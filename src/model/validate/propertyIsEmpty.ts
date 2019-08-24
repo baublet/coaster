@@ -1,6 +1,6 @@
 import { ModelData } from "../createModel";
 
-function defaultTruthyEvaluator(value: any): boolean {
+function defaultEmptyEvaluator(value: any): boolean {
   if (!value) return false;
   if (Array.isArray(value)) {
     if (value.length) return true;
@@ -16,10 +16,12 @@ function defaultTruthyEvaluator(value: any): boolean {
 export default function<T = Record<string, any>>(
   property: string,
   errorMessage: string = "%prop must be a truthy value",
-  truthyEvaluator: (value: any) => boolean = defaultTruthyEvaluator
+  emptyEvaluator: (value: any) => boolean = defaultEmptyEvaluator
 ) {
+  const fullErrorMessage = errorMessage.replace("%prop", property);
   return (data: ModelData<T>) => {
-    if (truthyEvaluator(data[property])) return true;
-    return errorMessage.replace("%prop", property);
+    if (!data[property]) return fullErrorMessage;
+    if (emptyEvaluator(data[property])) return true;
+    return fullErrorMessage;
   };
 }

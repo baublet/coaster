@@ -1,4 +1,4 @@
-import toSnakeCase from "../../helpers/toSnakeCase";
+import toSnakeCase from "snake-case";
 
 export interface SchemaNodeNames {
   canonical: string;

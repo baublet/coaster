@@ -7,7 +7,7 @@ export enum SchemaNodeType {
   MODELS
 }
 
-export interface SchemaNode {
+export interface SchemaNodeOptions {
   type: SchemaNodeType;
   names: {
     canonical: string,
@@ -18,9 +18,25 @@ export interface SchemaNode {
   primaryKey?: boolean;
   autoIncrement?: boolean;
   unique?: boolean;
+  uniqueName?: null;
 }
 
-export type Schema = Record<string, SchemaNode | SchemaNodeType>;
+export interface SchemaNode {
+  type: SchemaNodeType;
+  names: {
+    canonical: string,
+    safe: string
+  },
+  nullable: boolean;
+  default?: any;
+  primaryKey: boolean;
+  autoIncrement: boolean;
+  unique: boolean;
+  uniqueName: null;
+}
+
+export type Schema = Record<string, SchemaNode>;
+export type UncompiledSchema = Record<string, SchemaNodeOptions | SchemaNodeType>
 
 export const schemaNodeDefaults = {
   nullable: true,
