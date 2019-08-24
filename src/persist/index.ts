@@ -12,31 +12,35 @@ export interface PersistSortType {
 
 export enum PersistMatcherType {
   EQUAL,
+  NOT_EQUAL,
   GREATER_THAN,
   LESS_THAN,
   BETWEEN,
+  BETWEEN_GREEDY,
   ONE_OF
 }
 
-interface PersistMatcher {
+export interface PersistMatcher {
   property: string;
   type: PersistMatcherType;
   value: any;
 }
 
-interface PersistLogicalMatcher {
-  $and?: PersistMatcher;
-  $or?: PersistMatcher;
+export interface PersistQuery extends Record<string, any> {
+  $and?: boolean;
+  $or?: boolean;
+  $with?: PersistQuery | PersistQuery[];
+  without?: PersistQuery | PersistQuery[];
 }
 
-interface PersistFindByProps {
-  matchers: PersistLogicalMatcher[];
-  sortOrder: PersistSortType[];
-  limit: number;
-  offset: number;
+export interface PersistFindByProps {
+  query: PersistQuery;
+  sort?: PersistSortType[];
+  limit?: number;
+  offset?: number;
 }
 
-interface PersistAdapter {
+export interface PersistAdapter {
   delete: (target: string | Model | string[] | Model[]) => boolean | boolean[];
   find: (id: string | string[]) => Model | Model[];
   findBy: (props: PersistFindByProps) => Model[];

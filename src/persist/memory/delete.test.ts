@@ -1,10 +1,10 @@
 import deleteFromMemory from "./delete";
 
-it("returns a function", () => {
+it("returns a function", async () => {
   expect(deleteFromMemory({})).toBeInstanceOf(Function);
 });
 
-it("deletes properly", () => {
+it("deletes a model", async () => {
   const memoryMap = {
     a: {
       data: {
@@ -12,9 +12,11 @@ it("deletes properly", () => {
       }
     }
   };
+
   // @ts-ignore
   const deleteFn = deleteFromMemory(memoryMap);
-  deleteFn(
+
+  await deleteFn(
     // @ts-ignore
     {
       data: {
@@ -22,5 +24,22 @@ it("deletes properly", () => {
       }
     }
   );
+  expect(memoryMap).toEqual({});
+});
+
+it("deletes a string", async () => {
+  const memoryMap = {
+    a: {
+      data: {
+        id: "a"
+      }
+    }
+  };
+
+  // @ts-ignore
+  const deleteFn = deleteFromMemory(memoryMap);
+
+  await deleteFn("a");
+
   expect(memoryMap).toEqual({});
 });

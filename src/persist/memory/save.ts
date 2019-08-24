@@ -9,7 +9,7 @@ function saveModel(memoryMap: Record<string, Model>, model: Model) {
 }
 
 export default function saveToMemory(memoryMap: Record<string, Model>) {
-  return function(model: Model | Model[]) {
+  return async function(model: Model | Model[]): Promise<boolean | boolean[]> {
     if (Array.isArray(model)) {
       return model.map(model => saveModel(memoryMap, model));
     }

@@ -11,7 +11,7 @@ export default function createComputedPropFunctions<T>(
 ): ComputedPropsClosed<T> {
   const computedPropsClosures = {};
   Object.keys(computedProps).forEach(key => {
-    computedPropsClosures[key] = () => computedProps[key](model.data);
+    computedPropsClosures[key] = () => computedProps[key]({ ...model.data });
   });
   return computedPropsClosures;
 }
