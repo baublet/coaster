@@ -13,7 +13,7 @@ export default function findResultsForLogicalMatcher(
     ...query
   }: PersistQuery
 ): Model[] {
-  const results: Model[] = [];
+  let results: Model[] = [];
   const keysToSearch = Object.keys(query);
 
   const keySearches = keysToSearch.map(key => {
@@ -66,6 +66,12 @@ export default function findResultsForLogicalMatcher(
   });
 
   // Remove $without
+  const $withoutQueries = Array.isArray($without) ? $without : [$without];
+  $withoutQueries.forEach(query => {
+    const modelsToRemove = findResultsForLogicalMatcher(models, query);
+    const idsToRemove = modelsToRemove.map(m => m.data.id);
+    results = results.filter(model => !idsToRemove.includes(model.data.id));
+  });
 
   // Keep only unique
   return uniqueModels(results);

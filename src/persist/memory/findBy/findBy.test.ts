@@ -122,3 +122,31 @@ it("fetches a single query for $with", async () => {
   expect(results).toEqual([memoryMap.test5, memoryMap.test4]);
 });
 
+it("processes a single $without", async () => {
+  const results = await findBy({
+    query: {
+      group: 2,
+      $without: {
+        tester: 67
+      }
+    }
+  });
+  expect(results).toEqual([memoryMap.test1, memoryMap.test2]);
+});
+
+it("processes multiple $withouts", async () => {
+  const results = await findBy({
+    query: {
+      group: 2,
+      $without: [
+        {
+          tester: 67
+        },
+        {
+          name: "Gambino Slim"
+        }
+      ]
+    }
+  });
+  expect(results).toEqual([memoryMap.test1]);
+});
