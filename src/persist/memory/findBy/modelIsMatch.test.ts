@@ -2,8 +2,8 @@ import modelIsMatch from "./modelIsMatch";
 import { PersistMatcherType } from "../..";
 import { Model } from "../../../model/createModel";
 
+// @ts-ignore
 const model: Model = {
-  // @ts-ignore
   data: {
     name: "T-Shirt Eddie",
     size: 5
