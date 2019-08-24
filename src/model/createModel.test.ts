@@ -19,7 +19,7 @@ it("allows the instantiation of a model", () => {
   });
 });
 
-it("allows computed props", () => {
+it("allows computed working props", () => {
   const userModel = createModel({
     name: "User",
     computedProps: {
@@ -30,5 +30,8 @@ it("allows computed props", () => {
     firstName: "Testy",
     lastName: "McTest"
   });
-  expect(testUser.computed.name()).toEqual("Testy McTest");
+  expect(testUser.computed.name()).toBe("Testy McTest");
+
+  testUser.data.firstName = "Testerson";
+  expect(testUser.computed.name()).toBe("Testerson McTest")
 });
