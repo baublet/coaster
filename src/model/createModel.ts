@@ -11,6 +11,7 @@ export type ModelData<T = ModelDataDefaultType> = T;
 export type ModelComputedType<T = ModelDataDefaultType> = (data: T) => any;
 
 export interface Model<T = ModelDataDefaultType> {
+  name: string;
   data: ModelData<T>;
   computed: Record<string, ComputedPropClosedFn<T>>;
   validate: ValidateFn<T>;
@@ -22,14 +23,18 @@ export interface ModelOptions<T = ModelDataDefaultType> {
   computedProps?: Record<string, ModelComputedType<T>>;
 }
 
-type ModelFactory<T = ModelDataDefaultType> = (initialValue: T) => Model<T>;
+export type ModelFactoryFn<T> = (initialValue: T) => Model<T>;
+
+export type ModelFactory<T = ModelDataDefaultType> = ModelFactoryFn<T> & {
+  modelName: string;
+};
 
 function createModel<T = ModelDataDefaultType>({
   name,
   validators = [],
   computedProps = {}
 }: ModelOptions<T>): ModelFactory<T> {
-  return (initialValue = {} as T) => {
+  const factory = (initialValue = {} as T) => {
     const model = {
       name,
       validate,
@@ -40,6 +45,8 @@ function createModel<T = ModelDataDefaultType>({
     model.computed = createComputedPropFunctions<T>(model, computedProps);
     return model as Model<T>;
   };
+  factory.modelName = name;
+  return factory;
 }
 
 export default createModel;

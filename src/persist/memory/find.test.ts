@@ -1,18 +1,19 @@
 import findFromMemory from "./find";
+import createModel from "../../model/createModel";
+
+const testModel = createModel({
+  name: "test"
+});
 
 const memoryMap = {
-  "test-1": {
-    data: {
+  test: {
+    "test-1": {
       id: "test-1"
-    }
-  },
-  "test-2": {
-    data: {
+    },
+    "test-2": {
       id: "test-2"
-    }
-  },
-  "test-3": {
-    data: {
+    },
+    "test-3": {
       id: "test-3"
     }
   }
@@ -21,16 +22,19 @@ const memoryMap = {
 const find = findFromMemory(memoryMap);
 
 it("finds by id", async () => {
-  expect(await find("test-1")).toBe(memoryMap["test-1"]);
+  const [model] = await find(testModel, "test-1");
+  // @ts-ignore
+  expect(model.data).toEqual(memoryMap.test["test-1"]);
 });
 
 it("finds many by id", async () => {
-  expect(await find(["test-1", "test-2"])).toEqual([
-    memoryMap["test-1"],
-    memoryMap["test-2"]
-  ]);
+  const [model1, model2] = await find(testModel, ["test-1", "test-2"]);
+  expect(model1.data).toEqual(memoryMap.test["test-1"]);
+  expect(model2.data).toEqual(memoryMap.test["test-2"]);
 });
 
 it("finds many by id and nulls one not found", async () => {
-  expect(await find(["test-1", "test-5"])).toEqual([memoryMap["test-1"], null]);
+  const [model1, model2] = await find(testModel, ["test-1", "test-5"]);
+  expect(model1.data).toEqual(memoryMap.test["test-1"]);
+  expect(model2.data).toEqual(null);
 });

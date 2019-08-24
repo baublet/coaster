@@ -4,12 +4,13 @@ it("returns a function", () => {
   expect(save({})).toBeInstanceOf(Function);
 });
 
-it("save function saves models properly", () => {
+it("save function saves models properly", async () => {
   const map = {};
   const saveFn = save(map);
-  saveFn(
+  await saveFn(
     // @ts-ignore
     {
+      name: "user",
       data: {
         id: "Test 123",
         name: "Testy McTesterson"
@@ -17,8 +18,8 @@ it("save function saves models properly", () => {
     }
   );
   expect(map).toEqual({
-    "Test 123": {
-      data: {
+    user: {
+      "Test 123": {
         id: "Test 123",
         name: "Testy McTesterson"
       }

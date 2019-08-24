@@ -1,19 +1,29 @@
 import { Model } from "../../../model/createModel";
-import { PersistQuery, PersistMatcherType } from "../..";
+import {
+  PersistSelectQuery,
+  PersistMatcherType,
+  PersistSelectWithQuery
+} from "../..";
 import modelIsMatch from "./modelIsMatch";
 import uniqueModels from "../../../helpers/uniqueModels";
+import { MemoryMap } from "../memory";
 
 export default function findResultsForLogicalMatcher(
-  models: Model[],
+  memoryMap: MemoryMap,
   {
+    $model,
     $and = true,
     $or = false,
     $with = [],
     $without = [],
     ...query
-  }: PersistQuery
+  }: PersistSelectQuery | PersistSelectWithQuery,
+  modelContext: string = null
 ): Model[] {
   let results: Model[] = [];
+
+  const currentModel = modelContext || $model.modelName;
+  const models = Object.values(memoryMap[currentModel]);
   const keysToSearch = Object.keys(query);
 
   const keySearches = keysToSearch.map(key => {
@@ -62,13 +72,19 @@ export default function findResultsForLogicalMatcher(
   // Add $with
   const $withQueries = Array.isArray($with) ? $with : [$with];
   $withQueries.forEach(query => {
-    results.push(...findResultsForLogicalMatcher(models, query));
+    results.push(
+      ...findResultsForLogicalMatcher(memoryMap, query, currentModel)
+    );
   });
 
   // Remove $without
   const $withoutQueries = Array.isArray($without) ? $without : [$without];
   $withoutQueries.forEach(query => {
-    const modelsToRemove = findResultsForLogicalMatcher(models, query);
+    const modelsToRemove = findResultsForLogicalMatcher(
+      memoryMap,
+      query,
+      currentModel
+    );
     const idsToRemove = modelsToRemove.map(m => m.data.id);
     results = results.filter(model => !idsToRemove.includes(model.data.id));
   });

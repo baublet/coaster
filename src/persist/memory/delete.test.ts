@@ -1,4 +1,5 @@
 import deleteFromMemory from "./delete";
+import createModel from "../../model/createModel";
 
 it("returns a function", async () => {
   expect(deleteFromMemory({})).toBeInstanceOf(Function);
@@ -6,9 +7,13 @@ it("returns a function", async () => {
 
 it("deletes a model", async () => {
   const memoryMap = {
+    // "Collection"
     a: {
-      data: {
-        id: "a"
+      // Model map
+      a: {
+        data: {
+          id: "a"
+        }
       }
     }
   };
@@ -19,27 +24,34 @@ it("deletes a model", async () => {
   await deleteFn(
     // @ts-ignore
     {
+      name: "a",
       data: {
         id: "a"
       }
     }
   );
-  expect(memoryMap).toEqual({});
+
+  expect(memoryMap).toEqual({ a: {} });
 });
 
 it("deletes a string", async () => {
   const memoryMap = {
     a: {
-      data: {
-        id: "a"
+      a: {
+        data: {
+          id: "a"
+        }
       }
     }
   };
 
   // @ts-ignore
   const deleteFn = deleteFromMemory(memoryMap);
+  const aModel = createModel({
+    name: "a"
+  });
 
-  await deleteFn("a");
+  await deleteFn("a", aModel);
 
-  expect(memoryMap).toEqual({});
+  expect(memoryMap).toEqual({ a: {} });
 });

@@ -1,14 +1,16 @@
 import { Model } from "../../model/createModel";
+import { MemoryMap } from "./memory";
 
 let id = 1;
 
-function saveModel(memoryMap: Record<string, Model>, model: Model) {
+function saveModel(memoryMap: MemoryMap, model: Model) {
   model.data.id = model.data.id || `model-${id++}`;
-  memoryMap[model.data.id] = model;
+  memoryMap[model.name] = memoryMap[model.name] || {};
+  memoryMap[model.name][model.data.id] = model.data;
   return true;
 }
 
-export default function saveToMemory(memoryMap: Record<string, Model>) {
+export default function saveToMemory(memoryMap: MemoryMap) {
   return async function(model: Model | Model[]): Promise<boolean | boolean[]> {
     if (Array.isArray(model)) {
       return model.map(model => saveModel(memoryMap, model));

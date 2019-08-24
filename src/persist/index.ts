@@ -1,4 +1,4 @@
-import { Model } from "../model/createModel";
+import { Model, ModelFactory } from "../model/createModel";
 
 export enum PersistSortDirection {
   ASC,
@@ -26,18 +26,25 @@ export interface PersistMatcher {
   value: any;
 }
 
-export interface PersistQuery extends Record<string, any> {
+export interface PersistSelectQuery extends Record<string, any> {
+  $model: ModelFactory;
   $and?: boolean;
   $or?: boolean;
-  $with?: PersistQuery | PersistQuery[];
-  without?: PersistQuery | PersistQuery[];
+  $with?: PersistSelectWithQuery | PersistSelectWithQuery[];
+  $without?: PersistSelectWithQuery | PersistSelectWithQuery[];
+}
+
+export interface PersistSelectWithQuery extends Record<string, any> {
+  $and?: boolean;
+  $or?: boolean;
 }
 
 export interface PersistFindByProps {
-  query: PersistQuery;
+  query: PersistSelectQuery;
   sort?: PersistSortType[];
   limit?: number;
   offset?: number;
+  raw?: boolean;
 }
 
 export interface PersistAdapter {

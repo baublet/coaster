@@ -2,8 +2,11 @@ import deleteFromMemory from "./delete";
 import findFromMemory from "./find";
 import findByFromMemory from "./findBy";
 import saveToMemory from "./save";
+import { Model } from "../../model/createModel";
 
-const memoryMap = {};
+export type MemoryMap = Record<string, Record<string, any>>
+
+const memoryMap: MemoryMap = {};
 
 export default function persistInMemory() {
   return {
