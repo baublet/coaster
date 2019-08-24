@@ -4,7 +4,9 @@ import createComputedPropFunctions, {
   ComputedPropClosedFn
 } from "./createComputedPropFunctions";
 
-export type ModelDataDefaultType = Record<string, any>;
+export interface ModelDataDefaultType extends Record<string, any> {
+  id: string;
+}
 export type ModelData<T = ModelDataDefaultType> = T;
 export type ModelComputedType<T = ModelDataDefaultType> = (data: T) => any;
 
