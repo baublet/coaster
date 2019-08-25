@@ -100,28 +100,5 @@ export default function findResultsForLogicalMatcher(
   // Keep only unique
   results = uniqueArrayElements(results, (a, b) => a.id === b.id);
 
-  // Handle merges
-  const $mergeQueries = Array.isArray($merge) ? $merge : [$merge];
-  $mergeQueries.forEach(merge => {
-    const { $model = merge, $hereProperty, $thereProperty } = merge;
-    const modelsToMerge = Object.values(memoryMap[$model.modelName]);
-    const thereProp = $hereProperty || "id";
-    const hereProp = $thereProperty || `${$model.modelName}_id`;
-    // Scan through the results and merge things as needed
-    results.forEach(result => {
-      if (!result[thereProp]) {
-        return;
-      }
-      const toMerge = firstObjectByProp(
-        modelsToMerge,
-        thereProp,
-        result[hereProp]
-      );
-      if (toMerge) {
-        result[$model.modelName] = toMerge;
-      }
-    });
-  });
-
   return results;
 }

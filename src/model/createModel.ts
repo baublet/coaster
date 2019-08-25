@@ -1,6 +1,7 @@
 import { Validator, ValidateFn } from "./validate/validate";
 import validate from "./validate";
 import proxyModel from "./proxyModel";
+import { Schema } from "./schema";
 
 export type ModelComputedPropFn<T> = (data: T) => any;
 export interface ModelDataDefaultType extends Record<string, any> {
@@ -23,6 +24,7 @@ export interface ModelOptions<T = ModelDataDefaultType> {
   name: string;
   validators?: Validator<T>[];
   computedProps?: Record<string, ModelComputedType<T>>;
+  schema?: Schema;
 }
 
 export type ModelFactoryFn<DataTypes, ComputedTypes> = (
@@ -34,6 +36,7 @@ export type ModelFactory<DataTypes = ModelDataDefaultType, ComputedTypes = Model
 > & {
   modelName: string;
   modelFactory: boolean;
+  schema: Schema;
 };
 
 export function isModelFactory(v: any): v is ModelFactory {
@@ -45,7 +48,8 @@ export function isModelFactory(v: any): v is ModelFactory {
 function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
   name,
   validators = [],
-  computedProps = {}
+  computedProps = {},
+  schema = {}
 }: ModelOptions<T>): ModelFactory<T, C> {
   const factory = (initialValue: T = {} as T): Model<T & C> => {
     const model = proxyModel<T>({
@@ -59,6 +63,7 @@ function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
   };
   factory.modelName = name;
   factory.modelFactory = true;
+  factory.schema = schema;
   return factory;
 }
 
