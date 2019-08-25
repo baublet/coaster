@@ -3,13 +3,18 @@ A rails-like framework for Node.
 # ORM
 
 ```js
-
-interface UserProps {
-  firstName: string,
-  lastName: string
+interface UserProps extends ModelDefaultProps {
+  firstName: string;
+  lastName: string;
+  transactionAccount: ModelRelation<TransactionAccountProps>;
 }
 
-const UserModel = createModel({
+interface TransactionAccountProps extends ModelDefaultProps {
+  user: ModelRelation<UserProps>;
+  balance: number;
+}
+
+const UserModel = createModel<UserProps>({
   name: "User",
 
   // Validators are simple functions that take the internal model data
@@ -22,37 +27,21 @@ const UserModel = createModel({
 
   schema: {
     // IDs are included in every schema unless you override it
-    id: {
-      type: ModelType.id,
-      unique: true,
-      primaryKey: true,
-      unique: true
-    },
+    id: ModelType.id,
+    createdAt: ModelType.date,
+    updatedAt: ModelType.date,
 
     // Text
     firstName: ModelType.text,
-    lastName: {
-      type: ModelType.text,
-      unique: true,
-      nullable: false
-    },
+    lastName: ModelType.text,
 
     // Numerics
     pointBalance: ModelType.int,
     floatThing: ModelType.float,
 
     // Cross-model relationships
-    transactionAccount: {
-      type: ModelType.model,
-      model: TransactionAccountModel,
-      // Load relationships eagerly by default to prevent n+1 problems.
-      // This is false by default.
-      eager: true
-    },
-    purchases: {
-      type: ModelType.models,
-      model: PurchaseModel
-    }
+    transactionAccount:
+      modelRelation<TransactionAccountProps>(TransactionAccountModel)
   },
 
   // Computed props that are not persisted to the database

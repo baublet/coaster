@@ -26,12 +26,24 @@ export interface PersistMatcher {
   value: any;
 }
 
+export interface PersistMergeConditionOptions {
+  $hereProperty: string;
+  $thereProperty: string;
+}
+
+export interface PersistMergeOptions {
+  $model: ModelFactory;
+  $hereProperty?: string;
+  $thereProperty?: string;
+}
+
 export interface PersistSelectQuery extends Record<string, any> {
   $model: ModelFactory;
   $and?: boolean;
   $or?: boolean;
   $with?: PersistSelectWithQuery | PersistSelectWithQuery[];
   $without?: PersistSelectWithQuery | PersistSelectWithQuery[];
+  $merge?: ModelFactory | PersistMergeOptions | PersistMergeOptions[];
 }
 
 export interface PersistSelectWithQuery extends Record<string, any> {
@@ -40,11 +52,12 @@ export interface PersistSelectWithQuery extends Record<string, any> {
 }
 
 export interface PersistFindByProps {
-  query: PersistSelectQuery;
-  sort?: PersistSortType[];
+  eager?: boolean;
   limit?: number;
   offset?: number;
+  query: PersistSelectQuery;
   raw?: boolean;
+  sort?: PersistSortType[];
 }
 
 export interface PersistAdapter {

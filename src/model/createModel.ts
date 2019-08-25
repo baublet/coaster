@@ -1,21 +1,23 @@
 import { Validator, ValidateFn } from "./validate/validate";
 import validate from "./validate";
-import createComputedPropFunctions, {
-  ComputedPropClosedFn
-} from "./createComputedPropFunctions";
+import proxyModel from "./proxyModel";
 
+export type ModelComputedPropFn<T> = (data: T) => any;
 export interface ModelDataDefaultType extends Record<string, any> {
   id?: string;
 }
 export type ModelData<T = ModelDataDefaultType> = T;
 export type ModelComputedType<T = ModelDataDefaultType> = (data: T) => any;
 
-export interface Model<T = ModelDataDefaultType> {
-  name: string;
-  data: ModelData<T>;
-  computed: Record<string, ComputedPropClosedFn<T>>;
-  validate: ValidateFn<T>;
+export interface ModelInternalProperties<Type> {
+  $name: string;
+  $data: ModelData<Type>;
+  $computed: Record<string, ModelComputedPropFn<Type>>;
+  $validate: ValidateFn<Type>;
+  $validators: Validator<Type>[];
 }
+
+export type Model<UserLandProperties = ModelDataDefaultType> = UserLandProperties & ModelInternalProperties<UserLandProperties>;
 
 export interface ModelOptions<T = ModelDataDefaultType> {
   name: string;
@@ -23,29 +25,40 @@ export interface ModelOptions<T = ModelDataDefaultType> {
   computedProps?: Record<string, ModelComputedType<T>>;
 }
 
-export type ModelFactoryFn<T> = (initialValue: T) => Model<T>;
+export type ModelFactoryFn<DataTypes, ComputedTypes> = (
+  initialValue: DataTypes
+) => Model<DataTypes & ComputedTypes>;
 
-export type ModelFactory<T = ModelDataDefaultType> = ModelFactoryFn<T> & {
+export type ModelFactory<DataTypes = ModelDataDefaultType, ComputedTypes = ModelDataDefaultType> = ModelFactoryFn<
+  DataTypes, ComputedTypes
+> & {
   modelName: string;
+  modelFactory: boolean;
 };
 
-function createModel<T = ModelDataDefaultType>({
+export function isModelFactory(v: any): v is ModelFactory {
+  if (typeof v !== "function") return false;
+  if (v.modelName && v.$$coasterModelFactory) return true;
+  return false;
+}
+
+function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
   name,
   validators = [],
   computedProps = {}
-}: ModelOptions<T>): ModelFactory<T> {
-  const factory = (initialValue = {} as T) => {
-    const model = {
-      name,
-      validate,
-      validators,
-      data: initialValue,
-      computed: {}
-    };
-    model.computed = createComputedPropFunctions<T>(model, computedProps);
-    return model as Model<T>;
+}: ModelOptions<T>): ModelFactory<T, C> {
+  const factory = (initialValue: T = {} as T): Model<T & C> => {
+    const model = proxyModel<T>({
+      $name: name,
+      $validate: validate,
+      $validators: validators,
+      $data: initialValue,
+      $computed: computedProps
+    });
+    return model as Model<T & C>;
   };
   factory.modelName = name;
+  factory.modelFactory = true;
   return factory;
 }
 

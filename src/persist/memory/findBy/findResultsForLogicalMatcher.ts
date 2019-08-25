@@ -1,12 +1,13 @@
-import { Model } from "../../../model/createModel";
+import { Model, ModelData } from "../../../model/createModel";
 import {
   PersistSelectQuery,
   PersistMatcherType,
   PersistSelectWithQuery
 } from "../..";
-import modelIsMatch from "./modelIsMatch";
-import uniqueModels from "../../../helpers/uniqueModels";
+import dataIsMatch from "./dataIsMatch";
 import { MemoryMap } from "../memory";
+import uniqueArrayElements from "../../../helpers/uniqueArrayElements";
+import firstObjectByProp from "../../../helpers/firstObjectByProp";
 
 export default function findResultsForLogicalMatcher(
   memoryMap: MemoryMap,
@@ -16,14 +17,15 @@ export default function findResultsForLogicalMatcher(
     $or = false,
     $with = [],
     $without = [],
+    $merge = [],
     ...query
   }: PersistSelectQuery | PersistSelectWithQuery,
   modelContext: string = null
-): Model[] {
-  let results: Model[] = [];
+): ModelData[] {
+  let results: ModelData[] = [];
 
   const currentModel = modelContext || $model.modelName;
-  const models = Object.values(memoryMap[currentModel]);
+  const rawData = Object.values(memoryMap[currentModel]);
   const keysToSearch = Object.keys(query);
 
   const keySearches = keysToSearch.map(key => {
@@ -33,8 +35,8 @@ export default function findResultsForLogicalMatcher(
       : // But by default, it's rote equality
         PersistMatcherType.EQUAL;
 
-    return (model: Model) => {
-      return modelIsMatch(model, {
+    return (modelData: ModelData) => {
+      return dataIsMatch(modelData, {
         property: key,
         type: comparator,
         value: query[key]
@@ -43,17 +45,17 @@ export default function findResultsForLogicalMatcher(
   });
 
   if (!$or) {
-    const filter = (model: Model): boolean => {
+    const filter = (modelData: ModelData): boolean => {
       for (let i = 0; i < keySearches.length; i++) {
         // If the model isn't a match for one of the properties, filter it out
-        if (!keySearches[i](model)) {
+        if (!keySearches[i](modelData)) {
           return false;
         }
       }
       return true;
     };
 
-    results.push(...models.filter(filter));
+    results.push(...rawData.filter(filter));
   } else {
     const filter = (model: Model): boolean => {
       for (let i = 0; i < keySearches.length; i++) {
@@ -66,7 +68,7 @@ export default function findResultsForLogicalMatcher(
       return false;
     };
 
-    results.push(...models.filter(filter));
+    results.push(...rawData.filter(filter));
   }
 
   // Add $with
@@ -80,15 +82,46 @@ export default function findResultsForLogicalMatcher(
   // Remove $without
   const $withoutQueries = Array.isArray($without) ? $without : [$without];
   $withoutQueries.forEach(query => {
-    const modelsToRemove = findResultsForLogicalMatcher(
+    const rowsToRemove = findResultsForLogicalMatcher(
       memoryMap,
       query,
       currentModel
     );
-    const idsToRemove = modelsToRemove.map(m => m.data.id);
-    results = results.filter(model => !idsToRemove.includes(model.data.id));
+    const idsToRemove = rowsToRemove.map(row => row.id);
+    results = results.filter(row => !idsToRemove.includes(row.id));
   });
 
+  // If we get this far and there are no results and no keys to search for,
+  // we treat it as a select all.
+  if (!results.length && !keysToSearch.length) {
+    results = rawData;
+  }
+
   // Keep only unique
-  return uniqueModels(results);
+  results = uniqueArrayElements(results, (a, b) => a.id === b.id);
+
+  // Handle merges
+  const $mergeQueries = Array.isArray($merge) ? $merge : [$merge];
+  $mergeQueries.forEach(merge => {
+    const { $model = merge, $hereProperty, $thereProperty } = merge;
+    const modelsToMerge = Object.values(memoryMap[$model.modelName]);
+    const thereProp = $hereProperty || "id";
+    const hereProp = $thereProperty || `${$model.modelName}_id`;
+    // Scan through the results and merge things as needed
+    results.forEach(result => {
+      if (!result[thereProp]) {
+        return;
+      }
+      const toMerge = firstObjectByProp(
+        modelsToMerge,
+        thereProp,
+        result[hereProp]
+      );
+      if (toMerge) {
+        result[$model.modelName] = toMerge;
+      }
+    });
+  });
+
+  return results;
 }

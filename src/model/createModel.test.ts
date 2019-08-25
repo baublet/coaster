@@ -14,13 +14,18 @@ it("allows the instantiation of a model", () => {
   const testUser = userModel({
     name: "Testy McTest"
   });
-  expect(testUser.data).toEqual({
-    name: "Testy McTest"
-  });
+  expect(testUser.name).toEqual("Testy McTest");
 });
 
 it("allows computed working props", () => {
-  const userModel = createModel({
+  interface UserModelTypes {
+    firstName: string;
+    lastName: string;
+  }
+  interface UserModelComputedTypes {
+    name: string;
+  }
+  const userModel = createModel<UserModelTypes, UserModelComputedTypes>({
     name: "User",
     computedProps: {
       name: ({ firstName, lastName }) => `${firstName} ${lastName}`
@@ -30,8 +35,8 @@ it("allows computed working props", () => {
     firstName: "Testy",
     lastName: "McTest"
   });
-  expect(testUser.computed.name()).toBe("Testy McTest");
+  expect(testUser.name).toBe("Testy McTest");
 
-  testUser.data.firstName = "Testerson";
-  expect(testUser.computed.name()).toBe("Testerson McTest")
+  testUser.firstName = "Testerson";
+  expect(testUser.name).toBe("Testerson McTest");
 });
