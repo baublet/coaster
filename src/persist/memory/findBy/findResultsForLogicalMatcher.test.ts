@@ -1,4 +1,4 @@
-import findByFactory from "./findBy";
+import findBy from "./findResultsForLogicalMatcher";
 import createModel from "../../../model/createModel";
 
 export const userModel = createModel({
@@ -45,27 +45,23 @@ export const memoryMap = {
   }
 };
 
-// @ts-ignore
-const findBy = findByFactory(memoryMap);
-
 it("finds by non-ID property", async () => {
-  const results = await findBy({
-    query: { $model: userModel, name: "Gambino Slim" }
+  const results = await findBy(memoryMap, { $model: userModel, name: "Gambino Slim"
   });
-  expect(results[0].data).toEqual(memoryMap.user.test2);
+  console.log(results);
+  expect(results[0]).toEqual(memoryMap.user.test2);
 });
 
 it("works across multiple properties", async () => {
-  const results = await findBy({
-    query: { $model: userModel, group: 3, tester: 5 }
+  const results = await findBy(memoryMap, {
+    $model: userModel, group: 3, tester: 5 
   });
-  expect(results[0].data).toEqual(memoryMap.user.test3);
+  expect(results[0]).toEqual(memoryMap.user.test3);
 });
 
 it("works with $or", async () => {
-  const results = await findBy({
-    query: { $model: userModel, group: 3, tester: 5, $or: true },
-    raw: true
+  const results = await findBy(memoryMap, {
+$model: userModel, group: 3, tester: 5, $or: true
   });
   expect(results).toEqual([
     memoryMap.user.test2,
@@ -74,16 +70,8 @@ it("works with $or", async () => {
   ]);
 });
 
-it("works across multiple properties (Smoochie)", async () => {
-  const results = await findBy({
-    query: { $model: userModel, group: 2, tester: 67 }
-  });
-  expect(results[0].data).toEqual(memoryMap.user.test5);
-});
-
 it("fetches multiple queries for with", async () => {
-  const results = await findBy({
-    query: {
+  const results = await findBy(memoryMap, {
       $model: userModel,
       group: 2,
       tester: 67,
@@ -95,9 +83,7 @@ it("fetches multiple queries for with", async () => {
           name: "Gambino Slim"
         }
       ]
-    },
-    raw: true
-  });
+    });
   expect(results).toEqual([
     memoryMap.user.test5,
     memoryMap.user.test4,
@@ -106,37 +92,30 @@ it("fetches multiple queries for with", async () => {
 });
 
 it("fetches a single query for $with", async () => {
-  const results = await findBy({
-    query: {
+  const results = await findBy(memoryMap, {
       $model: userModel,
       group: 2,
       tester: 67,
       $with: {
         tester: 66
       }
-    },
-    raw: true
   });
   expect(results).toEqual([memoryMap.user.test5, memoryMap.user.test4]);
 });
 
 it("processes a single $without", async () => {
-  const results = await findBy({
-    query: {
+  const results = await findBy(memoryMap, {
       $model: userModel,
       group: 2,
       $without: {
         tester: 67
       }
-    },
-    raw: true
   });
   expect(results).toEqual([memoryMap.user.test1, memoryMap.user.test2]);
 });
 
 it("processes multiple $withouts", async () => {
-  const results = await findBy({
-    query: {
+  const results = await findBy(memoryMap, {
       $model: userModel,
       group: 2,
       $without: [
@@ -147,7 +126,6 @@ it("processes multiple $withouts", async () => {
           name: "Gambino Slim"
         }
       ]
-    }
   });
-  expect(results[0].data).toEqual(memoryMap.user.test1);
+  expect(results[0]).toEqual(memoryMap.user.test1);
 });

@@ -3,13 +3,13 @@ A rails-like framework for Node.
 # ORM
 
 ```js
-interface UserProps extends ModelDefaultProps {
+interface UserProps {
   firstName: string;
   lastName: string;
   transactionAccount: ModelRelation<TransactionAccountProps>;
 }
 
-interface TransactionAccountProps extends ModelDefaultProps {
+interface TransactionAccountProps {
   user: ModelRelation<UserProps>;
   balance: number;
 }
