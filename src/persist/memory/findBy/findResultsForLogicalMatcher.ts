@@ -7,7 +7,6 @@ import {
 import dataIsMatch from "./dataIsMatch";
 import { MemoryMap } from "../memory";
 import uniqueArrayElements from "../../../helpers/uniqueArrayElements";
-import firstObjectByProp from "../../../helpers/firstObjectByProp";
 
 export default function findResultsForLogicalMatcher(
   memoryMap: MemoryMap,

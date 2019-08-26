@@ -1,4 +1,4 @@
-import { Schema, SchemaNodeType } from "../../../model/schema";
+import { Schema } from "../../../model/schema";
 import { MemoryMap } from "../memory";
 import { isModelFactory } from "../../../model/createModel";
 

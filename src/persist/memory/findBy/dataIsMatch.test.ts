@@ -1,7 +1,6 @@
 import dataIsMatch from "./dataIsMatch";
 import { PersistMatcherType } from "../..";
 
-// @ts-ignore
 const data: Record<string, any> = {
   name: "T-Shirt Eddie",
   size: 5

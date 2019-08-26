@@ -11,9 +11,10 @@ export type ModelData<T = ModelDataDefaultType> = T;
 export type ModelComputedType<T = ModelDataDefaultType> = (data: T) => any;
 
 export interface ModelInternalProperties<Type> {
-  $name: string;
-  $data: ModelData<Type>;
   $computed: Record<string, ModelComputedPropFn<Type>>;
+  $data: ModelData<Type>;
+  $name: string;
+  $relationships: Record<string, Model>;
   $validate: ValidateFn<Type>;
   $validators: Validator<Type>[];
 }
@@ -53,11 +54,12 @@ function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
 }: ModelOptions<T>): ModelFactory<T, C> {
   const factory = (initialValue: T = {} as T): Model<T & C> => {
     const model = proxyModel<T>({
+      $computed: computedProps,
+      $data: initialValue,
       $name: name,
+      $relationships: {},
       $validate: validate,
       $validators: validators,
-      $data: initialValue,
-      $computed: computedProps
     });
     return model as Model<T & C>;
   };

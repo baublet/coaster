@@ -1,10 +1,10 @@
 import { PersistMatcher, PersistMatcherType } from "../..";
 
 export default function dataIsMatch(
-  model: Record<string, any>,
+  data: Record<string, any>,
   matcher: PersistMatcher
 ): boolean {
-  const modelData = model[matcher.property];
+  const modelData = data[matcher.property];
   switch (matcher.type) {
     case PersistMatcherType.EQUAL:
       return modelData === matcher.value;

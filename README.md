@@ -17,27 +17,21 @@ interface TransactionAccountProps {
 const UserModel = createModel<UserProps>({
   name: "User",
 
-  // Validators are simple functions that take the internal model data
-  // and return either true if it's valid, or a string for the error if
-  // it's invalid.
-  //
-  // (data) => data.id ? true : "You need an ID!";
-  //
-  validators: [],
+  validators: [(data) => data.firstName ? true : "You need a first name!"],
 
   schema: {
-    // IDs are included in every schema unless you override it
-    id: ModelType.id,
-    createdAt: ModelType.date,
-    updatedAt: ModelType.date,
+    // These are our default props
+    id: SchemaNodeType.id,
+    createdAt: SchemaNodeType.date,
+    updatedAt: SchemaNodeType.date,
 
     // Text
-    firstName: ModelType.text,
-    lastName: ModelType.text,
+    firstName: SchemaNodeType.text,
+    lastName: SchemaNodeype.text,
 
     // Numerics
-    pointBalance: ModelType.int,
-    floatThing: ModelType.float,
+    pointBalance: SchemaNodeType.int,
+    floatThing: SchemaNodeType.float,
 
     // Cross-model relationships
     transactionAccount:
