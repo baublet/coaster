@@ -67,7 +67,7 @@ export default function createSchema(schema: UncompiledSchema): Schema {
           newName = idNameFromName(node.names.canonical, true);
           break;
       }
-      node.names = generateNames(newName);
+      node.names = generateNames(newName, node.names.original);
       if (!node.model) {
         throw modelTypesRequireModelFactoriesError(node);
       }

@@ -1,5 +1,6 @@
 import findByFactory from "./findBy";
 import createModel from "../../../model/createModel";
+import { PersistMatcherType } from "persist";
 
 const accountModel = createModel({
   name: "account"
@@ -24,4 +25,22 @@ it("expands models properly", async () => {
     }
   });
   expect(results[0].balance).toBe(12);
+});
+
+it("matches one of", async () => {
+  let results = await findBy({
+    query: {
+      $model: accountModel,
+      id: [PersistMatcherType.ONE_OF, ["2", "3"]]
+    }
+  });
+  expect(results.length).toBe(0);
+
+  results = await findBy({
+    query: {
+      $model: accountModel,
+      id: [PersistMatcherType.ONE_OF, ["1", "2"]]
+    }
+  });
+  expect(results.length).toBe(1);
 });

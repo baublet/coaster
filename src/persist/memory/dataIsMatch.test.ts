@@ -78,7 +78,7 @@ it("matches model property less than", () => {
   ).toBeFalsy();
 });
 
-it("matches model property less than", () => {
+it("matches model property ONE_OF", () => {
   expect(
     dataIsMatch(data, {
       property: "size",

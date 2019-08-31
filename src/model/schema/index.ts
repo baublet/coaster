@@ -47,6 +47,7 @@ export interface SchemaNode {
   relation: boolean;
   model?: ModelFactory;
   names: {
+    original: string;
     canonical: string;
     safe: string;
   };

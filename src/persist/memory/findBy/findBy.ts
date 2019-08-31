@@ -3,7 +3,6 @@ import { Model, ModelDataDefaultType, ModelFactory } from "model/createModel";
 import findResultsForLogicalMatcher from "persist/memory/findResultsForLogicalMatcher";
 import { MemoryMap } from "persist/memory/memory";
 import uniqueArrayElements from "helpers/uniqueArrayElements";
-import { SchemaNodeType } from "model/schema";
 import eagerLoadWithoutSchemaError from "persist/errors/eagerLoadWithoutSchemaError";
 
 export default function findByFactory(memoryMap: MemoryMap = {}) {
@@ -13,18 +12,14 @@ export default function findByFactory(memoryMap: MemoryMap = {}) {
     eager = false
   }: PersistFindByProps): Promise<ModelDataDefaultType[] | Model[]> {
     // If the user tries to eager load a query, and they don't have a schema
-    // defined, we need to throw. We can't ever eager load a query  if we don't
-    // know how to instantiate relationships
+    // defined, we need to throw. We can't ever eager load a query if we don't
+    // know about relationships ahead of time.
     if (eager && !query.$model.schema) {
       throw eagerLoadWithoutSchemaError();
     }
 
-    // First, find the results
+    // Find the results
     const results = findResultsForLogicalMatcher(memoryMap, query);
-    // Then sort stuff
-    // Then trim $offset at the beginning
-    // Then limit things
-    // Finished!
 
     if (raw) {
       return results;
@@ -37,15 +32,20 @@ export default function findByFactory(memoryMap: MemoryMap = {}) {
     // Eager load all additional related models
     interface IDMapForModelRelations {
       factory: ModelFactory;
+      foreignKey: string;
+      nodeLocalAccessor: string;
       nodeLocalId: string;
       ids: number[];
       models: Record<number, Model>;
       data: Record<number, any>;
     }
+
     const idMap: Map<ModelFactory, IDMapForModelRelations> = new Map();
+
     Object.values(modelFactory.schema).forEach(node => {
-      if (node.type === SchemaNodeType.MODEL) {
-        const nodeLocalId = `${node.names.safe}_id`;
+      if (node.relation === true) {
+        const nodeLocalAccessor = `${node.names.original}`;
+        const nodeLocalId = `${node.names.safe}`;
         const ids: (null | number)[] = uniqueArrayElements(
           results
             .map(result => {
@@ -54,8 +54,11 @@ export default function findByFactory(memoryMap: MemoryMap = {}) {
             })
             .filter(id => id !== null)
         );
-        idMap.set(modelFactory, {
+
+        idMap.set(node.model, {
           factory: modelFactory,
+          foreignKey: node.persistOptions.foreignKey,
+          nodeLocalAccessor,
           nodeLocalId,
           ids,
           models: {},
@@ -63,25 +66,27 @@ export default function findByFactory(memoryMap: MemoryMap = {}) {
         });
       }
     });
+
     // For each model relation, load the models by their ids
-    for (let [factory, { ids, models }] of idMap) {
+    for (let [factory, { foreignKey, ids, models }] of idMap) {
       const results = await findBy({
         query: {
-          $model: modelFactory,
-          id: [PersistMatcherType.ONE_OF, [ids]]
+          $model: factory,
+          [foreignKey]: [PersistMatcherType.ONE_OF, ids]
         }
       });
+
       results.forEach(result => {
-        models[result.id] = factory(result);
+        models[result.id] = result;
       });
     }
     // Now, we've loaded all related models in an in-memory store. Let's
-    // attach them to the underlying models
+    // attach them to their parent model.
     return results.map(result => {
       const model = modelFactory(result);
-      for (let [_, { nodeLocalId, models }] of idMap) {
+      for (let [_, { nodeLocalId, nodeLocalAccessor, models }] of idMap) {
         const id = model[nodeLocalId];
-        model.$setRelationship(nodeLocalId, models[id]);
+        model.$setRelationship(nodeLocalAccessor, models[id]);
       }
       return model;
     });

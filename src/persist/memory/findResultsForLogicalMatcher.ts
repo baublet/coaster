@@ -29,16 +29,16 @@ export default function findResultsForLogicalMatcher(
 
   const keySearches = keysToSearch.map(key => {
     const comparator = Array.isArray(query[key])
-      ? // You can define your own comparator type here
-        query[key][0]
-      : // But by default, it's rote equality
+      ? query[key][0]
+      : // But by default, it's an equality check
         PersistMatcherType.EQUAL;
+    const value = Array.isArray(query[key]) ? query[key][1] : query[key];
 
     return (modelData: ModelData) => {
       return dataIsMatch(modelData, {
         property: key,
         type: comparator,
-        value: query[key]
+        value: value
       });
     };
   });

@@ -32,7 +32,9 @@ function getFn<T>() {
   return function get(obj: ModelInternalProperties, prop: string): any {
     switch (prop) {
       case "$setRelationship":
-        return (key: string, model: Model) => (obj.$relationships[key] = model);
+        return (key: string, model: ModelInternalProperties) => {
+          obj.$relationships[key] = model;
+        };
     }
     if (propertyIsComputed(obj, prop)) {
       return obj.$computed[prop]({ ...obj.$data });

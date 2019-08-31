@@ -38,7 +38,7 @@ it("expands a simplified model schema properly", () => {
     })
   ).toEqual({
     name: {
-      names: generateNames("name_id"),
+      names: generateNames("name_id", "name"),
       model: testModel,
       relation: true,
       type: SchemaNodeType.ID,
