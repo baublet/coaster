@@ -1,1 +1,1 @@
-export default ["validate", "get", "set"];
+export default ["validate"];

@@ -1,11 +1,12 @@
 import { ModelData } from "../createModel";
 
 export type Validator<T> = (data: ModelData<T>) => true | string;
+export type ModelValidationErrors = string[];
 
 export type ValidateFn<T> = (
   data: ModelData<T>,
   validators: Validator<T>[]
-) => true | string[];
+) => true | ModelValidationErrors;
 
 function validate<T>(
   data: ModelData<T>,

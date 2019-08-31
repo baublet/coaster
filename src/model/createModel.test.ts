@@ -12,6 +12,7 @@ it("allows the instantiation of a model", () => {
     name: "User"
   });
   const testUser = userModel({
+    id: "test",
     name: "Testy McTest"
   });
   expect(testUser.name).toEqual("Testy McTest");
@@ -39,4 +40,17 @@ it("allows computed working props", () => {
 
   testUser.firstName = "Testerson";
   expect(testUser.name).toBe("Testerson McTest");
+});
+
+it("allows you to set and access relationships", () => {
+  const userModel = createModel({
+    name: "User"
+  });
+  const accountModel = createModel({
+    name: "Account"
+  });
+  const user = userModel({ id: "user-1" });
+  const account = accountModel({ id: "account-1" });
+  user.$setRelationship("account", account);
+  expect(user.account.id).toBe("account-1");
 });

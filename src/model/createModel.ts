@@ -4,27 +4,31 @@ import proxyModel from "./proxyModel";
 import { Schema, UncompiledSchema } from "./schema";
 import createSchema from "./schema/createSchema";
 import { PersistAdapter } from "../persist";
+import modelWithPersist, { ModelWithPersist } from "./modelWithPersist";
 
 export type ModelComputedPropFn<T> = (data: T) => any;
 export interface ModelDataDefaultType extends Record<string, any> {
   id?: string;
+  createdAt?: number;
+  updatedAt?: number;
 }
 export type ModelData<T = ModelDataDefaultType> = T;
 export type ModelComputedType<T = ModelDataDefaultType> = (data: T) => any;
 
-export interface ModelInternalProperties<Type> {
-  $computed: Record<string, ModelComputedPropFn<Type>>;
-  $data: ModelData<Type>;
+export interface ModelInternalProperties {
+  $computed: Record<string, ModelComputedPropFn<any>>;
+  $data: ModelDataDefaultType;
+  $factory: ModelFactory<any>;
   $name: string;
   $relationships: Record<string, Model>;
   $setRelationship: (key: string, model: Model) => void;
-  $validate: ValidateFn<Type>;
-  $validators: Validator<Type>[];
+  $validate: ValidateFn<any>;
+  $validators: Validator<any>[];
 }
 
 export type Model<
   UserLandProperties = ModelDataDefaultType
-> = UserLandProperties & ModelInternalProperties<UserLandProperties>;
+> = UserLandProperties;
 
 export interface ModelOptions<T = ModelDataDefaultType> {
   computedProps?: Record<string, ModelComputedType<T>>;
@@ -66,20 +70,29 @@ function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
     const $setRelationship = (key: string, model: Model) => {
       $relationships[key] = model;
     };
-    const model = proxyModel<T>({
+    const baseModel = {
       $computed: computedProps,
       $data: initialValue,
       $name: name,
       $relationships,
       $setRelationship,
       $validate: validate,
-      $validators: validators
-    });
-    return model as Model<T & C>;
+      $validators: validators,
+      $factory: factory
+    };
+    if (persistWith) {
+      return proxyModel(
+        modelWithPersist(baseModel, persistWith)
+      ) as ModelWithPersist<T & C>;
+    }
+    return proxyModel(baseModel) as Model<T & C>;
   };
   factory.modelName = name;
   factory.modelFactory = true;
   factory.schema = compiledSchema;
+  if(persistWith) {
+    // TODO: attach handy `find`, `findBy`, and `deleteBy` stuff here
+  }
   return factory;
 }
 
