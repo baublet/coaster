@@ -8,7 +8,7 @@ export default function validate(
 ): true | string[] {
   const validity = validators
     .map(validate => validate(schema))
-    .filter(result => result === true);
+    .filter(result => result !== true);
   if (validity.length === 0) {
     return true;
   }

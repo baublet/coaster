@@ -12,6 +12,8 @@ import validate from "./validate";
 import generateNames from "../../helpers/generateNames";
 import idNameFromName from "./idNameFromName";
 import { isModelFactory } from "../createModel";
+import modelTypesRequireModelFactoriesError from "./error/modelTypesRequireModelFactoriesError";
+import schemaInvalidError from "./error/schemaInvalidError";
 
 export default function createSchema(schema: UncompiledSchema): Schema {
   const compiledSchema: Schema = {};
@@ -21,7 +23,7 @@ export default function createSchema(schema: UncompiledSchema): Schema {
     const node = schema[key];
     if (isSchemaNodeOptions(node)) {
       const schemaNode = {
-        dbOptions: schemaNodeDbOptionsDefaults,
+        dbOptions: schemaNodeDbOptionsDefaults(key),
         names: generateNames(key),
         relation: false,
         uniqueName: key,
@@ -36,8 +38,11 @@ export default function createSchema(schema: UncompiledSchema): Schema {
         uniqueName: key,
         names: generateNames(key),
         relation: false,
-        dbOptions: schemaNodeDbOptionsDefaults
+        persistOptions: schemaNodeDbOptionsDefaults(key)
       };
+      if (isModelFactory(node)) {
+        compiledSchema[key].model = node;
+      }
     }
   });
 
@@ -47,8 +52,8 @@ export default function createSchema(schema: UncompiledSchema): Schema {
       node.type === SchemaNodeType.MODEL ||
       node.type === SchemaNodeType.MODELS
     ) {
-      if (!node.dbOptions.foreignKey) {
-        node.dbOptions.foreignKey = "id";
+      if (!node.persistOptions.foreignKey) {
+        node.persistOptions.foreignKey = "id";
       }
       node.relation = true;
       let newName: string;
@@ -63,14 +68,16 @@ export default function createSchema(schema: UncompiledSchema): Schema {
           break;
       }
       node.names = generateNames(newName);
+      if (!node.model) {
+        throw modelTypesRequireModelFactoriesError(node);
+      }
     }
   });
 
   const valid = validate(compiledSchema as Schema);
-  if (valid) {
+  if (valid === true) {
     return compiledSchema as Schema;
   }
-  throw `Your schema is invalid
 
-${valid}`;
+  throw schemaInvalidError(valid);
 }

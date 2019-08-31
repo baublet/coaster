@@ -1,5 +1,5 @@
 import dataIsMatch from "./dataIsMatch";
-import { PersistMatcherType } from "../..";
+import { PersistMatcherType } from "..";
 
 const data: Record<string, any> = {
   name: "T-Shirt Eddie",

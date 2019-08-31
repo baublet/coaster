@@ -1,6 +1,11 @@
 import createSchema from "./createSchema";
 import { SchemaNodeType, schemaNodeDbOptionsDefaults } from ".";
 import generateNames from "../../helpers/generateNames";
+import createModel from "../createModel";
+
+const testModel = createModel({
+  name: "test"
+});
 
 it("expands a simplified schema node", () => {
   expect(
@@ -21,7 +26,7 @@ it("expands a simplified schema properly", () => {
       relation: false,
       type: SchemaNodeType.STRING,
       uniqueName: "name",
-      dbOptions: schemaNodeDbOptionsDefaults
+      persistOptions: schemaNodeDbOptionsDefaults("name")
     }
   });
 });
@@ -29,15 +34,26 @@ it("expands a simplified schema properly", () => {
 it("expands a simplified model schema properly", () => {
   expect(
     createSchema({
-      name: SchemaNodeType.MODEL
+      name: testModel
     })
   ).toEqual({
     name: {
       names: generateNames("name_id"),
+      model: testModel,
       relation: true,
       type: SchemaNodeType.ID,
       uniqueName: "name",
-      dbOptions: schemaNodeDbOptionsDefaults
+      persistOptions: schemaNodeDbOptionsDefaults("name")
     }
   });
+});
+
+it("throws an error when you don't pass a model to a model schema", () => {
+  expect(() => {
+    createSchema({
+      name: {
+        type: SchemaNodeType.MODEL
+      }
+    });
+  }).toThrow();
 });

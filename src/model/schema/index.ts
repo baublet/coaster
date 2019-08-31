@@ -9,6 +9,7 @@ export enum SchemaNodeType {
   INT,
   MODEL,
   MODELS,
+  // SLUG,
   STRING
 }
 
@@ -30,7 +31,8 @@ export interface SchemaNodeOptions {
   type: SchemaNodeType | ModelFactory;
   uniqueName?: string;
   model?: ModelFactory;
-  dbOptions?: {
+  persistOptions?: {
+    columnName?: string;
     nullable?: boolean;
     default?: any;
     primaryKey?: boolean;
@@ -48,7 +50,7 @@ export interface SchemaNode {
     canonical: string;
     safe: string;
   };
-  dbOptions: {
+  persistOptions: {
     autoIncrement: boolean;
     default?: any;
     foreignKey?: string;
@@ -61,12 +63,14 @@ export interface SchemaNode {
 export type Schema = Record<string, SchemaNode>;
 export type UncompiledSchema = Record<
   string,
-  SchemaNodeOptions | SchemaNodeType
+  SchemaNodeOptions | SchemaNodeType | ModelFactory
 >;
 
-export const schemaNodeDbOptionsDefaults = {
+export const schemaNodeDbOptionsDefaults = (columnName: string) => ({
   autoIncrement: false,
+  columnName,
+  foreignKey: "id",
   nullable: true,
   primaryKey: false,
   unique: false
-};
+});

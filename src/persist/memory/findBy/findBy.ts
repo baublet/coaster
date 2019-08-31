@@ -4,7 +4,7 @@ import {
   ModelDataDefaultType,
   ModelFactory
 } from "../../../model/createModel";
-import findResultsForLogicalMatcher from "./findResultsForLogicalMatcher";
+import findResultsForLogicalMatcher from "../findResultsForLogicalMatcher";
 import { MemoryMap } from "../memory";
 import uniqueArrayElements from "../../../helpers/uniqueArrayElements";
 import { SchemaNodeType } from "../../../model/schema";
@@ -13,7 +13,7 @@ export default function findByFactory(memoryMap: MemoryMap = {}) {
   return async function findBy({
     query,
     raw = false,
-    eager = true
+    eager = false
   }: PersistFindByProps): Promise<ModelDataDefaultType[] | Model[]> {
     // First, find the results
     const results = findResultsForLogicalMatcher(memoryMap, query);
@@ -22,14 +22,23 @@ export default function findByFactory(memoryMap: MemoryMap = {}) {
     // Then limit things
     // Finished!
 
-    if (raw) return results;
+    if (raw) {
+      return results;
+    }
 
     // Instantiate the new models
     const modelFactory = query.$model;
     if (eager === false) return results.map(result => modelFactory(result));
 
     // Eager load all additional related models
-    const idMap: Array<[ModelFactory, number[]]> = [];
+    interface IDMapForModelRelations {
+      factory: ModelFactory;
+      nodeLocalId: string;
+      ids: number[];
+      models: Record<number, Model>;
+      data: Record<number, any>;
+    }
+    const idMap: Map<ModelFactory, IDMapForModelRelations> = new Map();
     Object.values(modelFactory.schema).forEach(node => {
       if (node.type === SchemaNodeType.MODEL) {
         const nodeLocalId = `${node.names.safe}_id`;
@@ -41,30 +50,36 @@ export default function findByFactory(memoryMap: MemoryMap = {}) {
             })
             .filter(id => id !== null)
         );
-        idMap.push([modelFactory, ids]);
+        idMap.set(modelFactory, {
+          factory: modelFactory,
+          nodeLocalId,
+          ids,
+          models: {},
+          data: {}
+        });
       }
     });
-    const relatedModels: Map<ModelFactory, Record<number, Model>> = new Map();
     // For each model relation, load the models by their ids
-    await Promise.all(
-      idMap.map(async ([modelFactory, ids]) => {
-        const results = await findBy({
-          query: {
-            $model: modelFactory,
-            id: [PersistMatcherType.ONE_OF, [ids]]
-          }
-        });
-        const resultsMap = {};
-        results.forEach(result => {
-          resultsMap[result.id] = result;
-        })
-        relatedModels.set(modelFactory, resultsMap);
-      })
-    );
+    for (let [factory, { ids, models }] of idMap) {
+      const results = await findBy({
+        query: {
+          $model: modelFactory,
+          id: [PersistMatcherType.ONE_OF, [ids]]
+        }
+      });
+      results.forEach(result => {
+        models[result.id] = factory(result);
+      });
+    }
     // Now, we've loaded all related models in an in-memory store. Let's
     // attach them to the underlying models
     return results.map(result => {
-      return modelFactory(result);
-    })
+      const model = modelFactory(result);
+      for (let [_, { nodeLocalId, models }] of idMap) {
+        const id = model[nodeLocalId];
+        model.$setRelationship(nodeLocalId, models[id]);
+      }
+      return model;
+    });
   };
 }

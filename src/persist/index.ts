@@ -37,8 +37,7 @@ export interface PersistMergeOptions {
   $thereProperty?: string;
 }
 
-export interface PersistSelectQuery extends Record<string, any> {
-  $model: ModelFactory;
+export interface PersistQuery extends Record<string, any> {
   $and?: boolean;
   $or?: boolean;
   $with?: PersistSelectWithQuery | PersistSelectWithQuery[];
@@ -51,6 +50,12 @@ export interface PersistSelectWithQuery extends Record<string, any> {
   $or?: boolean;
 }
 
+export interface PersistSelectQuery extends PersistQuery {
+  $model: ModelFactory;
+}
+
+export type PersistDeleteQuery = PersistSelectQuery;
+
 export interface PersistFindByProps {
   eager?: boolean;
   limit?: number;
@@ -60,9 +65,13 @@ export interface PersistFindByProps {
   sort?: PersistSortType[];
 }
 
+export interface PersistDeleteByProps {
+  limit?: number;
+  query: PersistDeleteQuery;
+}
+
 export interface PersistAdapter {
-  delete: (target: string | Model | string[] | Model[]) => boolean | boolean[];
-  find: (id: string | string[]) => Model | Model[];
+  deleteBy: (props: PersistDeleteByProps) => boolean | boolean[];
   findBy: (props: PersistFindByProps) => Model[];
   save: (target: Model | Model[]) => boolean | boolean[];
 }

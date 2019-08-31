@@ -1,12 +1,12 @@
-import { Model, ModelData } from "../../../model/createModel";
+import { Model, ModelData } from "../../model/createModel";
 import {
   PersistSelectQuery,
   PersistMatcherType,
   PersistSelectWithQuery
-} from "../..";
+} from "..";
 import dataIsMatch from "./dataIsMatch";
-import { MemoryMap } from "../memory";
-import uniqueArrayElements from "../../../helpers/uniqueArrayElements";
+import { MemoryMap } from "./memory";
+import uniqueArrayElements from "../../helpers/uniqueArrayElements";
 
 export default function findResultsForLogicalMatcher(
   memoryMap: MemoryMap,

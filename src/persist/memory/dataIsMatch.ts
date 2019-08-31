@@ -1,4 +1,4 @@
-import { PersistMatcher, PersistMatcherType } from "../..";
+import { PersistMatcher, PersistMatcherType } from "..";
 
 export default function dataIsMatch(
   data: Record<string, any>,

@@ -1,5 +1,5 @@
 import findBy from "./findResultsForLogicalMatcher";
-import createModel from "../../../model/createModel";
+import createModel from "../../model/createModel";
 
 export const userModel = createModel({
   name: "user"
@@ -48,7 +48,6 @@ export const memoryMap = {
 it("finds by non-ID property", async () => {
   const results = await findBy(memoryMap, { $model: userModel, name: "Gambino Slim"
   });
-  console.log(results);
   expect(results[0]).toEqual(memoryMap.user.test2);
 });
 
