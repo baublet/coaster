@@ -1,13 +1,10 @@
-import { PersistFindByProps, PersistMatcherType } from "../..";
-import {
-  Model,
-  ModelDataDefaultType,
-  ModelFactory
-} from "../../../model/createModel";
-import findResultsForLogicalMatcher from "../findResultsForLogicalMatcher";
-import { MemoryMap } from "../memory";
-import uniqueArrayElements from "../../../helpers/uniqueArrayElements";
-import { SchemaNodeType } from "../../../model/schema";
+import { PersistFindByProps, PersistMatcherType } from "persist";
+import { Model, ModelDataDefaultType, ModelFactory } from "model/createModel";
+import findResultsForLogicalMatcher from "persist/memory/findResultsForLogicalMatcher";
+import { MemoryMap } from "persist/memory/memory";
+import uniqueArrayElements from "helpers/uniqueArrayElements";
+import { SchemaNodeType } from "model/schema";
+import eagerLoadWithoutSchemaError from "persist/errors/eagerLoadWithoutSchemaError";
 
 export default function findByFactory(memoryMap: MemoryMap = {}) {
   return async function findBy({
@@ -15,6 +12,13 @@ export default function findByFactory(memoryMap: MemoryMap = {}) {
     raw = false,
     eager = false
   }: PersistFindByProps): Promise<ModelDataDefaultType[] | Model[]> {
+    // If the user tries to eager load a query, and they don't have a schema
+    // defined, we need to throw. We can't ever eager load a query  if we don't
+    // know how to instantiate relationships
+    if (eager && !query.$model.schema) {
+      throw eagerLoadWithoutSchemaError();
+    }
+
     // First, find the results
     const results = findResultsForLogicalMatcher(memoryMap, query);
     // Then sort stuff
