@@ -18,6 +18,8 @@ export default function findResultsForLogicalMatcher(
     $with = [],
     $without = [],
     $merge = [],
+    $limit = undefined,
+    $offset = 0,
     ...query
   }: PersistSelectQuery | PersistSelectWithQuery,
   modelContext: string = null
@@ -102,6 +104,16 @@ export default function findResultsForLogicalMatcher(
 
   // Deep clone it all so we can maintain the validity of our store
   const clonedResults = cloneDeep(results);
+
+  // Respect offset
+  if ($offset) {
+    clonedResults.splice(0, $offset);
+  }
+
+  // Respect limit
+  if (results.length > $limit) {
+    clonedResults.splice($limit, results.length - $limit);
+  }
 
   return clonedResults;
 }
