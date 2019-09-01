@@ -7,6 +7,7 @@ import {
 import dataIsMatch from "./dataIsMatch";
 import { MemoryMap } from "./memory";
 import uniqueArrayElements from "../../helpers/uniqueArrayElements";
+import cloneDeep from "lodash.clonedeep";
 
 export default function findResultsForLogicalMatcher(
   memoryMap: MemoryMap,
@@ -99,5 +100,8 @@ export default function findResultsForLogicalMatcher(
   // Keep only unique
   results = uniqueArrayElements(results, (a, b) => a.id === b.id);
 
-  return results;
+  // Deep clone it all so we can maintain the validity of our store
+  const clonedResults = cloneDeep(results);
+
+  return clonedResults;
 }

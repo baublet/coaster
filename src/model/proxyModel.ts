@@ -1,4 +1,4 @@
-import { Model, ModelInternalProperties } from "./createModel";
+import { Model, ModelInternalProperties, ModelData } from "./createModel";
 import protectedNames from "./protectedNames";
 
 function propertyIsComputed(obj: Model, prop: string): boolean {
@@ -35,6 +35,14 @@ function getFn<T>() {
         return (key: string, model: ModelInternalProperties) => {
           obj.$relationships[key] = model;
         };
+      case "$setData":
+        return (data: ModelData<T>): void => {
+          obj.$data = data;
+        };
+      case "save":
+      case "delete":
+      case "reload":
+        return obj[prop];
     }
     if (propertyIsComputed(obj, prop)) {
       return obj.$computed[prop]({ ...obj.$data });

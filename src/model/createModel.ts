@@ -4,7 +4,9 @@ import proxyModel from "./proxyModel";
 import { Schema, UncompiledSchema } from "./schema";
 import createSchema from "./schema/createSchema";
 import { PersistAdapter } from "../persist";
-import modelWithPersist, { ModelWithPersist } from "./modelWithPersist";
+import attachPersistFunctions from "./attachPersistFunctions";
+import noPersistAdapterError from "./error/noPersistAdapterError";
+import log from "helpers/log";
 
 export type ModelComputedPropFn<T> = (data: T) => any;
 export interface ModelDataDefaultType extends Record<string, any> {
@@ -67,30 +69,33 @@ function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
   const compiledSchema = createSchema(schema);
   const factory = (initialValue: T = {} as T): Model<T & C> => {
     const $relationships = {};
-    const $setRelationship = (key: string, model: Model) => {
-      $relationships[key] = model;
-    };
     const baseModel = {
       $computed: computedProps,
       $data: initialValue,
       $name: name,
       $relationships,
-      $setRelationship,
       $validate: validate,
       $validators: validators,
-      $factory: factory
+      $factory: factory,
+      reload: async () => {
+        throw noPersistAdapterError(name);
+      },
+      save: async () => {
+        throw noPersistAdapterError(name);
+      },
+      delete: async () => {
+        throw noPersistAdapterError(name);
+      }
     };
     if (persistWith) {
-      return proxyModel(
-        modelWithPersist(baseModel, persistWith)
-      ) as ModelWithPersist<T & C>;
+      attachPersistFunctions(baseModel, persistWith);
     }
     return proxyModel(baseModel) as Model<T & C>;
   };
   factory.modelName = name;
   factory.modelFactory = true;
   factory.schema = compiledSchema;
-  if(persistWith) {
+  if (persistWith) {
     // TODO: attach handy `find`, `findBy`, and `deleteBy` stuff here
   }
   return factory;

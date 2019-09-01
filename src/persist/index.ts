@@ -39,10 +39,12 @@ export interface PersistMergeOptions {
 
 export interface PersistQuery extends Record<string, any> {
   $and?: boolean;
+  $limit?: number;
+  $merge?: ModelFactory | PersistMergeOptions | PersistMergeOptions[];
+  $offset?: number;
   $or?: boolean;
   $with?: PersistSelectWithQuery | PersistSelectWithQuery[];
   $without?: PersistSelectWithQuery | PersistSelectWithQuery[];
-  $merge?: ModelFactory | PersistMergeOptions | PersistMergeOptions[];
 }
 
 export interface PersistSelectWithQuery extends Record<string, any> {
@@ -65,13 +67,8 @@ export interface PersistFindByProps {
   sort?: PersistSortType[];
 }
 
-export interface PersistDeleteByProps {
-  limit?: number;
-  query: PersistDeleteQuery;
-}
-
 export interface PersistAdapter {
-  deleteBy: (props: PersistDeleteByProps) => boolean | boolean[];
-  findBy: (props: PersistFindByProps) => Model[];
-  save: (target: Model | Model[]) => boolean | boolean[];
+  deleteBy: (query: PersistDeleteQuery) => Promise<number>;
+  findBy: (props: PersistFindByProps) => Promise<Model[]>;
+  save: (target: Model | Model[]) => Promise<boolean | boolean[]>;
 }

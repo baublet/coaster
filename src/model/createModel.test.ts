@@ -54,3 +54,15 @@ it("allows you to set and access relationships", () => {
   user.$setRelationship("account", account);
   expect(user.account.id).toBe("account-1");
 });
+
+it("allows you to fully reset the data", () => {
+  const userModel = createModel({
+    name: "User"
+  });
+  const user = userModel({ id: "user-1" });
+  expect(user.id).toBe("user-1");
+  user.$setData({
+    id: "user-2"
+  });
+  expect(user.id).toBe("user-2");
+});
