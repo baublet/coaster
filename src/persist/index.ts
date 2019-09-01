@@ -43,6 +43,7 @@ export interface PersistQuery extends Record<string, any> {
   $merge?: ModelFactory | PersistMergeOptions | PersistMergeOptions[];
   $offset?: number;
   $or?: boolean;
+  $sort?: PersistSortType[];
   $with?: PersistSelectWithQuery | PersistSelectWithQuery[];
   $without?: PersistSelectWithQuery | PersistSelectWithQuery[];
 }
@@ -60,11 +61,8 @@ export type PersistDeleteQuery = PersistSelectQuery;
 
 export interface PersistFindByProps {
   eager?: boolean;
-  limit?: number;
-  offset?: number;
   query: PersistSelectQuery;
   raw?: boolean;
-  sort?: PersistSortType[];
 }
 
 export interface PersistAdapter {

@@ -1,17 +1,20 @@
-import {
-  Model,
-  ModelDataDefaultType,
-  ModelInternalProperties
-} from "./createModel";
+import { Model } from "./createModel";
 import { PersistAdapter } from "../persist";
 import reloadInvariantViolation from "./error/reloadInvariantViolation";
+import { ModelValidationErrors } from "./validate/validate";
+
+export interface ModelPersistFunctions {
+  save(ignoreValidation: boolean): Promise<true | ModelValidationErrors>;
+  reload(): Promise<boolean>;
+  delete(): Promise<boolean>;
+}
 
 export default function attachPersistFunctions(
   model: Model,
   adapter: PersistAdapter
 ): void {
-  const persistFunctions = {
-    save: (ignoreValidation: boolean = false) => {
+  const persistFunctions: ModelPersistFunctions = {
+    save: async (ignoreValidation: boolean = false) => {
       if (!ignoreValidation) {
         const valid = model.$validate(model.$data, model.$validators);
         if (valid !== true) {
@@ -30,7 +33,7 @@ export default function attachPersistFunctions(
         raw: true
       });
       if (!results.length) {
-        throw reloadInvariantViolation(model);
+        throw reloadInvariantViolation(model.$factory.modelName, id);
       }
       model.$data = results[0];
       return true;

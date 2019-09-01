@@ -29,5 +29,5 @@ it("deletes by id", async () => {
     $model: userModel,
     id: "test-id3"
   });
-  expect(memoryMap["test-id3"]).toBe(undefined);
+  expect(memoryMap.user["test-id3"]).toBe(undefined);
 });
