@@ -4,8 +4,9 @@ import proxyModel from "./proxyModel";
 import { Schema, UncompiledSchema } from "./schema";
 import createSchema from "./schema/createSchema";
 import { PersistAdapter } from "../persist";
-import attachPersistFunctions from "./attachPersistFunctions";
+import attachPersistFunctionsToModel from "./attachPersistFunctionsToModel";
 import noPersistAdapterError from "./error/noPersistAdapterError";
+import attachPersistFunctionsToModelFactory from "./attachPersistFunctionsToModelFactory";
 
 export type ModelComputedPropFn<T> = (data: T) => any;
 export interface ModelDataDefaultType extends Record<string, any> {
@@ -87,7 +88,7 @@ function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
       }
     };
     if (persistWith) {
-      attachPersistFunctions(baseModel, persistWith);
+      attachPersistFunctionsToModel(baseModel, persistWith);
     }
     return proxyModel(baseModel) as Model<T & C>;
   };
@@ -95,7 +96,7 @@ function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
   factory.modelFactory = true;
   factory.schema = compiledSchema;
   if (persistWith) {
-    // TODO: attach handy `find`, `findBy`, and `deleteBy` stuff here
+    attachPersistFunctionsToModelFactory(factory, persistWith);
   }
   return factory;
 }

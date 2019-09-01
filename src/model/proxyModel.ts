@@ -1,5 +1,6 @@
 import { Model, ModelInternalProperties, ModelData } from "./createModel";
 import protectedNames from "./protectedNames";
+import log from "helpers/log";
 
 function propertyIsComputed(obj: Model, prop: string): boolean {
   return Object.keys(obj.$computed).includes(prop);
@@ -17,6 +18,12 @@ function throwIfPropertyIsProtected(model: Model, prop: string): void {
   if (prop[0] === "$" || protectedNames.includes(prop)) {
     throw `${model.$name}.${prop} is invalid. ${prop} is a protected name. Please name your property something else or access it via and ${model.$name}.set("property", "value").`;
   }
+}
+
+function applyFn<T>() {
+  return function apply(obj: ModelInternalProperties) {
+    return obj.$data;
+  };
 }
 
 function hasFn<T>() {
@@ -71,7 +78,7 @@ function setFn<T>() {
 }
 
 function modelProxyHandler(): ProxyHandler<any> {
-  return { has: hasFn(), get: getFn(), set: setFn() };
+  return { has: hasFn(), get: getFn(), set: setFn(), apply: applyFn() };
 }
 
 export default function proxyModel(model: Model): Model {
