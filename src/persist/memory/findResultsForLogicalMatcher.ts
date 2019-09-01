@@ -17,7 +17,6 @@ export default function findResultsForLogicalMatcher(
     $or = false,
     $with = [],
     $without = [],
-    $merge = [],
     $limit = undefined,
     $offset = 0,
     ...query
@@ -46,7 +45,7 @@ export default function findResultsForLogicalMatcher(
     };
   });
 
-  if (!$or) {
+  if (!$or || $and) {
     const filter = (modelData: ModelData): boolean => {
       for (let i = 0; i < keySearches.length; i++) {
         // If the model isn't a match for one of the properties, filter it out

@@ -1,5 +1,4 @@
 import unique from "./uniqueNames";
-import { Schema } from "..";
 
 it("returns true if there are no collisions", () => {
   const schema = {

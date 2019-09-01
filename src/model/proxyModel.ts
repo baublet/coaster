@@ -1,6 +1,5 @@
 import { Model, ModelInternalProperties, ModelData } from "./createModel";
 import protectedNames from "./protectedNames";
-import log from "helpers/log";
 
 function propertyIsComputed(obj: Model, prop: string): boolean {
   return Object.keys(obj.$computed).includes(prop);

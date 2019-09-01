@@ -35,6 +35,7 @@ export default function attachPersistFunctions(
       if (!results.length) {
         throw reloadInvariantViolation(model.$factory.modelName, id);
       }
+      /* eslint-disable require-atomic-updates */
       model.$data = results[0];
       return true;
     },

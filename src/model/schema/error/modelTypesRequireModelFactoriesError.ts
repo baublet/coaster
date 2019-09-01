@@ -1,4 +1,4 @@
-import { SchemaNodeType, SchemaNode } from "..";
+import { SchemaNode } from "..";
 
 export default function modelTypesRequireModelFactoriesError(node: SchemaNode) {
   return `Model ${node.names.canonical} does not have a model defined:

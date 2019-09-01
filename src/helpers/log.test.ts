@@ -1,3 +1,5 @@
+/* eslint-disable no-global-assign */
+
 import log from "./log";
 const mockFn = jest.fn();
 const originalConsole = console;

@@ -5,7 +5,6 @@ import {
   PersistDeleteQuery,
   PersistMatcherType
 } from "persist";
-import log from "helpers/log";
 
 export interface ModelFactoryPersistFunctions {
   deleteBy: (query: PersistDeleteQuery) => Promise<number>;

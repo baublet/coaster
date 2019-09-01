@@ -1,4 +1,4 @@
-import unique, { defaultComparison } from "./uniqueArrayElements";
+import unique from "./uniqueArrayElements";
 
 it("creates unique array elements", () => {
   expect(unique([1, 1, 2])).toEqual([1, 2]);

@@ -1,4 +1,4 @@
-import { Model, ModelFactory, ModelFactoryFn } from "../createModel";
+import { ModelFactory } from "../createModel";
 
 export enum SchemaNodeType {
   ARRAY,

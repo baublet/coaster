@@ -40,7 +40,6 @@ export interface PersistMergeOptions {
 export interface PersistQuery extends Record<string, any> {
   $and?: boolean;
   $limit?: number;
-  $merge?: ModelFactory | PersistMergeOptions | PersistMergeOptions[];
   $offset?: number;
   $or?: boolean;
   $sort?: PersistSortType[];

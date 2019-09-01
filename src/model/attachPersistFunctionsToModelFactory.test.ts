@@ -1,6 +1,5 @@
 import createModel from "./createModel";
 import inMemoryPersistence from "persist/memory";
-import log from "helpers/log";
 
 const memoryMapFn = () => ({
   user: {

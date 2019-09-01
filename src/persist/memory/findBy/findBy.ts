@@ -84,7 +84,7 @@ export default function findByFactory(memoryMap: MemoryMap = {}) {
     // attach them to their parent model.
     return results.map(result => {
       const model = modelFactory(result);
-      for (let [_, { nodeLocalId, nodeLocalAccessor, models }] of idMap) {
+      for (let [, { nodeLocalId, nodeLocalAccessor, models }] of idMap) {
         const id = model[nodeLocalId];
         model.$setRelationship(nodeLocalAccessor, models[id]);
       }
