@@ -14,7 +14,7 @@ createModel<ModelProperties, ModelComputedProperties>({
 }): ModelFactory
 ```
 
-*required* `name: string`: the name of your new model. This is entirely an internal model for your own reference. We do not use it internally.
+_required_ `name: string`: the name of your new model. This is entirely an internal model for your own reference. We do not use it internally.
 
 `validators: [(data: ModelData, computedProps: Record<string, ComputedPropFunction>) => true | string]`: an array of model validators.
 
@@ -58,5 +58,5 @@ const angela = userModel({
 Returns a new model instantiated with `initialValue`, the types you specified in the `createModel` function call
 
 ```ts
-(initialValue: T = {} as T): Model<T & C> => Model
+(initialValue: T = {} as T): Model<T & C> => Model;
 ```

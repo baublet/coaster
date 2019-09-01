@@ -14,33 +14,36 @@ interface TransactionAccountProps {
   balance: number;
 }
 
-const UserModel = createModel<UserProps>({
-  name: "User",
+const UserModel =
+  createModel <
+  UserProps >
+  {
+    name: "User",
 
-  validators: [(data) => data.firstName ? true : "You need a first name!"],
+    validators: [data => (data.firstName ? true : "You need a first name!")],
 
-  schema: {
-    // These are our default props
-    id: SchemaNodeType.id,
-    createdAt: SchemaNodeType.date,
-    updatedAt: SchemaNodeType.date,
+    schema: {
+      // These are our default props
+      id: SchemaNodeType.id,
+      createdAt: SchemaNodeType.date,
+      updatedAt: SchemaNodeType.date,
 
-    // Text
-    firstName: SchemaNodeType.text,
-    lastName: SchemaNodeype.text,
+      // Text
+      firstName: SchemaNodeType.text,
+      lastName: SchemaNodeype.text,
 
-    // Numerics
-    pointBalance: SchemaNodeType.int,
-    floatThing: SchemaNodeType.float,
+      // Numerics
+      pointBalance: SchemaNodeType.int,
+      floatThing: SchemaNodeType.float,
 
-    // Cross-model relationships
-    transactionAccount:
-      modelRelation<TransactionAccountProps>(TransactionAccountModel)
-  },
+      // Cross-model relationships
+      transactionAccount:
+        modelRelation < TransactionAccountProps > TransactionAccountModel
+    },
 
-  // Computed props that are not persisted to the database
-  computedProperties: {
-    fullName: data => `${data.firstName} ${data.lastName}`
-  }
-});
+    // Computed props that are not persisted to the database
+    computedProperties: {
+      fullName: data => `${data.firstName} ${data.lastName}`
+    }
+  };
 ```
