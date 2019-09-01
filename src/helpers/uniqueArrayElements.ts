@@ -10,7 +10,7 @@ export default function uniqueArrayElements(
   array.forEach(a1 => {
     let addIt = true;
     uniqueElements.forEach(a2 => {
-      if(!addIt) {
+      if (!addIt) {
         return;
       }
       if (comparison(a1, a2)) {

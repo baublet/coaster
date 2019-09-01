@@ -7,7 +7,9 @@ export type MemoryMap = Record<string, Record<string, any>>;
 
 const memoryMap: MemoryMap = {};
 
-export default function persistInMemory(initialMemoryMap: MemoryMap = {}): PersistAdapter {
+export default function persistInMemory(
+  initialMemoryMap: MemoryMap = {}
+): PersistAdapter {
   Object.assign(memoryMap, initialMemoryMap);
   return {
     deleteBy: deleteFromMemory(memoryMap),

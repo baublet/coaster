@@ -46,21 +46,28 @@ export const memoryMap = {
 };
 
 it("finds by non-ID property", async () => {
-  const results = await findBy(memoryMap, { $model: userModel, name: "Gambino Slim"
+  const results = await findBy(memoryMap, {
+    $model: userModel,
+    name: "Gambino Slim"
   });
   expect(results[0]).toEqual(memoryMap.user.test2);
 });
 
 it("works across multiple properties", async () => {
   const results = await findBy(memoryMap, {
-    $model: userModel, group: 3, tester: 5 
+    $model: userModel,
+    group: 3,
+    tester: 5
   });
   expect(results[0]).toEqual(memoryMap.user.test3);
 });
 
 it("works with $or", async () => {
   const results = await findBy(memoryMap, {
-$model: userModel, group: 3, tester: 5, $or: true
+    $model: userModel,
+    group: 3,
+    tester: 5,
+    $or: true
   });
   expect(results).toEqual([
     memoryMap.user.test2,
@@ -71,18 +78,18 @@ $model: userModel, group: 3, tester: 5, $or: true
 
 it("fetches multiple queries for with", async () => {
   const results = await findBy(memoryMap, {
-      $model: userModel,
-      group: 2,
-      tester: 67,
-      $with: [
-        {
-          tester: 66
-        },
-        {
-          name: "Gambino Slim"
-        }
-      ]
-    });
+    $model: userModel,
+    group: 2,
+    tester: 67,
+    $with: [
+      {
+        tester: 66
+      },
+      {
+        name: "Gambino Slim"
+      }
+    ]
+  });
   expect(results).toEqual([
     memoryMap.user.test5,
     memoryMap.user.test4,
@@ -92,39 +99,39 @@ it("fetches multiple queries for with", async () => {
 
 it("fetches a single query for $with", async () => {
   const results = await findBy(memoryMap, {
-      $model: userModel,
-      group: 2,
-      tester: 67,
-      $with: {
-        tester: 66
-      }
+    $model: userModel,
+    group: 2,
+    tester: 67,
+    $with: {
+      tester: 66
+    }
   });
   expect(results).toEqual([memoryMap.user.test5, memoryMap.user.test4]);
 });
 
 it("processes a single $without", async () => {
   const results = await findBy(memoryMap, {
-      $model: userModel,
-      group: 2,
-      $without: {
-        tester: 67
-      }
+    $model: userModel,
+    group: 2,
+    $without: {
+      tester: 67
+    }
   });
   expect(results).toEqual([memoryMap.user.test1, memoryMap.user.test2]);
 });
 
 it("processes multiple $withouts", async () => {
   const results = await findBy(memoryMap, {
-      $model: userModel,
-      group: 2,
-      $without: [
-        {
-          tester: 67
-        },
-        {
-          name: "Gambino Slim"
-        }
-      ]
+    $model: userModel,
+    group: 2,
+    $without: [
+      {
+        tester: 67
+      },
+      {
+        name: "Gambino Slim"
+      }
+    ]
   });
   expect(results[0]).toEqual(memoryMap.user.test1);
 });
