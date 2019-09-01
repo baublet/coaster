@@ -6,7 +6,6 @@ import createSchema from "./schema/createSchema";
 import { PersistAdapter } from "../persist";
 import attachPersistFunctions from "./attachPersistFunctions";
 import noPersistAdapterError from "./error/noPersistAdapterError";
-import log from "helpers/log";
 
 export type ModelComputedPropFn<T> = (data: T) => any;
 export interface ModelDataDefaultType extends Record<string, any> {
