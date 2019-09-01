@@ -2,23 +2,26 @@ import { Model, ModelData } from "../../model/createModel";
 import {
   PersistSelectQuery,
   PersistMatcherType,
-  PersistSelectWithQuery
+  PersistSelectWithQuery,
+  PersistSortDirection
 } from "..";
 import dataIsMatch from "./dataIsMatch";
 import { MemoryMap } from "./memory";
 import uniqueArrayElements from "../../helpers/uniqueArrayElements";
 import cloneDeep from "lodash.clonedeep";
+import orderBy from "lodash.orderby";
 
 export default function findResultsForLogicalMatcher(
   memoryMap: MemoryMap,
   {
-    $model,
     $and = true,
+    $limit = undefined,
+    $model,
+    $offset = 0,
     $or = false,
+    $sort = [],
     $with = [],
     $without = [],
-    $limit = undefined,
-    $offset = 0,
     ...query
   }: PersistSelectQuery | PersistSelectWithQuery,
   modelContext: string = null
@@ -45,7 +48,7 @@ export default function findResultsForLogicalMatcher(
     };
   });
 
-  if (!$or || $and) {
+  if (!$or && $and) {
     const filter = (modelData: ModelData): boolean => {
       for (let i = 0; i < keySearches.length; i++) {
         // If the model isn't a match for one of the properties, filter it out
@@ -101,11 +104,21 @@ export default function findResultsForLogicalMatcher(
   // Keep only unique
   results = uniqueArrayElements(results, (a, b) => a.id === b.id);
 
+  // Sort them
+  $sort = Array.isArray($sort) ? $sort : [$sort];
+  if ($sort.length > 0) {
+    const sortFields = $sort.map(option => option.property);
+    const sortDirections = $sort.map(option =>
+      option.direction === PersistSortDirection.DESC ? "desc" : "asc"
+    );
+    results = orderBy(results, sortFields, sortDirections);
+  }
+
   // Deep clone it all so we can maintain the validity of our store
   const clonedResults = cloneDeep(results);
 
   // Respect offset
-  if ($offset) {
+  if ($offset > 0) {
     clonedResults.splice(0, $offset);
   }
 

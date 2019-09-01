@@ -1,5 +1,6 @@
 import findBy from "./findResultsForLogicalMatcher";
 import createModel from "../../model/createModel";
+import { PersistSortDirection } from "persist";
 
 export const userModel = createModel({
   name: "user"
@@ -134,4 +135,50 @@ it("processes multiple $withouts", async () => {
     ]
   });
   expect(results[0]).toEqual(memoryMap.user.test1);
+});
+
+it("respects limit", async () => {
+  const results = await findBy(memoryMap, {
+    $model: userModel,
+    $limit: 1
+  });
+  expect(results.length).toEqual(1);
+});
+
+it("respects offset", async () => {
+  const results = await findBy(memoryMap, {
+    $model: userModel,
+    $offset: 3
+  });
+  expect(results.length).toEqual(2);
+});
+
+it("respects limit _and_ offset", async () => {
+  const results = await findBy(memoryMap, {
+    $model: userModel,
+    $offset: 2,
+    $limit: 1
+  });
+  expect(results.length).toEqual(1);
+  expect(results[0]).toEqual(memoryMap.user.test3);
+});
+
+it("respects sort order", async () => {
+  const results = await findBy(memoryMap, {
+    $model: userModel,
+    $sort: { property: "name" }
+  });
+  expect(results[0].name).toEqual("Boots Russel");
+  expect(results[results.length - 1].name).toEqual("Tights Spinster");
+});
+
+it("respects multiple sort orders", async () => {
+  const results = await findBy(memoryMap, {
+    $model: userModel,
+    $sort: [
+      { property: "group" },
+      { property: "tester", direction: PersistSortDirection.DESC }
+    ]
+  });
+  expect(results[0].name).toBe("Smoochie");
 });

@@ -26,23 +26,12 @@ export interface PersistMatcher {
   value: any;
 }
 
-export interface PersistMergeConditionOptions {
-  $hereProperty: string;
-  $thereProperty: string;
-}
-
-export interface PersistMergeOptions {
-  $model: ModelFactory;
-  $hereProperty?: string;
-  $thereProperty?: string;
-}
-
 export interface PersistQuery extends Record<string, any> {
   $and?: boolean;
   $limit?: number;
   $offset?: number;
   $or?: boolean;
-  $sort?: PersistSortType[];
+  $sort?: PersistSortType[] | PersistSortType;
   $with?: PersistSelectWithQuery | PersistSelectWithQuery[];
   $without?: PersistSelectWithQuery | PersistSelectWithQuery[];
 }

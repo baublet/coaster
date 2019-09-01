@@ -6,6 +6,7 @@
   "dependencies": {
     "jest": "^24.9.0",
     "lodash.clonedeep": "^4.5.0",
+    "lodash.orderby": "^4.6.0",
     "snake-case": "^2.1.0",
     "stringify-object": "^3.3.0",
     "ts-node": "^8.3.0",
