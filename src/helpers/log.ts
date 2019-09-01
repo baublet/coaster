@@ -1,10 +1,20 @@
+import stringifyObject from "stringify-object";
+
 export enum LogLevel {
   ERROR,
   DEBUG,
   WARN
 }
 
+const frameRegex = /.*\((.*)\)$/;
+const cwd = process ? process.cwd() : "";
+
 export default function log(...args: any[]): void {
+  const stack = new Error().stack;
+
+  const frameLine = stack.split("\n")[2];
+  const frame = frameRegex.exec(frameLine)[1];
+
   let logLevel = LogLevel.DEBUG;
   if (Object.keys(LogLevel).includes(args[0])) {
     logLevel = args[0] as LogLevel;
@@ -12,6 +22,7 @@ export default function log(...args: any[]): void {
   }
 
   let logger = console.log;
+  let loggerContext = console;
 
   switch (logLevel) {
     case LogLevel.ERROR:
@@ -22,7 +33,16 @@ export default function log(...args: any[]): void {
       break;
   }
 
-  args.forEach(arg => {
-    logger(arg);
-  });
+  logger
+    .bind(loggerContext)
+    .call(
+      logger,
+      ...[
+        frame.replace(cwd, ""),
+        "\n\n",
+        ...args.map(arg =>
+          typeof arg === "object" ? stringifyObject(arg) : arg
+        )
+      ]
+    );
 }
