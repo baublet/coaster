@@ -55,5 +55,7 @@ export interface PersistFindByProps {
 export interface PersistAdapter {
   deleteBy: (query: PersistDeleteQuery) => Promise<number>;
   findBy: (props: PersistFindByProps) => Promise<Model[]>;
-  save: (target: Model | Model[]) => Promise<boolean | boolean[]>;
+  save: (
+    target: Model | Model[]
+  ) => Promise<boolean | string | boolean[] | string[]>;
 }

@@ -3,7 +3,7 @@ import { MemoryMap } from "./memory";
 
 let id = 1;
 
-function saveModel(memoryMap: MemoryMap, model: Model) {
+function saveModel(memoryMap: MemoryMap, model: Model): true {
   model.data.id = model.data.id || `model-${id++}`;
   memoryMap[model.name] = memoryMap[model.name] || {};
   memoryMap[model.name][model.data.id] = model.data;
@@ -11,7 +11,9 @@ function saveModel(memoryMap: MemoryMap, model: Model) {
 }
 
 export default function saveToMemory(memoryMap: MemoryMap) {
-  return async function(model: Model | Model[]): Promise<boolean | boolean[]> {
+  return async function(
+    model: Model | Model[]
+  ): Promise<boolean | string | boolean[] | string[]> {
     if (Array.isArray(model)) {
       return model.map(model => saveModel(memoryMap, model));
     }

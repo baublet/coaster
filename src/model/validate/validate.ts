@@ -1,4 +1,4 @@
-import { ModelData } from "../createModel";
+import { ModelData, ModelComputedPropFn } from "../createModel";
 
 export type Validator<T> = (data: ModelData<T>) => true | string;
 export type ModelValidationErrors = string[];
@@ -10,6 +10,7 @@ export type ValidateFn<T> = (
 
 function validate<T>(
   data: ModelData<T>,
+  computedProps: ModelComputedPropFn<T>[],
   validators: Validator<T>[]
 ): true | string[] {
   const validationResults = validators

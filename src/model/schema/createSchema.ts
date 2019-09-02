@@ -14,6 +14,7 @@ import idNameFromName from "./idNameFromName";
 import { isModelFactory } from "../createModel";
 import modelTypesRequireModelFactoriesError from "./error/modelTypesRequireModelFactoriesError";
 import schemaInvalidError from "./error/schemaInvalidError";
+import decimalTypeRequiresScaleAndPrecision from "./error/decimalTypeRequiresScaleAndPrecision";
 
 export default function createSchema({
   $tableName,
@@ -55,6 +56,13 @@ export default function createSchema({
   Object.values(compiledSchema).forEach((node: SchemaNode | string) => {
     if (typeof node === "string") {
       return;
+    }
+    if (
+      node.type === SchemaNodeType.DECIMAL &&
+      node.persistOptions.scale === undefined &&
+      node.persistOptions.precision === undefined
+    ) {
+      throw decimalTypeRequiresScaleAndPrecision(node.names.canonical);
     }
     if (
       node.type === SchemaNodeType.MODEL ||

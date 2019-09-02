@@ -4,15 +4,34 @@ import { GeneratedNames } from "helpers/generateNames";
 export enum SchemaNodeType {
   ARRAY,
   ARRAY_OF_IDS,
+  BIG_INT,
+  BOOLEAN,
   DATE,
-  FLOAT,
+  DECIMAL,
   ID,
   INT,
   MODEL,
   MODELS,
-  // SLUG,
+  SLUG,
+  SMALL_INT,
   STRING
 }
+
+export const SchemaNodeTypeReadable = {
+  [SchemaNodeType.ARRAY]: "array",
+  [SchemaNodeType.ARRAY_OF_IDS]: "array",
+  [SchemaNodeType.BIG_INT]: "number",
+  [SchemaNodeType.BOOLEAN]: "boolean",
+  [SchemaNodeType.DATE]: "number",
+  [SchemaNodeType.DECIMAL]: "number",
+  [SchemaNodeType.ID]: "number",
+  [SchemaNodeType.INT]: "number",
+  [SchemaNodeType.MODEL]: "number",
+  [SchemaNodeType.MODELS]: "array",
+  [SchemaNodeType.SLUG]: "string",
+  [SchemaNodeType.SMALL_INT]: "number",
+  [SchemaNodeType.STRING]: "string"
+};
 
 export const schemaNodeTypes = Object.values(SchemaNodeType);
 
@@ -33,11 +52,13 @@ export interface SchemaNodeOptions {
   uniqueName?: string;
   model?: ModelFactory;
   persistOptions?: {
-    columnName?: string;
-    nullable?: boolean;
-    default?: any;
-    primaryKey?: boolean;
     autoIncrement?: boolean;
+    columnName?: string;
+    default?: any;
+    nullable?: boolean;
+    precision?: number;
+    primaryKey?: boolean;
+    scale?: number;
     unique?: boolean;
   };
 }
@@ -49,12 +70,15 @@ export interface SchemaNode {
   model?: ModelFactory;
   names: GeneratedNames;
   persistOptions: {
-    autoIncrement: boolean;
+    index?: boolean;
+    autoIncrement?: boolean;
     default?: any;
     foreignKey?: string;
-    nullable: boolean;
-    primaryKey: boolean;
-    unique: boolean;
+    nullable?: boolean;
+    precision?: number;
+    primaryKey?: boolean;
+    scale?: number;
+    unique?: boolean;
   };
 }
 
@@ -78,7 +102,10 @@ export const schemaNodeDbOptionsDefaults = (columnName: string) => ({
   autoIncrement: false,
   columnName,
   foreignKey: "id",
+  index: false,
   nullable: true,
+  precision: 2,
   primaryKey: false,
+  scale: 5,
   unique: false
 });
