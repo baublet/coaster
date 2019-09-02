@@ -11,6 +11,9 @@ ${JSON.stringify(nodes)}
 function getNodeCollisions(name: string, schema: Schema): SchemaNode[] {
   const nodes = [];
   Object.values(schema).forEach(node => {
+    if (typeof node === "string") {
+      return;
+    }
     if (node.uniqueName === name) {
       nodes.push(node);
     }
@@ -20,7 +23,9 @@ function getNodeCollisions(name: string, schema: Schema): SchemaNode[] {
 
 export default function columnsNamesAreUnique(schema: Schema): true | string {
   const errors: Record<string, string> = {};
-  const names: string[] = Object.values(schema).map(node => node.uniqueName);
+  const names: string[] = Object.values(schema)
+    .filter(node => typeof node !== "string")
+    .map((node: SchemaNode) => node.uniqueName);
   names.forEach(name => {
     if (timesElementIsInArray(name, names) > 1) {
       const nodes = getNodeCollisions(name, schema);

@@ -16,8 +16,9 @@ export enum PersistMatcherType {
   GREATER_THAN,
   LESS_THAN,
   BETWEEN,
-  BETWEEN_GREEDY,
-  ONE_OF
+  NOT_BETWEEN,
+  ONE_OF,
+  NOT_ONE_OF
 }
 
 export interface PersistMatcher {

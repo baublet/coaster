@@ -14,7 +14,7 @@ import orderBy from "lodash.orderby";
 export default function findResultsForLogicalMatcher(
   memoryMap: MemoryMap,
   {
-    $and = true,
+    $and = false,
     $limit = undefined,
     $model,
     $offset = 0,
@@ -24,13 +24,15 @@ export default function findResultsForLogicalMatcher(
     $without = [],
     ...query
   }: PersistSelectQuery | PersistSelectWithQuery,
-  modelContext: string = null
+  tableName: string = null
 ): ModelData[] {
   let results: ModelData[] = [];
 
-  const currentModel = modelContext || $model.modelName;
-  const rawData = Object.values(memoryMap[currentModel]);
+  const table = tableName || $model.schema.$tableName || $model.modelName;
+  const rawData = Object.values(memoryMap[table]);
   const keysToSearch = Object.keys(query);
+
+  const isAnd = $or !== true;
 
   const keySearches = keysToSearch.map(key => {
     const comparator = Array.isArray(query[key])
@@ -48,7 +50,7 @@ export default function findResultsForLogicalMatcher(
     };
   });
 
-  if (!$or && $and) {
+  if (isAnd) {
     const filter = (modelData: ModelData): boolean => {
       for (let i = 0; i < keySearches.length; i++) {
         // If the model isn't a match for one of the properties, filter it out
@@ -78,19 +80,13 @@ export default function findResultsForLogicalMatcher(
   // Add $with
   const $withQueries = Array.isArray($with) ? $with : [$with];
   $withQueries.forEach(query => {
-    results.push(
-      ...findResultsForLogicalMatcher(memoryMap, query, currentModel)
-    );
+    results.push(...findResultsForLogicalMatcher(memoryMap, query, table));
   });
 
   // Remove $without
   const $withoutQueries = Array.isArray($without) ? $without : [$without];
   $withoutQueries.forEach(query => {
-    const rowsToRemove = findResultsForLogicalMatcher(
-      memoryMap,
-      query,
-      currentModel
-    );
+    const rowsToRemove = findResultsForLogicalMatcher(memoryMap, query, table);
     const idsToRemove = rowsToRemove.map(row => row.id);
     results = results.filter(row => !idsToRemove.includes(row.id));
   });

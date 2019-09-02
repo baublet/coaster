@@ -6,7 +6,7 @@ const data: Record<string, any> = {
   size: 5
 };
 
-it("matches model property equality", () => {
+it("matches model property EQUAL", () => {
   expect(
     dataIsMatch(data, {
       property: "name",
@@ -24,7 +24,7 @@ it("matches model property equality", () => {
   ).toBeFalsy();
 });
 
-it("matches model property non-equality", () => {
+it("matches model property NOT_EQUAL", () => {
   expect(
     dataIsMatch(data, {
       property: "name",
@@ -42,7 +42,7 @@ it("matches model property non-equality", () => {
   ).toBeFalsy();
 });
 
-it("matches model property greater than", () => {
+it("matches model property GREATER_THAN", () => {
   expect(
     dataIsMatch(data, {
       property: "size",
@@ -60,7 +60,7 @@ it("matches model property greater than", () => {
   ).toBeFalsy();
 });
 
-it("matches model property less than", () => {
+it("matches model property LESS_THAN", () => {
   expect(
     dataIsMatch(data, {
       property: "size",
@@ -96,7 +96,25 @@ it("matches model property ONE_OF", () => {
   ).toBeFalsy();
 });
 
-it("matches model property between", () => {
+it("matches model property NOT_ONE_OF", () => {
+  expect(
+    dataIsMatch(data, {
+      property: "size",
+      type: PersistMatcherType.NOT_ONE_OF,
+      value: [3, 4]
+    })
+  ).toBeTruthy();
+
+  expect(
+    dataIsMatch(data, {
+      property: "size",
+      type: PersistMatcherType.NOT_ONE_OF,
+      value: [3, 4, 5]
+    })
+  ).toBeFalsy();
+});
+
+it("matches model property BETWEEN", () => {
   expect(
     dataIsMatch(data, {
       property: "size",
@@ -114,20 +132,20 @@ it("matches model property between", () => {
   ).toBeFalsy();
 });
 
-it("matches model property between (greedy)", () => {
+it("matches model property NOT_BETWEEN", () => {
   expect(
     dataIsMatch(data, {
       property: "size",
-      type: PersistMatcherType.BETWEEN_GREEDY,
-      value: [3, 5]
+      type: PersistMatcherType.NOT_BETWEEN,
+      value: [3, 6]
     })
-  ).toBeTruthy();
+  ).toBeFalsy();
 
   expect(
     dataIsMatch(data, {
       property: "size",
-      type: PersistMatcherType.BETWEEN_GREEDY,
+      type: PersistMatcherType.NOT_BETWEEN,
       value: [1, 4]
     })
-  ).toBeFalsy();
+  ).toBeTruthy();
 });

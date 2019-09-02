@@ -8,6 +8,7 @@ import attachPersistFunctionsToModel from "./attachPersistFunctionsToModel";
 import noPersistAdapterError from "./error/noPersistAdapterError";
 import attachPersistFunctionsToModelFactory from "./attachPersistFunctionsToModelFactory";
 import tableNameMustBeAString from "./schema/error/tableNameMustBeAString";
+import generateNames, { GeneratedNames } from "helpers/generateNames";
 
 export type ModelComputedPropFn<T> = (data: T) => any;
 export interface ModelDataDefaultType extends Record<string, any> {
@@ -22,7 +23,7 @@ export interface ModelInternalProperties {
   $computed: Record<string, ModelComputedPropFn<any>>;
   $data: ModelDataDefaultType;
   $factory: ModelFactory<any>;
-  $name: string;
+  $name: GeneratedNames;
   $relationships: Record<string, Model>;
   $setRelationship: (key: string, model: Model) => void;
   $validate: ValidateFn<any>;
@@ -80,7 +81,7 @@ function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
     const baseModel = {
       $computed: computedProps,
       $data: initialValue,
-      $name: name,
+      $names: generateNames(name),
       $relationships,
       $validate: validate,
       $validators: validators,

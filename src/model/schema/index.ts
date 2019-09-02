@@ -1,4 +1,5 @@
 import { ModelFactory } from "../createModel";
+import { GeneratedNames } from "helpers/generateNames";
 
 export enum SchemaNodeType {
   ARRAY,
@@ -46,11 +47,7 @@ export interface SchemaNode {
   uniqueName: string;
   relation: boolean;
   model?: ModelFactory;
-  names: {
-    original: string;
-    canonical: string;
-    safe: string;
-  };
+  names: GeneratedNames;
   persistOptions: {
     autoIncrement: boolean;
     default?: any;

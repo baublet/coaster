@@ -16,12 +16,14 @@ export default function dataIsMatch(
       return modelData < matcher.value;
     case PersistMatcherType.ONE_OF:
       return matcher.value.includes(modelData);
+    case PersistMatcherType.NOT_ONE_OF:
+      return !matcher.value.includes(modelData);
     case PersistMatcherType.BETWEEN:
       matcher.value.sort();
       return modelData > matcher.value[0] && modelData < matcher.value[1];
-    case PersistMatcherType.BETWEEN_GREEDY:
+    case PersistMatcherType.NOT_BETWEEN:
       matcher.value.sort();
-      return modelData >= matcher.value[0] && modelData <= matcher.value[1];
+      return modelData >= matcher.value[1] || modelData <= matcher.value[0];
   }
   return false;
 }

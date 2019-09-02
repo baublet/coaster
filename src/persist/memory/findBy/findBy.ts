@@ -42,7 +42,13 @@ export default function findByFactory(memoryMap: MemoryMap = {}) {
 
     const idMap: Map<ModelFactory, IDMapForModelRelations> = new Map();
 
+    // Map through the schema and load all of the properties we need to
+    // eagerly load.
     Object.values(modelFactory.schema).forEach(node => {
+      // Ignore $tableName
+      if (typeof node === "string") {
+        return;
+      }
       if (node.relation === true) {
         const nodeLocalAccessor = `${node.names.original}`;
         const nodeLocalId = `${node.names.safe}`;
@@ -80,8 +86,9 @@ export default function findByFactory(memoryMap: MemoryMap = {}) {
         models[result.id] = result;
       });
     }
+
     // Now, we've loaded all related models in an in-memory store. Let's
-    // attach them to their parent model.
+    // attach them to their parent model and return the result.
     return results.map(result => {
       const model = modelFactory(result);
       for (let [, { nodeLocalId, nodeLocalAccessor, models }] of idMap) {

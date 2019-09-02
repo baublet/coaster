@@ -13,7 +13,7 @@ it("logs properly and maintains the context", () => {
   log("test!", { toots: 123 });
   expect(console.log).toHaveBeenCalled();
   expect(console.log).toHaveBeenCalledWith(
-    "/src/helpers/log.test.ts:11:6",
+    "/src/helpers/log.test.ts:13:6",
     "\n\n",
     "test!",
     `{\n\ttoots: 123\n}`
