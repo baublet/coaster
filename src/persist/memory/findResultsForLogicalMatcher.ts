@@ -32,7 +32,7 @@ export default function findResultsForLogicalMatcher(
   const rawData = Object.values(memoryMap[table]);
   const keysToSearch = Object.keys(query);
 
-  const isAnd = $or !== true;
+  const isAnd = $or !== true || $and === true;
 
   const keySearches = keysToSearch.map(key => {
     const comparator = Array.isArray(query[key])

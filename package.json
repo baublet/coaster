@@ -27,7 +27,7 @@
     "ts-jest": "^24.0.2"
   },
   "lint-staged": {
-    "*.js": "eslint --fix --max-warnings 0"
+    "*.ts": "eslint --fix --max-warnings 0"
   },
   "husky": {
     "hooks": {
