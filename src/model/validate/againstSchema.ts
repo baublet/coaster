@@ -54,6 +54,18 @@ export default function validateAgainstSchema(
           );
         }
         return;
+      case "boolean":
+        if (typesMap[key] !== SchemaNodeType.BOOLEAN) {
+          errors.push(
+            propertyIsNotOfValidType(
+              key,
+              $tableName,
+              readableExpected,
+              "boolean"
+            )
+          );
+        }
+        return;
     }
   });
   if (!errors.length) {

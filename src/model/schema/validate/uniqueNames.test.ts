@@ -1,5 +1,4 @@
 import unique from "./uniqueNames";
-import log from "helpers/log";
 
 it("returns true if there are no collisions", () => {
   const schema = {
@@ -25,6 +24,5 @@ it("returns error messages if there are collisions", () => {
   };
   // @ts-ignore
   const errors = unique(schema);
-  log(errors);
   expect(typeof errors).toBe("string");
 });

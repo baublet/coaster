@@ -10,7 +10,7 @@ export type ValidateFn<T> = (
 
 function validate<T>(
   data: ModelData<T>,
-  computedProps: ModelComputedPropFn<T>[],
+  computedProps: Record<string, ModelComputedPropFn<T>>,
   validators: Validator<T>[]
 ): true | string[] {
   const validationResults = validators

@@ -10,12 +10,16 @@ const schema = createSchema({
   },
   messages: {
     type: SchemaNodeType.INT
+  },
+  cool: {
+    type: SchemaNodeType.BOOLEAN
   }
 });
 
 const data = (overrides: Record<string, any> = {}) => ({
   name: "Name!",
   messages: 3,
+  cool: true,
   ...overrides
 });
 
@@ -29,8 +33,14 @@ it("fails when expected with STRING type", () => {
   );
 });
 
-it("success or fails with INT type", () => {
+it("fails when expected with INT type", () => {
   expect(againstSchema({ messages: "Not gonna work" }, {}, schema)[0]).toEqual(
     propertyIsNotOfValidType("messages", "test", "number", "string")
   );
+});
+
+it("fails when expected with BOOLEAN type", () => {
+  expect(
+    againstSchema({ cool: "not gonna work, either" }, {}, schema)[0]
+  ).toEqual(propertyIsNotOfValidType("cool", "test", "boolean", "string"));
 });
