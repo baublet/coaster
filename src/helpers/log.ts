@@ -13,7 +13,12 @@ export default function log(...args: any[]): void {
   const stack = new Error().stack;
 
   const frameLine = stack.split("\n")[2];
-  const frame = frameRegex.exec(frameLine)[1];
+  const frameFinder = frameRegex.exec(frameLine);
+
+  let frame = "";
+  if (frameFinder) {
+    frame = frameFinder[1];
+  }
 
   let logLevel = LogLevel.DEBUG;
   if (Object.keys(LogLevel).includes(args[0])) {

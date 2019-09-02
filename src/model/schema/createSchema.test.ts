@@ -10,6 +10,7 @@ const testModel = createModel({
 it("expands a simplified schema node", () => {
   expect(
     createSchema({
+      $tableName: "test",
       name: SchemaNodeType.STRING
     })
   ).toBeInstanceOf(Object);
@@ -18,9 +19,11 @@ it("expands a simplified schema node", () => {
 it("expands a simplified schema properly", () => {
   expect(
     createSchema({
+      $tableName: "test",
       name: SchemaNodeType.STRING
     })
   ).toEqual({
+    $tableName: "test",
     name: {
       names: generateNames("name"),
       relation: false,
@@ -34,9 +37,11 @@ it("expands a simplified schema properly", () => {
 it("expands a simplified model schema properly", () => {
   expect(
     createSchema({
+      $tableName: "test",
       name: testModel
     })
   ).toEqual({
+    $tableName: "test",
     name: {
       names: generateNames("name_id", "name"),
       model: testModel,
@@ -51,6 +56,7 @@ it("expands a simplified model schema properly", () => {
 it("throws an error when you don't pass a model to a model schema", () => {
   expect(() => {
     createSchema({
+      $tableName: "test",
       name: {
         type: SchemaNodeType.MODEL
       }

@@ -1,12 +1,13 @@
 import { Validator, ValidateFn } from "./validate/validate";
 import validate from "./validate";
 import proxyModel from "./proxyModel";
-import { Schema, UncompiledSchema } from "./schema";
+import { Schema, UncompiledSchemaWithOptionalTableName } from "./schema";
 import createSchema from "./schema/createSchema";
 import { PersistAdapter } from "../persist";
 import attachPersistFunctionsToModel from "./attachPersistFunctionsToModel";
 import noPersistAdapterError from "./error/noPersistAdapterError";
 import attachPersistFunctionsToModelFactory from "./attachPersistFunctionsToModelFactory";
+import tableNameMustBeAString from "./schema/error/tableNameMustBeAString";
 
 export type ModelComputedPropFn<T> = (data: T) => any;
 export interface ModelDataDefaultType extends Record<string, any> {
@@ -36,7 +37,7 @@ export interface ModelOptions<T = ModelDataDefaultType> {
   computedProps?: Record<string, ModelComputedType<T>>;
   name: string;
   persistWith?: PersistAdapter;
-  schema?: UncompiledSchema;
+  schema?: UncompiledSchemaWithOptionalTableName;
   validators?: Validator<T>[];
 }
 
@@ -66,7 +67,14 @@ function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
   schema = {},
   persistWith
 }: ModelOptions<T>): ModelFactory<T, C> {
-  const compiledSchema = createSchema(schema);
+  const tableName = schema.$tableName || name;
+  if (typeof tableName !== "string") {
+    throw tableNameMustBeAString(tableName);
+  }
+  const compiledSchema = createSchema({
+    $tableName: tableName,
+    ...schema
+  });
   const factory = (initialValue: T = {} as T): Model<T & C> => {
     const $relationships = {};
     const baseModel = {

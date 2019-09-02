@@ -29,6 +29,7 @@ export interface PersistMatcher {
 export interface PersistQuery extends Record<string, any> {
   $and?: boolean;
   $limit?: number;
+  $model: ModelFactory;
   $offset?: number;
   $or?: boolean;
   $sort?: PersistSortType[] | PersistSortType;
@@ -41,11 +42,8 @@ export interface PersistSelectWithQuery extends Record<string, any> {
   $or?: boolean;
 }
 
-export interface PersistSelectQuery extends PersistQuery {
-  $model: ModelFactory;
-}
-
-export type PersistDeleteQuery = PersistSelectQuery;
+export type PersistSelectQuery = PersistQuery;
+export type PersistDeleteQuery = PersistQuery;
 
 export interface PersistFindByProps {
   eager?: boolean;

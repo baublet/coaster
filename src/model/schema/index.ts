@@ -61,10 +61,20 @@ export interface SchemaNode {
   };
 }
 
-export type Schema = Record<string, SchemaNode>;
+export interface RequiredSchemaOptions {
+  $tableName: string;
+}
+
+export type Schema = Record<string, SchemaNode | string> &
+  RequiredSchemaOptions;
 export type UncompiledSchema = Record<
   string,
-  SchemaNodeOptions | SchemaNodeType | ModelFactory
+  SchemaNodeOptions | SchemaNodeType | ModelFactory | string
+> &
+  RequiredSchemaOptions;
+export type UncompiledSchemaWithOptionalTableName = Record<
+  string,
+  SchemaNodeOptions | SchemaNodeType | ModelFactory | string
 >;
 
 export const schemaNodeDbOptionsDefaults = (columnName: string) => ({

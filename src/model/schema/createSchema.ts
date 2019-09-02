@@ -15,8 +15,13 @@ import { isModelFactory } from "../createModel";
 import modelTypesRequireModelFactoriesError from "./error/modelTypesRequireModelFactoriesError";
 import schemaInvalidError from "./error/schemaInvalidError";
 
-export default function createSchema(schema: UncompiledSchema): Schema {
-  const compiledSchema: Schema = {};
+export default function createSchema({
+  $tableName,
+  ...schema
+}: UncompiledSchema): Schema {
+  const compiledSchema: Schema = {
+    $tableName
+  };
 
   // Expand simple definitions out properly
   Object.keys(schema).forEach((key: string) => {
@@ -41,13 +46,16 @@ export default function createSchema(schema: UncompiledSchema): Schema {
         persistOptions: schemaNodeDbOptionsDefaults(key)
       };
       if (isModelFactory(node)) {
-        compiledSchema[key].model = node;
+        compiledSchema[key]["model"] = node;
       }
     }
   });
 
   // Properly expand model relations
-  Object.values(compiledSchema).forEach((node: SchemaNode) => {
+  Object.values(compiledSchema).forEach((node: SchemaNode | string) => {
+    if (typeof node === "string") {
+      return;
+    }
     if (
       node.type === SchemaNodeType.MODEL ||
       node.type === SchemaNodeType.MODELS
