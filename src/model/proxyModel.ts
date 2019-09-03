@@ -45,6 +45,13 @@ function getFn<T>() {
         return (data: ModelData<T>): void => {
           obj.$data = data;
         };
+      case "valid":
+        return obj.$validate(
+          obj.$data,
+          obj.$computed,
+          obj.$factory.schema,
+          obj.$validators
+        );
       case "save":
       case "delete":
       case "reload":

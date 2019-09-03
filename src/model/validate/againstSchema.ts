@@ -7,9 +7,13 @@ import {
 } from "model/schema";
 import propertyDoesNotExistOnSchema from "model/error/propertyDoesNotExistOnSchema";
 import propertyIsNotOfValidType from "model/error/propertyIsNotOfValidType";
+import unknownSchemaNodeType from "model/error/unknownSchemaNodeType";
 
 const numberTypes = [
   SchemaNodeType.BIG_INT,
+  SchemaNodeType.DATE,
+  SchemaNodeType.DECIMAL,
+  SchemaNodeType.ID,
   SchemaNodeType.INT,
   SchemaNodeType.SMALL_INT
 ];
@@ -66,6 +70,8 @@ export default function validateAgainstSchema(
           );
         }
         return;
+      default:
+        return unknownSchemaNodeType(readableExpected, $tableName);
     }
   });
   if (!errors.length) {

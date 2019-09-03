@@ -13,6 +13,9 @@ const schema = createSchema({
   },
   cool: {
     type: SchemaNodeType.BOOLEAN
+  },
+  date: {
+    type: SchemaNodeType.DATE
   }
 });
 
@@ -20,6 +23,7 @@ const data = (overrides: Record<string, any> = {}) => ({
   name: "Name!",
   messages: 3,
   cool: true,
+  date: 123,
   ...overrides
 });
 
