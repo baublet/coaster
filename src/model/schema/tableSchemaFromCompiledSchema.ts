@@ -1,4 +1,6 @@
 import { Schema, SchemaNodeType, SchemaNode } from ".";
+import validate from "./validate";
+import uncompilableSchema from "./error/uncompilableSchema";
 
 interface TableSchema {
   name: string;
@@ -48,10 +50,15 @@ function dbTypeFromSchemaNodeType(type: SchemaNodeType): SqlColumnType {
   return SqlColumnType.TEXT;
 }
 
-export default function tableSchemaFromCompiledSchema({
-  $tableName,
-  ...columns
-}: Schema): TableSchema {
+export default function tableSchemaFromCompiledSchema(
+  compiledSchema: Schema
+): TableSchema {
+  const { $tableName, ...columns } = compiledSchema;
+
+  if (!validate(compiledSchema)) {
+    throw uncompilableSchema(compiledSchema);
+  }
+
   const schema = {
     name: $tableName,
     indexes: {},

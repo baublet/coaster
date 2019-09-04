@@ -46,6 +46,19 @@ it("turns a compiled schema into a diffable, db-operable schema column tree", ()
           autoIncrement: true
         }
       },
+      category: {
+        names: generateNames("category"),
+        type: SchemaNodeType.STRING,
+        uniqueName: "category",
+        relation: false,
+        persistOptions: {
+          index: true,
+          unique: false,
+          autoIncrement: false,
+          nullable: false,
+          primaryKey: false
+        }
+      },
       name: {
         names: generateNames("name"),
         type: SchemaNodeType.STRING,
