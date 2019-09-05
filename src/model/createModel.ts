@@ -1,13 +1,10 @@
 import { Validator, ValidateFn } from "./validate/validate";
 import validate from "./validate";
 import proxyModel from "./proxyModel";
-import { Schema, UncompiledSchemaWithOptionalTableName } from "./schema";
-import createSchema from "./schema/createSchema";
 import { PersistAdapter } from "../persist";
 import attachPersistFunctionsToModel from "./attachPersistFunctionsToModel";
 import noPersistAdapterError from "./error/noPersistAdapterError";
 import attachPersistFunctionsToModelFactory from "./attachPersistFunctionsToModelFactory";
-import tableNameMustBeAString from "./schema/error/tableNameMustBeAString";
 import generateNames, { GeneratedNames } from "helpers/generateNames";
 
 export type ModelComputedPropFn<T> = (data: T) => any;
@@ -19,7 +16,10 @@ export interface ModelDataDefaultType extends Record<string, any> {
 export type ModelData<T = ModelDataDefaultType> = T;
 export type ModelComputedType<T = ModelDataDefaultType> = (data: T) => any;
 
+export type ModelManyRelationship = [Model];
+
 export interface ModelInternalProperties {
+  $changed: boolean;
   $computed: Record<string, ModelComputedPropFn<any>>;
   $data: ModelDataDefaultType;
   $factory: ModelFactory<any>;
@@ -36,9 +36,9 @@ export type Model<
 
 export interface ModelOptions<T = ModelDataDefaultType> {
   computedProps?: Record<string, ModelComputedType<T>>;
+  has?: (ModelFactory | ModelFactory[])[];
   name: string;
   persistWith?: PersistAdapter;
-  schema?: UncompiledSchemaWithOptionalTableName;
   validators?: Validator<T>[];
 }
 
@@ -50,9 +50,8 @@ export type ModelFactory<
   DataTypes = ModelDataDefaultType,
   ComputedTypes = ModelDataDefaultType
 > = ModelFactoryFn<DataTypes, ComputedTypes> & {
-  modelName: string;
-  modelFactory: boolean;
-  schema: Schema;
+  names: GeneratedNames;
+  isFactory: boolean;
 };
 
 export function isModelFactory(v: any): v is ModelFactory {
@@ -61,27 +60,34 @@ export function isModelFactory(v: any): v is ModelFactory {
   return false;
 }
 
+export function many(model: ModelFactory): [ModelFactory] {
+  return [model];
+}
+
 function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
-  name,
-  validators = [],
   computedProps = {},
-  schema = {},
-  persistWith
+  has = [],
+  name,
+  persistWith,
+  validators = []
 }: ModelOptions<T>): ModelFactory<T, C> {
-  const tableName = schema.$tableName || name;
-  if (typeof tableName !== "string") {
-    throw tableNameMustBeAString(tableName);
-  }
-  const compiledSchema = createSchema({
-    $tableName: tableName,
-    ...schema
+  const relationships = {};
+  const names = generateNames(name);
+  has.forEach((has: ModelFactory | [ModelFactory]) => {
+    let name: string;
+    if (Array.isArray(has)) {
+      name = has[0].names.pluralSafe;
+    } else {
+      name = has.names.safe;
+    }
+    relationships[name] = Array.isArray(has) ? [] : null;
   });
   const factory = (initialValue: T = {} as T): Model<T & C> => {
-    const $relationships = {};
+    const $relationships = relationships;
     const baseModel = {
       $computed: computedProps,
       $data: initialValue,
-      $names: generateNames(name),
+      $names: names,
       $relationships,
       $validate: validate,
       $validators: validators,
@@ -101,9 +107,8 @@ function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
     }
     return proxyModel(baseModel) as Model<T & C>;
   };
-  factory.modelName = name;
-  factory.modelFactory = true;
-  factory.schema = compiledSchema;
+  factory.names = names;
+  factory.isFactory = true;
   if (persistWith) {
     attachPersistFunctionsToModelFactory(factory, persistWith);
   }

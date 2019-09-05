@@ -1,4 +1,4 @@
-import createModel from "./createModel";
+import createModel, { many } from "./createModel";
 
 it("passes the smoke test", () => {
   const userModel = createModel({
@@ -65,4 +65,29 @@ it("allows you to fully reset the data", () => {
     id: "user-2"
   });
   expect(user.id).toBe("user-2");
+});
+
+it("allows you to set has relationships", () => {
+  const todoModel = createModel({
+    name: "todo"
+  });
+  const userModel = createModel({
+    name: "User",
+    has: [many(todoModel)]
+  });
+  const testModel = createModel({
+    name: "test",
+    has: [todoModel]
+  });
+  const user = userModel({ id: "user-1" });
+  expect(user.todos.length).toBe(0);
+  const todo = todoModel({ task: "Test" });
+  expect(user.todos.push(todo));
+  expect(user.todos[0].task).toBe("Test");
+  const test = testModel({ funk: true });
+  test.$setRelationship("todo", todo);
+  expect(test.todo.task).toBe("Test");
+  const test2 = testModel({ funk: false });
+  test2.todo = todo;
+  expect(test2.todo.task).toBe("Test");
 });

@@ -1,6 +1,6 @@
 import findByFactory from "./findBy";
 import createModel from "../../../model/createModel";
-import { SchemaNodeType } from "../../../model/schema";
+import { SchemaNodeType } from "../../../schema";
 import { PersistMatcherType } from "persist";
 
 const accountModel = createModel({

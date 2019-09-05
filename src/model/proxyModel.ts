@@ -19,13 +19,13 @@ function throwIfPropertyIsProtected(model: Model, prop: string): void {
   }
 }
 
-function applyFn<T>() {
+function applyFn() {
   return function apply(obj: ModelInternalProperties) {
     return obj.$data;
   };
 }
 
-function hasFn<T>() {
+function hasFn() {
   return function has(obj: ModelInternalProperties, prop: string): boolean {
     if (propertyIsComputed(obj, prop) || propertyIsData(obj, prop)) {
       return true;
@@ -34,7 +34,7 @@ function hasFn<T>() {
   };
 }
 
-function getFn<T>() {
+function getFn() {
   return function get(obj: ModelInternalProperties, prop: string): any {
     switch (prop) {
       case "$setRelationship":
@@ -42,16 +42,11 @@ function getFn<T>() {
           obj.$relationships[key] = model;
         };
       case "$setData":
-        return (data: ModelData<T>): void => {
+        return (data: ModelData): void => {
           obj.$data = data;
         };
       case "valid":
-        return obj.$validate(
-          obj.$data,
-          obj.$computed,
-          obj.$factory.schema,
-          obj.$validators
-        );
+        return obj.$validate(obj.$data, obj.$computed, obj.$validators);
       case "save":
       case "delete":
       case "reload":
@@ -70,7 +65,7 @@ function getFn<T>() {
   };
 }
 
-function setFn<T>() {
+function setFn() {
   return function set(obj: ModelInternalProperties, prop: string, value: any) {
     throwIfPropertyIsProtected(obj, prop);
     if (prop === "$dangerouslySetRelationships") {
