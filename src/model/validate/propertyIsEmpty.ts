@@ -13,15 +13,15 @@ function defaultEmptyEvaluator(value: any): boolean {
   return true;
 }
 
-export default function<T = Record<string, any>>(
-  property: string,
+export default function(
+  prop: string,
   errorMessage: string = "%prop must be a truthy value",
   emptyEvaluator: (value: any) => boolean = defaultEmptyEvaluator
 ) {
-  const fullErrorMessage = errorMessage.replace("%prop", property);
-  return (data: ModelData<T>) => {
-    if (!data[property]) return fullErrorMessage;
-    if (emptyEvaluator(data[property])) return true;
+  const fullErrorMessage = errorMessage.replace("%prop", prop);
+  return (data: ModelData) => {
+    if (!data[prop]) return fullErrorMessage;
+    if (emptyEvaluator(data[prop])) return true;
     return fullErrorMessage;
   };
 }
