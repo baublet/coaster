@@ -6,6 +6,7 @@ import attachPersistFunctionsToModel from "./attachPersistFunctionsToModel";
 import noPersistAdapterError from "./error/noPersistAdapterError";
 import attachPersistFunctionsToModelFactory from "./attachPersistFunctionsToModelFactory";
 import generateNames, { GeneratedNames } from "helpers/generateNames";
+import proxyModelArray from "./proxyModelArray";
 
 export type ModelComputedPropFn<T> = (data: T) => any;
 export interface ModelDataDefaultType extends Record<string, any> {
@@ -22,8 +23,9 @@ export interface ModelInternalProperties {
   $changed: boolean;
   $computed: Record<string, ModelComputedPropFn<any>>;
   $data: ModelDataDefaultType;
+  $deleted: boolean;
   $factory: ModelFactory<any>;
-  $name: GeneratedNames;
+  $names: GeneratedNames;
   $relationships: Record<string, Model>;
   $setRelationship: (key: string, model: Model) => void;
   $validate: ValidateFn<any>;
@@ -80,18 +82,19 @@ function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
     } else {
       name = has.names.safe;
     }
-    relationships[name] = Array.isArray(has) ? [] : null;
+    relationships[name] = Array.isArray(has) ? proxyModelArray([]) : null;
   });
   const factory = (initialValue: T = {} as T): Model<T & C> => {
-    const $relationships = relationships;
     const baseModel = {
+      $changed: false,
       $computed: computedProps,
       $data: initialValue,
+      $deleted: false,
+      $factory: factory,
       $names: names,
-      $relationships,
+      $relationships: relationships,
       $validate: validate,
       $validators: validators,
-      $factory: factory,
       reload: async () => {
         throw noPersistAdapterError(name);
       },

@@ -1,5 +1,4 @@
 import { Model, ModelInternalProperties, ModelData } from "./createModel";
-import protectedNames from "./protectedNames";
 
 function propertyIsComputed(obj: Model, prop: string): boolean {
   return Object.keys(obj.$computed).includes(prop);
@@ -11,12 +10,6 @@ function propertyIsRelationship(obj: Model, prop: string): boolean {
 
 function propertyIsData(obj: Model, prop: string): boolean {
   return Object.keys(obj.$data).includes(prop);
-}
-
-function throwIfPropertyIsProtected(model: Model, prop: string): void {
-  if (prop[0] === "$" || protectedNames.includes(prop)) {
-    throw `${model.$name}.${prop} is invalid. ${prop} is a protected name. Please name your property something else or access it via and ${model.$name}.set("property", "value").`;
-  }
 }
 
 function applyFn() {
@@ -37,6 +30,10 @@ function hasFn() {
 function getFn() {
   return function get(obj: ModelInternalProperties, prop: string): any {
     switch (prop) {
+      case "$deleted":
+        return obj.$deleted;
+      case "$factory":
+        return obj.$factory;
       case "$setRelationship":
         return (key: string, model: ModelInternalProperties) => {
           obj.$relationships[key] = model;
@@ -47,8 +44,12 @@ function getFn() {
         };
       case "valid":
         return obj.$validate(obj.$data, obj.$computed, obj.$validators);
-      case "save":
       case "delete":
+        // Mark it for deletion in the relationship
+        obj.$deleted = true;
+        return obj[prop];
+      case "save":
+        return obj[prop];
       case "reload":
         return obj[prop];
     }
@@ -56,10 +57,18 @@ function getFn() {
       return obj.$computed[prop]({ ...obj.$data });
     }
     if (propertyIsRelationship(obj, prop)) {
+      // Filter deleted
+      if (Array.isArray(obj.$relationships[prop])) {
+        obj.$relationships[prop] = obj.$relationships[prop].filter(
+          model => !model.$deleted
+        );
+      } else if (
+        obj.$relationships[prop] &&
+        obj.$relationships[prop].$deleted
+      ) {
+        obj.$relationships[prop] = null;
+      }
       return obj.$relationships[prop];
-    }
-    if (prop === "$factory") {
-      return obj.$factory;
     }
     return obj.$data[prop];
   };
@@ -67,7 +76,10 @@ function getFn() {
 
 function setFn() {
   return function set(obj: ModelInternalProperties, prop: string, value: any) {
-    throwIfPropertyIsProtected(obj, prop);
+    if (propertyIsRelationship(obj, prop)) {
+      obj.$relationships[prop] = value;
+      return true;
+    }
     if (prop === "$dangerouslySetRelationships") {
       obj.$relationships = value;
       return true;
