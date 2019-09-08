@@ -1,4 +1,4 @@
-import propertyIsEmpty from "./propertyIsEmpty";
+import propertyIsEmpty from "./propertyIsNotEmpty";
 
 it("returns a function", () => {
   expect(propertyIsEmpty("test")).toBeInstanceOf(Function);
