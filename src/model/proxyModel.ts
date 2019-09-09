@@ -34,6 +34,8 @@ function getFn() {
         return obj.$deleted;
       case "$factory":
         return obj.$factory;
+      case "$hooks":
+        return obj.$hooks;
       case "$setRelationship":
         return (key: string, model: ModelInternalProperties) => {
           obj.$relationships[key] = model;

@@ -7,6 +7,7 @@ import noPersistAdapterError from "./error/noPersistAdapterError";
 import attachPersistFunctionsToModelFactory from "./attachPersistFunctionsToModelFactory";
 import generateNames, { GeneratedNames } from "helpers/generateNames";
 import proxyModelArray from "./proxyModelArray";
+import { ModelHooks, hookDefaults } from "./hooks";
 
 export type ModelComputedPropFn<T> = (data: T) => any;
 export interface ModelDataDefaultType extends Record<string, any> {
@@ -25,6 +26,7 @@ export interface ModelInternalProperties {
   $data: ModelDataDefaultType;
   $deleted: boolean;
   $factory: ModelFactory<any>;
+  $hooks: ModelHooks;
   $names: GeneratedNames;
   $relationships: Record<string, Model>;
   $setRelationship: (key: string, model: Model) => void;
@@ -36,9 +38,28 @@ export type Model<
   UserLandProperties = ModelDataDefaultType
 > = UserLandProperties;
 
+export interface ModelFactoryComposerArguments {
+  has: (ModelFactory | ModelFactory[])[];
+  computedProps: Record<string, ModelComputedType>;
+  validators?: Validator[];
+}
+
+export type ModelFactoryComposer = (
+  composerOptions: any
+) => ModelFactoryComposerFunction;
+
+export type ModelFactoryComposerFunction = (
+  composerArguments: ModelFactoryComposerArguments
+) => void;
+
+type ModelOptionsHookFunction = (args: any) => void;
+type NormalizedHooksMap = Record<string, ((args: any) => void)[]>;
+
 export interface ModelOptions<T = ModelDataDefaultType> {
+  composers?: ModelFactoryComposerFunction[];
   computedProps?: Record<string, ModelComputedType<T>>;
   has?: (ModelFactory | ModelFactory[])[];
+  hooks?: Record<string, ModelOptionsHookFunction | ModelOptionsHookFunction[]>;
   name: string;
   persistWith?: PersistAdapter;
   validators?: Validator<T>[];
@@ -67,12 +88,37 @@ export function many(model: ModelFactory): [ModelFactory] {
 }
 
 function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
+  composers = [],
   computedProps = {},
   has = [],
+  hooks = hookDefaults(),
   name,
   persistWith,
   validators = []
 }: ModelOptions<T>): ModelFactory<T, C> {
+  // Normalize hook nodes into arrays
+  const normalizedHooks: NormalizedHooksMap = Object.assign(
+    {},
+    hookDefaults(),
+    hooks
+  );
+  Object.keys(normalizedHooks).forEach(key => {
+    const hookNode = normalizedHooks[key];
+    if (Array.isArray(hookNode)) return;
+    if (typeof hookNode !== "function") {
+      return (normalizedHooks[key] = []);
+    } else {
+      normalizedHooks[key] = [hookNode];
+    }
+  });
+
+  composers.forEach(composer => {
+    composer({
+      computedProps,
+      has,
+      validators
+    });
+  });
   const relationships = {};
   const names = generateNames(name);
   has.forEach((has: ModelFactory | [ModelFactory]) => {
@@ -85,12 +131,16 @@ function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
     relationships[name] = Array.isArray(has) ? proxyModelArray([]) : null;
   });
   const factory = (initialValue: T = {} as T): Model<T & C> => {
+    normalizedHooks.beforeCreate.forEach(hook =>
+      hook({ initialData: initialValue })
+    );
     const baseModel = {
       $changed: false,
       $computed: computedProps,
       $data: initialValue,
       $deleted: false,
       $factory: factory,
+      $hooks: normalizedHooks,
       $names: names,
       $relationships: relationships,
       $validate: validate,
@@ -108,7 +158,11 @@ function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
     if (persistWith) {
       attachPersistFunctionsToModel(baseModel, persistWith);
     }
-    return proxyModel(baseModel) as Model<T & C>;
+    const model = proxyModel(baseModel) as Model<T & C>;
+    normalizedHooks.afterCreate.forEach(hook => {
+      hook({ model });
+    });
+    return model;
   };
   factory.names = names;
   factory.isFactory = true;

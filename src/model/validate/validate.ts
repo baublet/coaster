@@ -1,6 +1,10 @@
-import { ModelData, ModelComputedPropFn } from "../createModel";
+import {
+  ModelData,
+  ModelComputedPropFn,
+  ModelDataDefaultType
+} from "../createModel";
 
-export type Validator<T> = (
+export type Validator<T = ModelDataDefaultType> = (
   data: ModelData<T>,
   computedProps: Record<string, ModelComputedPropFn<any>>
 ) => true | string;
