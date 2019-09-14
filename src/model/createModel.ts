@@ -1,13 +1,14 @@
-import { Validator, ValidateFn } from "./validate/validate";
-import validate from "./validate";
-import proxyModel from "./proxyModel";
-import { PersistAdapter } from "../persist";
-import attachPersistFunctionsToModel from "./attachPersistFunctionsToModel";
-import noPersistAdapterError from "./error/noPersistAdapterError";
-import attachPersistFunctionsToModelFactory from "./attachPersistFunctionsToModelFactory";
-import generateNames, { GeneratedNames } from "helpers/generateNames";
-import proxyModelArray from "./proxyModelArray";
 import { ModelHooks, hookDefaults } from "./hooks";
+import { PersistAdapter } from "../persist";
+import { Validator, ValidateFn } from "./validate/validate";
+import attachPersistFunctionsToModel from "./attachPersistFunctionsToModel";
+import attachPersistFunctionsToModelFactory from "./attachPersistFunctionsToModelFactory";
+import composeModel from "./composers";
+import generateNames, { GeneratedNames } from "helpers/generateNames";
+import noPersistAdapterError from "./error/noPersistAdapterError";
+import proxyModel from "./proxyModel";
+import proxyModelArray from "./proxyModelArray";
+import validate from "./validate";
 
 export type ModelComputedPropFn<T> = (data: T) => any;
 export interface ModelDataDefaultType extends Record<string, any> {
@@ -39,6 +40,7 @@ export type Model<
 > = UserLandProperties;
 
 export interface ModelFactoryComposerArguments {
+  composers: ModelFactoryComposerFunction[];
   has: (ModelFactory | ModelFactory[])[];
   computedProps: Record<string, ModelComputedType>;
   validators?: Validator[];
@@ -111,16 +113,12 @@ function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
       normalizedHooks[key] = [hookNode];
     }
   });
-
-  composers.forEach(composer => {
-    composer({
-      computedProps,
-      has,
-      validators
-    });
-  });
-  const relationships = {};
   const names = generateNames(name);
+
+  // Run our composers
+  composeModel(names.canonical, composers, computedProps, has, validators);
+
+  const relationships = {};
   has.forEach((has: ModelFactory | [ModelFactory]) => {
     let name: string;
     if (Array.isArray(has)) {

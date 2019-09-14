@@ -14,7 +14,8 @@
     "sqlstring": "^2.3.1",
     "stringify-object": "^3.3.0",
     "ts-node": "^8.3.0",
-    "typescript": "^3.5.3"
+    "typescript": "^3.5.3",
+    "uuid": "^3.3.3"
   },
   "devDependencies": {
     "@types/jest": "^24.0.18",
