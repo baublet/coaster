@@ -1,15 +1,11 @@
 import { ModelHooks, NormalizedHooksMap } from "./hooks/hooks";
 import { PersistAdapter } from "../persist";
 import { Validator, ValidateFn } from "./validate/validate";
-import attachPersistFunctionsToModel from "./attachPersistFunctionsToModel";
-import attachPersistFunctionsToModelFactory from "./attachPersistFunctionsToModelFactory";
+import buildRelationships from "./buildRelationships";
 import composeModel from "./composers";
 import generateNames, { GeneratedNames } from "helpers/generateNames";
-import noPersistAdapterError from "./error/noPersistAdapterError";
 import normalizeHooks from "./hooks";
-import proxyModel from "./proxyModel";
-import proxyModelArray from "./proxyModelArray";
-import validate from "./validate";
+import createFactory from "./createFactory";
 
 export type ModelComputedPropFn<T> = (data: T) => any;
 export interface ModelDataDefaultType extends Record<string, any> {
@@ -60,10 +56,11 @@ export type ModelOptionsHooks = Record<
   string,
   ModelOptionsHookFunction | ModelOptionsHookFunction[]
 >;
+export type ModelOptionsComputedProps<T> = Record<string, ModelComputedType<T>>;
 
-export interface ModelOptions<T = ModelDataDefaultType> {
+export interface ModelOptions<T, C> {
   composers?: ModelFactoryComposerFunction[];
-  computedProps?: Record<string, ModelComputedType<T>>;
+  computedProps?: ModelOptionsComputedProps<C>;
   has?: (ModelFactory | ModelFactory[])[];
   hooks?: ModelOptionsHooks;
   name: string;
@@ -101,7 +98,7 @@ function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
   name,
   persistWith,
   validators = []
-}: ModelOptions<T>): ModelFactory<T, C> {
+}: ModelOptions<T, C>): ModelFactory<T, C> {
   const names = generateNames(name);
 
   // Normalize hook nodes into arrays
@@ -110,56 +107,18 @@ function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
   // Run our composers
   composeModel(names.canonical, composers, computedProps, has, validators);
 
-  const relationships = {};
-  has.forEach((has: ModelFactory | [ModelFactory]) => {
-    let name: string;
-    if (Array.isArray(has)) {
-      name = has[0].names.pluralSafe;
-    } else {
-      name = has.names.safe;
-    }
-    relationships[name] = Array.isArray(has) ? proxyModelArray([]) : null;
+  // Build out relationships object out of our `has` options
+  const relationships = buildRelationships(has);
+
+  // Build our factory
+  return createFactory<T, C>({
+    computedProps,
+    names,
+    normalizedHooks,
+    persistWith,
+    relationships,
+    validators
   });
-  const factory = (initialValue: T = {} as T): Model<T & C> => {
-    normalizedHooks.beforeCreate.forEach(hook =>
-      hook({ initialData: initialValue })
-    );
-    const baseModel = {
-      $changed: false,
-      $computed: computedProps,
-      $data: initialValue,
-      $deleted: false,
-      $factory: factory,
-      $hooks: normalizedHooks,
-      $names: names,
-      $relationships: relationships,
-      $validate: validate,
-      $validators: validators,
-      reload: async () => {
-        throw noPersistAdapterError(name);
-      },
-      save: async () => {
-        throw noPersistAdapterError(name);
-      },
-      delete: async () => {
-        throw noPersistAdapterError(name);
-      }
-    };
-    if (persistWith) {
-      attachPersistFunctionsToModel(baseModel, persistWith);
-    }
-    const model = proxyModel(baseModel) as Model<T & C>;
-    normalizedHooks.afterCreate.forEach(hook => {
-      hook({ model });
-    });
-    return model;
-  };
-  factory.names = names;
-  factory.isFactory = true;
-  if (persistWith) {
-    attachPersistFunctionsToModelFactory(factory, persistWith);
-  }
-  return factory;
 }
 
 export default createModel;
