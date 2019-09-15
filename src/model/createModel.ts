@@ -60,7 +60,7 @@ export type ModelOptionsComputedProps<T> = Record<string, ModelComputedType<T>>;
 
 export interface ModelOptions<T, C> {
   composers?: ModelFactoryComposerFunction[];
-  computedProps?: ModelOptionsComputedProps<C>;
+  computedProps?: ModelOptionsComputedProps<T>;
   has?: (ModelFactory | ModelFactory[])[];
   hooks?: ModelOptionsHooks;
   name: string;

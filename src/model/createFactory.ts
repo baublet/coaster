@@ -10,7 +10,7 @@ import { PersistAdapter } from "persist";
 import proxyModel from "./proxyModel";
 
 export interface CreateFactoryArguments<T, C> {
-  computedProps: ModelOptionsComputedProps<C>;
+  computedProps: ModelOptionsComputedProps<T>;
   names: GeneratedNames;
   normalizedHooks: NormalizedHooksMap;
   persistWith?: PersistAdapter;
