@@ -1,4 +1,20 @@
-import createModel from "./createModel";
+import createModel from "../createModel";
+import normalizeMap, { hookDefaults } from "./hooks";
+
+it("normalizes the hook map", () => {
+  const testFn = () => null;
+  expect(normalizeMap({})).toEqual(hookDefaults());
+
+  expect(
+    normalizeMap({
+      beforeSave: testFn
+    })
+  ).toEqual(
+    Object.assign(hookDefaults(), {
+      beforeSave: [testFn]
+    })
+  );
+});
 
 it("runs a function before create", () => {
   const hook = jest.fn();

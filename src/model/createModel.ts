@@ -1,4 +1,4 @@
-import { ModelHooks, hookDefaults } from "./hooks";
+import { ModelHooks, NormalizedHooksMap } from "./hooks/hooks";
 import { PersistAdapter } from "../persist";
 import { Validator, ValidateFn } from "./validate/validate";
 import attachPersistFunctionsToModel from "./attachPersistFunctionsToModel";
@@ -6,6 +6,7 @@ import attachPersistFunctionsToModelFactory from "./attachPersistFunctionsToMode
 import composeModel from "./composers";
 import generateNames, { GeneratedNames } from "helpers/generateNames";
 import noPersistAdapterError from "./error/noPersistAdapterError";
+import normalizeHooks from "./hooks";
 import proxyModel from "./proxyModel";
 import proxyModelArray from "./proxyModelArray";
 import validate from "./validate";
@@ -54,14 +55,17 @@ export type ModelFactoryComposerFunction = (
   composerArguments: ModelFactoryComposerArguments
 ) => void;
 
-type ModelOptionsHookFunction = (args: any) => void;
-type NormalizedHooksMap = Record<string, ((args: any) => void)[]>;
+export type ModelOptionsHookFunction = (args: any) => void;
+export type ModelOptionsHooks = Record<
+  string,
+  ModelOptionsHookFunction | ModelOptionsHookFunction[]
+>;
 
 export interface ModelOptions<T = ModelDataDefaultType> {
   composers?: ModelFactoryComposerFunction[];
   computedProps?: Record<string, ModelComputedType<T>>;
   has?: (ModelFactory | ModelFactory[])[];
-  hooks?: Record<string, ModelOptionsHookFunction | ModelOptionsHookFunction[]>;
+  hooks?: ModelOptionsHooks;
   name: string;
   persistWith?: PersistAdapter;
   validators?: Validator<T>[];
@@ -93,27 +97,15 @@ function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
   composers = [],
   computedProps = {},
   has = [],
-  hooks = hookDefaults(),
+  hooks = {},
   name,
   persistWith,
   validators = []
 }: ModelOptions<T>): ModelFactory<T, C> {
-  // Normalize hook nodes into arrays
-  const normalizedHooks: NormalizedHooksMap = Object.assign(
-    {},
-    hookDefaults(),
-    hooks
-  );
-  Object.keys(normalizedHooks).forEach(key => {
-    const hookNode = normalizedHooks[key];
-    if (Array.isArray(hookNode)) return;
-    if (typeof hookNode !== "function") {
-      return (normalizedHooks[key] = []);
-    } else {
-      normalizedHooks[key] = [hookNode];
-    }
-  });
   const names = generateNames(name);
+
+  // Normalize hook nodes into arrays
+  const normalizedHooks: NormalizedHooksMap = normalizeHooks(hooks);
 
   // Run our composers
   composeModel(names.canonical, composers, computedProps, has, validators);
