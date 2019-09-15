@@ -7,21 +7,23 @@ it("returns a function", () => {
 it("save function saves models properly", async () => {
   const map = {};
   const saveFn = save(map);
-  await saveFn(
-    // @ts-ignore
-    {
-      name: "user",
-      data: {
-        id: "Test 123",
-        name: "Testy McTesterson"
-      }
+  await saveFn({
+    $factory: {
+      $tableName: "user",
+      $databaseName: "test"
+    },
+    data: {
+      id: "Test 123",
+      name: "Testy McTesterson"
     }
-  );
+  });
   expect(map).toEqual({
-    user: {
-      "Test 123": {
-        id: "Test 123",
-        name: "Testy McTesterson"
+    test: {
+      user: {
+        "Test 123": {
+          id: "Test 123",
+          name: "Testy McTesterson"
+        }
       }
     }
   });

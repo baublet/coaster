@@ -23,21 +23,6 @@ A Rails-like framework for Node optimized for developer happiness. At its heart,
 # Todo List
 
 - Models
-  - [ ] Validations against schema
-    - [ ] All data types (& test it)
-  - [ ] Automatic DB schema generation
-    - [ ] Tables
-    - [ ] Columns
-  - Application configuration
-    - [ ] Need a way for our CLI script to know where to find DB connections
-  - Migrations
-    - [ ] Standardization
-      - [ ] Where migration scripts live
-      - [ ] Where migration table lives in the persist engine
-    - [ ] Schema diffing for automated migration generation
-      - [ ] Implement diff algorithm
-      - [ ] Implement diff-to-migration algorithm
-    - [ ] CLI tool `coaster migrate`
-      - [ ] Write the basics of it
-      - [ ] Write up/down scripts
-      - [ ] Write generate script
+  - Composers
+    - [ ] AuthN
+    - [ ] Data hierarchies

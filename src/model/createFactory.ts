@@ -8,22 +8,30 @@ import noPersistAdapterError from "./error/noPersistAdapterError";
 import validate from "./validate";
 import { PersistAdapter } from "persist";
 import proxyModel from "./proxyModel";
+import { Schema } from "persist/schema";
+import get from "lodash.get";
 
 export interface CreateFactoryArguments<T, C> {
   computedProps: ModelOptionsComputedProps<T>;
+  databaseName?: string;
   names: GeneratedNames;
   normalizedHooks: NormalizedHooksMap;
   persistWith?: PersistAdapter;
   relationships: ModelRelationships;
+  schema: Schema | null;
+  tableName: string;
   validators: Validator<T>[];
 }
 
 export default function createFactory<T, C>({
   computedProps,
+  databaseName,
   names,
   normalizedHooks,
   persistWith,
   relationships,
+  schema,
+  tableName,
   validators
 }: CreateFactoryArguments<T, C>): ModelFactory<T & C> {
   const factory = (initialValue: T = {} as T): Model<T> => {
@@ -60,7 +68,20 @@ export default function createFactory<T, C>({
     });
     return model;
   };
-  factory.names = names;
+
+  let database: string = databaseName;
+  if (!databaseName) {
+    if (persistWith) {
+      database = get(persistWith, "defaultDatabase", "default");
+    } else {
+      database = "default";
+    }
+  }
+
+  factory.databaseName = database;
   factory.isFactory = true;
+  factory.names = names;
+  factory.schema = schema;
+  factory.tableName = tableName;
   return factory as ModelFactory<T, C>;
 }

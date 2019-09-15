@@ -24,12 +24,25 @@ export default function findResultsForLogicalMatcher(
     $without = [],
     ...query
   }: PersistSelectQuery | PersistSelectWithQuery,
+  databaseName: string = null,
   tableName: string = null
 ): ModelData[] {
   let results: ModelData[] = [];
 
-  const table = tableName || $model.schema.$tableName || $model.modelName;
-  const rawData = Object.values(memoryMap[table]);
+  const database = databaseName || $model.databaseName;
+  const table = tableName || $model.tableName;
+
+  if (!memoryMap[database]) {
+    memoryMap[database] = {};
+    return [];
+  }
+
+  if (!memoryMap[database][table]) {
+    memoryMap[database][table] = {};
+    return [];
+  }
+
+  const rawData = Object.values(memoryMap[database][table]);
   const keysToSearch = Object.keys(query);
 
   const isAnd = $or !== true || $and === true;
@@ -80,13 +93,20 @@ export default function findResultsForLogicalMatcher(
   // Add $with
   const $withQueries = Array.isArray($with) ? $with : [$with];
   $withQueries.forEach(query => {
-    results.push(...findResultsForLogicalMatcher(memoryMap, query, table));
+    results.push(
+      ...findResultsForLogicalMatcher(memoryMap, query, database, table)
+    );
   });
 
   // Remove $without
   const $withoutQueries = Array.isArray($without) ? $without : [$without];
   $withoutQueries.forEach(query => {
-    const rowsToRemove = findResultsForLogicalMatcher(memoryMap, query, table);
+    const rowsToRemove = findResultsForLogicalMatcher(
+      memoryMap,
+      query,
+      database,
+      table
+    );
     const idsToRemove = rowsToRemove.map(row => row.id);
     results = results.filter(row => !idsToRemove.includes(row.id));
   });

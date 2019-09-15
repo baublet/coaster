@@ -1,4 +1,5 @@
 import { Model, ModelFactory } from "../model/createModel";
+import { Schema } from "./schema";
 
 export enum PersistSortDirection {
   ASC,
@@ -53,6 +54,8 @@ export interface PersistFindByProps {
 }
 
 export interface PersistAdapter {
+  schema: Schema | null;
+  defaultDatabase: string;
   deleteBy: (query: PersistDeleteQuery) => Promise<number>;
   findBy: (props: PersistFindByProps) => Promise<Model[]>;
   save: (

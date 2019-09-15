@@ -3,6 +3,7 @@ import {
   ModelFactoryComposerArguments
 } from "model/createModel";
 import passwordValidator from "./passwordValidator";
+import tokenModel from "./tokenModel";
 
 const defaultOptions = {
   usernameProperties: ["username", "email"],
@@ -23,7 +24,7 @@ export default function withAuthentication({
   passwordConfirmationProperty,
   passwordHashProperty
 }: WithAuthenticationOptions = defaultOptions): ModelFactoryComposerFunction {
-  return ({ validators }: ModelFactoryComposerArguments) => {
+  return ({ validators, has }: ModelFactoryComposerArguments) => {
     // Password strength and confirmation equality validator
     validators.push(
       passwordValidator({
@@ -32,6 +33,8 @@ export default function withAuthentication({
         passwordHashProperty
       })
     );
-    return;
+
+    // Session tokens
+    has.push(tokenModel);
   };
 }

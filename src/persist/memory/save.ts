@@ -5,8 +5,15 @@ let id = 1;
 
 function saveModel(memoryMap: MemoryMap, model: Model): true {
   model.data.id = model.data.id || `model-${id++}`;
-  memoryMap[model.name] = memoryMap[model.name] || {};
-  memoryMap[model.name][model.data.id] = model.data;
+  const databaseName = model.$factory.$databaseName;
+  const tableName = model.$factory.$tableName;
+
+  if (!memoryMap[databaseName]) memoryMap[databaseName] = {};
+  if (!memoryMap[databaseName][tableName])
+    memoryMap[databaseName][tableName] = {};
+
+  memoryMap[databaseName][tableName] = memoryMap[databaseName][tableName] || {};
+  memoryMap[databaseName][tableName][model.data.id] = model.data;
   return true;
 }
 

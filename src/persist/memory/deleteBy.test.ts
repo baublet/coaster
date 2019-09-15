@@ -6,18 +6,20 @@ const userModel = createModel({
 });
 
 const memoryMap = {
-  user: {
-    "test-id": {
-      id: "test-id",
-      name: "Test"
-    },
-    "test-id2": {
-      id: "test-id2",
-      name: "Test 2"
-    },
-    "test-id3": {
-      id: "test-id3",
-      name: "Test 3"
+  default: {
+    users: {
+      "test-id": {
+        id: "test-id",
+        name: "Test"
+      },
+      "test-id2": {
+        id: "test-id2",
+        name: "Test 2"
+      },
+      "test-id3": {
+        id: "test-id3",
+        name: "Test 3"
+      }
     }
   }
 };
@@ -29,5 +31,5 @@ it("deletes by id", async () => {
     $model: userModel,
     id: "test-id3"
   });
-  expect(memoryMap.user["test-id3"]).toBe(undefined);
+  expect(memoryMap.default.users["test-id3"]).toBe(undefined);
 });

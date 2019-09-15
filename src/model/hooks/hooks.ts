@@ -1,14 +1,27 @@
-import { ModelOptionsHooks } from "model/createModel";
+import {
+  ModelOptionsHooks,
+  ModelDataDefaultType,
+  Model
+} from "model/createModel";
 
 // When a model is initialized, before we finish up proxying everything,
 // we run the initial data through beforeCreate hooks
-export type BeforeCreateHook = ({ initialData: ModelDataDefaultType }) => void;
+export interface BeforeCreateHookArguments {
+  initialData: ModelDataDefaultType;
+}
+export type BeforeCreateHook = (args: BeforeCreateHookArguments) => void;
 
 // Once the model is created, we pass the final model through these
-export type AfterCreateHook = ({ model: Model }) => void;
+export interface AfterCreateHookArguments {
+  model: Model;
+}
+export type AfterCreateHook = (args: AfterCreateHookArguments) => void;
 
 // Before we run the save hook, we run the data through these hooks
-export type BeforeSaveHook = ({ model: Model }) => Promise<void>;
+export interface BeforeSaveHookArguments {
+  model: Model;
+}
+export type BeforeSaveHook = (args: BeforeSaveHookArguments) => Promise<void>;
 
 export interface ModelHooks {
   beforeCreate: BeforeCreateHook[];

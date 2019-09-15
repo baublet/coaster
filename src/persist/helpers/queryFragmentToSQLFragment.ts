@@ -1,15 +1,19 @@
-import { PersistQuery, PersistMatcherType } from "persist";
+import {
+  PersistQuery,
+  PersistMatcherType,
+  PersistSortDirection
+} from "persist";
 import sqlString from "sqlstring";
 
 interface SQLQueryParts {
-  table: string;
+  limit?: number;
+  offset?: number;
+  sort?: string;
   where: string;
 }
 
 export default function queryToSQL({
-  $and = false,
   $limit = undefined,
-  $model,
   $offset = 0,
   $or = false,
   $sort = [],
@@ -17,9 +21,10 @@ export default function queryToSQL({
   $without = [],
   ...attributes
 }: PersistQuery): SQLQueryParts {
-  const table = $model.schema.$tableName;
-  const joinClause = $or ? " OR " : " AND ";
+  const logicalClause = $or ? " OR " : " AND ";
   const mainNodes = Object.keys(attributes)
+    // Filter out special query names
+    .filter(columnName => columnName[0] !== "$")
     .map(column => {
       const escapedColumn = sqlString.escapeId(column);
       let value: string = "";
@@ -85,9 +90,45 @@ export default function queryToSQL({
       }
       return `${escapedColumn} ${comparator} ${value}`;
     })
-    .join(joinClause);
-  return {
-    table,
+    .join(logicalClause);
+
+  const fragment: SQLQueryParts = {
     where: mainNodes
   };
+
+  if ($limit) {
+    fragment.limit = $limit;
+  }
+
+  if ($offset) {
+    fragment.offset = $offset;
+  }
+
+  if (!Array.isArray($sort)) $sort = [$sort];
+  if ($sort.length > 0) {
+    const sorts = $sort.map(sort => {
+      const direction =
+        sort.direction === PersistSortDirection.ASC ? "ASC" : "DESC";
+      return `${sort.property} ${direction}`;
+    });
+    fragment.sort = sorts.join(", ");
+  }
+
+  // Process our recursive withs and withouts
+  if (!Array.isArray($with)) $with = [$with];
+  if (!Array.isArray($without)) $without = [$without];
+  if ($with.length > 0) {
+    const additionalWheres = $with.map(query => queryToSQL(query).where);
+    fragment.where += " AND (";
+    fragment.where += additionalWheres.join(", ");
+    fragment.where += ")";
+  }
+  if ($without.length > 0) {
+    const additionalWheres = $without.map(query => queryToSQL(query).where);
+    fragment.where += " AND NOT (";
+    fragment.where += additionalWheres.join(", ");
+    fragment.where += ")";
+  }
+
+  return fragment;
 }
