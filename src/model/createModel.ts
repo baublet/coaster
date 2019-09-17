@@ -93,6 +93,13 @@ export function isModelFactory(v: any): v is ModelFactory {
   return false;
 }
 
+export function isModel(v: any): v is Model {
+  if (typeof v !== "object") return false;
+  if (v instanceof Proxy === false) return false;
+  if (v.$isModel) return true;
+  return false;
+}
+
 export function many(model: ModelFactory): [ModelFactory] {
   return [model];
 }
@@ -118,7 +125,7 @@ function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
   composeModel(names.canonical, composers, computedProps, has, validators);
 
   // Build out relationships object out of our `has` options
-  const relationships = buildRelationships(has);
+  const relationships = initialValue => buildRelationships(has, initialValue);
 
   // Build our factory
   const schema = persistWith && get(persistWith, "schema", null);

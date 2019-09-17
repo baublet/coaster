@@ -29,7 +29,11 @@ function hasFn() {
 
 function getFn() {
   return function get(obj: ModelInternalProperties, prop: string): any {
+    const validate = () =>
+      obj.$validate(obj.$data, obj.$computed, obj.$validators);
     switch (prop) {
+      case "$isModel":
+        return true;
       case "$deleted":
         return obj.$deleted;
       case "$factory":
@@ -45,7 +49,10 @@ function getFn() {
           obj.$data = data;
         };
       case "valid":
-        return obj.$validate(obj.$data, obj.$computed, obj.$validators);
+        return validate() === true;
+      case "errors":
+        const valid = validate();
+        return valid === true ? [] : valid;
       case "delete":
         // Mark it for deletion in the relationship
         obj.$deleted = true;

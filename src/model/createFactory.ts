@@ -1,5 +1,10 @@
 import attachPersistFunctionsToModel from "./attachPersistFunctionsToModel";
-import { ModelFactory, Model, ModelOptionsComputedProps } from "./createModel";
+import {
+  ModelFactory,
+  Model,
+  ModelOptionsComputedProps,
+  ModelDataDefaultType
+} from "./createModel";
 import { NormalizedHooksMap } from "./hooks/hooks";
 import { GeneratedNames } from "helpers/generateNames";
 import { Validator } from "./validate/validate";
@@ -17,7 +22,7 @@ export interface CreateFactoryArguments<T, C> {
   names: GeneratedNames;
   normalizedHooks: NormalizedHooksMap;
   persistWith?: PersistAdapter;
-  relationships: ModelRelationships;
+  relationships: (initialData: ModelDataDefaultType) => ModelRelationships;
   schema: Schema | null;
   tableName: string;
   validators: Validator<T>[];
@@ -46,7 +51,7 @@ export default function createFactory<T, C>({
       $factory: factory,
       $hooks: normalizedHooks,
       $names: names,
-      $relationships: relationships,
+      $relationships: relationships(initialValue),
       $validate: validate,
       $validators: validators,
       reload: async () => {

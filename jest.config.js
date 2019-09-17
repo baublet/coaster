@@ -1,9 +1,7 @@
 module.exports = {
-  "roots": [
-    "<rootDir>/src"
-  ],
-  "modulePaths": ["<rootDir>/src/"],
-  "transform": {
+  roots: ["<rootDir>/src", "<rootDir>/integration"],
+  modulePaths: ["<rootDir>/src/"],
+  transform: {
     "^.+\\.tsx?$": "ts-jest"
-  },
-}
+  }
+};

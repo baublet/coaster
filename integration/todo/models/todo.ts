@@ -1,9 +1,9 @@
 import createModel from "model/createModel";
-import { propertyIsTruthy } from "model/validate";
-import persist from "../persist";
+import { propertyIsNotEmpty } from "model/validate";
+import persistWith from "../persist";
 
 export default createModel({
   name: "Todo",
-  validators: [propertyIsTruthy("todo")],
-  persistWith: persist
+  validators: [propertyIsNotEmpty("todo")],
+  persistWith
 });

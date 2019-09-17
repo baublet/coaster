@@ -1,4 +1,5 @@
 export enum SchemaColumnType {
+  ID = "BIGINT",
   BLOB = "BLOB",
   BOOLEAN = "BOOLEAN",
   DATE = "BIGINT",
