@@ -1,5 +1,6 @@
 import toSnakeCase from "snake-case";
 import pluralize from "pluralize";
+import memoize from "lodash.memoize";
 
 export interface GeneratedNames {
   canonical: string;
@@ -10,7 +11,7 @@ export interface GeneratedNames {
   safe: string;
 }
 
-export default function generateNames(
+export default memoize(function generateNames(
   name: string,
   original: string | false = false
 ): GeneratedNames {
@@ -23,4 +24,4 @@ export default function generateNames(
     pluralSafe: pluralize(safe, 2),
     safe: safe
   };
-}
+});

@@ -27,3 +27,5 @@ export interface SchemaDatabase {
 export interface Schema {
   databases: SchemaDatabase[];
 }
+
+export { default } from "persist/schema/shema";
