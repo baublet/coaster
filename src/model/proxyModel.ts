@@ -51,8 +51,9 @@ function getFn() {
       case "valid":
         return validate() === true;
       case "errors":
+        // eslint-disable-next-line no-case-declarations
         const valid = validate();
-        return valid === true ? [] : valid;
+        return validate() === true ? [] : valid;
       case "delete":
         // Mark it for deletion in the relationship
         obj.$deleted = true;
