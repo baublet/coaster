@@ -14,6 +14,7 @@ import renameDatabase from "./operations/database/rename";
 import databaseNotFound from "./errors/databaseNotFound";
 import tableNotFound from "./errors/tableNotFound";
 import schemaToJSON from "./toJSON";
+import tableExists from "./errors/tableExists";
 
 function column(
   operations: SchemaBuilderOperation[],
@@ -55,7 +56,7 @@ function table(
   operations: SchemaBuilderOperation[],
   databaseName: string,
   tableName: string,
-  options?: SchemaCreateTableOptions
+  options: SchemaCreateTableOptions = {}
 ): SchemaTable {
   const columns: any = {};
 
@@ -131,17 +132,18 @@ function database(
       name: string,
       options: SchemaCreateTableOptions
     ): null {
+      if (tables[name]) throw tableExists(databaseName, name);
       tables[name] = table(operations, databaseName, name, options);
       return null;
     },
     renameTable: function(from: string, to: string): null {
-      if (tables[from]) throw `exists`;
-      tables[from] = tables[to];
+      if (tables[to]) throw tableExists(databaseName, to);
+      tables[to] = tables[from];
       delete tables[from];
       return null;
     },
     removeTable: function(name: string): null {
-      if (!tables[name]) throw `no table`;
+      if (!tables[name]) throw tableNotFound(databaseName, name);
       delete tables[name];
       return null;
     },

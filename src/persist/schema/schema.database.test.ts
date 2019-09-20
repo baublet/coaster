@@ -37,9 +37,11 @@ it("renames a database", () => {
 it("throw properly when trying to access or perform operations on an unknown database", () => {
   const schema = createSchema();
   schema.createDatabase("test-database");
-  expect(() => schema.removeDatabase("not")).toThrow(databaseNotFound("not"));
-  expect(() => schema.renameDatabase("not", "here")).toThrow(
+  expect(() => schema.removeDatabase("not")).toThrowError(
     databaseNotFound("not")
   );
-  expect(() => schema.database("not")).toThrow(databaseNotFound("not"));
+  expect(() => schema.renameDatabase("not", "here")).toThrowError(
+    databaseNotFound("not")
+  );
+  expect(() => schema.database("not")).toThrowError(databaseNotFound("not"));
 });
