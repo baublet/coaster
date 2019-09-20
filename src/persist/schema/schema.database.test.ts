@@ -1,4 +1,4 @@
-import createSchema from "persist/schema/shema";
+import createSchema from "persist/schema";
 import createDatabase from "./operations/database/create";
 import removeDatabase from "./operations/database/remove";
 import renameDatabase from "./operations/database/rename";

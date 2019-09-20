@@ -9,23 +9,4 @@ export enum SchemaColumnType {
   TEXT = "TEXT"
 }
 
-export interface SchemaDatabaseTableColumn {
-  name: string;
-  index: boolean;
-  type: SchemaColumnType;
-}
-
-export interface SchemaDatabaseTable {
-  name: string;
-}
-
-export interface SchemaDatabase {
-  name: string;
-  tables: SchemaDatabaseTable[];
-}
-
-export interface Schema {
-  databases: SchemaDatabase[];
-}
-
 export { default } from "persist/schema/shema";

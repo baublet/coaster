@@ -4,6 +4,7 @@ import removeDatabase from "./operations/database/remove";
 import renameDatabase from "./operations/database/rename";
 import databaseNotFound from "./errors/databaseNotFound";
 import tableNotFound from "./errors/tableNotFound";
+import schemaToJSON from "./toJSON";
 
 export enum SchemaBuilderOperationType {
   DATABASE_CREATE,
@@ -35,7 +36,7 @@ export interface SchemaBuilderOperation {
   payload?: Record<string, any>;
 }
 
-interface Column {
+interface SchemaColumn {
   autoIncrement: boolean;
   default: any;
   nullable: boolean;
@@ -43,6 +44,29 @@ interface Column {
   type: SchemaColumnType;
   tableName: string;
   databaseName: string;
+}
+
+interface SchemaTable {
+  columns: Record<string, SchemaColumn>;
+  databaseName: string;
+  name: string;
+  column: (name: string) => SchemaColumn;
+  createColumn: (name: string) => null;
+  renameColumn: (from: string, to: string) => null;
+  removeColumn: (name: string) => null;
+  setPrimaryKey: (column: string) => null;
+}
+
+interface SchemaDatabase {
+  indexes: any;
+  tables: Record<string, SchemaTable>;
+  name: string;
+  createTable: (name: string, options?: SchemaCreateTableOptions) => null;
+  renameTable: (from: string, to: string) => null;
+  removeTable: (name: string) => null;
+  createIndex: (table: string, name: string, columns: string[]) => null;
+  removeIndex: (table: string, name: string) => null;
+  table: (name: string) => SchemaTable;
 }
 
 interface SchemaCreateTableOptions {
@@ -58,6 +82,16 @@ interface SchemaCreateColumnOptions {
   nullable?: boolean;
 }
 
+interface Schema {
+  operations: SchemaBuilderOperation[];
+  databases: Record<string, SchemaDatabase>;
+  toJSON: () => string;
+  createDatabase: (name: string) => null;
+  database: (name: string) => SchemaDatabase;
+  removeDatabase: (name: string) => null;
+  renameDatabase: (from: string, to: string) => null;
+}
+
 function column(
   operations: SchemaBuilderOperation[],
   databaseName: string,
@@ -65,7 +99,7 @@ function column(
   name: string,
   columnOptions: SchemaCreateColumnOptions = {}
 ) {
-  const options: Column = {
+  const options: SchemaColumn = {
     name,
     tableName,
     databaseName,
@@ -99,7 +133,7 @@ function table(
   databaseName: string,
   tableName: string,
   options?: SchemaCreateTableOptions
-) {
+): SchemaTable {
   const columns: any = {};
 
   if (options.withId !== false) {
@@ -131,6 +165,10 @@ function table(
     columns,
     databaseName,
     name: tableName,
+    column: function(name: string): SchemaColumn {
+      if (!columns[name]) throw `no col`;
+      return columns[name];
+    },
     createColumn: function(name: string) {
       if (columns[name]) return columns[name];
       columns[name] = column(operations, databaseName, tableName, name);
@@ -156,29 +194,39 @@ function table(
   };
 }
 
-function database(operations: SchemaBuilderOperation[], databaseName: string) {
+function database(
+  operations: SchemaBuilderOperation[],
+  databaseName: string
+): SchemaDatabase {
   const tables = {};
   const indexes = {};
   return {
     indexes,
     tables,
     name: databaseName,
-    createTable: function(name: string, options: SchemaCreateTableOptions) {
+    createTable: function(
+      name: string,
+      options: SchemaCreateTableOptions
+    ): null {
       tables[name] = table(operations, databaseName, name, options);
       return null;
     },
-    renameTable: function(from: string, to: string) {
+    renameTable: function(from: string, to: string): null {
       if (tables[from]) throw `exists`;
       tables[from] = tables[to];
       delete tables[from];
       return null;
     },
-    removeTable: function(name: string) {
+    removeTable: function(name: string): null {
       if (!tables[name]) throw `no table`;
       delete tables[name];
       return null;
     },
-    createIndex: function(table: string, name: string, columns: string[]) {
+    createIndex: function(
+      table: string,
+      name: string,
+      columns: string[]
+    ): null {
       if (!tables[table]) throw `table doesn't exist`;
       if (indexes[name]) throw `index exists`;
       indexes[name] = {
@@ -187,39 +235,39 @@ function database(operations: SchemaBuilderOperation[], databaseName: string) {
       };
       return null;
     },
-    removeIndex: function(table: string, name: string) {
+    removeIndex: function(table: string, name: string): null {
       if (!tables[table]) throw tableNotFound(databaseName, name);
       if (!indexes[name]) throw `index doesn't exist`;
       delete indexes[name];
       return null;
     },
-    table: function(name: string) {
+    table: function(name: string): SchemaTable {
       if (!tables[name]) throw tableNotFound(databaseName, name);
       return tables[name];
     }
   };
 }
 
-export default function buildSchema() {
-  const databases = {};
-  const operations = [];
+export default function buildSchema(): Schema {
+  const databases: Record<string, SchemaDatabase> = {};
+  const operations: SchemaBuilderOperation[] = [];
 
   return {
     operations,
     databases,
-    toJSON: () => "Placeholder",
-    createDatabase: function(name: string) {
+    toJSON: (): string => schemaToJSON(databases),
+    createDatabase: function(name: string): null {
       operations.push(createDatabase(name));
       databases[name] = database(operations, name);
       return null;
     },
-    database: function(name: string) {
+    database: function(name: string): SchemaDatabase {
       if (!databases[name]) {
         throw databaseNotFound(name);
       }
       return databases[name];
     },
-    removeDatabase: function(name: string) {
+    removeDatabase: function(name: string): null {
       if (!databases[name]) {
         throw databaseNotFound(name);
       }
@@ -227,7 +275,7 @@ export default function buildSchema() {
       delete databases[name];
       return null;
     },
-    renameDatabase: function(from: string, to: string) {
+    renameDatabase: function(from: string, to: string): null {
       if (!databases[from]) {
         throw databaseNotFound(from);
       }
