@@ -1,7 +1,7 @@
 import {
   SchemaBuilderOperation,
   SchemaBuilderOperationType
-} from "persist/schema/shema";
+} from "persist/schema";
 
 export default function createTable(
   database,
