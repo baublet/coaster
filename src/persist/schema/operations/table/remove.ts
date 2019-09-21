@@ -3,7 +3,7 @@ import {
   SchemaBuilderOperationType
 } from "persist/schema";
 
-export default function createTable(
+export default function removeTable(
   database,
   name: string
 ): SchemaBuilderOperation {

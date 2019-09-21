@@ -6,7 +6,9 @@ import {
   SchemaCreateTableOptions,
   SchemaTable,
   SchemaDatabase,
-  Schema
+  Schema,
+  SchemaColumnOptions,
+  SchemaTableOptions
 } from ".";
 import createDatabase from "./operations/database/create";
 import removeDatabase from "./operations/database/remove";
@@ -15,6 +17,10 @@ import databaseNotFound from "./errors/databaseNotFound";
 import tableNotFound from "./errors/tableNotFound";
 import schemaToJSON from "./toJSON";
 import tableExists from "./errors/tableExists";
+import createColumn from "./operations/column/create";
+import removeTable from "./operations/table/remove";
+import renameTable from "./operations/table/rename";
+import createTable from "./operations/table/create";
 
 function column(
   operations: SchemaBuilderOperation[],
@@ -22,32 +28,32 @@ function column(
   tableName: string,
   name: string,
   columnOptions: SchemaCreateColumnOptions = {}
-) {
-  const options: SchemaColumn = {
+): SchemaColumn {
+  const options: SchemaColumnOptions = {
     name,
-    tableName,
-    databaseName,
     autoIncrement: columnOptions.autoIncrement || false,
     type: columnOptions.type || SchemaColumnType.TEXT,
     default: columnOptions.default || null,
     nullable: columnOptions.nullable || false
   };
+  operations.push(createColumn(databaseName, tableName, name, options));
   return {
     options,
     autoIncrement: function(autoIncrement: boolean = true) {
       options.autoIncrement = autoIncrement;
+      return null;
     },
     type: function(type: SchemaColumnType) {
       options.type = type;
-      return this;
+      return null;
     },
     default: function(value: any) {
       options.default = value;
-      return this;
+      return null;
     },
     nullable: function(nullable: boolean) {
       options.nullable = nullable;
-      return this;
+      return null;
     }
   };
 }
@@ -59,15 +65,18 @@ function table(
   options: SchemaCreateTableOptions = {}
 ): SchemaTable {
   const columns: any = {};
+  const tableOptions: SchemaTableOptions = {};
+
+  operations.push(createTable(databaseName, tableName));
 
   if (options.withId !== false) {
     columns.id = column(operations, databaseName, tableName, "id").type(
       SchemaColumnType.ID
     );
-    columns.primaryKey = "id";
+    tableOptions.primaryKey = "id";
   }
 
-  if (options.withCreated) {
+  if (options.withCreated !== false) {
     columns.createdDate = column(
       operations,
       databaseName,
@@ -89,31 +98,41 @@ function table(
     columns,
     databaseName,
     name: tableName,
+    options: tableOptions,
     column: function(name: string): SchemaColumn {
       if (!columns[name]) throw `no col`;
       return columns[name];
     },
-    createColumn: function(name: string) {
-      if (columns[name]) return columns[name];
-      columns[name] = column(operations, databaseName, tableName, name);
-      return this;
+    createColumn: function(
+      name: string,
+      columnOptions: SchemaCreateColumnOptions = {}
+    ) {
+      if (columns[name]) throw `col exists`;
+      columns[name] = column(
+        operations,
+        databaseName,
+        tableName,
+        name,
+        columnOptions
+      );
+      return null;
     },
     renameColumn: function(from: string, to: string) {
       if (!columns[from]) throw `no column`;
       if (columns[to]) throw `seat's taken`;
       columns[to] = columns[from];
       delete columns[from];
-      return this;
+      return null;
     },
     removeColumn: function(name: string) {
       if (!columns[name]) throw `no column`;
       delete columns[name];
-      return this;
+      return null;
     },
     setPrimaryKey: function(column: string) {
       if (!columns[column]) throw `no column`;
-      columns.primaryKey = column;
-      return this;
+      tableOptions.primaryKey = column;
+      return null;
     }
   };
 }
@@ -138,12 +157,14 @@ function database(
     },
     renameTable: function(from: string, to: string): null {
       if (tables[to]) throw tableExists(databaseName, to);
+      operations.push(renameTable(databaseName, from, to));
       tables[to] = tables[from];
       delete tables[from];
       return null;
     },
     removeTable: function(name: string): null {
       if (!tables[name]) throw tableNotFound(databaseName, name);
+      operations.push(removeTable(databaseName, name));
       delete tables[name];
       return null;
     },

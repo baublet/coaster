@@ -20,13 +20,13 @@ export enum SchemaBuilderOperationType {
   TABLE_CREATE,
   TABLE_REMOVE,
   TABLE_RENAME,
+  TABLE_SET_PRIMARY_KEY,
 
   COLUMN_CREATE,
   COLUMN_REMOVE,
   COLUMN_RENAME,
   COLUMN_SET_DEFAULT,
   COLUMN_SET_AUTO_INCREMENT,
-  COLUMN_SET_PRIMARY_KEY,
   COLUMN_SET_NULLABLE,
   COLUMN_SET_TYPE
 }
@@ -39,22 +39,36 @@ export interface SchemaBuilderOperation {
   payload?: Record<string, any>;
 }
 
-export interface SchemaColumn {
+export interface SchemaColumnOptions {
   autoIncrement: boolean;
   default: any;
   nullable: boolean;
   name: string;
   type: SchemaColumnType;
-  tableName: string;
-  databaseName: string;
+}
+
+export interface SchemaColumn {
+  options: SchemaColumnOptions;
+  autoIncrement: (autoIncrement: boolean) => null;
+  type: (type: SchemaColumnType) => null;
+  default: (value: any) => null;
+  nullable: (nullable: boolean) => null;
+}
+
+export interface SchemaTableOptions {
+  primaryKey?: string;
 }
 
 export interface SchemaTable {
   columns: Record<string, SchemaColumn>;
   databaseName: string;
   name: string;
+  options: SchemaTableOptions;
   column: (name: string) => SchemaColumn;
-  createColumn: (name: string) => null;
+  createColumn: (
+    name: string,
+    columnOptions?: SchemaCreateColumnOptions
+  ) => null;
   renameColumn: (from: string, to: string) => null;
   removeColumn: (name: string) => null;
   setPrimaryKey: (column: string) => null;

@@ -4,7 +4,7 @@ import {
 } from "persist/schema";
 
 export default function renameTable(
-  database,
+  database: string,
   from: string,
   to: string
 ): SchemaBuilderOperation {
