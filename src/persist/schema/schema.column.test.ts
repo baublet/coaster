@@ -1,4 +1,7 @@
 import buildSchema, { Schema, SchemaTable, SchemaColumnType } from ".";
+import createColumn from "./operations/column/create";
+import renameColumn from "./operations/column/rename";
+import removeColumn from "./operations/column/remove";
 
 let schema: Schema;
 let table: SchemaTable;
@@ -39,4 +42,30 @@ it("creates a column properly with default options", () => {
     nullable: true,
     type: SchemaColumnType.NUMBER
   });
+  expect(schema.operations.length).toBe(6);
+  expect(schema.operations[5]).toEqual(
+    createColumn("test", "hats", "make", {
+      autoIncrement: true,
+      default: 12,
+      name: "make",
+      nullable: true,
+      type: SchemaColumnType.NUMBER
+    })
+  );
+});
+
+it("creates a column properly with default options", () => {
+  table.createColumn("make");
+  table.renameColumn("make", "model");
+  expect(schema.operations.length).toBe(7);
+  expect(schema.operations[6]).toEqual(
+    renameColumn("test", "hats", "make", "model")
+  );
+});
+
+it("removes a column properly", () => {
+  table.createColumn("make");
+  table.removeColumn("make");
+  expect(schema.operations.length).toBe(7);
+  expect(schema.operations[6]).toEqual(removeColumn("test", "hats", "make"));
 });

@@ -21,6 +21,11 @@ import createColumn from "./operations/column/create";
 import removeTable from "./operations/table/remove";
 import renameTable from "./operations/table/rename";
 import createTable from "./operations/table/create";
+import indexNameExists from "./errors/indexNameExists";
+import columnExists from "./errors/columnExists";
+import renameColumn from "./operations/column/rename";
+import columnNotFound from "./errors/columnNotFound";
+import removeColumn from "./operations/column/remove";
 
 function column(
   operations: SchemaBuilderOperation[],
@@ -107,7 +112,7 @@ function table(
       name: string,
       columnOptions: SchemaCreateColumnOptions = {}
     ) {
-      if (columns[name]) throw `col exists`;
+      if (columns[name]) throw columnExists(databaseName, tableName, name);
       columns[name] = column(
         operations,
         databaseName,
@@ -120,12 +125,14 @@ function table(
     renameColumn: function(from: string, to: string) {
       if (!columns[from]) throw `no column`;
       if (columns[to]) throw `seat's taken`;
+      operations.push(renameColumn(databaseName, tableName, from, to));
       columns[to] = columns[from];
       delete columns[from];
       return null;
     },
     removeColumn: function(name: string) {
-      if (!columns[name]) throw `no column`;
+      if (!columns[name]) throw columnNotFound(databaseName, tableName, name);
+      operations.push(removeColumn(databaseName, tableName, name));
       delete columns[name];
       return null;
     },
@@ -173,8 +180,8 @@ function database(
       name: string,
       columns: string[]
     ): null {
-      if (!tables[table]) throw `table doesn't exist`;
-      if (indexes[name]) throw `index exists`;
+      if (!tables[table]) throw tableNotFound(databaseName, table);
+      if (indexes[name]) throw indexNameExists(databaseName, name);
       indexes[name] = {
         columns,
         table
