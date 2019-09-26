@@ -6,42 +6,44 @@ export const userModel = createModel({
   name: "user"
 });
 
-export const memoryMap = {
-  user: {
-    test1: {
-      id: "test",
-      job: "player",
-      name: "Boots Russel",
-      group: 2,
-      tester: 4
-    },
-    test2: {
-      id: "test2",
-      job: "player",
-      name: "Gambino Slim",
-      group: 2,
-      tester: 5
-    },
-    test3: {
-      id: "test3",
-      job: "preacher",
-      name: "Tights Spinster",
-      group: 3,
-      tester: 5
-    },
-    test4: {
-      id: "test4",
-      job: "preacher",
-      name: "Dr. Spaceman",
-      group: 3,
-      tester: 66
-    },
-    test5: {
-      id: "test5",
-      job: "cinnamon bun",
-      name: "Smoochie",
-      group: 2,
-      tester: 67
+export const memoryMap: any = {
+  default: {
+    users: {
+      test1: {
+        id: "test",
+        job: "player",
+        name: "Boots Russel",
+        group: 2,
+        tester: 4
+      },
+      test2: {
+        id: "test2",
+        job: "player",
+        name: "Gambino Slim",
+        group: 2,
+        tester: 5
+      },
+      test3: {
+        id: "test3",
+        job: "preacher",
+        name: "Tights Spinster",
+        group: 3,
+        tester: 5
+      },
+      test4: {
+        id: "test4",
+        job: "preacher",
+        name: "Dr. Spaceman",
+        group: 3,
+        tester: 66
+      },
+      test5: {
+        id: "test5",
+        job: "cinnamon bun",
+        name: "Smoochie",
+        group: 2,
+        tester: 67
+      }
     }
   }
 };
@@ -51,7 +53,7 @@ it("finds by non-ID property", async () => {
     $model: userModel,
     name: "Gambino Slim"
   });
-  expect(results[0]).toEqual(memoryMap.user.test2);
+  expect(results[0]).toEqual(memoryMap.default.users.test2);
 });
 
 it("works across multiple properties", async () => {
@@ -60,7 +62,7 @@ it("works across multiple properties", async () => {
     group: 3,
     tester: 5
   });
-  expect(results[0]).toEqual(memoryMap.user.test3);
+  expect(results[0]).toEqual(memoryMap.default.users.test3);
 });
 
 it("works with $or", async () => {
@@ -71,9 +73,9 @@ it("works with $or", async () => {
     $or: true
   });
   expect(results).toEqual([
-    memoryMap.user.test2,
-    memoryMap.user.test3,
-    memoryMap.user.test4
+    memoryMap.default.users.test2,
+    memoryMap.default.users.test3,
+    memoryMap.default.users.test4
   ]);
 });
 
@@ -92,9 +94,9 @@ it("fetches multiple queries for with", async () => {
     ]
   });
   expect(results).toEqual([
-    memoryMap.user.test5,
-    memoryMap.user.test4,
-    memoryMap.user.test2
+    memoryMap.default.users.test5,
+    memoryMap.default.users.test4,
+    memoryMap.default.users.test2
   ]);
 });
 
@@ -107,7 +109,10 @@ it("fetches a single query for $with", async () => {
       tester: 66
     }
   });
-  expect(results).toEqual([memoryMap.user.test5, memoryMap.user.test4]);
+  expect(results).toEqual([
+    memoryMap.default.users.test5,
+    memoryMap.default.users.test4
+  ]);
 });
 
 it("processes a single $without", async () => {
@@ -118,7 +123,10 @@ it("processes a single $without", async () => {
       tester: 67
     }
   });
-  expect(results).toEqual([memoryMap.user.test1, memoryMap.user.test2]);
+  expect(results).toEqual([
+    memoryMap.default.users.test1,
+    memoryMap.default.users.test2
+  ]);
 });
 
 it("processes multiple $withouts", async () => {
@@ -134,7 +142,7 @@ it("processes multiple $withouts", async () => {
       }
     ]
   });
-  expect(results[0]).toEqual(memoryMap.user.test1);
+  expect(results[0]).toEqual(memoryMap.default.users.test1);
 });
 
 it("respects limit", async () => {
@@ -160,7 +168,7 @@ it("respects limit _and_ offset", async () => {
     $limit: 1
   });
   expect(results.length).toEqual(1);
-  expect(results[0]).toEqual(memoryMap.user.test3);
+  expect(results[0]).toEqual(memoryMap.default.users.test3);
 });
 
 it("respects sort order", async () => {

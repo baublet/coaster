@@ -33,10 +33,10 @@ export default function attachPersistFunctions(
         raw: true
       });
       if (!results.length) {
-        throw reloadInvariantViolation(model.$factory.modelName, id);
+        throw reloadInvariantViolation(model.$factory.tableName, id);
       }
       /* eslint-disable require-atomic-updates */
-      model.$data = results[0];
+      model.$data = { ...results[0] };
       return true;
     },
     delete: async () => {

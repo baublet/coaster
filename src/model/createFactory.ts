@@ -15,6 +15,7 @@ import { PersistAdapter } from "persist";
 import proxyModel from "./proxyModel";
 import { Schema } from "persist/schema";
 import get from "lodash.get";
+import attachPersistFunctionsToModelFactory from "./attachPersistFunctionsToModelFactory";
 
 export interface CreateFactoryArguments<T, C> {
   computedProps: ModelOptionsComputedProps<T>;
@@ -88,5 +89,10 @@ export default function createFactory<T, C>({
   factory.names = names;
   factory.schema = schema;
   factory.tableName = tableName;
+
+  if (persistWith) {
+    attachPersistFunctionsToModelFactory(factory, persistWith);
+  }
+
   return factory as ModelFactory<T, C>;
 }

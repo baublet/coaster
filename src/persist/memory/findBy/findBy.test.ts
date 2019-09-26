@@ -7,10 +7,12 @@ const accountModel = createModel({
 });
 
 const memoryMap = {
-  account: {
-    "1": {
-      id: "1",
-      balance: 12
+  default: {
+    accounts: {
+      "1": {
+        id: "1",
+        balance: 12
+      }
     }
   }
 };

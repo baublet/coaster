@@ -117,6 +117,7 @@ function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
 }: ModelOptions<T, C>): ModelFactory<T, C> {
   const names = generateNames(name);
   tableName = tableName || names.pluralSafe;
+  databaseName = databaseName || "default";
 
   // Normalize hook nodes into arrays
   const normalizedHooks: NormalizedHooksMap = normalizeHooks(hooks);

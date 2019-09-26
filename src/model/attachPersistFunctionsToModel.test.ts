@@ -3,18 +3,20 @@ import inMemoryPersistence from "persist/memory";
 import reloadInvariantViolation from "./error/reloadInvariantViolation";
 
 const memoryMapFn = () => ({
-  user: {
-    "test-id": {
-      id: "test-id",
-      name: "Test"
-    },
-    "test-id2": {
-      id: "test-id2",
-      name: "Test 2"
-    },
-    "test-id3": {
-      id: "test-id3",
-      name: "Test 3"
+  default: {
+    users: {
+      "test-id": {
+        id: "test-id",
+        name: "Test"
+      },
+      "test-id2": {
+        id: "test-id2",
+        name: "Test 2"
+      },
+      "test-id3": {
+        id: "test-id3",
+        name: "Test 3"
+      }
     }
   }
 });
@@ -49,7 +51,7 @@ it("deletes a model properly", async () => {
   expect(user.name).toBe("Test");
   const deleted = await user.delete();
   expect(deleted).toBeTruthy();
-  expect(memoryMap.user["test-id"]).toBe(undefined);
+  expect(memoryMap.default.users["test-id"]).toBe(undefined);
 });
 
 it("triggers a reload invariant violation when we try to reload a model we've deleted", async () => {
@@ -58,7 +60,7 @@ it("triggers a reload invariant violation when we try to reload a model we've de
     name: "Test"
   });
   await user.delete();
-  expect(user.reload()).rejects.toBe(
-    reloadInvariantViolation("user", "test-id")
+  await expect(user.reload()).rejects.toBe(
+    reloadInvariantViolation("users", "test-id")
   );
 });
