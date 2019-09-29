@@ -65,6 +65,11 @@ export default async function migrate(
           operation.table,
           operation.column
         );
+      case SchemaBuilderOperationType.COLUMN_SET_AUTO_INCREMENT:
+      case SchemaBuilderOperationType.COLUMN_SET_DEFAULT:
+      case SchemaBuilderOperationType.COLUMN_SET_NULLABLE:
+      case SchemaBuilderOperationType.COLUMN_SET_TYPE:
+        return;
       default:
         throw operationNotSupported(memoryAdapter, operation);
     }
