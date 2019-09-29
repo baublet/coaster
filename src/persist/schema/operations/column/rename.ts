@@ -7,7 +7,7 @@ export default function renameColumn(
   databaseName: string,
   tableName: string,
   from: string,
-  to: string
+  newName: string
 ): SchemaBuilderOperation {
   return {
     database: databaseName,
@@ -15,7 +15,7 @@ export default function renameColumn(
     column: from,
     type: SchemaBuilderOperationType.COLUMN_RENAME,
     payload: {
-      to
+      newName
     }
   };
 }

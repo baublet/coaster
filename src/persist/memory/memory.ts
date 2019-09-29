@@ -6,15 +6,19 @@ import { Schema } from "persist/schema";
 
 export type MemoryMap = Record<string, Record<string, any>>;
 
-const memoryMap: MemoryMap = {};
-
 export default function persistInMemory(
   initialMemoryMap: MemoryMap = {},
   schema: Schema | null = null,
   defaultDatabase: string = "MemoryDatabase"
 ): PersistAdapter {
-  Object.assign(memoryMap, initialMemoryMap);
+  const memoryMap: MemoryMap = {};
+  Object.assign({}, initialMemoryMap);
   return {
+    meta: {
+      memoryMap,
+      version: 0
+    },
+    name: "memory",
     schema,
     defaultDatabase,
     deleteBy: deleteFromMemory(memoryMap),

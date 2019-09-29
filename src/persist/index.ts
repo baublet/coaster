@@ -54,6 +54,8 @@ export interface PersistFindByProps {
 }
 
 export interface PersistAdapter {
+  meta?: any;
+  name: string;
   schema: Schema | null;
   defaultDatabase: string;
   deleteBy: (query: PersistDeleteQuery) => Promise<number>;
