@@ -10,22 +10,29 @@ import {
   SchemaColumnOptions,
   SchemaTableOptions
 } from ".";
-import createDatabase from "./operations/database/create";
-import removeDatabase from "./operations/database/remove";
-import renameDatabase from "./operations/database/rename";
-import databaseNotFound from "./errors/databaseNotFound";
-import tableNotFound from "./errors/tableNotFound";
-import schemaToJSON from "./toJSON";
-import tableExists from "./errors/tableExists";
-import createColumn from "./operations/column/create";
-import removeTable from "./operations/table/remove";
-import renameTable from "./operations/table/rename";
-import createTable from "./operations/table/create";
-import indexNameExists from "./errors/indexNameExists";
+
 import columnExists from "./errors/columnExists";
-import renameColumn from "./operations/column/rename";
 import columnNotFound from "./errors/columnNotFound";
+import createColumn from "./operations/column/create";
+import createDatabase from "./operations/database/create";
+import createIndex from "./operations/index/create";
+import createTable from "./operations/table/create";
+import databaseNotFound from "./errors/databaseNotFound";
+import indexExists from "./errors/indexExists";
+import indexNotFound from "./errors/indexNotFound";
 import removeColumn from "./operations/column/remove";
+import removeDatabase from "./operations/database/remove";
+import removeIndex from "./operations/index/remove";
+import removeTable from "./operations/table/remove";
+import renameColumn from "./operations/column/rename";
+import renameDatabase from "./operations/database/rename";
+import renameTable from "./operations/table/rename";
+import schemaToTree from "./toTree";
+import setAttributeFactory, {
+  SchemaColumnAttributes
+} from "./operations/column/setAttribute";
+import tableExists from "./errors/tableExists";
+import tableNotFound from "./errors/tableNotFound";
 
 function column(
   operations: SchemaBuilderOperation[],
@@ -44,22 +51,38 @@ function column(
   operations.push(createColumn(databaseName, tableName, name, options));
   return {
     options,
-    autoIncrement: function(autoIncrement: boolean = true) {
-      options.autoIncrement = autoIncrement;
-      return null;
-    },
-    type: function(type: SchemaColumnType) {
-      options.type = type;
-      return null;
-    },
-    default: function(value: any) {
-      options.default = value;
-      return null;
-    },
-    nullable: function(nullable: boolean) {
-      options.nullable = nullable;
-      return null;
-    }
+    autoIncrement: setAttributeFactory<boolean>(
+      options,
+      operations,
+      databaseName,
+      tableName,
+      name,
+      SchemaColumnAttributes.TYPE
+    ),
+    type: setAttributeFactory<SchemaColumnType>(
+      options,
+      operations,
+      databaseName,
+      tableName,
+      name,
+      SchemaColumnAttributes.TYPE
+    ),
+    default: setAttributeFactory<any>(
+      options,
+      operations,
+      databaseName,
+      tableName,
+      name,
+      SchemaColumnAttributes.DEFAULT
+    ),
+    nullable: setAttributeFactory<boolean>(
+      options,
+      operations,
+      databaseName,
+      tableName,
+      name,
+      SchemaColumnAttributes.NULLABLE
+    )
   };
 }
 
@@ -75,9 +98,9 @@ function table(
   operations.push(createTable(databaseName, tableName));
 
   if (options.withId !== false) {
-    columns.id = column(operations, databaseName, tableName, "id").type(
-      SchemaColumnType.ID
-    );
+    columns.id = column(operations, databaseName, tableName, "id", {
+      type: SchemaColumnType.ID
+    });
     tableOptions.primaryKey = "id";
   }
 
@@ -86,8 +109,11 @@ function table(
       operations,
       databaseName,
       tableName,
-      "createdDate"
-    ).type(SchemaColumnType.DATE);
+      "createdDate",
+      {
+        type: SchemaColumnType.DATE
+      }
+    );
   }
 
   if (options.withModified !== false) {
@@ -95,8 +121,11 @@ function table(
       operations,
       databaseName,
       tableName,
-      "modifiedDate"
-    ).type(SchemaColumnType.DATE);
+      "modifiedDate",
+      {
+        type: SchemaColumnType.DATE
+      }
+    );
   }
 
   return {
@@ -105,13 +134,13 @@ function table(
     name: tableName,
     options: tableOptions,
     column: function(name: string): SchemaColumn {
-      if (!columns[name]) throw `no col`;
+      if (!columns[name]) throw columnNotFound(databaseName, tableName, name);
       return columns[name];
     },
     createColumn: function(
       name: string,
       columnOptions: SchemaCreateColumnOptions = {}
-    ) {
+    ): SchemaColumn {
       if (columns[name]) throw columnExists(databaseName, tableName, name);
       columns[name] = column(
         operations,
@@ -120,15 +149,15 @@ function table(
         name,
         columnOptions
       );
-      return null;
+      return columns[name];
     },
-    renameColumn: function(from: string, to: string) {
-      if (!columns[from]) throw `no column`;
-      if (columns[to]) throw `seat's taken`;
+    renameColumn: function(from: string, to: string): SchemaColumn {
+      if (!columns[from]) throw columnNotFound(databaseName, tableName, from);
+      if (columns[to]) throw columnExists(databaseName, tableName, to);
       operations.push(renameColumn(databaseName, tableName, from, to));
       columns[to] = columns[from];
       delete columns[from];
-      return null;
+      return columns[to];
     },
     removeColumn: function(name: string) {
       if (!columns[name]) throw columnNotFound(databaseName, tableName, name);
@@ -136,10 +165,11 @@ function table(
       delete columns[name];
       return null;
     },
-    setPrimaryKey: function(column: string) {
-      if (!columns[column]) throw `no column`;
+    setPrimaryKey: function(column: string): SchemaColumn {
+      if (!columns[column])
+        throw columnNotFound(databaseName, tableName, column);
       tableOptions.primaryKey = column;
-      return null;
+      return columns[column];
     }
   };
 }
@@ -157,17 +187,17 @@ function database(
     createTable: function(
       name: string,
       options: SchemaCreateTableOptions
-    ): null {
+    ): SchemaTable {
       if (tables[name]) throw tableExists(databaseName, name);
       tables[name] = table(operations, databaseName, name, options);
-      return null;
+      return tables[name];
     },
-    renameTable: function(from: string, to: string): null {
+    renameTable: function(from: string, to: string): SchemaTable {
       if (tables[to]) throw tableExists(databaseName, to);
       operations.push(renameTable(databaseName, from, to));
       tables[to] = tables[from];
       delete tables[from];
-      return null;
+      return tables[to];
     },
     removeTable: function(name: string): null {
       if (!tables[name]) throw tableNotFound(databaseName, name);
@@ -179,19 +209,21 @@ function database(
       table: string,
       name: string,
       columns: string[]
-    ): null {
+    ): SchemaTable {
       if (!tables[table]) throw tableNotFound(databaseName, table);
-      if (indexes[name]) throw indexNameExists(databaseName, name);
+      if (indexes[name]) throw indexExists(databaseName, name);
       indexes[name] = {
         columns,
         table
       };
-      return null;
+      operations.push(createIndex(databaseName, table, name, columns));
+      return tables[table];
     },
     removeIndex: function(table: string, name: string): null {
       if (!tables[table]) throw tableNotFound(databaseName, name);
-      if (!indexes[name]) throw `index doesn't exist`;
+      if (!indexes[name]) throw indexNotFound(databaseName, table, name);
       delete indexes[name];
+      operations.push(removeIndex(databaseName, table, name));
       return null;
     },
     table: function(name: string): SchemaTable {
@@ -208,11 +240,12 @@ export default function buildSchema(): Schema {
   return {
     operations,
     databases,
-    toJSON: (): string => schemaToJSON(databases),
-    createDatabase: function(name: string): null {
+    toTree: (): Record<string, any> => schemaToTree(databases),
+    toJSON: (): string => JSON.stringify(schemaToTree(databases)),
+    createDatabase: function(name: string): SchemaDatabase {
       operations.push(createDatabase(name));
       databases[name] = database(operations, name);
-      return null;
+      return databases[name];
     },
     database: function(name: string): SchemaDatabase {
       if (!databases[name]) {
@@ -228,14 +261,14 @@ export default function buildSchema(): Schema {
       delete databases[name];
       return null;
     },
-    renameDatabase: function(from: string, to: string): null {
+    renameDatabase: function(from: string, to: string): SchemaDatabase {
       if (!databases[from]) {
         throw databaseNotFound(from);
       }
       operations.push(renameDatabase(from, to));
       databases[to] = databases[from];
       delete databases[from];
-      return null;
+      return databases[to];
     }
   };
 }

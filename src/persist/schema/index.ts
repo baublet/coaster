@@ -68,20 +68,23 @@ export interface SchemaTable {
   createColumn: (
     name: string,
     columnOptions?: SchemaCreateColumnOptions
-  ) => null;
-  renameColumn: (from: string, to: string) => null;
+  ) => SchemaColumn;
+  renameColumn: (from: string, to: string) => SchemaColumn;
   removeColumn: (name: string) => null;
-  setPrimaryKey: (column: string) => null;
+  setPrimaryKey: (column: string) => SchemaColumn;
 }
 
 export interface SchemaDatabase {
   indexes: any;
   tables: Record<string, SchemaTable>;
   name: string;
-  createTable: (name: string, options?: SchemaCreateTableOptions) => null;
-  renameTable: (from: string, to: string) => null;
+  createTable: (
+    name: string,
+    options?: SchemaCreateTableOptions
+  ) => SchemaTable;
+  renameTable: (from: string, to: string) => SchemaTable;
   removeTable: (name: string) => null;
-  createIndex: (table: string, name: string, columns: string[]) => null;
+  createIndex: (table: string, name: string, columns: string[]) => SchemaTable;
   removeIndex: (table: string, name: string) => null;
   table: (name: string) => SchemaTable;
 }
@@ -103,10 +106,11 @@ export interface Schema {
   operations: SchemaBuilderOperation[];
   databases: Record<string, SchemaDatabase>;
   toJSON: () => string;
-  createDatabase: (name: string) => null;
+  toTree: () => Record<string, any>;
+  createDatabase: (name: string) => SchemaDatabase;
   database: (name: string) => SchemaDatabase;
   removeDatabase: (name: string) => null;
-  renameDatabase: (from: string, to: string) => null;
+  renameDatabase: (from: string, to: string) => SchemaDatabase;
 }
 
-export { default } from "persist/schema/shema";
+export { default } from "./shema";

@@ -11,7 +11,7 @@ export default function removeIndex(
   return {
     database: databaseName,
     table: tableName,
-    type: SchemaBuilderOperationType.INDEX_CREATE,
+    type: SchemaBuilderOperationType.INDEX_REMOVE,
     payload: {
       indexName
     }

@@ -2,6 +2,10 @@ import buildSchema, { Schema, SchemaTable, SchemaColumnType } from ".";
 import createColumn from "./operations/column/create";
 import renameColumn from "./operations/column/rename";
 import removeColumn from "./operations/column/remove";
+import {
+  setAttribute,
+  SchemaColumnAttributes
+} from "./operations/column/setAttribute";
 
 let schema: Schema;
 let table: SchemaTable;
@@ -68,4 +72,29 @@ it("removes a column properly", () => {
   table.removeColumn("make");
   expect(schema.operations.length).toBe(7);
   expect(schema.operations[6]).toEqual(removeColumn("test", "hats", "make"));
+});
+
+it("sets attributes properly", () => {
+  table.createColumn("make");
+
+  table.column("make").type(SchemaColumnType.BOOLEAN);
+  expect(schema.operations.length).toBe(7);
+  expect(schema.operations[6]).toEqual(
+    setAttribute(
+      "test",
+      "hats",
+      "make",
+      SchemaColumnAttributes.TYPE,
+      SchemaColumnType.BOOLEAN
+    )
+  );
+
+  table.column("make").default(true);
+  expect(schema.operations.length).toBe(8);
+  expect(schema.operations[7]).toEqual(
+    setAttribute("test", "hats", "make", SchemaColumnAttributes.DEFAULT, true)
+  );
+
+  expect(table.column("make").options.type).toBe(SchemaColumnType.BOOLEAN);
+  expect(table.column("make").options.default).toBe(true);
 });
