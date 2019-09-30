@@ -70,6 +70,12 @@ export default async function migrate(
       case SchemaBuilderOperationType.COLUMN_SET_NULLABLE:
       case SchemaBuilderOperationType.COLUMN_SET_TYPE:
         return;
+
+      // Indexes
+      case SchemaBuilderOperationType.INDEX_CREATE:
+      case SchemaBuilderOperationType.INDEX_REMOVE:
+        return;
+
       default:
         throw operationNotSupported(memoryAdapter, operation);
     }
