@@ -20,6 +20,7 @@ import attachPersistFunctionsToModelFactory from "./attachPersistFunctionsToMode
 export interface CreateFactoryArguments<T, C> {
   computedProps: ModelOptionsComputedProps<T>;
   databaseName?: string;
+  has: (ModelFactory | ModelFactory[])[];
   names: GeneratedNames;
   normalizedHooks: NormalizedHooksMap;
   persistWith?: PersistAdapter;
@@ -32,6 +33,7 @@ export interface CreateFactoryArguments<T, C> {
 export default function createFactory<T, C>({
   computedProps,
   databaseName,
+  has,
   names,
   normalizedHooks,
   persistWith,
@@ -89,6 +91,7 @@ export default function createFactory<T, C>({
   factory.names = names;
   factory.schema = schema;
   factory.tableName = tableName;
+  factory.relationships = has;
 
   if (persistWith) {
     attachPersistFunctionsToModelFactory(factory, persistWith);

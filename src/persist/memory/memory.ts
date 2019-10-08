@@ -11,8 +11,7 @@ export default function persistInMemory(
   schema: Schema | null = null,
   defaultDatabase: string = "MemoryDatabase"
 ): PersistAdapter {
-  const memoryMap: MemoryMap = {};
-  Object.assign({}, initialMemoryMap);
+  const memoryMap: MemoryMap = Object.assign({}, initialMemoryMap);
   return {
     meta: {
       memoryMap,

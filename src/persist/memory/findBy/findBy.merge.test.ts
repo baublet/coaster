@@ -1,38 +1,38 @@
 import findByFactory from "./findBy";
 import createModel from "../../../model/createModel";
-import { SchemaNodeType } from "../../../schema";
 import { PersistMatcherType } from "persist";
+import inMemoryPersistence from "persist/memory";
+
+const memoryMap = {
+  default: {
+    accounts: {
+      abc: {
+        id: "abc",
+        balance: 12
+      }
+    },
+    users: {
+      1: {
+        id: 1,
+        account_id: "abc",
+        name: "Ted"
+      }
+    }
+  }
+};
+
+const memoryStore = inMemoryPersistence(memoryMap);
 
 const accountModel = createModel({
   name: "account",
-  schema: {
-    balance: SchemaNodeType.INT
-  }
+  persistWith: memoryStore
 });
 
 const userModel = createModel({
   name: "user",
-  schema: {
-    name: SchemaNodeType.STRING,
-    account: accountModel
-  }
+  persistWith: memoryStore,
+  has: [accountModel]
 });
-
-const memoryMap = {
-  account: {
-    abc: {
-      id: "abc",
-      balance: 12
-    }
-  },
-  user: {
-    1: {
-      id: 1,
-      account_id: "abc",
-      name: "Ted"
-    }
-  }
-};
 
 const findBy = findByFactory(memoryMap);
 

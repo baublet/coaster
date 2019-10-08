@@ -3,7 +3,6 @@ import { Model, ModelDataDefaultType, ModelFactory } from "model/createModel";
 import findResultsForLogicalMatcher from "persist/memory/findResultsForLogicalMatcher";
 import { MemoryMap } from "persist/memory/memory";
 import uniqueArrayElements from "helpers/uniqueArrayElements";
-import eagerLoadWithoutSchemaError from "persist/errors/eagerLoadWithoutSchemaError";
 
 export default function findByFactory(memoryMap: MemoryMap = {}) {
   return async function findBy({
@@ -11,13 +10,6 @@ export default function findByFactory(memoryMap: MemoryMap = {}) {
     raw = false,
     eager = false
   }: PersistFindByProps): Promise<ModelDataDefaultType[] | Model[]> {
-    // If the user tries to eager load a query, and they don't have a schema
-    // defined, we need to throw. We can't ever eager load a query if we don't
-    // know about relationships ahead of time.
-    if (eager && !query.$model.schema) {
-      throw eagerLoadWithoutSchemaError();
-    }
-
     // Find the results
     const results = findResultsForLogicalMatcher(memoryMap, query);
 
@@ -44,33 +36,45 @@ export default function findByFactory(memoryMap: MemoryMap = {}) {
 
     // Map through the schema and load all of the properties we need to
     // eagerly load.
-    Object.values(modelFactory.schema).forEach(node => {
-      // Ignore $tableName
-      if (typeof node === "string") {
-        return;
+    const relations: ({
+      nodeLocalAccessor: string;
+      many: boolean;
+      model: ModelFactory;
+    })[] = modelFactory.relationships.map(relation => {
+      if (Array.isArray(relation)) {
+        return {
+          nodeLocalAccessor: relation[0].names.pluralSafe,
+          many: true,
+          model: relation[0]
+        };
       }
-      if (node.relation === true) {
-        const nodeLocalAccessor = `${node.names.original}`;
-        const nodeLocalId = `${node.names.safe}`;
-        const ids: (null | number)[] = uniqueArrayElements(
-          results
-            .map(result => {
-              if (result[nodeLocalId]) return result[nodeLocalId];
-              return null;
-            })
-            .filter(id => id !== null)
-        );
+      return {
+        nodeLocalAccessor: relation.names.safe,
+        many: false,
+        model: relation
+      };
+    });
 
-        idMap.set(node.model, {
-          factory: modelFactory,
-          foreignKey: node.persistOptions.foreignKey,
-          nodeLocalAccessor,
-          nodeLocalId,
-          ids,
-          models: {},
-          data: {}
-        });
-      }
+    relations.forEach(({ nodeLocalAccessor, model }) => {
+      const nodeLocalId = `${model.names.safe}_id`;
+      const ids: (null | number)[] = uniqueArrayElements(
+        results
+          .map(result => {
+            if (result[nodeLocalId]) return result[nodeLocalId];
+            return null;
+          })
+          .filter(id => id !== null)
+      );
+
+      idMap.set(model, {
+        factory: model,
+        foreignKey: "id",
+        nodeLocalAccessor,
+        nodeLocalId,
+        ids,
+        models: {},
+        data: {}
+      });
     });
 
     // For each model relation, load the models by their ids

@@ -30,7 +30,7 @@ beforeEach(() => {
   });
 });
 
-it.only("finds a model properly", async () => {
+it("finds a model properly", async () => {
   expect(userModel.find).toBeInstanceOf(Function);
   const user = await userModel.find("test-id");
   expect(user).toBeTruthy();

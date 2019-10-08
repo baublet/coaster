@@ -83,6 +83,7 @@ export type ModelFactory<
   databaseName: string;
   isFactory: boolean;
   names: GeneratedNames;
+  relationships: (ModelFactory | ModelFactory[])[];
   schema: Schema | null;
   tableName: string;
 };
@@ -133,6 +134,7 @@ function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
   return createFactory<T, C>({
     computedProps,
     databaseName,
+    has,
     names,
     normalizedHooks,
     persistWith,
