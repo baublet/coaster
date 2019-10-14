@@ -1,9 +1,14 @@
 import { PersistAdapter } from "persist";
 import { Schema } from "persist/schema";
 
+interface SqliteOptions {
+  defaultDatabase: string;
+  memory: boolean;
+}
+
 export default function persistInSqlite(
-  schema: Schema | null = null,
-  defaultDatabase: string = ":memory:"
+  schema: Schema,
+  { defaultDatabase = "default", memory = false }: SqliteOptions
 ): PersistAdapter {
   return {
     meta: {

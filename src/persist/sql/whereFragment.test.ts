@@ -1,7 +1,7 @@
-import findBy from "./findBy";
+import whereFragment from "./whereFragment";
 
 it("returns a proper statement", () => {
-  const statement = findBy({ test: 2 });
+  const statement = whereFragment({ test: 2 });
   expect(statement).toEqual({
     query: "test = ?",
     values: [2]
@@ -9,7 +9,7 @@ it("returns a proper statement", () => {
 });
 
 it("returns a proper $and statement", () => {
-  const statement = findBy({ $and: true, test: 2, taco: "tuesday" });
+  const statement = whereFragment({ $and: true, test: 2, taco: "tuesday" });
   expect(statement).toEqual({
     query: "test = ? AND taco = ?",
     values: [2, "tuesday"]
@@ -17,7 +17,7 @@ it("returns a proper $and statement", () => {
 });
 
 it("returns a proper $or statement", () => {
-  const statement = findBy({ $or: true, test: 2, taco: "tuesday" });
+  const statement = whereFragment({ $or: true, test: 2, taco: "tuesday" });
   expect(statement).toEqual({
     query: "test = ? OR taco = ?",
     values: [2, "tuesday"]
@@ -25,7 +25,7 @@ it("returns a proper $or statement", () => {
 });
 
 it("returns a proper $and statement", () => {
-  const statement = findBy({ $or: true, test: 2, taco: "tuesday" });
+  const statement = whereFragment({ $or: true, test: 2, taco: "tuesday" });
   expect(statement).toEqual({
     query: "test = ? OR taco = ?",
     values: [2, "tuesday"]
@@ -33,7 +33,7 @@ it("returns a proper $and statement", () => {
 });
 
 it("returns a proper $with statement", () => {
-  const statement = findBy({
+  const statement = whereFragment({
     test: 2,
     $with: [
       {
@@ -48,7 +48,7 @@ it("returns a proper $with statement", () => {
 });
 
 it("returns a proper $without statement", () => {
-  const statement = findBy({
+  const statement = whereFragment({
     test: 2,
     $without: [
       {
@@ -63,7 +63,7 @@ it("returns a proper $without statement", () => {
 });
 
 it("returns a proper $without statement", () => {
-  const statement = findBy({
+  const statement = whereFragment({
     test: 2,
     $without: [
       {
