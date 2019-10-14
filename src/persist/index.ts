@@ -53,8 +53,8 @@ export interface PersistFindByProps {
   raw?: boolean;
 }
 
-export interface PersistAdapter {
-  meta?: any;
+export interface PersistAdapter<T = any> {
+  meta?: T;
   name: string;
   schema: Schema | null;
   defaultDatabase: string;

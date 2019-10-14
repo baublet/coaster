@@ -1,22 +1,29 @@
-import { PersistAdapter } from "persist";
 import { Schema } from "persist/schema";
+import db from "better-sqlite3";
+import { SqliteAdapter } from ".";
 
 interface SqliteOptions {
-  defaultDatabase: string;
+  file?: string;
+  defaultDatabase?: string;
   memory: boolean;
 }
 
 export default function persistInSqlite(
   schema: Schema,
-  { defaultDatabase = "default", memory = false }: SqliteOptions
-): PersistAdapter {
+  { file, memory = false }: SqliteOptions
+): SqliteAdapter {
+  const fileName = file || "default.db";
   return {
     meta: {
-      version: 0
+      file: fileName,
+      db: db(fileName, {
+        memory,
+        verbose: console.log
+      })
     },
     name: "memory",
     schema,
-    defaultDatabase,
+    defaultDatabase: fileName,
     deleteBy: () => null,
     findBy: () => Promise.resolve([]),
     save: () => null
