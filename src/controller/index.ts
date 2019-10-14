@@ -11,8 +11,9 @@ export interface ControllerContext extends Record<string, any> {
   cookies: Record<string, string>;
 }
 
-export type Controller = (
+export type Controller = ({
   args: ControllerArguments,
   context: ControllerContext,
-  type: ControllerResourceType
-) => Promise<ControllerResponse>;
+  type: ControllerResourceType,
+  uri: string
+}) => Promise<ControllerResponse>;
