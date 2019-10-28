@@ -36,7 +36,7 @@ export interface SchemaBuilderOperation {
   database: string;
   table?: string;
   column?: string;
-  payload?: Record<string, any>;
+  payload?: any;
 }
 
 export interface SchemaColumnOptions {
