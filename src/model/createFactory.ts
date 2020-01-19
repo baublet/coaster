@@ -1,4 +1,3 @@
-import attachPersistFunctionsToModel from "./attachPersistFunctionsToModel";
 import {
   ModelFactory,
   Model,
@@ -11,21 +10,17 @@ import { Validator } from "./validate/validate";
 import { ModelRelationships } from "./buildRelationships";
 import noPersistAdapterError from "./error/noPersistAdapterError";
 import validate from "./validate";
-import { PersistAdapter } from "persist";
 import proxyModel from "./proxyModel";
-import { Schema } from "persist/schema";
-import get from "lodash.get";
-import attachPersistFunctionsToModelFactory from "./attachPersistFunctionsToModelFactory";
+import { PersistConnection, queryFactory } from "persist";
 
-export interface CreateFactoryArguments<T, C> {
+export interface CreateFactoryArguments<T> {
   computedProps: ModelOptionsComputedProps<T>;
   databaseName?: string;
   has: (ModelFactory | ModelFactory[])[];
   names: GeneratedNames;
   normalizedHooks: NormalizedHooksMap;
-  persistWith?: PersistAdapter;
+  persistWith: PersistConnection;
   relationships: (initialData: ModelDataDefaultType) => ModelRelationships;
-  schema: Schema | null;
   tableName: string;
   validators: Validator<T>[];
 }
@@ -38,10 +33,9 @@ export default function createFactory<T, C>({
   normalizedHooks,
   persistWith,
   relationships,
-  schema,
   tableName,
   validators
-}: CreateFactoryArguments<T, C>): ModelFactory<T & C> {
+}: CreateFactoryArguments<T>): ModelFactory<T & C> {
   const factory = (initialValue: T = {} as T): Model<T> => {
     normalizedHooks.beforeCreate.forEach(hook =>
       hook({ initialData: initialValue })
@@ -67,9 +61,6 @@ export default function createFactory<T, C>({
         throw noPersistAdapterError(names.canonical);
       }
     };
-    if (persistWith) {
-      attachPersistFunctionsToModel(baseModel, persistWith);
-    }
     const model = proxyModel(baseModel) as Model<T & C>;
     normalizedHooks.afterCreate.forEach(hook => {
       hook({ model });
@@ -77,25 +68,14 @@ export default function createFactory<T, C>({
     return model;
   };
 
-  let database: string = databaseName;
-  if (!databaseName) {
-    if (persistWith) {
-      database = get(persistWith, "defaultDatabase", "default");
-    } else {
-      database = "default";
-    }
-  }
-
-  factory.databaseName = database;
+  factory.databaseName = databaseName;
   factory.isFactory = true;
   factory.names = names;
-  factory.schema = schema;
   factory.tableName = tableName;
   factory.relationships = has;
-
   if (persistWith) {
-    attachPersistFunctionsToModelFactory(factory, persistWith);
+    factory.query = queryFactory<T>(persistWith, factory);
   }
 
-  return factory as ModelFactory<T, C>;
+  return factory as ModelFactory<T & C>;
 }

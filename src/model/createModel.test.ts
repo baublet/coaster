@@ -1,4 +1,4 @@
-import createModel, { many } from "./createModel";
+import { many, createModel } from "./createModel";
 
 it("passes the smoke test", () => {
   const userModel = createModel({

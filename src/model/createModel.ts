@@ -1,13 +1,11 @@
 import { ModelHooks, NormalizedHooksMap } from "./hooks/hooks";
-import { PersistAdapter } from "../persist";
 import { Validator, ValidateFn } from "./validate/validate";
 import buildRelationships from "./buildRelationships";
 import composeModel from "./composers";
 import generateNames, { GeneratedNames } from "helpers/generateNames";
 import normalizeHooks from "./hooks";
 import createFactory from "./createFactory";
-import { Schema } from "persist/schema";
-import get from "lodash.get";
+import { PersistQuery, PersistConnection } from "persist";
 
 export type ModelComputedPropFn<T> = (data: T) => any;
 export interface ModelDataDefaultType extends Record<string, any> {
@@ -16,7 +14,9 @@ export interface ModelDataDefaultType extends Record<string, any> {
   updatedAt?: number;
 }
 export type ModelData<T = ModelDataDefaultType> = T;
+
 export type ModelComputedType<T = ModelDataDefaultType> = (data: T) => any;
+export type ModelOptionsComputedProps<T> = Record<string, ModelComputedType<T>>;
 
 export type ModelManyRelationship = [Model];
 
@@ -58,7 +58,6 @@ export type ModelOptionsHooks = Record<
   string,
   ModelOptionsHookFunction | ModelOptionsHookFunction[]
 >;
-export type ModelOptionsComputedProps<T> = Record<string, ModelComputedType<T>>;
 
 export interface ModelOptions<T, C> {
   composers?: ModelFactoryComposerFunction[];
@@ -67,7 +66,7 @@ export interface ModelOptions<T, C> {
   has?: (ModelFactory | ModelFactory[])[];
   hooks?: ModelOptionsHooks;
   name: string;
-  persistWith?: PersistAdapter;
+  persistWith?: PersistConnection;
   tableName?: string;
   validators?: Validator<T>[];
 }
@@ -84,7 +83,7 @@ export type ModelFactory<
   isFactory: boolean;
   names: GeneratedNames;
   relationships: (ModelFactory | ModelFactory[])[];
-  schema: Schema | null;
+  query: PersistQuery<DataTypes>;
   tableName: string;
 };
 
@@ -105,7 +104,10 @@ export function many(model: ModelFactory): [ModelFactory] {
   return [model];
 }
 
-function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
+export function createModel<
+  T = ModelDataDefaultType,
+  C = ModelDataDefaultType
+>({
   composers = [],
   computedProps = {},
   databaseName,
@@ -130,7 +132,6 @@ function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
   const relationships = initialValue => buildRelationships(has, initialValue);
 
   // Build our factory
-  const schema = persistWith && get(persistWith, "schema", null);
   return createFactory<T, C>({
     computedProps,
     databaseName,
@@ -140,9 +141,6 @@ function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>({
     persistWith,
     relationships,
     tableName,
-    schema,
     validators
   });
 }
-
-export default createModel;

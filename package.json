@@ -5,6 +5,7 @@
   },
   "dependencies": {
     "better-sqlite3": "^5.4.3",
+    "knex": "^0.20.8",
     "lodash.clonedeep": "^4.5.0",
     "lodash.get": "^4.4.2",
     "lodash.intersectionwith": "^4.4.0",
