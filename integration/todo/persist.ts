@@ -1,5 +1,8 @@
-import persistInMemory from "persist/memory";
+import { connect } from "persist";
 
-export const memoryMap = {};
-
-export default persistInMemory(memoryMap);
+export const database = connect({
+  client: "sqlite3",
+  connection: {
+    filename: ":memory"
+  }
+});

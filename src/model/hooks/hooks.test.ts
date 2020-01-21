@@ -1,4 +1,4 @@
-import createModel from "../createModel";
+import { createModel } from "../createModel";
 import normalizeMap, { hookDefaults } from "./hooks";
 
 it("normalizes the hook map", () => {

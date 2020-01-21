@@ -1,11 +1,16 @@
-import createModel, { many } from "model/createModel";
+import { createModel, many, Model } from "model/createModel";
 import { propertyIsNotEmpty } from "model/validate";
-import persistWith from "../persist";
-import todo from "./todo";
+import { database } from "../persist";
+import todo, { Todo } from "./todo";
 
-export default createModel({
+export interface User {
+  name: string;
+  todos?: Model<Todo>[];
+}
+
+export default createModel<User>({
   name: "User",
   validators: [propertyIsNotEmpty("name")],
   has: [many(todo)],
-  persistWith
+  persistWith: database
 });

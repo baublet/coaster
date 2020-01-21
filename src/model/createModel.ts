@@ -4,7 +4,7 @@ import buildRelationships from "./buildRelationships";
 import composeModel from "./composers";
 import generateNames, { GeneratedNames } from "helpers/generateNames";
 import normalizeHooks from "./hooks";
-import createFactory from "./createFactory";
+import { createFactory } from "./createFactory";
 import { PersistQuery, PersistConnection } from "persist";
 
 export type ModelComputedPropFn<T> = (data: T) => any;
@@ -62,13 +62,23 @@ export type ModelOptionsHooks = Record<
 export interface ModelOptions<T, C> {
   composers?: ModelFactoryComposerFunction[];
   computedProps?: ModelOptionsComputedProps<T>;
-  databaseName?: string;
   has?: (ModelFactory | ModelFactory[])[];
   hooks?: ModelOptionsHooks;
   name: string;
-  persistWith?: PersistConnection;
-  tableName?: string;
   validators?: Validator<T>[];
+}
+export type ModelOptionsWithPersist<T, C> = ModelOptions<T, C> & {
+  databaseName?: string;
+  persistWith: PersistConnection;
+  tableName?: string;
+};
+
+export function isModelOptionsWithPersist<T, C>(
+  v: any
+): v is ModelOptionsWithPersist<T, C> {
+  if (typeof v !== "object") return false;
+  if (v.persistWith) return true;
+  return false;
 }
 
 export type ModelFactoryFn<DataTypes, ComputedTypes> = (
@@ -79,12 +89,16 @@ export type ModelFactory<
   DataTypes = ModelDataDefaultType,
   ComputedTypes = ModelDataDefaultType
 > = ModelFactoryFn<DataTypes, ComputedTypes> & {
-  databaseName: string;
   isFactory: boolean;
   names: GeneratedNames;
   relationships: (ModelFactory | ModelFactory[])[];
-  query: PersistQuery<DataTypes>;
+};
+
+export type ModelFactoryWithPersist<T, C> = ModelFactory<T, C> & {
+  databaseName: string;
+  save: () => boolean;
   tableName: string;
+  query: PersistQuery<T, C>;
 };
 
 export function isModelFactory(v: any): v is ModelFactory {
@@ -104,23 +118,25 @@ export function many(model: ModelFactory): [ModelFactory] {
   return [model];
 }
 
-export function createModel<
-  T = ModelDataDefaultType,
-  C = ModelDataDefaultType
->({
-  composers = [],
-  computedProps = {},
-  databaseName,
-  has = [],
-  hooks = {},
-  name,
-  persistWith,
-  tableName,
-  validators = []
-}: ModelOptions<T, C>): ModelFactory<T, C> {
+export function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>(
+  args: ModelOptions<T, C>
+): ModelFactory<T, C>;
+export function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>(
+  args: ModelOptionsWithPersist<T, C>
+): ModelFactoryWithPersist<T, C>;
+export function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>(
+  args: ModelOptions<T, C> | ModelOptionsWithPersist<T, C>
+): any {
+  const {
+    composers = [],
+    computedProps = {},
+    has = [],
+    hooks = {},
+    name,
+    validators = []
+  } = args;
+
   const names = generateNames(name);
-  tableName = tableName || names.pluralSafe;
-  databaseName = databaseName || "default";
 
   // Normalize hook nodes into arrays
   const normalizedHooks: NormalizedHooksMap = normalizeHooks(hooks);
@@ -130,6 +146,15 @@ export function createModel<
 
   // Build out relationships object out of our `has` options
   const relationships = initialValue => buildRelationships(has, initialValue);
+
+  let persistWith;
+  let tableName;
+  let databaseName;
+  if (isModelOptionsWithPersist<T, C>(args)) {
+    persistWith = args.persistWith;
+    tableName = args.tableName || names.pluralSafe;
+    databaseName = args.databaseName || "default";
+  }
 
   // Build our factory
   return createFactory<T, C>({

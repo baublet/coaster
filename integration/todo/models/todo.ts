@@ -1,9 +1,14 @@
-import createModel from "model/createModel";
+import { createModel } from "model";
 import { propertyIsNotEmpty } from "model/validate";
-import persistWith from "../persist";
+import { database } from "../persist";
 
-export default createModel({
+export interface Todo {
+  todo: string;
+  userId?: string;
+}
+
+export default createModel<Todo>({
   name: "Todo",
   validators: [propertyIsNotEmpty("todo")],
-  persistWith
+  persistWith: database
 });

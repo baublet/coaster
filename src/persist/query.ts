@@ -1,13 +1,25 @@
 import knex from "knex";
 
 import { PersistConnection } from "./connect";
-import { ModelFactory, Model } from "model/createModel";
+import { Model, ModelFactoryWithPersist } from "model/createModel";
 
-export type PersistQuery<T> = knex.QueryBuilder<T>;
+export type PersistQueryFunction = (
+  knex: knex.QueryBuilder
+) => knex.QueryBuilder;
 
-export function queryFactory<T>(
+export type PersistQuery<T, C> = (
+  q: PersistQueryFunction
+) => Promise<Model<T & C>[]>;
+
+export function queryFactory<T, C>(
   connection: PersistConnection,
-  modelFactory: ModelFactory
-): PersistQuery<T> {
-  return connection<Model<T>>(modelFactory.tableName);
+  modelFactory: ModelFactoryWithPersist<T, C>
+): PersistQuery<T, C> {
+  return async function(q: PersistQueryFunction): Promise<Model<T & C>[]> {
+    const results = await q(connection<T>(modelFactory.tableName));
+    if (results) {
+      return results.map(modelFactory);
+    }
+    return [];
+  };
 }
