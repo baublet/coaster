@@ -1,4 +1,4 @@
-import { Model } from "./createModel";
+import { Model } from "./types";
 
 function removeDeleted(modelArray: Model[]) {
   let i = modelArray.length;

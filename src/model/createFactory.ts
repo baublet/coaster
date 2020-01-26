@@ -1,17 +1,18 @@
+import { attachPersistToModelFactory } from "persist/attachToModelFactory";
+import { GeneratedNames } from "helpers/generateNames";
 import {
   ModelFactory,
   Model,
   ModelOptionsComputedProps,
   ModelDataDefaultType,
   ModelFactoryWithPersist
-} from "./createModel";
-import { NormalizedHooksMap } from "./hooks/hooks";
-import { GeneratedNames } from "helpers/generateNames";
-import { Validator } from "./validate/validate";
+} from "./types";
 import { ModelRelationships } from "./buildRelationships";
-import validate from "./validate";
+import { NormalizedHooksMap } from "./hooks/hooks";
+import { PersistConnection } from "persist/types";
+import { Validator } from "./validate/validate";
 import proxyModel from "./proxyModel";
-import { PersistConnection, queryFactory } from "persist";
+import validate from "./validate";
 
 export interface CreateFactoryArguments<T> {
   computedProps: ModelOptionsComputedProps<T>;
@@ -46,7 +47,6 @@ export function createFactory<T, C>({
       $changed: false,
       $computed: computedProps,
       $data: initialValue,
-      $deleted: false,
       $factory: factory,
       $hooks: normalizedHooks,
       $names: names,
@@ -70,8 +70,7 @@ export function createFactory<T, C>({
   }
 
   factory.databaseName = databaseName;
-  factory.query = queryFactory<T>(persistWith, factory);
   factory.tableName = tableName;
 
-  return factory;
+  return attachPersistToModelFactory<T, C>(factory, persistWith);
 }

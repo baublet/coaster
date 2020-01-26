@@ -1,2 +1,2 @@
-export { connect, PersistConnection } from "./connect";
-export { queryFactory, PersistQuery } from "./query";
+export { connect } from "./connect";
+export { queryFactory } from "./query";

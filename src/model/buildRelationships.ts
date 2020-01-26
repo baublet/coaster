@@ -1,4 +1,4 @@
-import { ModelFactory, ModelDataDefaultType, isModel } from "./createModel";
+import { ModelFactory, ModelDataDefaultType, isModel } from "./types";
 import proxyModelArray from "./proxyModelArray";
 
 export type ModelRelationships = Record<string, ModelFactory[]>;

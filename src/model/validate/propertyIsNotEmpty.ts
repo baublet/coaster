@@ -1,4 +1,4 @@
-import { ModelData } from "../createModel";
+import { ModelData } from "model/types";
 
 function defaultEmptyEvaluator(value: any): boolean {
   if (!value) return false;

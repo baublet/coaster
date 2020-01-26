@@ -1,4 +1,4 @@
-import { Model, ModelInternalProperties, ModelData } from "./createModel";
+import { Model, ModelInternalProperties, ModelData } from "./types";
 
 function propertyIsComputed(obj: Model, prop: string): boolean {
   return Object.keys(obj.$computed).includes(prop);
@@ -27,19 +27,27 @@ function hasFn() {
   };
 }
 
+function nativeProperties(obj: ModelInternalProperties) {
+  return () => Object.assign({}, obj.$data);
+}
+
 function getFn() {
   return function get(obj: ModelInternalProperties, prop: string): any {
     const validate = () =>
       obj.$validate(obj.$data, obj.$computed, obj.$validators);
     switch (prop) {
-      case "$isModel":
-        return true;
       case "$deleted":
         return obj.$deleted;
       case "$factory":
         return obj.$factory;
       case "$hooks":
         return obj.$hooks;
+      case "$isModel":
+        return true;
+      case "$nativeProperties":
+        return nativeProperties(obj);
+      case "$setDeleted":
+        return (deleted: boolean) => (obj.$deleted = deleted);
       case "$setRelationship":
         return (key: string, model: ModelInternalProperties) => {
           obj.$relationships[key] = model;
@@ -54,14 +62,6 @@ function getFn() {
         // eslint-disable-next-line no-case-declarations
         const valid = validate();
         return validate() === true ? [] : valid;
-      case "delete":
-        // Mark it for deletion in the relationship
-        obj.$deleted = true;
-        return obj[prop];
-      case "save":
-        return obj[prop];
-      case "reload":
-        return obj[prop];
     }
     if (propertyIsComputed(obj, prop)) {
       return obj.$computed[prop]({ ...obj.$data });

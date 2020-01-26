@@ -1,4 +1,5 @@
 import { many, createModel } from "./createModel";
+import { ModelInternalProperties } from "./types";
 
 it("passes the smoke test", () => {
   const userModel = createModel({
@@ -106,13 +107,30 @@ it("filters out deleted models when accessing a relationship", async () => {
     has: [many(todoModel)]
   });
   const user = userModel({ id: "test" });
+
   user.todos = [
     todoModel({ task: "Test task" }),
     todoModel({ task: "Test task 2" })
   ];
 
-  await expect(user.todos[1].delete()).rejects.toBeTruthy();
+  user.todos[0].$setDeleted(true);
 
   expect(user.todos.length).toBe(1);
-  expect(user.todos[0].task).toBe("Test task");
+  expect(user.todos[0].task).toBe("Test task 2");
+});
+
+it("returns native properties without the computed ones", async () => {
+  const todoModel = createModel({
+    name: "todo",
+    computedProps: {
+      name: () => 123
+    }
+  });
+
+  const todo = todoModel({ todo: "Hammer time" });
+  const nativeProperties = (todo as ModelInternalProperties).$nativeProperties();
+  expect(nativeProperties).toEqual({
+    todo: "Hammer time"
+  });
+  expect(todo.name).not.toEqual(false);
 });

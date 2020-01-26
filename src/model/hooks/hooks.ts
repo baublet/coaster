@@ -1,8 +1,4 @@
-import {
-  ModelOptionsHooks,
-  ModelDataDefaultType,
-  Model
-} from "model/createModel";
+import { ModelOptionsHooks, ModelDataDefaultType, Model } from "model/types";
 
 // When a model is initialized, before we finish up proxying everything,
 // we run the initial data through beforeCreate hooks

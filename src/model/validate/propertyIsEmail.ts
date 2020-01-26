@@ -1,4 +1,4 @@
-import { ModelData } from "../createModel";
+import { ModelData } from "model/types";
 import { validate } from "email-validator";
 
 type EmailValidator = (email: string) => boolean;

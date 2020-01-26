@@ -2,7 +2,7 @@ import {
   ModelData,
   ModelComputedPropFn,
   ModelDataDefaultType
-} from "../createModel";
+} from "model/types";
 
 export type Validator<T = ModelDataDefaultType> = (
   data: ModelData<T>,
@@ -10,13 +10,13 @@ export type Validator<T = ModelDataDefaultType> = (
 ) => true | string;
 export type ModelValidationErrors = string[];
 
-export type ValidateFn<T> = (
+export type ValidateFunction<T> = (
   data: ModelData<T>,
   computedProps: Record<string, ModelComputedPropFn<any>>,
   validators: Validator<T>[]
 ) => true | ModelValidationErrors;
 
-function validate<T>(
+export default function validate<T>(
   data: ModelData<T>,
   computedProps: Record<string, ModelComputedPropFn<T>>,
   validators: Validator<T>[]
@@ -34,5 +34,3 @@ function validate<T>(
   }
   return true;
 }
-
-export default validate;

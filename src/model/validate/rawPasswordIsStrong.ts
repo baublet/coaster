@@ -1,4 +1,4 @@
-import { ModelData } from "../createModel";
+import { ModelData } from "model/types";
 import passwordIsStrong from "helpers/passwordIsStrong";
 
 export default function passwordPropertyIsStrong(

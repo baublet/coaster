@@ -1,1 +1,1 @@
-export { default, hookDefaults } from "./hooks";
+export { default, hookDefaults, ModelHooks } from "./hooks";

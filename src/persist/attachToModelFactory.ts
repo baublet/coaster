@@ -1,10 +1,25 @@
-import { ModelFactoryWithPersist } from "model/createModel";
-import { PersistConnection } from "./connect";
+import { countFactory } from "./count";
+import { createFactory } from "./create";
+import { deleteFactory } from "./delete";
+import { findByFactory } from "./findBy";
+import { findFactory } from "./find";
+import { ModelFactoryWithPersist, ModelFactory } from "model/types";
+import { PersistConnection } from "./types";
 import { queryFactory } from "./query";
+import { updateFactory } from "./update";
 
 export function attachPersistToModelFactory<T, C>(
-  modelFactory: ModelFactoryWithPersist<T, C>,
+  modelFactory: ModelFactory<T, C>,
   persist: PersistConnection
-): void {
-  modelFactory.query = queryFactory<T, C>(persist, modelFactory);
+): ModelFactoryWithPersist<T, C> {
+  const persistFactory: ModelFactoryWithPersist<T, C> = modelFactory as any;
+  persistFactory.persistWith = persist;
+  persistFactory.count = countFactory(persistFactory);
+  persistFactory.create = createFactory<T, C>(persistFactory);
+  persistFactory.delete = deleteFactory<T, C>(persistFactory);
+  persistFactory.find = findFactory<T, C>(persistFactory);
+  persistFactory.findBy = findByFactory<T, C>(persistFactory);
+  persistFactory.query = queryFactory<T, C>(persistFactory);
+  persistFactory.update = updateFactory<T, C>(persistFactory);
+  return persistFactory;
 }

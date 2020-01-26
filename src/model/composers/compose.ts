@@ -2,7 +2,7 @@ import {
   ModelFactoryComposerFunction,
   ModelComputedType,
   ModelFactory
-} from "model/createModel";
+} from "model/types";
 import { Validator } from "model/validate/validate";
 import tooManyComposersError from "model/error/tooManyComposers";
 
