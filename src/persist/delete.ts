@@ -13,7 +13,7 @@ export function deleteFactory<T extends ModelDataDefaultType, C>(
   const tableName = modelFactory.tableName;
   const connection = modelFactory.persistWith;
 
-  return async function save(
+  return async function(
     model: Model<T & C> | string,
     trx: PersistTransaction = null
   ): Promise<boolean> {

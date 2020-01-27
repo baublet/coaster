@@ -8,7 +8,7 @@ export function findFactory<T extends ModelDataDefaultType, C>(
   const tableName = modelFactory.tableName;
   const connection = modelFactory.persistWith;
 
-  return async function find(
+  return async function(
     id: string,
     columns: string[] = ["*"],
     trx: PersistTransaction = null

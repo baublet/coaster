@@ -14,7 +14,7 @@ export function updateFactory<T extends ModelDataDefaultType, C>(
   const tableName = modelFactory.tableName;
   const connection = modelFactory.persistWith;
 
-  return async function update(
+  return async function(
     model: Model<T & C>,
     trx: PersistTransaction = null
   ): Promise<Model<T & C>> {

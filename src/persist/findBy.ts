@@ -8,7 +8,7 @@ export function findByFactory<T extends ModelDataDefaultType, C>(
   const tableName = modelFactory.tableName;
   const connection = modelFactory.persistWith;
 
-  return async function findBy(
+  return async function(
     by: Record<string, string | number | boolean>,
     columns: string[] = ["*"],
     trx: PersistTransaction = null

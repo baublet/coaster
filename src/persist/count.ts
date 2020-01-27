@@ -8,7 +8,7 @@ export function countFactory<T extends ModelDataDefaultType, C>(
   const tableName = modelFactory.tableName;
   const connection = modelFactory.persistWith;
 
-  return async function count(trx: PersistTransaction = null): Promise<number> {
+  return async function(trx: PersistTransaction = null): Promise<number> {
     const cnx = trx || connection;
     const count = await cnx(tableName).count();
     return count[0]["count(*)"] as number;

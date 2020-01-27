@@ -28,3 +28,15 @@ it("creates a model", async () => {
 
   expect(newCount).toBeGreaterThan(originalCount);
 });
+
+it("returns a model with an ID after creating it", async () => {
+  const persist = connect(db);
+
+  const [User, user] = await createTableForNewModelFactory(persist, {
+    name: "Burt"
+  });
+
+  const newUser = await User.create(user);
+
+  expect(newUser.id).toBeTruthy();
+});
