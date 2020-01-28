@@ -47,6 +47,7 @@ export function createFactory<T, C>({
       $changed: false,
       $computed: computedProps,
       $data: initialValue,
+      $deleted: false,
       $factory: factory,
       $hooks: normalizedHooks,
       $names: names,

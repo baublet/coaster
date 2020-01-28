@@ -1,17 +1,11 @@
-import { db, createTableForNewModelFactory } from "testHelpers/db";
+import { User } from "testHelpers/User";
 
 import { createFactory } from "./create";
-import { connect } from "./connect";
-import { createModel } from "model";
+import { connect } from "persist";
+import { db, createTableForNewModelFactory } from "testHelpers/db";
 
 it("returns a function", () => {
-  const persist = connect(db);
-  const factory = createFactory(
-    createModel({
-      name: "User",
-      persistWith: persist
-    })
-  );
+  const factory = createFactory(User);
   expect(factory).toBeInstanceOf(Function);
 });
 

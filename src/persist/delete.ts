@@ -2,7 +2,8 @@ import {
   Model,
   ModelFactoryWithPersist,
   ModelDataDefaultType,
-  ModelInternalProperties
+  ModelInternalProperties,
+  isModel
 } from "model/types";
 
 import { PersistDeleteFunction, PersistTransaction } from "./types";
@@ -20,12 +21,16 @@ export function deleteFactory<T extends ModelDataDefaultType, C>(
     const id = typeof model === "string" ? model : model.id;
     const cnx = trx || connection;
 
+    // Throw here with a more helpful error message -- we get here when a user passes in an unsaved model
+    if (!id) throw new Error("Cannot delete an undefined ID!");
+
     const result = await cnx(tableName)
-      .where("id", "=", id)
-      .delete();
+      .where("id", id)
+      .delete()
+      .limit(1);
 
     if (result) {
-      if (model) {
+      if (isModel(model)) {
         ((model as any) as ModelInternalProperties).$setDeleted(true);
       }
       return true;

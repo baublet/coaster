@@ -47,7 +47,9 @@ function getFn() {
       case "$nativeProperties":
         return nativeProperties(obj);
       case "$setDeleted":
-        return (deleted: boolean) => (obj.$deleted = deleted);
+        return (deleted: boolean) => {
+          obj.$deleted = deleted;
+        };
       case "$setRelationship":
         return (key: string, model: ModelInternalProperties) => {
           obj.$relationships[key] = model;
