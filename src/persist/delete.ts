@@ -7,6 +7,8 @@ import {
 } from "model/types";
 
 import { PersistDeleteFunction, PersistTransaction } from "./types";
+import { cannotDeleteUncreatedModel } from "./error/cannotDeleteUncreatedModel";
+import { cannotDeleteBlankId } from "./error/cannotDeleteBlankId";
 
 export function deleteFactory<T extends ModelDataDefaultType, C>(
   modelFactory: ModelFactoryWithPersist<T, C>
@@ -22,7 +24,13 @@ export function deleteFactory<T extends ModelDataDefaultType, C>(
     const cnx = trx || connection;
 
     // Throw here with a more helpful error message -- we get here when a user passes in an unsaved model
-    if (!id) throw new Error("Cannot delete an undefined ID!");
+    if (typeof model !== "string" && !id) {
+      throw cannotDeleteUncreatedModel(model);
+    }
+
+    if (!model) {
+      throw cannotDeleteBlankId();
+    }
 
     const result = await cnx(tableName)
       .where("id", id)

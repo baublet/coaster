@@ -42,7 +42,9 @@ export interface ModelInternalProperties {
 
 export type Model<
   UserLandProperties = ModelDataDefaultType
-> = UserLandProperties;
+> = UserLandProperties & {
+  toJson: () => Record<string, any>;
+};
 
 export interface ModelFactoryComposerArguments {
   composers: ModelFactoryComposerFunction[];

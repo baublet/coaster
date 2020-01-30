@@ -1,5 +1,4 @@
 import { many, createModel } from "./createModel";
-import { ModelInternalProperties } from "./types";
 
 it("passes the smoke test", () => {
   const userModel = createModel({
@@ -128,7 +127,7 @@ it("returns native properties without the computed ones", async () => {
   });
 
   const todo = todoModel({ todo: "Hammer time" });
-  const nativeProperties = (todo as ModelInternalProperties).$nativeProperties();
+  const nativeProperties = (todo as any).$nativeProperties();
   expect(nativeProperties).toEqual({
     todo: "Hammer time"
   });

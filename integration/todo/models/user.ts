@@ -1,5 +1,7 @@
-import { createModel, many, Model } from "model/createModel";
+import { createModel, many } from "model/createModel";
+import { Model } from "model/types";
 import { propertyIsNotEmpty } from "model/validate";
+
 import { database } from "../persist";
 import todo, { Todo } from "./todo";
 

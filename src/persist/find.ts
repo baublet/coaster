@@ -1,6 +1,7 @@
 import { ModelFactoryWithPersist, ModelDataDefaultType } from "model/types";
 
 import { PersistTransaction, PersistFindFunction } from "./types";
+import { cannotFindByBlankId } from "./error/cannotFindBlankId";
 
 export function findFactory<T extends ModelDataDefaultType, C>(
   modelFactory: ModelFactoryWithPersist<T, C>
@@ -13,6 +14,10 @@ export function findFactory<T extends ModelDataDefaultType, C>(
     columns: string[] = ["*"],
     trx: PersistTransaction = null
   ) {
+    if (!id) {
+      throw cannotFindByBlankId();
+    }
+
     const cnx = trx || connection;
 
     const results = await cnx<T>(tableName)

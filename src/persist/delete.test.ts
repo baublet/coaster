@@ -1,11 +1,12 @@
 import { db, createTableForNewModelFactory } from "testHelpers/db";
 
-import { createFactory } from "./create";
+import { deleteFactory } from "./delete";
 import { connect } from "./connect";
 import { User } from "testHelpers/User";
+import { cannotDeleteBlankId } from "./error/cannotDeleteBlankId";
 
 it("returns a function", () => {
-  const factory = createFactory(User);
+  const factory = deleteFactory(User);
   expect(factory).toBeInstanceOf(Function);
 });
 
@@ -43,4 +44,8 @@ it("returns a boolean if a model is deleted by model", async () => {
   const toDelete = await User.delete(savedUser);
 
   expect(toDelete).toBeTruthy();
+});
+
+it("throws if you try to delete by ID, and pass by blank ID", async () => {
+  await expect(User.delete("")).rejects.toEqual(cannotDeleteBlankId());
 });

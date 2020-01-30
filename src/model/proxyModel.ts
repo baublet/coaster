@@ -1,6 +1,9 @@
 import { Model, ModelInternalProperties, ModelData } from "./types";
 
-function propertyIsComputed(obj: Model, prop: string): boolean {
+function propertyIsComputed(
+  obj: ModelInternalProperties,
+  prop: string
+): boolean {
   return Object.keys(obj.$computed).includes(prop);
 }
 
@@ -19,7 +22,10 @@ function applyFn() {
 }
 
 function hasFn() {
-  return function has(obj: ModelInternalProperties, prop: string): boolean {
+  return function has(
+    obj: ModelInternalProperties & Model,
+    prop: string
+  ): boolean {
     if (propertyIsComputed(obj, prop) || propertyIsData(obj, prop)) {
       return true;
     }
@@ -32,7 +38,7 @@ function nativeProperties(obj: ModelInternalProperties) {
 }
 
 function getFn() {
-  return function get(obj: ModelInternalProperties, prop: string): any {
+  return function get(obj: ModelInternalProperties & Model, prop: string): any {
     const validate = () =>
       obj.$validate(obj.$data, obj.$computed, obj.$validators);
     switch (prop) {
@@ -51,19 +57,21 @@ function getFn() {
           obj.$deleted = deleted;
         };
       case "$setRelationship":
-        return (key: string, model: ModelInternalProperties) => {
+        return (key: string, model: Model) => {
           obj.$relationships[key] = model;
         };
       case "$setData":
         return (data: ModelData): void => {
           obj.$data = data;
         };
-      case "valid":
-        return validate() === true;
       case "errors":
         // eslint-disable-next-line no-case-declarations
         const valid = validate();
         return validate() === true ? [] : valid;
+      case "toJson":
+        return () => Object.assign({}, obj.$data);
+      case "valid":
+        return validate() === true;
     }
     if (propertyIsComputed(obj, prop)) {
       return obj.$computed[prop]({ ...obj.$data });
@@ -87,7 +95,11 @@ function getFn() {
 }
 
 function setFn() {
-  return function set(obj: ModelInternalProperties, prop: string, value: any) {
+  return function set(
+    obj: Model & ModelInternalProperties,
+    prop: string,
+    value: any
+  ) {
     if (propertyIsRelationship(obj, prop)) {
       obj.$relationships[prop] = value;
       return true;

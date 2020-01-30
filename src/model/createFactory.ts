@@ -53,7 +53,8 @@ export function createFactory<T, C>({
       $names: names,
       $relationships: relationships(initialValue),
       $validate: validate,
-      $validators: validators
+      $validators: validators,
+      toJson: () => ({})
     };
     const model = proxyModel(baseModel) as Model<T & C>;
     normalizedHooks.afterCreate.forEach(hook => {

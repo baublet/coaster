@@ -8,7 +8,8 @@ export const db = {
   client: "sqlite3",
   connection: {
     filename: ":memory:"
-  }
+  },
+  useNullAsDefault: true
 };
 
 export async function createTableForNewModelFactory<T = any, C = any>(
