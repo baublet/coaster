@@ -1,6 +1,9 @@
 {
   "scripts": {
     "test": "jest",
+    "coverage": "jest --coverage --silent",
+    "coverage:view": "open coverage/lcov-report/index.html",
+    "coverage:report": "yarn coverage; yarn coverage:view",
     "lint:all": "eslint src/ --ext ts --fix"
   },
   "dependencies": {

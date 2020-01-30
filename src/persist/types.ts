@@ -24,6 +24,12 @@ export type PersistFindFunction<T, C> = (
   persist?: PersistConnection
 ) => Promise<Model<T & C> | null>;
 
+export type PersistFindManyFunction<T, C> = (
+  ids: string[],
+  columns?: string[],
+  persist?: PersistConnection
+) => Promise<(Model<T & C> | null)[]>;
+
 export type PersistFindByFunction<T, C> = (
   by: Record<string, string | number | boolean>,
   columns?: string[],

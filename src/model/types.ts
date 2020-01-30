@@ -8,7 +8,8 @@ import {
   PersistFindByFunction,
   PersistQueryFunctionOnFactory,
   PersistConnection,
-  PersistCountFunction
+  PersistCountFunction,
+  PersistFindManyFunction
 } from "persist/types";
 
 export type ModelComputedPropFn<T> = (data: T) => any;
@@ -87,6 +88,7 @@ export type ModelOptionsWithPersist<T, C> = ModelOptions<T, C> & {
   delete?: PersistDeleteFunction<T, C>;
   find?: PersistFindFunction<T, C>;
   findBy?: PersistFindByFunction<T, C>;
+  findMany?: PersistFindManyFunction<T, C>;
   query?: PersistQueryFunctionOnFactory<T, C>;
   update?: PersistSaveFunction<T, C>;
 };
@@ -119,6 +121,7 @@ export type ModelFactoryWithPersist<T, C> = ModelFactory<T, C> & {
   delete: PersistDeleteFunction<T, C>;
   find: PersistFindFunction<T, C>;
   findBy: PersistFindByFunction<T, C>;
+  findMany: PersistFindManyFunction<T, C>;
   persistWith: PersistConnection;
   query: PersistQueryFunctionOnFactory<T, C>;
   tableName: string;

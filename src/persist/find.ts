@@ -9,16 +9,15 @@ export function findFactory<T extends ModelDataDefaultType, C>(
   const tableName = modelFactory.tableName;
   const connection = modelFactory.persistWith;
 
-  return async function(
+  return async function find(
     id: string,
     columns: string[] = ["*"],
     trx: PersistTransaction = null
   ) {
+    const cnx = trx || connection;
     if (!id) {
       throw cannotFindByBlankId();
     }
-
-    const cnx = trx || connection;
 
     const results = await cnx<T>(tableName)
       .where("id", "=", id)

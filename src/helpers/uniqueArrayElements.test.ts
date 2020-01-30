@@ -1,7 +1,7 @@
 import unique from "./uniqueArrayElements";
 
 it("creates unique array elements", () => {
-  expect(unique([1, 1, 2])).toEqual([1, 2]);
+  expect(unique([1, 1, 3, 2, 5, 2, 1, 34, 1, 2])).toEqual([1, 3, 2, 5, 34]);
 });
 
 it("allows custom matchers", () => {
