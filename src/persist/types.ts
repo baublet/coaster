@@ -1,5 +1,5 @@
 import knex from "knex";
-import { Model } from "model/types";
+import { Model, ModelDataDefaultType } from "model/types";
 
 export type PersistConnectArguments = string | knex.Config;
 export type PersistConnection = knex;
@@ -18,11 +18,20 @@ export type PersistDeleteFunction<T, C> = (
   persist?: PersistConnection
 ) => Promise<boolean>;
 
-export type PersistFindFunction<T, C> = (
-  id: string,
-  columns?: string[],
-  persist?: PersistConnection
-) => Promise<Model<T & C> | null>;
+export interface PersistFindFunction<T extends ModelDataDefaultType, C> {
+  (id: string, columns?: string[], persist?: PersistConnection): Promise<Model<
+    T & C
+  > | null>;
+  (ids: string[], columns?: string[], persist?: PersistConnection): Promise<
+    (Model<T & C> | null)[]
+  >;
+}
+
+// export type PersistFindFunction<T, C> = (
+//   id: string,
+//   columns?: string[],
+//   persist?: PersistConnection
+// ) => Promise<Model<T & C> | null>;
 
 export type PersistFindManyFunction<T, C> = (
   ids: string[],
