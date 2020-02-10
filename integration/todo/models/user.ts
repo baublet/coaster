@@ -7,12 +7,18 @@ import todo, { Todo } from "./todo";
 
 export interface User {
   name: string;
-  todos?: Model<Todo>[];
+  firstName: string;
+  fullName: string;
+  lastName: string;
+  todos: Model<Todo>[];
 }
 
 export default createModel<User>({
   name: "User",
   validators: [propertyIsNotEmpty("name")],
   has: [many(todo)],
+  computedProps: {
+    fullName: ({ firstName, lastName }) => `${firstName} ${lastName}`
+  },
   persistWith: database
 });

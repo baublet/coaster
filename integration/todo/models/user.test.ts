@@ -1,12 +1,6 @@
 import User from "./user";
 import Todo from "./todo";
 
-it("doesn't error if we have a name", () => {
-  const user = User({ name: "Chrissy" });
-  expect(user.valid).toBeTruthy();
-  expect(user.errors.length).toBe(0);
-});
-
 it("allows fluent accessing of todos", () => {
   const user = User({ name: "Jaime" });
   expect(user.todos).toBeInstanceOf(Array);
@@ -24,12 +18,7 @@ it("allows fluent accessing of todos", () => {
 it("allows fluent accessing of todos with pre-initialized data", () => {
   const user = User({
     name: "Jaime",
-    todos: [
-      {
-        todo: "Do the dishes"
-      },
-      Todo({ todo: "Clean the shower" })
-    ]
+    todos: [Todo({ todo: "Do the dishes" }), Todo({ todo: "Clean the shower" })]
   });
 
   expect(user.todos).toBeInstanceOf(Array);

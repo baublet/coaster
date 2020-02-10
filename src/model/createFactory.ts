@@ -5,7 +5,9 @@ import {
   Model,
   ModelOptionsComputedProps,
   ModelDataDefaultType,
-  ModelFactoryWithPersist
+  ModelFactoryWithPersist,
+  ModelRelationshipArguments,
+  ModelDataPropTypes
 } from "./types";
 import { ModelRelationships } from "./buildRelationships";
 import { NormalizedHooksMap } from "./hooks/hooks";
@@ -17,29 +19,29 @@ import validate from "./validate";
 export interface CreateFactoryArguments<T> {
   computedProps: ModelOptionsComputedProps<T>;
   databaseName?: string;
-  has: (ModelFactory | ModelFactory[])[];
+  has: ModelRelationshipArguments;
   names: GeneratedNames;
   normalizedHooks: NormalizedHooksMap;
   persistWith?: PersistConnection;
+  primaryKey: string;
   relationships: (initialData: ModelDataDefaultType) => ModelRelationships;
   tableName?: string;
   validators: Validator<T>[];
 }
 
-export function createFactory<T, C>({
+export function createFactory<T extends ModelDataPropTypes>({
   computedProps,
   databaseName,
   has,
   names,
   normalizedHooks,
   persistWith,
+  primaryKey,
   relationships,
   tableName,
   validators
-}: CreateFactoryArguments<T>):
-  | ModelFactoryWithPersist<T, C>
-  | ModelFactory<T, C> {
-  const factory = (initialValue: T): Model<T & C> => {
+}: CreateFactoryArguments<T>): ModelFactoryWithPersist<T> | ModelFactory<T> {
+  const factory = (initialValue): Model<T> => {
     normalizedHooks.beforeCreate.forEach(hook =>
       hook({ initialData: initialValue })
     );
@@ -50,19 +52,21 @@ export function createFactory<T, C>({
       $deleted: false,
       $factory: factory,
       $hooks: normalizedHooks,
+      $isModel: true,
       $names: names,
       $relationships: relationships(initialValue),
       $validate: validate,
       $validators: validators,
       toJson: () => ({})
     };
-    const model = proxyModel(baseModel) as Model<T & C>;
+    const model = proxyModel(baseModel) as Model<T>;
     normalizedHooks.afterCreate.forEach(hook => {
       hook({ model });
     });
     return model;
   };
 
+  factory.$id = Symbol(names.canonical);
   factory.isFactory = true;
   factory.names = names;
   factory.relationships = has;
@@ -72,7 +76,8 @@ export function createFactory<T, C>({
   }
 
   factory.databaseName = databaseName;
+  factory.primaryKey = primaryKey;
   factory.tableName = tableName;
 
-  return attachPersistToModelFactory<T, C>(factory, persistWith);
+  return attachPersistToModelFactory<T>(factory, persistWith);
 }

@@ -8,20 +8,17 @@ import {
   PersistFindByFunction,
   PersistQueryFunctionOnFactory,
   PersistConnection,
-  PersistCountFunction,
-  PersistFindManyFunction
+  PersistCountFunction
 } from "persist/types";
 
 export type ModelComputedPropFn<T> = (data: T) => any;
-export interface ModelDataDefaultType extends Record<string, any> {
-  id?: string;
-  createdAt?: number;
-  updatedAt?: number;
-}
+export type ModelDataPropTypes = Record<string, any>;
+export type ModelDataDefaultType = Record<string, any>;
 export type ModelData<T = ModelDataDefaultType> = T;
 
 export type ModelComputedType<T = ModelDataDefaultType> = (data: T) => any;
 export type ModelOptionsComputedProps<T> = Record<string, ModelComputedType<T>>;
+export type ModelInferredComputedProps<T> = Record<string, () => Model<T>>;
 
 export type ModelManyRelationship = [Model];
 
@@ -41,15 +38,15 @@ export interface ModelInternalProperties {
   $validators: Validator<any>[];
 }
 
-export type Model<
-  UserLandProperties = ModelDataDefaultType
-> = UserLandProperties & {
+export type Model<T = ModelDataDefaultType> = T & {
+  // Only very rarely add these. We typically want to store these things at the
+  // factory-level to prevent newing up functions and closures so often.
   toJson: () => Record<string, any>;
 };
 
 export interface ModelFactoryComposerArguments {
   composers: ModelFactoryComposerFunction[];
-  has: (ModelFactory | ModelFactory[])[];
+  has: ModelRelationshipArguments;
   computedProps: Record<string, ModelComputedType>;
   validators?: Validator[];
 }
@@ -68,64 +65,116 @@ export type ModelOptionsHooks = Record<
   ModelOptionsHookFunction | ModelOptionsHookFunction[]
 >;
 
-export interface ModelOptions<T, C> {
+export interface ModelHasArguments {
+  /**
+   * When accessing this relationship, you can set a custom accessor. Instead
+   * of `user.todos`, you can set this to `shoppingList` to access relationships
+   * via `user.shoppingList`.
+   */
+  accessName?: string;
+  /**
+   * Also colloquially called "through"
+   */
+  bridgeTableName?: string;
+  /**
+   * When searching for this model's relationships, we look for them on this
+   * column.
+   */
+  foreignKey?: string;
+  /**
+   * When searching across the above column for relationships, this is the
+   * column on this model we look for in the bridge table.
+   */
+  localKey?: string;
+  /**
+   * If this relationship can contain multiples, make this true. Defaults to
+   * false.
+   */
+  many?: boolean;
+  /**
+   * Factory of the foreign model we're relating this model to.
+   */
+  model: ModelFactory;
+}
+
+export function isModelHasArguments(arg: any): arg is ModelHasArguments {
+  if (typeof arg !== "object") return false;
+  if (Array.isArray(arg)) return false;
+  if (isModel(arg)) return false;
+  if (arg.model) return true;
+  return false;
+}
+
+export type ModelRelationshipArguments = (
+  | ModelFactory
+  | ModelFactory[]
+  | ModelHasArguments
+)[];
+
+export interface ModelOptions<T> {
   composers?: ModelFactoryComposerFunction[];
   computedProps?: ModelOptionsComputedProps<T>;
-  has?: (ModelFactory | ModelFactory[])[];
+  has?: ModelRelationshipArguments;
   hooks?: ModelOptionsHooks;
   name: string;
   validators?: Validator<T>[];
 }
 
-export type ModelOptionsWithPersist<T, C> = ModelOptions<T, C> & {
+export type ModelOptionsWithPersist<
+  T extends ModelDataPropTypes
+> = ModelOptions<T> & {
   databaseName?: string;
   persistWith: PersistConnection;
+  primaryKey?: string;
   tableName?: string;
   // Factory methods for persist. We have built-ins for this, but these allow
   // users to pass in whatever they want here in place of the built-ins.
   count?: PersistCountFunction;
-  create?: PersistSaveFunction<T, C>;
-  delete?: PersistDeleteFunction<T, C>;
-  find?: PersistFindFunction<T, C>;
-  findBy?: PersistFindByFunction<T, C>;
-  findMany?: PersistFindManyFunction<T, C>;
-  query?: PersistQueryFunctionOnFactory<T, C>;
-  update?: PersistSaveFunction<T, C>;
+  create?: PersistSaveFunction<T>;
+  delete?: PersistDeleteFunction<T>;
+  find?: PersistFindFunction<T>;
+  findBy?: PersistFindByFunction<T>;
+  query?: PersistQueryFunctionOnFactory<T>;
+  update?: PersistSaveFunction<T>;
 };
 
-export function isModelOptionsWithPersist<T, C>(
+export function isModelOptionsWithPersist<T>(
   v: any
-): v is ModelOptionsWithPersist<T, C> {
+): v is ModelOptionsWithPersist<T> {
   if (typeof v !== "object") return false;
   if (v.persistWith) return true;
   return false;
 }
 
-export type ModelFactoryFn<DataTypes, ComputedTypes> = (
-  initialValue: DataTypes
-) => Model<DataTypes & ComputedTypes>;
+export type ModelFactoryFn<T> = (
+  // Allows partial initialization of models, and doesn't let
+  // users accidentally set computedProps when initializing
+  initialValue: Partial<T>
+) => Model<T>;
 
-export type ModelFactory<
-  DataTypes = ModelDataDefaultType,
-  ComputedTypes = ModelDataDefaultType
-> = ModelFactoryFn<DataTypes, ComputedTypes> & {
+export type ModelFactory<T extends ModelDataPropTypes = {}> = ModelFactoryFn<
+  T
+> & {
+  $id: Symbol;
   isFactory: boolean;
   names: GeneratedNames;
-  relationships: (ModelFactory | ModelFactory[])[];
+  relationships: ModelRelationshipArguments;
 };
 
-export type ModelFactoryWithPersist<T, C> = ModelFactory<T, C> & {
+export type ModelFactoryWithPersist<
+  T extends ModelDataPropTypes = {}
+> = ModelFactory<T> & {
   count: PersistCountFunction;
-  create: PersistSaveFunction<T, C>;
+  create: PersistSaveFunction<T>;
   databaseName: string;
-  delete: PersistDeleteFunction<T, C>;
-  find: PersistFindFunction<T, C>;
-  findBy: PersistFindByFunction<T, C>;
-  findMany: PersistFindManyFunction<T, C>;
+  delete: PersistDeleteFunction<T>;
+  find: PersistFindFunction<T>;
+  findBy: PersistFindByFunction<T>;
   persistWith: PersistConnection;
-  query: PersistQueryFunctionOnFactory<T, C>;
+  primaryKey: string;
+  query: PersistQueryFunctionOnFactory<T>;
   tableName: string;
-  update: PersistSaveFunction<T, C>;
+  update: PersistSaveFunction<T>;
 };
 
 export function isModelFactory(v: any): v is ModelFactory {
@@ -136,7 +185,6 @@ export function isModelFactory(v: any): v is ModelFactory {
 
 export function isModel(v: any): v is Model {
   if (typeof v !== "object") return false;
-  if (v instanceof Proxy === false) return false;
   if (v.$isModel) return true;
   return false;
 }

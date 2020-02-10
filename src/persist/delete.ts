@@ -1,5 +1,4 @@
 import {
-  Model,
   ModelFactoryWithPersist,
   ModelDataDefaultType,
   ModelInternalProperties,
@@ -10,17 +9,18 @@ import { PersistDeleteFunction, PersistTransaction } from "./types";
 import { cannotDeleteUncreatedModel } from "./error/cannotDeleteUncreatedModel";
 import { cannotDeleteBlankId } from "./error/cannotDeleteBlankId";
 
-export function deleteFactory<T extends ModelDataDefaultType, C>(
-  modelFactory: ModelFactoryWithPersist<T, C>
-): PersistDeleteFunction<T, C> {
+export function deleteFactory<T extends ModelDataDefaultType>(
+  modelFactory: ModelFactoryWithPersist<T>
+): PersistDeleteFunction<T> {
   const tableName = modelFactory.tableName;
   const connection = modelFactory.persistWith;
 
   return async function(
-    model: Model<T & C> | string,
+    model: ReturnType<ModelFactoryWithPersist<T>> | string,
     trx: PersistTransaction = null
   ): Promise<boolean> {
-    const id = typeof model === "string" ? model : model.id;
+    const id =
+      typeof model === "string" ? model : model[modelFactory.primaryKey];
     const cnx = trx || connection;
 
     // Throw here with a more helpful error message -- we get here when a user passes in an unsaved model
@@ -33,7 +33,7 @@ export function deleteFactory<T extends ModelDataDefaultType, C>(
     }
 
     const result = await cnx(tableName)
-      .where("id", id)
+      .where(modelFactory.primaryKey, id)
       .delete()
       .limit(1);
 

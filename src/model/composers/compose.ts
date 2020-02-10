@@ -1,7 +1,7 @@
 import {
   ModelFactoryComposerFunction,
   ModelComputedType,
-  ModelFactory
+  ModelRelationshipArguments
 } from "model/types";
 import { Validator } from "model/validate/validate";
 import tooManyComposersError from "model/error/tooManyComposers";
@@ -13,7 +13,7 @@ export default function composeModel(
   modelName: string,
   composers: ModelFactoryComposerFunction[],
   computedProps: Record<string, ModelComputedType>,
-  has: (ModelFactory | ModelFactory[])[],
+  has: ModelRelationshipArguments,
   validators: Validator[]
 ) {
   if (!composers) return;

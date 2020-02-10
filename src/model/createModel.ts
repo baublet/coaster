@@ -6,26 +6,28 @@ import normalizeHooks from "./hooks";
 import { createFactory } from "./createFactory";
 import {
   ModelFactory,
-  ModelDataDefaultType,
   ModelOptions,
   ModelFactoryWithPersist,
   isModelOptionsWithPersist,
   ModelOptionsWithPersist
 } from "./types";
 
-export function many(model: ModelFactory): [ModelFactory] {
-  return [model];
+/**
+ * Sugar around declaring a simple hasMany relationship via
+ * `has: [many(Todos)]` instead of the clunky `has: [[Todos]]`
+ * @param factory
+ */
+export function many<T extends ModelFactory>(factory: T): [T] {
+  return [factory];
 }
 
-export function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>(
-  args: ModelOptions<T, C>
-): ModelFactory<T, C>;
-export function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>(
-  args: ModelOptionsWithPersist<T, C>
-): ModelFactoryWithPersist<T, C>;
-export function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>(
-  args: ModelOptions<T, C> | ModelOptionsWithPersist<T, C>
-): any {
+export function createModel<T = {}>(args: ModelOptions<T>): ModelFactory<T>;
+export function createModel<T = {}>(
+  args: ModelOptionsWithPersist<T>
+): ModelFactoryWithPersist<T>;
+export function createModel<T = {}>(
+  args: ModelOptions<T>
+): ModelFactory<T> | ModelFactoryWithPersist<T> {
   const {
     composers = [],
     computedProps = {},
@@ -47,22 +49,25 @@ export function createModel<T = ModelDataDefaultType, C = ModelDataDefaultType>(
   const relationships = initialValue => buildRelationships(has, initialValue);
 
   let persistWith;
+  let primaryKey = "id";
   let tableName;
   let databaseName;
-  if (isModelOptionsWithPersist<T, C>(args)) {
-    persistWith = args.persistWith;
-    tableName = args.tableName || names.pluralSafe;
+  if (isModelOptionsWithPersist<T>(args)) {
     databaseName = args.databaseName || "default";
+    tableName = args.tableName || names.pluralSafe;
+    persistWith = args.persistWith;
+    primaryKey = args.primaryKey || primaryKey;
   }
 
   // Build our factory
-  return createFactory<T, C>({
+  return createFactory<T>({
     computedProps,
     databaseName,
     has,
     names,
     normalizedHooks,
     persistWith,
+    primaryKey,
     relationships,
     tableName,
     validators

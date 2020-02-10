@@ -1,41 +1,53 @@
 import {
-  Model,
   ModelInternalProperties,
   ModelFactoryWithPersist,
-  ModelDataDefaultType
+  isModel,
+  ModelDataPropTypes
 } from "model/types";
 
 import { cannotUpdateNewModel } from "./error/cannotUpdateNewModel";
 import { PersistTransaction, PersistSaveFunction } from "./types";
+import { cannotUpdateWithoutPrimaryKey } from "./error/cannotUpdateWithoutPrimaryKey";
 
-export function updateFactory<T extends ModelDataDefaultType, C>(
-  modelFactory: ModelFactoryWithPersist<T, C>
-): PersistSaveFunction<T, C> {
+export function updateFactory<T extends ModelDataPropTypes>(
+  modelFactory: ModelFactoryWithPersist<T>
+): PersistSaveFunction<T> {
   const tableName = modelFactory.tableName;
   const connection = modelFactory.persistWith;
 
-  return async function(
-    model: Model<T & C>,
+  return async function update(
+    initialData: ReturnType<ModelFactoryWithPersist<T>> | Partial<T>,
     trx: PersistTransaction = null
-  ): Promise<Model<T & C>> {
-    const props = ((model as any) as ModelInternalProperties).$nativeProperties();
-    const id = model.id;
+  ) {
+    // If they pass in data, we assume they want to update it.
+    if (!isModel(initialData)) {
+      if (initialData[modelFactory.primaryKey])
+        throw cannotUpdateWithoutPrimaryKey(modelFactory, initialData);
+    }
+
+    const model = isModel(initialData)
+      ? initialData
+      : (modelFactory(initialData) as ReturnType<ModelFactoryWithPersist<T>>);
+    const props = ((model as unknown) as ModelInternalProperties).$nativeProperties();
+    const id = model[modelFactory.primaryKey];
     const cnx = trx || connection;
     if (!id) {
       throw cannotUpdateNewModel(model);
     }
 
     await cnx(tableName)
-      .where("id", "=", id)
+      .where(modelFactory.primaryKey, "=", id)
       .update(props);
 
     const result = await cnx<T>(tableName)
       .select("*")
-      .where("id", "=", id)
+      .where(modelFactory.primaryKey, "=", id)
       .limit(1);
 
     if (result[0]) {
-      return modelFactory(result[0] as T);
+      return modelFactory(result[0] as T) as ReturnType<
+        ModelFactoryWithPersist<T>
+      >;
     } else {
       return model;
     }

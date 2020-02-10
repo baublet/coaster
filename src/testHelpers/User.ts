@@ -4,7 +4,7 @@ import { connect } from "persist/connect";
 
 const persist = connect(db);
 
-export const User = createModel({
+export const User = createModel<{ id: string; name: string }>({
   name: "User",
   persistWith: persist
 });
