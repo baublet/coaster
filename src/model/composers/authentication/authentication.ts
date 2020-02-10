@@ -1,9 +1,6 @@
-import {
-  ModelFactoryComposerFunction,
-  ModelFactoryComposerArguments
-} from "model/createModel";
 import passwordValidator from "./passwordValidator";
 import tokenModel from "./tokenModel";
+import { ModelDataPropTypes } from "model/types";
 
 const defaultOptions = {
   usernameProperties: ["username", "email"],
@@ -23,8 +20,8 @@ export default function withAuthentication({
   passwordProperty,
   passwordConfirmationProperty,
   passwordHashProperty
-}: WithAuthenticationOptions = defaultOptions): ModelFactoryComposerFunction {
-  return ({ validators, has }: ModelFactoryComposerArguments) => {
+}: WithAuthenticationOptions = defaultOptions): ModelDataPropTypes {
+  return ({ validators, has }: ModelDataPropTypes) => {
     // Password strength and confirmation equality validator
     validators.push(
       passwordValidator({

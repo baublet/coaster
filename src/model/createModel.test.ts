@@ -22,11 +22,9 @@ it("allows computed working props", () => {
   interface UserModelTypes {
     firstName: string;
     lastName: string;
-  }
-  interface UserModelComputedTypes {
     name: string;
   }
-  const userModel = createModel<UserModelTypes, UserModelComputedTypes>({
+  const userModel = createModel<UserModelTypes>({
     name: "User",
     computedProps: {
       name: ({ firstName, lastName }) => `${firstName} ${lastName}`

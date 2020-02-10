@@ -9,7 +9,8 @@ import {
   ModelOptions,
   ModelFactoryWithPersist,
   isModelOptionsWithPersist,
-  ModelOptionsWithPersist
+  ModelOptionsWithPersist,
+  ModelDataPropTypes
 } from "./types";
 
 /**
@@ -21,11 +22,13 @@ export function many<T extends ModelFactory>(factory: T): [T] {
   return [factory];
 }
 
-export function createModel<T = {}>(args: ModelOptions<T>): ModelFactory<T>;
-export function createModel<T = {}>(
+export function createModel<T = ModelDataPropTypes>(
+  args: ModelOptions<T>
+): ModelFactory<T>;
+export function createModel<T = ModelDataPropTypes>(
   args: ModelOptionsWithPersist<T>
 ): ModelFactoryWithPersist<T>;
-export function createModel<T = {}>(
+export function createModel<T = ModelDataPropTypes>(
   args: ModelOptions<T>
 ): ModelFactory<T> | ModelFactoryWithPersist<T> {
   const {

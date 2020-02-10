@@ -12,11 +12,11 @@ export const db = {
   useNullAsDefault: true
 };
 
-export async function createTableForNewModelFactory<T = any, C = any>(
+export async function createTableForNewModelFactory<T = any>(
   persist: PersistConnection,
   props: any,
   computedProps: any = {}
-): Promise<[ModelFactoryWithPersist<T, C>, Model<T & C>]> {
+): Promise<{ factory: ModelFactoryWithPersist<T>; model: Model<T> }> {
   const tableName = `test_${testTableDelta++}`;
   const tableNamePlural = `${tableName}s`;
 
@@ -35,11 +35,11 @@ export async function createTableForNewModelFactory<T = any, C = any>(
     }
   });
 
-  const factory = createModel<T, C>({
+  const factory = createModel<T>({
     name: tableName,
     computedProps,
     persistWith: persist
   });
 
-  return [factory, factory(props)];
+  return { factory, model: factory(props) };
 }

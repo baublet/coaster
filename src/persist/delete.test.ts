@@ -12,9 +12,12 @@ it("returns a function", () => {
 
 it("deletes a model", async () => {
   const persist = connect(db);
-  const [User, user] = await createTableForNewModelFactory(persist, {
-    name: "Burt"
-  });
+  const { factory: User, model: user } = await createTableForNewModelFactory(
+    persist,
+    {
+      name: "Burt"
+    }
+  );
   const newUser = await User.create(user);
 
   const originalCount = await User.count();
@@ -26,9 +29,12 @@ it("deletes a model", async () => {
 
 it("returns a boolean if a model is deleted by id", async () => {
   const persist = connect(db);
-  const [User, user] = await createTableForNewModelFactory(persist, {
-    name: "Burt"
-  });
+  const { factory: User, model: user } = await createTableForNewModelFactory(
+    persist,
+    {
+      name: "Burt"
+    }
+  );
   const savedUser = await User.create(user);
   const toDelete = await User.delete(savedUser.id);
 
@@ -37,9 +43,12 @@ it("returns a boolean if a model is deleted by id", async () => {
 
 it("returns a boolean if a model is deleted by model", async () => {
   const persist = connect(db);
-  const [User, user] = await createTableForNewModelFactory(persist, {
-    name: "Burt"
-  });
+  const { factory: User, model: user } = await createTableForNewModelFactory(
+    persist,
+    {
+      name: "Burt"
+    }
+  );
   const savedUser = await User.create(user);
   const toDelete = await User.delete(savedUser);
 

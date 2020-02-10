@@ -1,4 +1,4 @@
-import createModel from "model/createModel";
+import { createModel } from "model/createModel";
 import generateToken from "uuid/v4";
 import { BeforeCreateHookArguments } from "model/hooks/hooks";
 

@@ -12,9 +12,12 @@ it("returns a function", () => {
 it("creates a model", async () => {
   const persist = connect(db);
 
-  const [User, user] = await createTableForNewModelFactory(persist, {
-    name: "Burt"
-  });
+  const { factory: User, model: user } = await createTableForNewModelFactory(
+    persist,
+    {
+      name: "Burt"
+    }
+  );
 
   const originalCount = await User.count();
   await User.create(user);
@@ -26,9 +29,12 @@ it("creates a model", async () => {
 it("returns a model with an ID after creating it", async () => {
   const persist = connect(db);
 
-  const [User, user] = await createTableForNewModelFactory(persist, {
-    name: "Burt"
-  });
+  const { factory: User, model: user } = await createTableForNewModelFactory(
+    persist,
+    {
+      name: "Burt"
+    }
+  );
 
   const newUser = await User.create(user);
 

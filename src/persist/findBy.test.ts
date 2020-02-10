@@ -14,10 +14,13 @@ it("returns a function", () => {
 
 async function setup(): Promise<[ModelFactoryWithPersist<any>, Model[]]> {
   const persist = connect(db);
-  const [User, user] = await createTableForNewModelFactory(persist, {
-    name: "Anil",
-    company: 1
-  });
+  const { factory: User, model: user } = await createTableForNewModelFactory(
+    persist,
+    {
+      name: "Anil",
+      company: 1
+    }
+  );
 
   const users = await Promise.all([
     User.create(user),
@@ -39,13 +42,16 @@ it("find models by a single field", async () => {
 });
 
 describe("query options", () => {
-  async function setup() {
+  async function setup(): Promise<[ModelFactoryWithPersist<any>, Model<any>]> {
     const persist = connect(db);
-    const [User, user] = await createTableForNewModelFactory(persist, {
-      name: "Anil",
-      employeeId: 1,
-      company: 1
-    });
+    const { factory: User, model: user } = await createTableForNewModelFactory(
+      persist,
+      {
+        name: "Anil",
+        employeeId: 1,
+        company: 1
+      }
+    );
 
     const users: ReturnType<typeof User>[] = await Promise.all([
       User.create(user),

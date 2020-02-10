@@ -12,7 +12,7 @@ it("returns a function", () => {
 
 it("throws if we find by falsy ID", async () => {
   const persist = connect(db);
-  const [User] = await createTableForNewModelFactory(persist, {
+  const { factory: User } = await createTableForNewModelFactory(persist, {
     name: "Burt"
   });
 
@@ -21,9 +21,12 @@ it("throws if we find by falsy ID", async () => {
 
 it("finds a model by its ID", async () => {
   const persist = connect(db);
-  const [User, user] = await createTableForNewModelFactory(persist, {
-    name: "Burt"
-  });
+  const { factory: User, model: user } = await createTableForNewModelFactory(
+    persist,
+    {
+      name: "Burt"
+    }
+  );
   const newUser = await User.create(user);
   const foundUser = await User.find(newUser.id);
 
@@ -32,9 +35,12 @@ it("finds a model by its ID", async () => {
 
 it("finds multiple models by ID", async () => {
   const persist = connect(db);
-  const [User, user] = await createTableForNewModelFactory(persist, {
-    name: "Burt"
-  });
+  const { factory: User, model: user } = await createTableForNewModelFactory(
+    persist,
+    {
+      name: "Burt"
+    }
+  );
   const newUser1 = await User.create(user);
   const newUser2 = await User.create(User({ name: "Alice" }));
   const foundUsers = await User.find([newUser1.id, newUser2.id]);

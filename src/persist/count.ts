@@ -2,8 +2,8 @@ import { ModelFactoryWithPersist, ModelDataDefaultType } from "model/types";
 
 import { PersistTransaction, PersistCountFunction } from "./types";
 
-export function countFactory<T extends ModelDataDefaultType, C>(
-  modelFactory: ModelFactoryWithPersist<T, C>
+export function countFactory<T extends ModelDataDefaultType>(
+  modelFactory: ModelFactoryWithPersist<T>
 ): PersistCountFunction {
   const tableName = modelFactory.tableName;
   const connection = modelFactory.persistWith;

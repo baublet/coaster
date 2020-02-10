@@ -62,23 +62,27 @@ export async function createUsersAndTodos() {
     table.text("bio");
   });
 
-  const Settings = createModel<{ bio: string }>({
+  const Settings = createModel<{ id: string; bio: string }>({
     name: settingsTable,
     persistWith: persist
   });
 
-  const Todo = createModel<{ todo: string }>({
+  const Todo = createModel<{ id: string; todo: string }>({
     name: todoTable,
     persistWith: persist
   });
 
-  const TodoGroup = createModel<{ name: string }>({
+  const TodoGroup = createModel<{ id: string; name: string }>({
     name: todoGroupTable,
     persistWith: persist,
     has: [[Todo]]
   });
 
-  const User = createModel<{ name: string; todos: { todo: string }[] }>({
+  const User = createModel<{
+    id: string;
+    name: string;
+    todos: { todo: string }[];
+  }>({
     name: userTable,
     persistWith: persist,
     has: [Settings, [Todo], [TodoGroup]]
