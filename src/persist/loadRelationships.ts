@@ -55,6 +55,8 @@ export async function loadRelationships(
   modelMap = modelMap || new Map<Symbol | string, Record<string, Model>>();
   modelNeeds = modelNeeds || {};
 
+  const leftFactoryPrimaryKey = leftFactory.primaryKey;
+
   leftFactory.relationships.forEach(relationship => {
     const isMultiple = isModelHasArguments(relationship)
       ? Boolean(relationship.many)
@@ -65,6 +67,7 @@ export async function loadRelationships(
       : Array.isArray(relationship)
       ? relationship[0]
       : relationship) as ModelFactoryWithPersist;
+    const rightFactoryPrimaryKey = rightFactory.primaryKey;
 
     const [bridgeTable, leftColumn, rightColumn] = getBridgeTableNames(
       leftFactory,
@@ -91,7 +94,7 @@ export async function loadRelationships(
       // queried for. (This is important during recursive calls.)
       const loadedIds = Object.keys(modelNeeds);
       const ids = models
-        .map(model => model.id)
+        .map(model => model[leftFactoryPrimaryKey])
         .filter(id => !loadedIds.includes(id));
 
       // If we've already loaded all the leftModel needs, we can skip the rest
@@ -136,21 +139,18 @@ export async function loadRelationships(
 
       // Now that we have queued up all the right-side IDs we need to load,
       // here's where we grab that data.
-      const rightModelData = await persist(rightFactory.tableName)
-        .whereIn("id", resultIds)
-        .select(["*"]);
+      const rightModelData = await rightFactory.find(resultIds as string[]);
       modelQueries++;
 
-      rightModelData.forEach(data => {
+      rightModelData.forEach(newModel => {
         const symbol = rightFactory.$id;
-        const newModel = rightFactory(data);
 
         // We map by both accessor and Symbol for smarter caching
         // between recursions
         const freshIdMap = {};
         if (!modelMap.has(symbol)) modelMap.set(symbol, freshIdMap);
         if (!modelMap.has(accessorName)) modelMap.set(accessorName, freshIdMap);
-        modelMap.get(symbol)[data.id] = newModel;
+        modelMap.get(symbol)[newModel[rightFactoryPrimaryKey]] = newModel;
       });
     });
 
@@ -159,8 +159,9 @@ export async function loadRelationships(
       models.forEach(model => {
         // For each right model data, load up the model from our map and set it
         // as a relationship
-        if (!modelNeeds[model.id]) modelNeeds[model.id] = {};
-        const needs = modelNeeds[model.id][accessorName];
+        const leftId = model[leftFactoryPrimaryKey];
+        if (!modelNeeds[leftId]) modelNeeds[leftId] = {};
+        const needs = modelNeeds[leftId][accessorName];
 
         let relationships: Model | Model[];
         if (needs === undefined) {
