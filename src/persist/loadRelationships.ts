@@ -72,10 +72,13 @@ export async function loadRelationships(
     const [bridgeTable, leftColumn, rightColumn] = getBridgeTableNames(
       leftFactory,
       rightFactory,
-      isModelHasArguments(relationship)
-        ? relationship.bridgeTableName
-        : undefined
+      isModelHasArguments(relationship) ? relationship : undefined
     );
+
+    if (bridgeTable === "deliveries_1_pizzas_1_relationships") {
+      console.log("RELATIONSHIP ", relationship)
+      throw new Error(bridgeTable);
+    }
 
     let accessorName: string;
     if (isModelHasArguments(relationship)) {

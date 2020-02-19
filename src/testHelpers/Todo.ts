@@ -62,6 +62,40 @@ export async function createUsersAndTodos() {
     table.text("bio");
   });
 
+  const pizzaTable = `pizzas_${testTableDelta}`;
+  const pizzaTablePlural = `${pizzaTable}s`;
+
+  await persist.schema.createTable(pizzaTablePlural, table => {
+    table
+      .bigInteger("id")
+      .unsigned()
+      .primary()
+      .unique()
+      .index();
+    table.text("type");
+  });
+
+  const deliveryTable = `deliveries_${testTableDelta}`;
+  const deliveryTablePlural = `${deliveryTable}s`;
+
+  await persist.schema.createTable(deliveryTablePlural, table => {
+    table
+      .bigInteger("id")
+      .unsigned()
+      .primary()
+      .unique()
+      .index();
+    table
+      .bigInteger("user_id")
+      .unsigned()
+      .index();
+    table
+      .bigInteger("pizza_id")
+      .unsigned()
+      .index();
+    table.bigInteger("orderDate");
+  });
+
   const Settings = createModel<{ id: string; bio: string }>({
     name: settingsTable,
     persistWith: persist
@@ -78,6 +112,22 @@ export async function createUsersAndTodos() {
     has: [[Todo]]
   });
 
+  const Pizza = createModel<{ id: string; type: string }>({
+    name: pizzaTable,
+    persistWith: persist
+  });
+
+  const Delivery = createModel<{
+    id: string;
+    orderDate: number;
+    pizza_id: string;
+    user_id: string;
+  }>({
+    name: deliveryTable,
+    persistWith: persist,
+    has: [[Pizza]]
+  });
+
   const User = createModel<{
     id: string;
     name: string;
@@ -85,7 +135,18 @@ export async function createUsersAndTodos() {
   }>({
     name: userTable,
     persistWith: persist,
-    has: [Settings, [Todo], [TodoGroup]]
+    has: [
+      Settings,
+      [Todo],
+      [TodoGroup],
+      {
+        model: Pizza,
+        many: true,
+        through: Delivery,
+        localKey: "user_id",
+        foreignKey: "pizza_id"
+      }
+    ]
   });
 
   const [
@@ -136,6 +197,8 @@ export async function createUsersAndTodos() {
       bridgeTableName: todoGroupTodoBridgeTableName,
       todoGroupColumn: todoGroupTodoLeftColumn,
       todoColumn: todoGroupTodoRightColumn
-    }
+    },
+    Pizza,
+    Delivery
   };
 }
