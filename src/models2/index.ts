@@ -1,3 +1,5 @@
+import user from "../../integration/todo/models/user";
+
 type ObjectWithoutNeverProperties<
   O extends Record<string | number | symbol, any>
 > = Pick<
@@ -18,14 +20,20 @@ type ModelArgsPropertyArgs = {
   required?: boolean;
 };
 
-type ModelArgs = {
+interface ModelArgs {
   properties: {
     [key: string]: ModelArgsPropertyArgs;
   };
-  computedProperties: {
-    [key: string]: () => any;
+  computedProperties?: {
+    [key: string]: (properties: ModelArgs["properties"]) => any;
   };
-};
+  has?: {
+    [key: string]: {
+      modelFactory: ModelFactory<ModelArgs>;
+      many?: boolean;
+    };
+  };
+}
 
 type PropertyType<
   T extends ModelArgsPropertyType
@@ -67,16 +75,37 @@ type RequiredPropertiesFromModelArgs<Args extends ModelArgs> = Required<
   >
 >;
 
-// PropertiesFromModelArgs<Args>
+type ComputedPropsFromModelArgs<Args extends ModelArgs> = {
+  [K in keyof Args["computedProperties"]]: ReturnType<
+    Args["computedProperties"][K]
+  >;
+};
+
+type ModelHasRelationshipsFromModelArgs<Args extends ModelArgs> = {
+  [K in keyof Args["has"]]: ReturnType<Args["has"][K]["modelFactory"]>;
+};
 
 type Model<Args extends ModelArgs> = PropertiesFromModelArgs<Args> &
-  RequiredPropertiesFromModelArgs<Args>;
+  RequiredPropertiesFromModelArgs<Args> &
+  ComputedPropsFromModelArgs<Args>;
 
-function createModel<T extends ModelArgs>(opts: T): Model<T> {
+type ModelFactory<Args extends ModelArgs> = () => Model<Args>;
+
+function createModel<T extends ModelArgs>(opts: T): ModelFactory<T> {
   return {};
 }
 
-const user = createModel({
+const Todo = createModel({
+  properties: {
+    name: {
+      type: ModelArgsPropertyType.STRING
+    }
+  }
+});
+
+type Todo = ReturnType<typeof Todo>;
+
+const User = createModel({
   properties: {
     test: {
       type: ModelArgsPropertyType.STRING
@@ -87,8 +116,8 @@ const user = createModel({
     }
   },
   computedProperties: {
-    test2: () => "test 2"
+    test2Computed: props => props.test + " Computed!"
   }
 });
 
-user;
+type User = ReturnType<typeof User>;
