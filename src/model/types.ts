@@ -73,7 +73,8 @@ export interface ModelHasArguments {
    */
   accessName?: string;
   /**
-   * Also colloquially called "through"
+   * Also colloquially called "through". If you provide a "through" model,
+   * we use that instead.
    */
   bridgeTableName?: string;
   /**
@@ -95,6 +96,12 @@ export interface ModelHasArguments {
    * Factory of the foreign model we're relating this model to.
    */
   model: ModelFactory;
+  /**
+   * Sometimes you want direct control over your relationships as models
+   * themselves. For example, Doctors may have Patients through a separate
+   * Appointments model.
+   */
+  through?: ModelFactoryWithPersist;
 }
 
 export function isModelHasArguments(arg: any): arg is ModelHasArguments {

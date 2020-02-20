@@ -14,11 +14,7 @@ export async function createBridgeTable(
   bridgeTableName?: string
 ) {
   const persist = to.persistWith;
-  const [table, fromColumn, toColumn] = getBridgeTableNames(
-    from,
-    to,
-    bridgeTableName
-  );
+  const [table, fromColumn, toColumn] = getBridgeTableNames(from, to);
 
   await persist.schema.createTable(table, table => {
     table

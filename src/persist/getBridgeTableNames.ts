@@ -1,4 +1,8 @@
-import { ModelFactoryWithPersist } from "model/types";
+import {
+  ModelFactoryWithPersist,
+  ModelHasArguments,
+  ModelFactory
+} from "model/types";
 
 /**
  * Returns the names we need for simple bridge tables.
@@ -9,19 +13,26 @@ import { ModelFactoryWithPersist } from "model/types";
 export function getBridgeTableNames(
   a: ModelFactoryWithPersist,
   b: ModelFactoryWithPersist,
-  bridgeTableName?: string
+  bridgeTable?: ModelHasArguments
 ) {
   // By design, we have to alphabetize these. The only issue here is that if
   // developers rename tables without specifying bridge table names, auto-
   // generated bridge table names may change.
 
-  const aColumn = `${a.names.safe}_id`;
-  const bColumn = `${b.names.safe}_id`;
+  let aColumn: string = `${a.names.safe}_${a.primaryKey}`;
+  let bColumn: string = `${b.names.safe}_${b.primaryKey}`;
+
   const columns = [a.names.safe, b.names.safe];
   columns.sort();
-  const table = bridgeTableName
-    ? bridgeTableName
-    : `${columns[0]}_${columns[1]}_relationships`;
+
+  let table: string = `${columns[0]}_${columns[1]}_relationships`;
+
+  if (bridgeTable) {
+    if (bridgeTable.localKey) aColumn = bridgeTable.localKey;
+    if (bridgeTable.foreignKey) bColumn = bridgeTable.foreignKey;
+    if (bridgeTable.through) table = bridgeTable.through.tableName;
+    if (bridgeTable.bridgeTableName) table = bridgeTable.bridgeTableName;
+  }
 
   return [table, aColumn, bColumn];
 }

@@ -1,5 +1,6 @@
 import { createUsersAndTodos } from "testHelpers/Todo";
 import { loadRelationships } from "./loadRelationships";
+import { setPriority } from "os";
 
 describe("hasMany", () => {
   it("returns an empty array when there aren't relations to load", async () => {
@@ -65,6 +66,8 @@ describe("hasOne", () => {
 describe("depth", () => {
   async function setup() {
     const {
+      Delivery,
+      Pizza,
       User,
       Todo,
       TodoGroup,
@@ -80,7 +83,7 @@ describe("depth", () => {
       Todo.create({ todo: "Coffee" })
     ]);
 
-    // Add the user<->todoGroup relatioship to the DB
+    // Add the user<->todoGroup relationship to the DB
     await User.persistWith(bridgeTableName).insert({
       [userColumn]: user.id,
       [todoGroupColumn]: todoGroup.id
@@ -96,7 +99,20 @@ describe("depth", () => {
       )
     );
 
+    // Add a pizza and a delivery to a user
+    const pizza = await Pizza.create({
+      type: "Veggie"
+    });
+    const delivery = Delivery.create({
+      user_id: user.id,
+      pizza_id: pizza.id
+    });
+
     return {
+      delivery,
+      Delivery,
+      pizza,
+      Pizza,
       user,
       Todo,
       User,
@@ -128,5 +144,13 @@ describe("depth", () => {
     );
 
     expect(singlePopulatedData).toEqual(doublePopulatedData);
+  });
+
+  it.only("loads hasMany through relationships", async () => {
+    const { user, Pizza } = await setup();
+
+    await loadRelationships([user], undefined, 1);
+
+    expect(user[Pizza.names.pluralSafe]).toEqual(1);
   });
 });
