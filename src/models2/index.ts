@@ -45,12 +45,6 @@ type PropertyType<
   ? number
   : never;
 
-type PropertyRequired<T extends boolean | undefined> = T extends
-  | false
-  | undefined
-  ? undefined
-  : never;
-
 type PropertiesFromModelArgs<Args extends ModelArgs> = Partial<
   {
     [K in keyof Args["properties"]]: PropertyType<
@@ -60,15 +54,15 @@ type PropertiesFromModelArgs<Args extends ModelArgs> = Partial<
 >;
 
 type RequiredPropertyFromPropertyArgs<
-  P extends string | number | symbol,
+  P extends ModelArgsPropertyType,
   Args extends ModelArgsPropertyArgs
-> = Args["required"] extends true ? P : never;
+> = Args["required"] extends true ? PropertyType<P> : never;
 
 type RequiredPropertiesFromModelArgs<Args extends ModelArgs> = Required<
   ObjectWithoutNeverProperties<
     {
       [P in keyof Args["properties"]]: RequiredPropertyFromPropertyArgs<
-        P,
+        Args["properties"][P]["type"],
         Args["properties"][P]
       >;
     }
@@ -76,7 +70,7 @@ type RequiredPropertiesFromModelArgs<Args extends ModelArgs> = Required<
 >;
 
 type ComputedPropsFromModelArgs<Args extends ModelArgs> = {
-  [K in keyof Args["computedProperties"]]: ReturnType<
+  readonly [K in keyof Args["computedProperties"]]: () => ReturnType<
     Args["computedProperties"][K]
   >;
 };
@@ -85,11 +79,17 @@ type ModelHasRelationshipsFromModelArgs<Args extends ModelArgs> = {
   [K in keyof Args["has"]]: ReturnType<Args["has"][K]["modelFactory"]>;
 };
 
+type ModelFactoryArgsFromModelArgs<
+  Args extends ModelArgs
+> = PropertiesFromModelArgs<Args> & RequiredPropertiesFromModelArgs<Args>;
+
 type Model<Args extends ModelArgs> = PropertiesFromModelArgs<Args> &
   RequiredPropertiesFromModelArgs<Args> &
   ComputedPropsFromModelArgs<Args>;
 
-type ModelFactory<Args extends ModelArgs> = () => Model<Args>;
+type ModelFactory<Args extends ModelArgs> = (
+  initialValue: ModelFactoryArgsFromModelArgs<Args>
+) => Model<Args>;
 
 function createModel<T extends ModelArgs>(opts: T): ModelFactory<T> {
   return {};
@@ -107,17 +107,34 @@ type Todo = ReturnType<typeof Todo>;
 
 const User = createModel({
   properties: {
-    test: {
-      type: ModelArgsPropertyType.STRING
+    firstName: {
+      type: ModelArgsPropertyType.STRING,
+      required: true
     },
-    test2: {
+    lastName: {
+      type: ModelArgsPropertyType.STRING,
+      required: true
+    },
+    employeeId: {
       type: ModelArgsPropertyType.NUMBER,
       required: true
+    },
+    about: {
+      type: ModelArgsPropertyType.STRING
     }
   },
   computedProperties: {
-    test2Computed: props => props.test + " Computed!"
+    name: props => props.firstName + " " + props.lastName
   }
 });
 
 type User = ReturnType<typeof User>;
+
+const mike = User({
+  firstName: "Michael",
+  lastName: "Yawanis",
+  employeeId: 123456789,
+  about: "Test!"
+});
+
+mike;
