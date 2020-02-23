@@ -1,4 +1,5 @@
 import user from "../../integration/todo/models/user";
+import { ModelRelationshipArguments } from "model/types";
 
 type ObjectWithoutNeverProperties<
   O extends Record<string | number | symbol, any>
@@ -12,20 +13,40 @@ type ObjectWithoutNeverProperties<
 enum ModelArgsPropertyType {
   BOOLEAN,
   STRING,
-  NUMBER
+  NUMBER,
+  COMPUTED,
+  RELATIONSHIP
 }
 
-type ModelArgsPropertyArgs = {
-  type: ModelArgsPropertyType;
+type ModelArgsRegularPropertyArgs = {
+  type:
+    | ModelArgsPropertyType.BOOLEAN
+    | ModelArgsPropertyType.STRING
+    | ModelArgsPropertyType.NUMBER;
   required?: boolean;
 };
+
+type ModelArgsComputedPropertyArgs = {
+  type: ModelArgsPropertyType.COMPUTED;
+  compute: (obj: any) => any;
+};
+
+type ModelArgsRelationshipPropertyArgs = {
+  type: ModelArgsPropertyType.RELATIONSHIP;
+  modelFactory: ModelFactory;
+  many?: boolean;
+  localKey?: string;
+  foreignKey?: string;
+};
+
+type ModelArgsPropertyArgs =
+  | ModelArgsRegularPropertyArgs
+  | ModelArgsComputedPropertyArgs
+  | ModelArgsRelationshipPropertyArgs;
 
 interface ModelArgs {
   properties: {
     [key: string]: ModelArgsPropertyArgs;
-  };
-  computedProperties?: {
-    [key: string]: (properties: ModelArgs["properties"]) => any;
   };
   has?: {
     [key: string]: {
@@ -36,47 +57,63 @@ interface ModelArgs {
 }
 
 type PropertyType<
-  T extends ModelArgsPropertyType
-> = T extends ModelArgsPropertyType.STRING
+  Args extends ModelArgsPropertyArgs
+> = Args["type"] extends ModelArgsPropertyType.STRING
   ? string
-  : T extends ModelArgsPropertyType.BOOLEAN
+  : Args["type"] extends ModelArgsPropertyType.BOOLEAN
   ? boolean
-  : T extends ModelArgsPropertyType.NUMBER
+  : Args["type"] extends ModelArgsPropertyType.NUMBER
   ? number
+  : Args extends ModelArgsComputedPropertyArgs
+  ? () => ReturnType<Args["compute"]>
+  : Args extends ModelArgsRelationshipPropertyArgs
+  ? Args["modelFactory"][]
   : never;
 
 type PropertiesFromModelArgs<Args extends ModelArgs> = Partial<
   {
-    [K in keyof Args["properties"]]: PropertyType<
-      Args["properties"][K]["type"]
-    >;
+    [K in keyof Args["properties"]]: PropertyType<Args["properties"][K]>;
   }
 >;
 
 type RequiredPropertyFromPropertyArgs<
-  P extends ModelArgsPropertyType,
   Args extends ModelArgsPropertyArgs
-> = Args["required"] extends true ? PropertyType<P> : never;
+> = Args extends ModelArgsRegularPropertyArgs
+  ? Args["required"] extends true
+    ? PropertyType<Args>
+    : never
+  : never;
+
+type ReadOnlyPropertiesFromModelArgs<
+  Args extends ModelArgs
+> = ObjectWithoutNeverProperties<
+  {
+    readonly [P in keyof Args["properties"]]: Args["properties"][P] extends ModelArgsComputedPropertyArgs
+      ? PropertyType<Args["properties"][P]>
+      : never;
+  }
+>;
 
 type RequiredPropertiesFromModelArgs<Args extends ModelArgs> = Required<
   ObjectWithoutNeverProperties<
     {
       [P in keyof Args["properties"]]: RequiredPropertyFromPropertyArgs<
-        Args["properties"][P]["type"],
         Args["properties"][P]
       >;
     }
   >
 >;
 
-type ComputedPropsFromModelArgs<Args extends ModelArgs> = {
-  readonly [K in keyof Args["computedProperties"]]: () => ReturnType<
-    Args["computedProperties"][K]
-  >;
-};
+type ModelHasRelationshipFromModelArgs<
+  Args extends ModelArgsPropertyArgs
+> = Args extends ModelArgsRelationshipPropertyArgs
+  ?PropertyType<Args>
+  : never;
 
 type ModelHasRelationshipsFromModelArgs<Args extends ModelArgs> = {
-  [K in keyof Args["has"]]: ReturnType<Args["has"][K]["modelFactory"]>;
+  readonly [K in keyof Args["properties"]]: ObjectWithoutNeverProperties< ModelHasRelationshipFromModelArgs<
+    Args["properties"][K]
+  >>;
 };
 
 type ModelFactoryArgsFromModelArgs<
@@ -85,14 +122,16 @@ type ModelFactoryArgsFromModelArgs<
 
 type Model<Args extends ModelArgs> = PropertiesFromModelArgs<Args> &
   RequiredPropertiesFromModelArgs<Args> &
-  ComputedPropsFromModelArgs<Args>;
+  ModelHasRelationshipsFromModelArgs<Args> &
+  // This must come last because it marks existing things as ReadOnly
+  ReadOnlyPropertiesFromModelArgs<Args>;
 
-type ModelFactory<Args extends ModelArgs> = (
+type ModelFactory<Args extends ModelArgs = any> = (
   initialValue: ModelFactoryArgsFromModelArgs<Args>
 ) => Model<Args>;
 
 function createModel<T extends ModelArgs>(opts: T): ModelFactory<T> {
-  return {};
+  return {} as any;
 }
 
 const Todo = createModel({
@@ -121,10 +160,15 @@ const User = createModel({
     },
     about: {
       type: ModelArgsPropertyType.STRING
+    },
+    todo: {
+      type: ModelArgsPropertyType.RELATIONSHIP,
+      modelFactory: Todo
+    },
+    name: {
+      type: ModelArgsPropertyType.COMPUTED,
+      compute: props => props.firstName + " " + props.lastName
     }
-  },
-  computedProperties: {
-    name: props => props.firstName + " " + props.lastName
   }
 });
 
@@ -133,8 +177,6 @@ type User = ReturnType<typeof User>;
 const mike = User({
   firstName: "Michael",
   lastName: "Yawanis",
-  employeeId: 123456789,
-  about: "Test!"
-});
+  employeeId: 123456789
+})
 
-mike;
