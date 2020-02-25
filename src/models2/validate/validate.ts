@@ -37,7 +37,7 @@ export function validate<Args extends ModelArgs>(
         | ModelArgsPrimitivePropertyArgs
         | ModelArgsRelationshipPropertyArgs).required
     ) {
-      if (!(prop in model)) {
+      if (!(prop in model) || model[prop] === undefined) {
         const error = `${prop} is required`;
         errors[prop] = errors[prop]
           ? errors[prop].push(error)
@@ -45,6 +45,12 @@ export function validate<Args extends ModelArgs>(
         hasError = true;
       }
     }
+  }
+
+  // If there are required fields missing, we want to early exit to prevent
+  // possible exceptions in our field validators
+  if (hasError) {
+    return [hasError, errors as ValidationErrors<Args>];
   }
 
   // Validate fields with custom validators
@@ -58,6 +64,7 @@ export function validate<Args extends ModelArgs>(
       if (fieldErrors) {
         if (!errors[prop]) errors[prop] = [];
         errors[prop].push(...fieldErrors);
+        hasError = true;
       }
     }
   }
