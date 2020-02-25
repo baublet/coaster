@@ -1,197 +1,211 @@
-import { ModelHooks } from "./hooks";
-import { GeneratedNames } from "helpers/generateNames";
-import { ValidateFunction, Validator } from "./validate";
-import {
-  PersistSaveFunction,
-  PersistDeleteFunction,
-  PersistFindFunction,
-  PersistFindByFunction,
-  PersistQueryFunctionOnFactory,
-  PersistConnection,
-  PersistCountFunction
-} from "persist/types";
+import { ModelFieldValidator } from "./validate";
+import { PersistConnection } from "persist/types";
 
-export type ModelComputedPropFn<T> = (data: T) => any;
-export type ModelDataPropTypes = Record<string, any>;
-export type ModelDataDefaultType = Record<string, any>;
-export type ModelData<T = ModelDataDefaultType> = T;
-
-export type ModelComputedType<T = ModelDataDefaultType> = (data: T) => any;
-export type ModelOptionsComputedProps<T> = Record<string, ModelComputedType<T>>;
-export type ModelInferredComputedProps<T> = Record<string, () => Model<T>>;
-
-export type ModelManyRelationship = [Model];
-
-export interface ModelInternalProperties {
-  $changed: boolean;
-  $computed: Record<string, ModelComputedPropFn<any>>;
-  $data: ModelDataDefaultType;
-  $deleted: boolean;
-  $factory: ModelFactory<any>;
-  $hooks: ModelHooks;
-  $names: GeneratedNames;
-  $nativeProperties: () => Record<string, any>;
-  $relationships: Record<string, Model>;
-  $setDeleted: (deleted: boolean) => void;
-  $setRelationship: (key: string, model: Model) => void;
-  $validate: ValidateFunction<any>;
-  $validators: Validator<any>[];
-}
-
-export type Model<T = ModelDataDefaultType> = T & {
-  // Only very rarely add these. We typically want to store these things at the
-  // factory-level to prevent newing up functions and closures so often.
-  toJson: () => Record<string, any>;
-};
-
-export interface ModelFactoryComposerArguments {
-  composers: ModelFactoryComposerFunction[];
-  has: ModelRelationshipArguments;
-  computedProps: Record<string, ModelComputedType>;
-  validators?: Validator[];
-}
-
-export type ModelFactoryComposer = (
-  composerOptions: any
-) => ModelFactoryComposerFunction;
-
-export type ModelFactoryComposerFunction = (
-  composerArguments: ModelFactoryComposerArguments
-) => void;
-
-export type ModelOptionsHookFunction = (args: any) => void;
-export type ModelOptionsHooks = Record<
-  string,
-  ModelOptionsHookFunction | ModelOptionsHookFunction[]
+export type ObjectWithoutNeverProperties<
+  O extends Record<string | number | symbol, any>
+> = Pick<
+  O,
+  {
+    [K in keyof O]: O[K] extends never ? never : K;
+  }[keyof O]
 >;
 
-export interface ModelHasArguments {
+export enum ModelArgsPropertyType {
+  BOOLEAN = "boolean",
+  STRING = "string",
+  NUMBER = "number",
+  COMPUTED = "computed",
+  RELATIONSHIP = "relationship"
+}
+
+export interface ModelArgsDefaultPropertyArgs {
   /**
-   * When accessing this relationship, you can set a custom accessor. Instead
-   * of `user.todos`, you can set this to `shoppingList` to access relationships
-   * via `user.shoppingList`.
+   * Validation rules for this property
    */
-  accessName?: string;
+  validate?: ModelFieldValidator[];
+}
+
+export interface ModelArgsPrimitivePropertyArgs {
+  type:
+    | ModelArgsPropertyType.STRING
+    | ModelArgsPropertyType.NUMBER
+    | ModelArgsPropertyType.BOOLEAN;
+  required?: boolean;
+}
+
+export interface ModelArgsComputedPropertyArgs {
+  type: ModelArgsPropertyType.COMPUTED;
+  compute: (obj: any) => any;
+}
+
+export interface ModelArgsRelationshipPropertyArgs {
+  type: ModelArgsPropertyType.RELATIONSHIP;
   /**
-   * Also colloquially called "through". If you provide a "through" model,
-   * we use that instead.
+   * The model factory to relate this prop to.
    */
-  bridgeTableName?: string;
+  modelFactory: ModelFactory;
   /**
-   * When searching for this model's relationships, we look for them on this
-   * column.
-   */
-  foreignKey?: string;
-  /**
-   * When searching across the above column for relationships, this is the
-   * column on this model we look for in the bridge table.
-   */
-  localKey?: string;
-  /**
-   * If this relationship can contain multiples, make this true. Defaults to
-   * false.
+   * Whether this relationship has multiple nodes; leave undefined for implicit
+   * single nodes, or use a boolean value for explicit value
    */
   many?: boolean;
   /**
-   * Factory of the foreign model we're relating this model to.
+   * The key in the bridge table that references the current model
    */
-  model: ModelFactory;
+  localKey?: string;
   /**
-   * Sometimes you want direct control over your relationships as models
-   * themselves. For example, Doctors may have Patients through a separate
-   * Appointments model.
+   * The key in the bridge table that relates to the model declared in modelFactory
    */
-  through?: ModelFactoryWithPersist;
+  foreignKey?: string;
+  required?: boolean;
 }
 
-export function isModelHasArguments(arg: any): arg is ModelHasArguments {
-  if (typeof arg !== "object") return false;
-  if (Array.isArray(arg)) return false;
-  if (isModel(arg)) return false;
-  if (arg.model) return true;
-  return false;
-}
+export type ModelArgsPropertyArgs = ModelArgsDefaultPropertyArgs &
+  (
+    | ModelArgsComputedPropertyArgs
+    | ModelArgsRelationshipPropertyArgs
+    | ModelArgsPrimitivePropertyArgs
+  );
 
-export type ModelRelationshipArguments = (
-  | ModelFactory
-  | ModelFactory[]
-  | ModelHasArguments
-)[];
-
-export interface ModelOptions<T> {
-  composers?: ModelFactoryComposerFunction[];
-  computedProps?: ModelOptionsComputedProps<T>;
-  has?: ModelRelationshipArguments;
-  hooks?: ModelOptionsHooks;
+export interface ModelBaseArgs {
+  /**
+   * The canonical name of the model; be careful with changing this value.
+   * Coaster infers a lot from the name, including DB column names (when
+   * they're not explicitly defined). Changing this could break your
+   * application.
+   */
   name: string;
-  validators?: Validator<T>[];
+  /**
+   * The model's accessors for data retrieval and access
+   */
+  properties: Record<string, ModelArgsPropertyArgs>;
 }
 
-export type ModelOptionsWithPersist<
-  T extends ModelDataPropTypes
-> = ModelOptions<T> & {
-  databaseName?: string;
-  persistWith: PersistConnection;
-  primaryKey?: string;
-  tableName?: string;
-  // Factory methods for persist. We have built-ins for this, but these allow
-  // users to pass in whatever they want here in place of the built-ins.
-  count?: PersistCountFunction;
-  create?: PersistSaveFunction<T>;
-  delete?: PersistDeleteFunction<T>;
-  find?: PersistFindFunction<T>;
-  findBy?: PersistFindByFunction<T>;
-  query?: PersistQueryFunctionOnFactory<T>;
-  update?: PersistSaveFunction<T>;
-};
-
-export function isModelOptionsWithPersist<T>(
-  v: any
-): v is ModelOptionsWithPersist<T> {
-  if (typeof v !== "object") return false;
-  if (v.persistWith) return true;
-  return false;
+export interface PersistModelArgs extends ModelBaseArgs {
+  persist: {
+    /**
+     * Persistence database connection to use
+     */
+    with: PersistConnection;
+    /**
+     * Table name name of the model. The default is a database-safe version of
+     * the model name
+     */
+    tableName?: string;
+    /**
+     * Primary index key of the model. Default is "id"
+     */
+    primaryKey?: string;
+  };
 }
 
-export type ModelFactoryFn<T> = (
-  // Allows partial initialization of models, and doesn't let
-  // users accidentally set computedProps when initializing
-  initialValue: Partial<T>
-) => Model<T>;
+export type ModelArgs = ModelBaseArgs | PersistModelArgs;
 
-export type ModelFactory<T extends ModelDataPropTypes = {}> = ModelFactoryFn<
-  T
-> & {
-  $id: Symbol;
-  isFactory: boolean;
-  names: GeneratedNames;
-  relationships: ModelRelationshipArguments;
-};
+type ModelTypeFromRelationshipPropertyArgs<
+  Args extends ModelArgsRelationshipPropertyArgs
+> = Args["many"] extends true
+  ? ReturnType<Args["modelFactory"]>[]
+  : ReturnType<Args["modelFactory"]>;
 
-export type ModelFactoryWithPersist<
-  T extends ModelDataPropTypes = {}
-> = ModelFactory<T> & {
-  count: PersistCountFunction;
-  create: PersistSaveFunction<T>;
-  databaseName: string;
-  delete: PersistDeleteFunction<T>;
-  find: PersistFindFunction<T>;
-  findBy: PersistFindByFunction<T>;
-  persistWith: PersistConnection;
-  primaryKey: string;
-  query: PersistQueryFunctionOnFactory<T>;
-  tableName: string;
-  update: PersistSaveFunction<T>;
-};
+export type PropertyType<Args extends ModelArgsPropertyArgs> =
+  /**
+   * Primitives
+   */
+  Args["type"] extends ModelArgsPropertyType.STRING
+    ? string
+    : Args["type"] extends ModelArgsPropertyType.BOOLEAN
+    ? boolean
+    : Args["type"] extends ModelArgsPropertyType.NUMBER
+    ? number
+    : /**
+     * Computed props
+     */
+    Args extends ModelArgsComputedPropertyArgs
+    ? () => ReturnType<Args["compute"]>
+      /**
+       * Relationships. We need to extract ModelTypeFromRelationshipPropertyArgs
+       * or TypeScript yells that we're doing circular references...
+       */
+    : Args extends ModelArgsRelationshipPropertyArgs
+    ? ModelTypeFromRelationshipPropertyArgs<Args>
+    : /**
+       * Unknown!
+       */
+      never;
 
-export function isModelFactory(v: any): v is ModelFactory {
-  if (typeof v !== "function") return false;
-  if (v.modelName && v.modelFactory) return true;
-  return false;
+export type PropertiesFromModelArgs<Args extends ModelArgs> = Partial<
+  {
+    [K in keyof Args["properties"]]: PropertyType<Args["properties"][K]>;
+  }
+>;
+
+export type RequiredPropertyFromPropertyArgs<
+  Args extends ModelArgsPropertyArgs
+> = Args extends ModelArgsPrimitivePropertyArgs
+  ? Args["required"] extends true
+    ? PropertyType<Args>
+    : never
+  : never;
+
+export type ReadOnlyPropertiesFromModelArgs<
+  Args extends ModelArgs
+> = ObjectWithoutNeverProperties<
+  {
+    readonly [P in keyof Args["properties"]]: Args["properties"][P] extends ModelArgsComputedPropertyArgs
+      ? PropertyType<Args["properties"][P]>
+      : never;
+  }
+>;
+
+export type RequiredPropertiesFromModelArgs<Args extends ModelArgs> = Required<
+  ObjectWithoutNeverProperties<
+    {
+      [P in keyof Args["properties"]]: RequiredPropertyFromPropertyArgs<
+        Args["properties"][P]
+      >;
+    }
+  >
+>;
+
+export type ModelFactoryArgsFromModelArgs<
+  Args extends ModelArgs
+> = PropertiesFromModelArgs<Args> & RequiredPropertiesFromModelArgs<Args>;
+
+export interface ModelInternalProperties<Args extends ModelArgs> {
+  /**
+   * A pointer to the model factory that this model was generated from
+   */
+  readonly $factory: ModelFactory<Args>;
+  /**
+   * The base values that the model was initialized with
+   */
+  readonly $baseValues: ModelFactoryArgsFromModelArgs<Args>;
 }
 
-export function isModel(v: any): v is Model {
-  if (typeof v !== "object") return false;
-  if (v.$isModel) return true;
-  return false;
+export type Model<Args extends ModelArgs = any> = PropertiesFromModelArgs<
+  Args
+> &
+  RequiredPropertiesFromModelArgs<Args> &
+  ModelInternalProperties<Args> &
+  // This must come last because it marks existing things as ReadOnly
+  ReadOnlyPropertiesFromModelArgs<Args>;
+
+export interface ModelFactory<Args extends ModelArgs = any> {
+  (initialValue: ModelFactoryArgsFromModelArgs<Args>): Model<Args>;
+  readonly $id: Symbol;
+  readonly $name: string;
+  readonly $options: Args;
+}
+
+export function isModel<Args extends ModelArgs = any>(
+  obj: unknown
+): obj is Model<Args> {
+  if (typeof obj !== "object") return false;
+  if (Array.isArray(obj)) return false;
+  if ("$factory" in obj) return true;
+  return true;
+}
+
+export function isPersistedModel(model: Model): model is Model {
+  return Boolean(model?.$factory?.$options?.persist?.with);
 }

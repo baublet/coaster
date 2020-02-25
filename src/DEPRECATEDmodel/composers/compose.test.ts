@@ -2,15 +2,7 @@ import compose, { maximumComposers } from "./compose";
 import tooManyComposersError from "model/error/tooManyComposers";
 
 it("doesn't error when no composers are passed in", () => {
-  expect(() =>
-    compose(
-      "Test",
-      [],
-      {},
-      [],
-      []
-    )
-  ).not.toThrow();
+  expect(() => compose("Test", [], {}, [], [])).not.toThrow();
 });
 
 it("properly mutates has, validators, and computed props, and runs additional composers added at compile-time", () => {
@@ -44,13 +36,7 @@ it("prevents infinite composer errors", () => {
   const composer = ({ composers }: any) => {
     composers.push(composer);
   };
-  expect(() =>
-    compose(
-      "Test",
-      [composer],
-      {},
-      [],
-      []
-    )
-  ).toThrow(tooManyComposersError("Test", maximumComposers));
+  expect(() => compose("Test", [composer], {}, [], [])).toThrow(
+    tooManyComposersError("Test", maximumComposers)
+  );
 });

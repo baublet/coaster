@@ -1,3 +1,2 @@
-export { createModel } from "./createModel";
-export { CreateFactoryArguments } from "./createFactory";
-export { Model } from "./types";
+export { createModel as default } from "./createModel";
+export { Model, ModelFactory } from "./types";

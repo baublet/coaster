@@ -1,3 +1,6 @@
-export { default, ValidateFunction, Validator } from "./validate";
-export { default as propertyIsNotEmpty } from "./propertyIsNotEmpty";
-export { default as propertyIsEmail } from "./propertyIsEmail";
+import { Model } from "models2/types";
+
+export type ModelFieldValidator = (
+  fieldValue: any,
+  model: Model
+) => false | string[];

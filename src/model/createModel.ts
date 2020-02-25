@@ -1,78 +1,96 @@
-import { NormalizedHooksMap } from "./hooks/hooks";
-import buildRelationships from "./buildRelationships";
-import composeModel from "./composers";
-import generateNames from "helpers/generateNames";
-import normalizeHooks from "./hooks";
-import { createFactory } from "./createFactory";
+import { assignRelationships } from "./assignRelationships";
 import {
+  ModelArgs,
+  Model,
   ModelFactory,
-  ModelOptions,
-  ModelFactoryWithPersist,
-  isModelOptionsWithPersist,
-  ModelOptionsWithPersist,
-  ModelDataPropTypes
+  ModelFactoryArgsFromModelArgs,
+  ModelArgsPropertyType,
+  ModelInternalProperties
 } from "./types";
+import clone from "lodash.clonedeep";
 
-/**
- * Sugar around declaring a simple hasMany relationship via
- * `has: [many(Todos)]` instead of the clunky `has: [[Todos]]`
- * @param factory
- */
-export function many<T extends ModelFactory>(factory: T): [T] {
-  return [factory];
-}
+export function createModel<Args extends ModelArgs>(
+  opts: Args
+): ModelFactory<Args> {
+  function modelFactory(
+    initialValue: ModelFactoryArgsFromModelArgs<Args>
+  ): Model<Args> {
+    const modelData = clone(initialValue);
 
-export function createModel<T = ModelDataPropTypes>(
-  args: ModelOptions<T>
-): ModelFactory<T>;
-export function createModel<T = ModelDataPropTypes>(
-  args: ModelOptionsWithPersist<T>
-): ModelFactoryWithPersist<T>;
-export function createModel<T = ModelDataPropTypes>(
-  args: ModelOptions<T>
-): ModelFactory<T> | ModelFactoryWithPersist<T> {
-  const {
-    composers = [],
-    computedProps = {},
-    has = [],
-    hooks = {},
-    name,
-    validators = []
-  } = args;
+    const regularProps = {};
+    const computedProps = {};
+    const relationshipsProps = {};
+    const internalProps: ModelInternalProperties<Args> = {
+      $factory: modelFactory,
+      $baseValues: initialValue
+    };
 
-  const names = generateNames(name);
+    for (const prop in opts.properties) {
+      const propArguments = opts.properties[prop];
+      switch (propArguments.type) {
+        case ModelArgsPropertyType.COMPUTED:
+          computedProps[prop] = () => {
+            // Copy the data so computed props can't modify props directly
+            const newProps = clone(modelData);
+            return propArguments.compute(newProps);
+          };
+          break;
+        case ModelArgsPropertyType.RELATIONSHIP:
+          relationshipsProps[prop] = assignRelationships(
+            propArguments,
+            modelData[prop]
+          );
+          break;
+        default:
+          regularProps[prop] = modelData[prop];
+      }
+    }
 
-  // Normalize hook nodes into arrays
-  const normalizedHooks: NormalizedHooksMap = normalizeHooks(hooks);
-
-  // Run our composers
-  composeModel(names.canonical, composers, computedProps, has, validators);
-
-  // Build out relationships object out of our `has` options
-  const relationships = initialValue => buildRelationships(has, initialValue);
-
-  let persistWith;
-  let primaryKey = "id";
-  let tableName;
-  let databaseName;
-  if (isModelOptionsWithPersist<T>(args)) {
-    databaseName = args.databaseName || "default";
-    tableName = args.tableName || names.pluralSafe;
-    persistWith = args.persistWith;
-    primaryKey = args.primaryKey || primaryKey;
+    return Object.assign(
+      {},
+      regularProps,
+      computedProps,
+      relationshipsProps,
+      internalProps
+    );
   }
 
-  // Build our factory
-  return createFactory<T>({
-    computedProps,
-    databaseName,
-    has,
-    names,
-    normalizedHooks,
-    persistWith,
-    primaryKey,
-    relationships,
-    tableName,
-    validators
-  });
+  modelFactory.$id = Symbol(opts.name);
+  modelFactory.$name = opts.name;
+  modelFactory.$options = opts;
+
+  return modelFactory;
 }
+
+// Test pad
+
+const Todo = createModel({
+  name: "Todo",
+  properties: {
+    name: {
+      type: ModelArgsPropertyType.STRING
+    }
+  }
+});
+
+const User = createModel({
+  name: "User",
+  properties: {
+    name: {
+      type: ModelArgsPropertyType.STRING
+    },
+    todos: {
+      type: ModelArgsPropertyType.RELATIONSHIP,
+      modelFactory: Todo,
+      many: true
+    },
+    mainTodo: {
+      type: ModelArgsPropertyType.RELATIONSHIP,
+      modelFactory: Todo
+    }
+  }
+});
+
+const me = User({ name: "Ryan" });
+
+me;

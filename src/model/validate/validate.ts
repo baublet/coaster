@@ -1,36 +1,73 @@
 import {
-  ModelData,
-  ModelComputedPropFn,
-  ModelDataDefaultType
-} from "model/types";
+  ModelFactory,
+  Model,
+  ModelArgs,
+  ModelArgsPropertyType,
+  ModelArgsPrimitivePropertyArgs,
+  ModelArgsRelationshipPropertyArgs
+} from "../types";
 
-export type Validator<T = ModelDataDefaultType> = (
-  data: ModelData<T>,
-  computedProps: Record<string, ModelComputedPropFn<any>>
-) => true | string;
-export type ModelValidationErrors = string[];
+type ValidationErrors<Args extends ModelArgs> = {
+  readonly [K in keyof Args["properties"]]: false | string[];
+};
 
-export type ValidateFunction<T> = (
-  data: ModelData<T>,
-  computedProps: Record<string, ModelComputedPropFn<any>>,
-  validators: Validator<T>[]
-) => true | ModelValidationErrors;
+export function validate<Args extends ModelArgs>(
+  factory: ModelFactory<Args>,
+  model: Model<Args>
+): [boolean, ValidationErrors<Args>] {
+  const errors = {};
+  let hasError: boolean = false;
 
-export default function validate<T>(
-  data: ModelData<T>,
-  computedProps: Record<string, ModelComputedPropFn<T>>,
-  validators: Validator<T>[]
-): true | string[] {
-  const validationResults = validators
-    // Run through our validators
-    .map(validate => validate(data, computedProps))
-    // Filter out successful validations
-    .filter(result => result !== true);
-
-  // If there are non-true validation results, there were one or more
-  // errors. Return them.
-  if (validationResults.length) {
-    return validationResults as string[];
+  // First up, accumulate all of the props
+  for (const prop in factory.$options.properties) {
+    errors[prop] = false;
   }
-  return true;
+
+  // Validate required props
+  for (const prop in factory.$options.properties) {
+    const field = factory.$options.properties[prop];
+
+    // Computed props can't be required
+    if (field.type === ModelArgsPropertyType.COMPUTED) {
+      continue;
+    }
+
+    if (
+      (field as
+        | ModelArgsPrimitivePropertyArgs
+        | ModelArgsRelationshipPropertyArgs).required
+    ) {
+      if (!(prop in model) || model[prop] === undefined) {
+        const error = `${prop} is required`;
+        errors[prop] = errors[prop]
+          ? errors[prop].push(error)
+          : (errors[prop] = [error]);
+        hasError = true;
+      }
+    }
+  }
+
+  // If there are required fields missing, we want to early exit to prevent
+  // possible exceptions in our field validators
+  if (hasError) {
+    return [hasError, errors as ValidationErrors<Args>];
+  }
+
+  // Validate fields with custom validators
+  for (const prop in factory.$options.properties) {
+    const field = factory.$options.properties[prop];
+    const validators = field.validate;
+    if (!validators) continue;
+
+    for (const validator of validators) {
+      const fieldErrors = validator(model[prop], model);
+      if (fieldErrors) {
+        if (!errors[prop]) errors[prop] = [];
+        errors[prop].push(...fieldErrors);
+        hasError = true;
+      }
+    }
+  }
+
+  return [hasError, errors as ValidationErrors<Args>];
 }
