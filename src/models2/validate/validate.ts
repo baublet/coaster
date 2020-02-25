@@ -3,7 +3,7 @@ import {
   Model,
   ModelArgs,
   ModelArgsPropertyType,
-  ModelArgsRegularPropertyArgs,
+  ModelArgsPrimitivePropertyArgs,
   ModelArgsRelationshipPropertyArgs
 } from "../types";
 
@@ -34,7 +34,7 @@ export function validate<Args extends ModelArgs>(
 
     if (
       (field as
-        | ModelArgsRegularPropertyArgs
+        | ModelArgsPrimitivePropertyArgs
         | ModelArgsRelationshipPropertyArgs).required
     ) {
       if (!(prop in model)) {
@@ -54,7 +54,7 @@ export function validate<Args extends ModelArgs>(
     if (!validators) continue;
 
     for (const validator of validators) {
-      const fieldErrors = validator(model[prop]);
+      const fieldErrors = validator(model[prop], model);
       if (fieldErrors) {
         if (!errors[prop]) errors[prop] = [];
         errors[prop].push(...fieldErrors);

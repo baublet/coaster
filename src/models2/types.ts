@@ -10,31 +10,34 @@ export type ObjectWithoutNeverProperties<
 >;
 
 export enum ModelArgsPropertyType {
-  BOOLEAN,
-  STRING,
-  NUMBER,
-  COMPUTED,
-  RELATIONSHIP
+  BOOLEAN = "boolean",
+  STRING = "string",
+  NUMBER = "number",
+  COMPUTED = "computed",
+  RELATIONSHIP = "relationship"
 }
 
-export type ModelArgsDefaultPropertyArgs = {
+export interface ModelArgsDefaultPropertyArgs {
+  /**
+   * Validation rules for this property
+   */
   validate?: ModelFieldValidator[];
-};
+}
 
-export type ModelArgsRegularPropertyArgs = {
+export interface ModelArgsPrimitivePropertyArgs {
   type:
-    | ModelArgsPropertyType.BOOLEAN
     | ModelArgsPropertyType.STRING
-    | ModelArgsPropertyType.NUMBER;
+    | ModelArgsPropertyType.NUMBER
+    | ModelArgsPropertyType.BOOLEAN;
   required?: boolean;
-};
+}
 
-export type ModelArgsComputedPropertyArgs = {
+export interface ModelArgsComputedPropertyArgs {
   type: ModelArgsPropertyType.COMPUTED;
   compute: (obj: any) => any;
-};
+}
 
-export type ModelArgsRelationshipPropertyArgs = {
+export interface ModelArgsRelationshipPropertyArgs {
   type: ModelArgsPropertyType.RELATIONSHIP;
   /**
    * The model factory to relate this prop to.
@@ -53,46 +56,61 @@ export type ModelArgsRelationshipPropertyArgs = {
    * The key in the bridge table that relates to the model declared in modelFactory
    */
   foreignKey?: string;
-  /**
-   * Whether or not the relationship/s is/are required in order to validate.
-   */
   required?: boolean;
-};
+}
 
 export type ModelArgsPropertyArgs = ModelArgsDefaultPropertyArgs &
   (
-    | ModelArgsRegularPropertyArgs
     | ModelArgsComputedPropertyArgs
     | ModelArgsRelationshipPropertyArgs
+    | ModelArgsPrimitivePropertyArgs
   );
 
 export interface ModelArgs {
   /**
-   * The canonical name of the model. Be careful with changing this value. We
-   * infer a lot from the name, including DB column names (when they're not
-   * explicitly defined). Changing this could break your application.
+   * The canonical name of the model; be careful with changing this value.
+   * Coaster infers a lot from the name, including DB column names (when
+   * they're not explicitly defined). Changing this could break your
+   * application.
    */
   name: string;
-  properties: {
-    [key: string]: ModelArgsPropertyArgs;
-  };
+  /**
+   * The model's accessors for data retrieval and access
+   */
+  properties: Record<string, ModelArgsPropertyArgs>;
 }
 
-export type PropertyType<
-  Args extends ModelArgsPropertyArgs
-> = Args["type"] extends ModelArgsPropertyType.STRING
-  ? string
-  : Args["type"] extends ModelArgsPropertyType.BOOLEAN
-  ? boolean
-  : Args["type"] extends ModelArgsPropertyType.NUMBER
-  ? number
-  : Args extends ModelArgsComputedPropertyArgs
-  ? () => ReturnType<Args["compute"]>
-  : Args extends ModelArgsRelationshipPropertyArgs
-  ? Args["many"] extends true
-    ? ReturnType<Args["modelFactory"]>[]
-    : ReturnType<Args["modelFactory"]>
-  : never;
+type ModelTypeFromRelationshipPropertyArgs<
+  Args extends ModelArgsRelationshipPropertyArgs
+> = Args["many"] extends true
+  ? ReturnType<Args["modelFactory"]>[]
+  : ReturnType<Args["modelFactory"]>;
+
+export type PropertyType<Args extends ModelArgsPropertyArgs> =
+  /**
+   * Primitives
+   */
+  Args["type"] extends ModelArgsPropertyType.STRING
+    ? string
+    : Args["type"] extends ModelArgsPropertyType.BOOLEAN
+    ? boolean
+    : Args["type"] extends ModelArgsPropertyType.NUMBER
+    ? number
+      /**
+       * Computed props
+       */
+    : Args extends ModelArgsComputedPropertyArgs
+    ? () => ReturnType<Args["compute"]>
+    : /**
+     * Relationships. We need to extract ModelTypeFromRelationshipPropertyArgs
+     * or TypeScript thinks we're doing circular references...
+     */
+    Args extends ModelArgsRelationshipPropertyArgs
+    ? ModelTypeFromRelationshipPropertyArgs<Args>
+      /**
+       * Unknown!
+       */
+    : never;
 
 export type PropertiesFromModelArgs<Args extends ModelArgs> = Partial<
   {
@@ -102,7 +120,7 @@ export type PropertiesFromModelArgs<Args extends ModelArgs> = Partial<
 
 export type RequiredPropertyFromPropertyArgs<
   Args extends ModelArgsPropertyArgs
-> = Args extends ModelArgsRegularPropertyArgs
+> = Args extends ModelArgsPrimitivePropertyArgs
   ? Args["required"] extends true
     ? PropertyType<Args>
     : never
@@ -128,25 +146,11 @@ export type RequiredPropertiesFromModelArgs<Args extends ModelArgs> = Required<
   >
 >;
 
-export type ModelHasRelationshipFromModelArgs<
-  Args extends ModelArgsPropertyArgs
-> = Args extends ModelArgsRelationshipPropertyArgs ? PropertyType<Args> : never;
-
-export type ModelHasRelationshipsFromModelArgs<
-  Args extends ModelArgs
-> = ObjectWithoutNeverProperties<
-  {
-    [K in keyof Args["properties"]]: ModelHasRelationshipFromModelArgs<
-      Args["properties"][K]
-    >;
-  }
->;
-
 export type ModelFactoryArgsFromModelArgs<
   Args extends ModelArgs
 > = PropertiesFromModelArgs<Args> & RequiredPropertiesFromModelArgs<Args>;
 
-export type ModelInternalProperties<Args extends ModelArgs> = {
+export interface ModelInternalProperties<Args extends ModelArgs> {
   /**
    * A pointer to the model factory that this model was generated from
    */
@@ -155,13 +159,12 @@ export type ModelInternalProperties<Args extends ModelArgs> = {
    * The base values that the model was initialized with
    */
   readonly $baseValues: ModelFactoryArgsFromModelArgs<Args>;
-};
+}
 
 export type Model<Args extends ModelArgs = any> = PropertiesFromModelArgs<
   Args
 > &
   RequiredPropertiesFromModelArgs<Args> &
-  ModelHasRelationshipsFromModelArgs<Args> &
   ModelInternalProperties<Args> &
   // This must come last because it marks existing things as ReadOnly
   ReadOnlyPropertiesFromModelArgs<Args>;

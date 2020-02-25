@@ -61,3 +61,36 @@ export function createModel<Args extends ModelArgs>(
 
   return modelFactory;
 }
+
+// Test pad
+
+const Todo = createModel({
+  name: "Todo",
+  properties: {
+    name: {
+      type: ModelArgsPropertyType.STRING
+    }
+  }
+});
+
+const User = createModel({
+  name: "User",
+  properties: {
+    name: {
+      type: ModelArgsPropertyType.STRING
+    },
+    todos: {
+      type: ModelArgsPropertyType.RELATIONSHIP,
+      modelFactory: Todo,
+      many: true
+    },
+    mainTodo: {
+      type: ModelArgsPropertyType.RELATIONSHIP,
+      modelFactory: Todo
+    }
+  }
+});
+
+const me = User({ name: "Ryan" });
+
+me;
