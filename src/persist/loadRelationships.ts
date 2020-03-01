@@ -1,218 +1,185 @@
-// import { PersistConnection } from "./types";
-// import { Model } from "model";
-// import { PersistedModelFactory } from "./types";
-// import { getBridgeTableNames } from "./getBridgeTableNames";
-// import cannotLoadInvariantRelationships from "./error/cannotLoadInvariantRelationships";
+import { Model } from "model";
+import { PersistedModelFactory } from "./types";
+import cannotLoadInvariantRelationships from "./error/cannotLoadInvariantRelationships";
 
-// type ModelMap = Map<
-//   // The accessorName or the unique symbol of the ModelFactory
-//   Symbol | string,
-//   // Map of the models loaded in <id, Model>
-//   Record<string, Model>
-// >;
+type ModelMap = Map<
+  // The accessorName or the unique symbol of the ModelFactory
+  Symbol | string,
+  // Map of the models loaded in <id, Model>
+  Record<string, Model>
+>;
 
-// type ModelNeeds = Record<
-//   // The model ID
-//   string,
-//   // First string here is the accessor name (settings in "user.settings")
-//   Record<string, string | string[]>
-// >;
+type ModelNeeds = Record<
+  // The model ID
+  string,
+  // First string here is the accessor name (settings in "user.settings")
+  Record<string, string | string[]>
+>;
 
-// /**
-//  * Attaches relationships to a set of models of the same type.
-//  * @param persist
-//  * @param model
-//  */
-// export async function loadRelationships(
-//   models: Model[],
-//   persist?: PersistConnection,
-//   depth: number = 0,
-//   // The below properties are for recursion purposes only. Do not modify
-//   // these or pass them in manually.
-//   modelMap?: ModelMap,
-//   modelNeeds?: ModelNeeds,
-//   bridgeQueries: number = 0,
-//   modelQueries: number = 0
-// ): Promise<{
-//   totalQueries: number;
-//   bridgeQueries: number;
-//   modelQueries: number;
-// }> {
-//   if (!models.length) return;
+/**
+ * Attaches relationships to a set of models of the same type.
+ * @param persist
+ * @param model
+ */
+export async function loadRelationships(
+  models: Model[],
+  depth: number = 0,
+  // The below properties are for recursion purposes only. Do not modify
+  // these or pass them in manually.
+  modelMap?: ModelMap,
+  modelNeeds?: ModelNeeds,
+  bridgeQueries: number = 0,
+  modelQueries: number = 0
+): Promise<{
+  totalQueries: number;
+  bridgeQueries: number;
+  modelQueries: number;
+}> {
+  if (!models.length) return;
 
-//   // Never let users pass different types of models here
-//   const leftFactory: PersistedModelFactory = models[0].$factory as any;
-//   for (const model of models) {
-//     if (model.$factory === leftFactory) continue;
-//     throw cannotLoadInvariantRelationships(models);
-//   }
+  // Never let users pass different types of models here
+  const leftFactory: PersistedModelFactory = models[0].$factory as any;
+  for (const model of models) {
+    if (model.$factory === leftFactory) continue;
+    throw cannotLoadInvariantRelationships(models);
+  }
 
-//   persist = persist === undefined ? leftFactory.$options.persist.with : persist;
+  const persist = leftFactory.$options.persist.with;
 
-//   const operations = [];
-//   const collators = [];
+  const operations = [];
+  const collators = [];
 
-//   modelMap = modelMap || new Map<Symbol | string, Record<string, Model>>();
-//   modelNeeds = modelNeeds || {};
+  modelMap = modelMap || new Map<Symbol | string, Record<string, Model>>();
+  modelNeeds = modelNeeds || {};
 
-//   const leftFactoryPrimaryKey = leftFactory.$options.persist.primaryKey;
+  const leftFactoryPrimaryKey = leftFactory.$options.persist.primaryKey;
 
-//   leftFactory.relationships.forEach(relationship => {
-//     const isMultiple = isModelHasArguments(relationship)
-//       ? Boolean(relationship.many)
-//       : Array.isArray(relationship);
+  leftFactory.$relationships.forEach(relationshipArgs => {
+    const isMultiple = relationshipArgs.many;
 
-//     const rightFactory = (isModelHasArguments(relationship)
-//       ? relationship.model
-//       : Array.isArray(relationship)
-//       ? relationship[0]
-//       : relationship) as ModelFactoryWithPersist;
-//     const rightFactoryPrimaryKey = rightFactory.primaryKey;
+    const rightFactory = relationshipArgs.modelFactory;
+    const rightFactoryPrimaryKey = rightFactory.$options.persist.primaryKey;
 
-//     const [bridgeTable, leftColumn, rightColumn] = getBridgeTableNames(
-//       leftFactory,
-//       rightFactory,
-//       isModelHasArguments(relationship) ? relationship : undefined
-//     );
+    const {
+      bridgeTableName,
+      localKey,
+      foreignKey,
+      accessor
+    } = relationshipArgs;
 
-//     if (bridgeTable === "deliveries_1_pizzas_1_relationships") {
-//       console.log("RELATIONSHIP ", relationship);
-//       throw new Error(bridgeTable);
-//     }
+    // Operations grab stuff from the database
+    operations.push(async () => {
+      // First, query the join table for relationships to load which right-hand
+      // into the database. We only want to load IDs that we haven't already
+      // queried for. (This is important during recursive calls.)
+      const loadedIds = Object.keys(modelNeeds);
+      const ids = models
+        .map(model => model[leftFactoryPrimaryKey])
+        .filter(id => !loadedIds.includes(id));
 
-//     let accessorName: string;
-//     if (isModelHasArguments(relationship)) {
-//       if (relationship.accessName) accessorName = relationship.accessName;
-//     }
-//     if (!accessorName) {
-//       accessorName = Array.isArray(relationship)
-//         ? rightFactory.names.pluralSafe
-//         : rightFactory.names.safe;
-//     }
+      // If we've already loaded all the leftModel needs, we can skip the rest
+      // of this operation.
+      if (!ids.length) return;
 
-//     // Operations grab stuff from the database
-//     operations.push(async () => {
-//       // First, query the join table for relationships to load which right-hand
-//       // into the database. We only want to load IDs that we haven't already
-//       // queried for. (This is important during recursive calls.)
-//       const loadedIds = Object.keys(modelNeeds);
-//       const ids = models
-//         .map(model => model[leftFactoryPrimaryKey])
-//         .filter(id => !loadedIds.includes(id));
+      const results = await persist(bridgeTableName)
+        .whereIn(localKey, ids)
+        .select([localKey, foreignKey]);
+      bridgeQueries++;
 
-//       // If we've already loaded all the leftModel needs, we can skip the rest
-//       // of this operation.
-//       if (!ids.length) return;
+      // Then, grab all the models we need for this relationship
+      const resultIds = results
+        .map(result => {
+          const leftId = result[localKey];
+          if (!modelNeeds[leftId]) modelNeeds[leftId] = {};
+          // This allows us to cross-reference models to what relationships we
+          // need to attach to them
+          if (!modelNeeds[leftId][accessor])
+            modelNeeds[leftId][accessor] = isMultiple ? [] : null;
 
-//       const results = await persist(bridgeTable)
-//         .whereIn(leftColumn, ids)
-//         .select([leftColumn, rightColumn]);
-//       bridgeQueries++;
+          if (isMultiple) {
+            (modelNeeds[leftId][accessor] as string[]).push(result[foreignKey]);
+          } else {
+            (modelNeeds[leftId][accessor] as string) = result[foreignKey];
+          }
 
-//       // Then, grab all the models we need for this relationship
-//       const resultIds = results
-//         .map(result => {
-//           const leftId = result[leftColumn];
-//           if (!modelNeeds[leftId]) modelNeeds[leftId] = {};
-//           // This allows us to cross-reference models to what relationships we
-//           // need to attach to them
-//           if (!modelNeeds[leftId][accessorName])
-//             modelNeeds[leftId][accessorName] = isMultiple ? [] : null;
+          return result[foreignKey];
+        })
+        .filter(id => {
+          // If we haven't loaded any of these model types, yet, load them all
+          if (!modelMap.has(rightFactory.$id)) return true;
+          const modelsLoaded = modelMap.get(rightFactory.$id);
+          return !modelsLoaded[id];
+        });
 
-//           if (isMultiple) {
-//             (modelNeeds[leftId][accessorName] as string[]).push(
-//               result[rightColumn]
-//             );
-//           } else {
-//             (modelNeeds[leftId][accessorName] as string) = result[rightColumn];
-//           }
+      // If we have already loaded up all the rightModels, we can skip the rest
+      // of this operation
+      if (!resultIds.length) return;
 
-//           return result[rightColumn];
-//         })
-//         .filter(id => {
-//           // If we haven't loaded any of these model types, yet, load them all
-//           if (!modelMap.has(rightFactory.$id)) return true;
-//           const modelsLoaded = modelMap.get(rightFactory.$id);
-//           return !modelsLoaded[id];
-//         });
+      // Now that we have queued up all the right-side IDs we need to load,
+      // here's where we grab that data.
+      const rightModelData = await rightFactory.find(resultIds as string[]);
+      modelQueries++;
 
-//       // If we have already loaded up all the rightModels, we can skip the rest
-//       // of this operation
-//       if (!resultIds.length) return;
+      rightModelData.forEach(newModel => {
+        const symbol = rightFactory.$id;
 
-//       // Now that we have queued up all the right-side IDs we need to load,
-//       // here's where we grab that data.
-//       const rightModelData = await rightFactory.find(resultIds as string[]);
-//       modelQueries++;
+        // We map by both accessor and Symbol for smarter caching
+        // between recursions
+        const freshIdMap = {};
+        if (!modelMap.has(symbol)) modelMap.set(symbol, freshIdMap);
+        if (!modelMap.has(accessor)) modelMap.set(accessor, freshIdMap);
+        modelMap.get(symbol)[newModel[rightFactoryPrimaryKey]] = newModel;
+      });
+    });
 
-//       rightModelData.forEach(newModel => {
-//         const symbol = rightFactory.$id;
+    // Our collators attach relationships to their parent models
+    collators.push(() => {
+      models.forEach(model => {
+        // For each right model data, load up the model from our map and set it
+        // as a relationship
+        const leftId = model[leftFactoryPrimaryKey];
+        if (!modelNeeds[leftId]) modelNeeds[leftId] = {};
+        const needs = modelNeeds[leftId][accessor];
 
-//         // We map by both accessor and Symbol for smarter caching
-//         // between recursions
-//         const freshIdMap = {};
-//         if (!modelMap.has(symbol)) modelMap.set(symbol, freshIdMap);
-//         if (!modelMap.has(accessorName)) modelMap.set(accessorName, freshIdMap);
-//         modelMap.get(symbol)[newModel[rightFactoryPrimaryKey]] = newModel;
-//       });
-//     });
+        let relationships: Model | Model[];
+        if (needs === undefined) {
+          relationships = isMultiple ? [] : null;
+        } else {
+          relationships = isMultiple
+            ? ((needs as string[]) || []).map(id => modelMap.get(accessor)[id])
+            : modelMap.get(accessor)[needs as string];
+        }
 
-//     // Our collators attach relationships to their parent models
-//     collators.push(() => {
-//       models.forEach(model => {
-//         // For each right model data, load up the model from our map and set it
-//         // as a relationship
-//         const leftId = model[leftFactoryPrimaryKey];
-//         if (!modelNeeds[leftId]) modelNeeds[leftId] = {};
-//         const needs = modelNeeds[leftId][accessorName];
+        model.$setRelationship(accessor, relationships);
+      });
+    });
+  });
 
-//         let relationships: Model | Model[];
-//         if (needs === undefined) {
-//           relationships = isMultiple ? [] : null;
-//         } else {
-//           relationships = isMultiple
-//             ? ((needs as string[]) || []).map(
-//                 id => modelMap.get(accessorName)[id]
-//               )
-//             : modelMap.get(accessorName)[needs as string];
-//         }
+  // Collators must run after our operations, or they will have nothing
+  // to collate.
+  await Promise.all(operations.map(op => op()));
+  collators.forEach(op => op());
 
-//         model.$setRelationship(accessorName, relationships);
-//       });
-//     });
-//   });
+  // For more depth than just the first slew of models
+  if (depth > 0) {
+    await Promise.all(
+      Array.from(modelMap.keys()).map(async (symbol: Symbol | string) => {
+        if (typeof symbol === "string") return;
+        const models = Object.values(modelMap.get(symbol));
+        const newDepth = depth - 1;
+        const {
+          bridgeQueries: childBridgeQueries,
+          modelQueries: childModelQueries
+        } = await loadRelationships(models, newDepth, modelMap, modelNeeds);
+        bridgeQueries += childBridgeQueries;
+        modelQueries += childModelQueries;
+      })
+    );
+  }
 
-//   // Collators must run after our operations, or they will have nothing
-//   // to collate.
-//   await Promise.all(operations.map(op => op()));
-//   collators.forEach(op => op());
-
-//   // For more depth than just the first slew of models
-//   if (depth > 0) {
-//     await Promise.all(
-//       Array.from(modelMap.keys()).map(async (symbol: Symbol | string) => {
-//         if (typeof symbol === "string") return;
-//         const models = Object.values(modelMap.get(symbol));
-//         const newDepth = depth - 1;
-//         const {
-//           bridgeQueries: childBridgeQueries,
-//           modelQueries: childModelQueries
-//         } = await loadRelationships(
-//           models,
-//           persist,
-//           newDepth,
-//           modelMap,
-//           modelNeeds
-//         );
-//         bridgeQueries += childBridgeQueries;
-//         modelQueries += childModelQueries;
-//       })
-//     );
-//   }
-
-//   return {
-//     totalQueries: bridgeQueries + modelQueries,
-//     bridgeQueries,
-//     modelQueries
-//   };
-// }
+  return {
+    totalQueries: bridgeQueries + modelQueries,
+    bridgeQueries,
+    modelQueries
+  };
+}

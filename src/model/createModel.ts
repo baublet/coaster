@@ -15,6 +15,7 @@ import {
 } from "persist/types";
 import { attachPersistToModelFactory } from "persist/attachToModelFactory";
 import generateNames from "helpers/generateNames";
+import { toJson } from "./toJson";
 
 export function createModel<Args extends PersistModelArgs>(
   opts: Args
@@ -27,29 +28,32 @@ export function createModel<Args extends ModelArgs | PersistModelArgs>(
 ): Args extends PersistModelArgs
   ? PersistedModelFactory<Args>
   : ModelFactory<Args> {
+  const primitiveProps: string[] = [];
+  for (const prop in opts.properties) {
+    const propArguments = opts.properties[prop];
+    switch (propArguments.type) {
+      case ModelArgsPropertyType.RELATIONSHIP:
+        break;
+      default:
+        primitiveProps.push(prop);
+    }
+  }
+
   function modelFactory(
     initialValue: ModelFactoryArgsFromModelArgs<Args>
   ): Model<Args> {
     const modelData = clone(initialValue);
 
     const regularProps = {};
-    const computedProps = {};
     const relationshipsProps = {};
     const internalProps: ModelInternalProperties<Args> = {
       $factory: modelFactory,
-      $baseValues: initialValue
+      $initialValues: initialValue
     };
 
     for (const prop in opts.properties) {
       const propArguments = opts.properties[prop];
       switch (propArguments.type) {
-        case ModelArgsPropertyType.COMPUTED:
-          computedProps[prop] = () => {
-            // Copy the data so computed props can't modify props directly
-            const newProps = clone(modelData);
-            return propArguments.compute(newProps);
-          };
-          break;
         case ModelArgsPropertyType.RELATIONSHIP:
           relationshipsProps[prop] = assignRelationships(
             propArguments,
@@ -61,28 +65,31 @@ export function createModel<Args extends ModelArgs | PersistModelArgs>(
       }
     }
 
-    return Object.assign(
-      {},
+    const model: Model<Args> = Object.assign(
       regularProps,
-      computedProps,
       relationshipsProps,
       internalProps
-    );
+    ) as any;
+
+    return model;
   }
 
   modelFactory.$id = Symbol(opts.name);
   modelFactory.$name = opts.name;
   modelFactory.$options = opts;
   modelFactory.$names = generateNames(opts.name);
+  modelFactory.$data = (model: Model<Args>): Record<string, any> => {
+    const data: Record<string, any> = {};
+    primitiveProps.forEach(prop => (data[prop] = model[prop]));
+    return data;
+  };
+  modelFactory.toJson = toJson;
 
   if (!isPersistArgs(opts)) {
-    opts;
     return modelFactory as any;
   }
 
-  attachPersistToModelFactory(modelFactory);
-
-  return modelFactory as any;
+  return attachPersistToModelFactory(modelFactory, opts) as any;
 }
 
 // Test pad

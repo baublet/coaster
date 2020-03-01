@@ -29,6 +29,19 @@ export interface PersistModelArgs extends ModelBaseArgs {
   };
 }
 
+/**
+ * Used for internal mapping
+ */
+export interface PersistModelRelationship {
+  accessor: string;
+  bridgeTableName: string;
+  foreignKey: string;
+  localKey: string;
+  many: boolean;
+  modelFactory: PersistedModelFactory;
+  required: boolean;
+}
+
 export interface VanillaModelArgs extends ModelBaseArgs {
   $options;
 }
@@ -36,6 +49,7 @@ export interface VanillaModelArgs extends ModelBaseArgs {
 export interface PersistedModelFactory<Args extends PersistModelArgs = any>
   extends ModelFactory<Args> {
   readonly $options: Args;
+  readonly $relationships: PersistModelRelationship[];
   readonly find: PersistFindFunction<Args>;
   readonly findBy: PersistFindByFunction<Args>;
   readonly delete: PersistDeleteFunction<Args>;

@@ -1,8 +1,11 @@
-import { Model, ModelFactoryWithPersist } from "model/types";
+import { Model, ModelArgsPropertyType } from "model/types";
 import { createModel } from "model";
-import { PersistConnection } from "persist/types";
+import { PersistConnection, PersistedModelFactory } from "persist/types";
 
 let testTableDelta = 0;
+export function getTestTableDelta() {
+  return testTableDelta++;
+}
 
 export const db = {
   client: "sqlite3",
@@ -12,33 +15,52 @@ export const db = {
   useNullAsDefault: true
 };
 
-export async function createTableForNewModelFactory<T = any>(
+/**
+ * Pass in an arbitrary ball of data and we'll turn it into a model and model
+ * factory for you, that's ready to go and built with persistence.
+ * @param persist
+ * @param props
+ */
+export async function createTableForNewModelFactory(
   persist: PersistConnection,
-  props: any,
-  computedProps: any = {}
-): Promise<{ factory: ModelFactoryWithPersist<T>; model: Model<T> }> {
-  const tableName = `test_${testTableDelta++}`;
+  props: any
+): Promise<{ factory: PersistedModelFactory<any>; model: Model<any> }> {
+  const tableName = `test_${getTestTableDelta()}`;
   const tableNamePlural = `${tableName}s`;
 
+  const modelProps = {};
+
   await persist.schema.createTable(tableNamePlural, table => {
-    for (const [name, type] of Object.entries({ id: "test", ...props })) {
+    for (const [name, type] of Object.entries({ id: "id", ...props })) {
       switch (typeof type) {
         case "boolean":
           table.boolean(name);
+          modelProps[name] = {
+            type: ModelArgsPropertyType.BOOLEAN
+          };
           break;
         case "number":
           table.bigInteger(name).unsigned();
+          modelProps[name] = {
+            type: ModelArgsPropertyType.NUMBER
+          };
           break;
         default:
+          modelProps[name] = {
+            type: ModelArgsPropertyType.STRING
+          };
           table.text(name);
       }
     }
   });
 
-  const factory = createModel<T>({
+  const factory = createModel({
     name: tableName,
-    computedProps,
-    persistWith: persist
+    properties: modelProps,
+    persist: {
+      with: persist,
+      tableName: tableNamePlural
+    }
   });
 
   return { factory, model: factory(props) };

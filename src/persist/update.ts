@@ -30,7 +30,7 @@ export function updateFactory<T extends PersistModelArgs>(
     const model = isModel(initialData)
       ? initialData
       : (modelFactory(initialData) as Model<T>);
-    const props = model.$baseValues;
+    const props = model.$initialValues;
     const id = model[primaryKey];
     const cnx = trx || connection;
     if (!id) {

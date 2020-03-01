@@ -7,9 +7,11 @@ import { ModelFactory } from "model/types";
 import { PersistedModelFactory, PersistModelArgs } from "./types";
 import { queryFactory } from "./query";
 import { updateFactory } from "./update";
+import { relationships } from "./relationships";
 
 export function attachPersistToModelFactory<T extends PersistModelArgs>(
-  modelFactory: ModelFactory
+  modelFactory: ModelFactory,
+  opts: PersistModelArgs
 ): PersistedModelFactory<T> {
   // We want to do this so we can actually set the factories here. Otherwise,
   // TS would tell us we can't set readonly properties. By casting to any
@@ -17,6 +19,15 @@ export function attachPersistToModelFactory<T extends PersistModelArgs>(
   // but we do lose some library-level type safety (particularly in the below
   // lines).
   const persistEnabledFactory = modelFactory as any;
+
+  // Set our defaults
+  const names = modelFactory.$names;
+  const options = modelFactory.$options as PersistModelArgs;
+  const persistOptions = options.persist;
+  if (!persistOptions.primaryKey)
+    persistEnabledFactory.$options.persist.primaryKey = "id";
+  if (!persistOptions.tableName)
+    persistEnabledFactory.$options.persist.tableName = names.pluralSafe;
 
   // Set our persist accessors
   persistEnabledFactory.count = countFactory(persistEnabledFactory);
@@ -27,12 +38,10 @@ export function attachPersistToModelFactory<T extends PersistModelArgs>(
   persistEnabledFactory.query = queryFactory<T>(persistEnabledFactory);
   persistEnabledFactory.update = updateFactory<T>(persistEnabledFactory);
 
-  // Set our defaults
-  const names = modelFactory.$names;
-  const options = modelFactory.$options as PersistModelArgs;
-  const persistOptions = options.persist;
-  if (!persistOptions.primaryKey) persistOptions.primaryKey = "id";
-  if (!persistOptions.tableName) persistOptions.tableName = names.pluralSafe;
+  persistEnabledFactory.$relationships = relationships(
+    persistEnabledFactory,
+    opts
+  );
 
   return persistEnabledFactory as PersistedModelFactory<T>;
 }

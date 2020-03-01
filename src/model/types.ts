@@ -15,7 +15,6 @@ export enum ModelArgsPropertyType {
   BOOLEAN = "boolean",
   STRING = "string",
   NUMBER = "number",
-  COMPUTED = "computed",
   RELATIONSHIP = "relationship"
 }
 
@@ -34,11 +33,6 @@ export interface ModelArgsPrimitivePropertyArgs {
   required?: boolean;
 }
 
-export interface ModelArgsComputedPropertyArgs {
-  type: ModelArgsPropertyType.COMPUTED;
-  compute: (obj: any) => any;
-}
-
 export interface ModelArgsRelationshipPropertyArgs {
   type: ModelArgsPropertyType.RELATIONSHIP;
   /**
@@ -51,6 +45,10 @@ export interface ModelArgsRelationshipPropertyArgs {
    */
   many?: boolean;
   /**
+   * The name of the table where we correlated the models.
+   */
+  bridgeTableName?: string;
+  /**
    * The key in the bridge table that references the current model
    */
   localKey?: string;
@@ -62,11 +60,7 @@ export interface ModelArgsRelationshipPropertyArgs {
 }
 
 export type ModelArgsPropertyArgs = ModelArgsDefaultPropertyArgs &
-  (
-    | ModelArgsComputedPropertyArgs
-    | ModelArgsRelationshipPropertyArgs
-    | ModelArgsPrimitivePropertyArgs
-  );
+  (ModelArgsRelationshipPropertyArgs | ModelArgsPrimitivePropertyArgs);
 
 export interface ModelBaseArgs {
   /**
@@ -100,11 +94,6 @@ export type PropertyType<Args extends ModelArgsPropertyArgs> =
     ? boolean
     : Args["type"] extends ModelArgsPropertyType.NUMBER
     ? number
-      /**
-       * Computed props
-       */
-    : Args extends ModelArgsComputedPropertyArgs
-    ? () => ReturnType<Args["compute"]>
     : /**
      * Relationships. We need to extract ModelTypeFromRelationshipPropertyArgs
      * or TypeScript yells that we're doing circular references...
@@ -130,16 +119,6 @@ export type RequiredPropertyFromPropertyArgs<
     : never
   : never;
 
-export type ReadOnlyPropertiesFromModelArgs<
-  Args extends ModelArgs
-> = ObjectWithoutNeverProperties<
-  {
-    readonly [P in keyof Args["properties"]]: Args["properties"][P] extends ModelArgsComputedPropertyArgs
-      ? PropertyType<Args["properties"][P]>
-      : never;
-  }
->;
-
 export type RequiredPropertiesFromModelArgs<Args extends ModelArgs> = Required<
   ObjectWithoutNeverProperties<
     {
@@ -162,23 +141,31 @@ export interface ModelInternalProperties<Args extends ModelArgs> {
   /**
    * The base values that the model was initialized with
    */
-  readonly $baseValues: ModelFactoryArgsFromModelArgs<Args>;
+  readonly $initialValues: ModelFactoryArgsFromModelArgs<Args>;
 }
 
 export type Model<Args extends ModelArgs = any> = PropertiesFromModelArgs<
   Args
 > &
   RequiredPropertiesFromModelArgs<Args> &
-  ModelInternalProperties<Args> &
-  // This must come last because it marks existing things as ReadOnly
-  ReadOnlyPropertiesFromModelArgs<Args>;
+  ModelInternalProperties<Args>;
 
 export interface ModelFactory<Args extends ModelArgs = any> {
   (initialValue: ModelFactoryArgsFromModelArgs<Args>): Model<Args>;
   readonly $id: Symbol;
+  /**
+   * Returns the primitive data for the model
+   */
+  readonly $data: (Model: Model<Args>) => Record<string, any>;
   readonly $name: string;
   readonly $names: GeneratedNames;
   readonly $options: Args;
+  readonly toJson: (
+    model: Model<Args>,
+    maxDepth?: number,
+    currentDepth?: number,
+    data?: Record<string, any>
+  ) => Record<string, any>;
 }
 
 export function isModel<Args extends ModelArgs = any>(

@@ -1,5 +1,5 @@
-import { ModelFactoryWithPersist } from "model/types";
 import { getBridgeTableNames } from "./getBridgeTableNames";
+import { PersistedModelFactory } from "./types";
 
 /**
  * Creates a bridge table to establish a relationship between two models. This
@@ -9,12 +9,18 @@ import { getBridgeTableNames } from "./getBridgeTableNames";
  * @param bridgeTableName If undefined, will use "fromName_toName_relationships"
  */
 export async function createBridgeTable(
-  from: ModelFactoryWithPersist,
-  to: ModelFactoryWithPersist,
+  from: PersistedModelFactory,
+  to: PersistedModelFactory,
   bridgeTableName?: string
 ) {
-  const persist = to.persistWith;
-  const [table, fromColumn, toColumn] = getBridgeTableNames(from, to);
+  const persist = to.$options.persist.with;
+  const [table, fromColumn, toColumn] = getBridgeTableNames(
+    from,
+    to,
+    bridgeTableName
+  );
+  const fromPrimaryKey = from.$options.persist.primaryKey;
+  const toPrimaryKey = to.$options.persist.primaryKey;
 
   await persist.schema.createTable(table, table => {
     table
@@ -32,8 +38,8 @@ export async function createBridgeTable(
 
     table
       .foreign(fromColumn)
-      .references("id")
-      .inTable(from.tableName);
+      .references(fromPrimaryKey)
+      .inTable(from.$options.persist.tableName);
 
     table
       .bigInteger(toColumn)
@@ -43,8 +49,8 @@ export async function createBridgeTable(
 
     table
       .foreign(toColumn)
-      .references("id")
-      .inTable(to.tableName);
+      .references(toPrimaryKey)
+      .inTable(to.$options.persist.tableName);
   });
 
   return [table, fromColumn, toColumn];

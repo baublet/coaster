@@ -1,9 +1,10 @@
 import { db, createTableForNewModelFactory } from "testHelpers/db";
 import { User } from "testHelpers/User";
 
+import { Model } from "model/types";
 import { createFactory } from "./create";
 import { connect } from "./connect";
-import { ModelFactoryWithPersist, Model } from "model/types";
+import { PersistedModelFactory } from "./types";
 
 jest.mock("./loadRelationships");
 
@@ -12,7 +13,7 @@ it("returns a function", () => {
   expect(factory).toBeInstanceOf(Function);
 });
 
-async function setup(): Promise<[ModelFactoryWithPersist<any>, Model[]]> {
+async function setup(): Promise<[PersistedModelFactory, Model[]]> {
   const persist = connect(db);
   const { factory: User, model: user } = await createTableForNewModelFactory(
     persist,
@@ -33,7 +34,7 @@ async function setup(): Promise<[ModelFactoryWithPersist<any>, Model[]]> {
   return [User, users];
 }
 
-it("find models by a single field", async () => {
+it.only("find models by a single field", async () => {
   const [User] = await setup();
   const foundUsers = await User.findBy({ company: 2 });
 
@@ -42,7 +43,7 @@ it("find models by a single field", async () => {
 });
 
 describe("query options", () => {
-  async function setup(): Promise<[ModelFactoryWithPersist<any>, Model<any>]> {
+  async function setup(): Promise<[PersistedModelFactory, Model[]]> {
     const persist = connect(db);
     const { factory: User, model: user } = await createTableForNewModelFactory(
       persist,

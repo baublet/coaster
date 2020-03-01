@@ -1,14 +1,13 @@
-import { db } from "./db";
+import { db, getTestTableDelta } from "./db";
 import { createModel } from "model";
 import { connect } from "persist/connect";
 import { createBridgeTable } from "persist/createBridgeTable";
+import { ModelArgsPropertyType } from "model/types";
 
 const persist = connect(db);
 
-let testTableDelta = 0;
-
 export async function createUsersAndTodos() {
-  testTableDelta = testTableDelta + 1;
+  const testTableDelta = getTestTableDelta();
 
   const userTable = `user_with_todos_${testTableDelta}`;
   const userTablePlural = `${userTable}s`;
@@ -96,57 +95,122 @@ export async function createUsersAndTodos() {
     table.bigInteger("orderDate");
   });
 
-  const Settings = createModel<{ id: string; bio: string }>({
+  const Settings = createModel({
     name: settingsTable,
-    persistWith: persist
-  });
-
-  const Todo = createModel<{ id: string; todo: string }>({
-    name: todoTable,
-    persistWith: persist
-  });
-
-  const TodoGroup = createModel<{ id: string; name: string }>({
-    name: todoGroupTable,
-    persistWith: persist,
-    has: [[Todo]]
-  });
-
-  const Pizza = createModel<{ id: string; type: string }>({
-    name: pizzaTable,
-    persistWith: persist
-  });
-
-  const Delivery = createModel<{
-    id: string;
-    orderDate: number;
-    pizza_id: string;
-    user_id: string;
-  }>({
-    name: deliveryTable,
-    persistWith: persist,
-    has: [[Pizza]]
-  });
-
-  const User = createModel<{
-    id: string;
-    name: string;
-    todos: { todo: string }[];
-  }>({
-    name: userTable,
-    persistWith: persist,
-    has: [
-      Settings,
-      [Todo],
-      [TodoGroup],
-      {
-        model: Pizza,
-        many: true,
-        through: Delivery,
-        localKey: "user_id",
-        foreignKey: "pizza_id"
+    properties: {
+      id: {
+        type: ModelArgsPropertyType.STRING
+      },
+      bio: {
+        type: ModelArgsPropertyType.STRING
       }
-    ]
+    },
+    persist: {
+      with: persist
+    }
+  });
+
+  const Todo = createModel({
+    name: todoTable,
+    properties: {
+      id: {
+        type: ModelArgsPropertyType.STRING
+      },
+      todo: {
+        type: ModelArgsPropertyType.STRING
+      }
+    },
+    persist: {
+      with: persist
+    }
+  });
+
+  const TodoGroup = createModel({
+    name: todoGroupTable,
+    properties: {
+      id: {
+        type: ModelArgsPropertyType.STRING
+      },
+      name: {
+        type: ModelArgsPropertyType.STRING
+      },
+      todos: {
+        type: ModelArgsPropertyType.RELATIONSHIP,
+        modelFactory: Todo,
+        many: true
+      }
+    },
+    persist: {
+      with: persist
+    }
+  });
+
+  const Pizza = createModel({
+    name: pizzaTable,
+    properties: {
+      id: {
+        type: ModelArgsPropertyType.STRING
+      },
+      type: {
+        type: ModelArgsPropertyType.STRING
+      }
+    },
+    persist: {
+      with: persist
+    }
+  });
+
+  const Delivery = createModel({
+    name: deliveryTable,
+    properties: {
+      id: {
+        type: ModelArgsPropertyType.STRING
+      },
+      orderDate: {
+        type: ModelArgsPropertyType.NUMBER
+      },
+      pizzas: {
+        type: ModelArgsPropertyType.RELATIONSHIP,
+        modelFactory: Pizza,
+        many: true
+      }
+    },
+    persist: {
+      with: persist
+    }
+  });
+
+  const User = createModel({
+    name: userTable,
+    properties: {
+      id: {
+        type: ModelArgsPropertyType.STRING
+      },
+      name: {
+        type: ModelArgsPropertyType.STRING
+      },
+      settings: {
+        type: ModelArgsPropertyType.RELATIONSHIP,
+        modelFactory: Settings
+      },
+      todos: {
+        type: ModelArgsPropertyType.RELATIONSHIP,
+        modelFactory: Todo,
+        many: true
+      },
+      todoGroups: {
+        type: ModelArgsPropertyType.RELATIONSHIP,
+        modelFactory: TodoGroup,
+        many: true
+      },
+      pizzas: {
+        type: ModelArgsPropertyType.RELATIONSHIP,
+        modelFactory: Pizza
+      }
+    },
+    persist: {
+      with: persist
+    }
   });
 
   const [

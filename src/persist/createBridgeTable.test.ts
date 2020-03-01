@@ -3,19 +3,29 @@ import { db } from "testHelpers/db";
 
 import { createBridgeTable } from "./createBridgeTable";
 import { connect } from "./connect";
+import { ModelArgsPropertyType } from "model/types";
 
 it("creates a new table", async () => {
   const persist = connect(db);
 
   const Penny = createModel({
     name: "Penny",
-    persistWith: persist
+    properties: {
+      id: {
+        type: ModelArgsPropertyType.STRING
+      }
+    },
+    persist: { with: persist }
   });
 
   const Nickel = createModel({
     name: "Nickel",
-    persistWith: persist,
-    has: [[Penny]]
+    properties: {
+      id: {
+        type: ModelArgsPropertyType.STRING
+      }
+    },
+    persist: { with: persist }
   });
 
   const [bridgeTableName] = await createBridgeTable(Nickel, Penny);

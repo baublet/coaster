@@ -1,2 +1,2 @@
-export { createModel as default } from "./createModel";
+export { createModel } from "./createModel";
 export { Model, ModelFactory } from "./types";

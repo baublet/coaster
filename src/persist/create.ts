@@ -24,22 +24,20 @@ export function createFactory<T extends PersistModelArgs>(
     trx: PersistTransaction = null
   ): Promise<Model<T>> {
     // Create a model here if the user passes in raw data to "create"
-    const model: Model = isModel(initialData)
+    const model: Model<T> = isModel(initialData)
       ? initialData
       : modelFactory(initialData);
-
     if (model[primaryKey]) {
       throw cannotCreateExistingModel(model);
     }
 
-    const props = model.$baseValues;
+    const data: any = modelFactory.$data(model);
     const cnx = trx || connection;
 
-    const id = randomId();
+    data[primaryKey] = randomId();
+    await cnx(tableName).insert(data);
+    (model as any)[primaryKey] = data[primaryKey];
 
-    props[primaryKey] = id;
-    await cnx(tableName).insert(props);
-
-    return modelFactory.find(id);
+    return model;
   };
 }

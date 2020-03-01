@@ -30,7 +30,7 @@ it("finds a model by its ID", async () => {
   const newUser = await User.create(user);
   const foundUser = await User.find(newUser.id);
 
-  expect(foundUser.toJson()).toEqual(newUser.toJson());
+  expect(User.toJson(foundUser)).toEqual(User.toJson(newUser));
 });
 
 it("finds multiple models by ID", async () => {
@@ -45,6 +45,6 @@ it("finds multiple models by ID", async () => {
   const newUser2 = await User.create(User({ name: "Alice" }));
   const foundUsers = await User.find([newUser1.id, newUser2.id]);
 
-  expect(foundUsers[0].toJson()).toEqual(newUser1.toJson());
-  expect(foundUsers[1].toJson()).toEqual(newUser2.toJson());
+  expect(User.toJson(foundUsers[0])).toEqual(User.toJson(newUser1));
+  expect(User.toJson(foundUsers[1])).toEqual(User.toJson(newUser2));
 });
