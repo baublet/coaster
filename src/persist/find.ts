@@ -5,7 +5,7 @@ import {
   PersistedModelFactory
 } from "./types";
 import { cannotFindByBlankId } from "./error/cannotFindBlankId";
-import { loadRelationships } from "./loadRelationships";
+// import { loadRelationships } from "./loadRelationships";
 import { Model } from "model";
 import { ModelFactoryArgsFromModelArgs } from "model/types";
 
@@ -26,7 +26,7 @@ export function findFactory<T extends PersistModelArgs>(
     }: PersistFindQueryOptions = {}
   ): Promise<Model<T> | null | (Model<T> | null)[]> {
     const cnx = persist || connection;
-    const depth = typeof eager === "boolean" ? 0 : eager - 1;
+    // const depth = typeof eager === "boolean" ? 0 : eager - 1;
 
     if (Array.isArray(id)) {
       const query = cnx<T>(tableName)
@@ -44,7 +44,7 @@ export function findFactory<T extends PersistModelArgs>(
         return null;
       });
       if (eager) {
-        await loadRelationships(resultsAsModels.filter(Boolean), cnx, depth);
+        // await loadRelationships(resultsAsModels.filter(Boolean), cnx, depth);
       }
       return resultsAsModels;
     }
@@ -63,7 +63,7 @@ export function findFactory<T extends PersistModelArgs>(
         results[0] as ModelFactoryArgsFromModelArgs<T>
       ) as Model<T>;
       if (eager) {
-        await loadRelationships([model], cnx, depth);
+        // await loadRelationships([model], cnx, depth);
       }
       return model;
     }

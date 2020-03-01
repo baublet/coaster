@@ -1,4 +1,4 @@
-import { Model } from "models2/types";
+import { Model } from "../types";
 
 export type ModelFieldValidator = (
   fieldValue: any,

@@ -1,20 +1,23 @@
 import {
   PersistTransaction,
   PersistQueryFunctionOnFactory,
-  PersistQueryFunction
+  PersistQueryFunction,
+  PersistModelArgs,
+  PersistedModelFactory
 } from "./types";
-import { ModelFactoryWithPersist, ModelDataPropTypes } from "model/types";
+import { Model } from "model";
 
-export function queryFactory<T extends ModelDataPropTypes>(
-  modelFactory: ModelFactoryWithPersist<T>
+export function queryFactory<T extends PersistModelArgs>(
+  modelFactory: PersistedModelFactory<T>
 ): PersistQueryFunctionOnFactory<T> {
-  const tableName = modelFactory.tableName;
-  const connection = modelFactory.persistWith;
+  const persistOptions = modelFactory.$options.persist;
+  const tableName = persistOptions.tableName;
+  const connection = persistOptions.with;
 
   return async function(
     q: PersistQueryFunction,
     trx: PersistTransaction = null
-  ): Promise<ReturnType<ModelFactoryWithPersist<T>>[]> {
+  ): Promise<Model<T>[]> {
     const cnx = trx || connection;
     const results = await q(cnx<T>(tableName));
     if (results) {
