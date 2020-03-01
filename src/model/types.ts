@@ -1,5 +1,6 @@
 import { ModelFieldValidator } from "./validate";
-import { PersistConnection } from "persist/types";
+import { PersistModelArgs } from "persist/types";
+import { GeneratedNames } from "helpers/generateNames";
 
 export type ObjectWithoutNeverProperties<
   O extends Record<string | number | symbol, any>
@@ -81,24 +82,6 @@ export interface ModelBaseArgs {
   properties: Record<string, ModelArgsPropertyArgs>;
 }
 
-export interface PersistModelArgs extends ModelBaseArgs {
-  persist: {
-    /**
-     * Persistence database connection to use
-     */
-    with: PersistConnection;
-    /**
-     * Table name name of the model. The default is a database-safe version of
-     * the model name
-     */
-    tableName?: string;
-    /**
-     * Primary index key of the model. Default is "id"
-     */
-    primaryKey?: string;
-  };
-}
-
 export type ModelArgs = ModelBaseArgs | PersistModelArgs;
 
 type ModelTypeFromRelationshipPropertyArgs<
@@ -117,21 +100,21 @@ export type PropertyType<Args extends ModelArgsPropertyArgs> =
     ? boolean
     : Args["type"] extends ModelArgsPropertyType.NUMBER
     ? number
-    : /**
-     * Computed props
-     */
-    Args extends ModelArgsComputedPropertyArgs
-    ? () => ReturnType<Args["compute"]>
       /**
-       * Relationships. We need to extract ModelTypeFromRelationshipPropertyArgs
-       * or TypeScript yells that we're doing circular references...
+       * Computed props
        */
-    : Args extends ModelArgsRelationshipPropertyArgs
-    ? ModelTypeFromRelationshipPropertyArgs<Args>
+    : Args extends ModelArgsComputedPropertyArgs
+    ? () => ReturnType<Args["compute"]>
     : /**
+     * Relationships. We need to extract ModelTypeFromRelationshipPropertyArgs
+     * or TypeScript yells that we're doing circular references...
+     */
+    Args extends ModelArgsRelationshipPropertyArgs
+    ? ModelTypeFromRelationshipPropertyArgs<Args>
+      /**
        * Unknown!
        */
-      never;
+    : never;
 
 export type PropertiesFromModelArgs<Args extends ModelArgs> = Partial<
   {
@@ -194,6 +177,7 @@ export interface ModelFactory<Args extends ModelArgs = any> {
   (initialValue: ModelFactoryArgsFromModelArgs<Args>): Model<Args>;
   readonly $id: Symbol;
   readonly $name: string;
+  readonly $names: GeneratedNames;
   readonly $options: Args;
 }
 

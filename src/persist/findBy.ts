@@ -1,16 +1,21 @@
-import { ModelFactoryWithPersist, ModelDataDefaultType } from "model/types";
-
-import { PersistFindByFunction, PersistFindQueryOptions } from "./types";
+import {
+  PersistFindByFunction,
+  PersistFindQueryOptions,
+  PersistModelArgs,
+  PersistedModelFactory
+} from "./types";
 import { loadRelationships } from "./loadRelationships";
+import { ModelFactoryArgsFromModelArgs, Model } from "model/types";
 
-export function findByFactory<T extends ModelDataDefaultType>(
-  modelFactory: ModelFactoryWithPersist<T>
+export function findByFactory<T extends PersistModelArgs>(
+  modelFactory: PersistedModelFactory<T>
 ): PersistFindByFunction<T> {
-  const tableName = modelFactory.tableName;
-  const connection = modelFactory.persistWith;
+  const persistOptions = modelFactory.$options.persist;
+  const tableName = persistOptions.tableName;
+  const connection = persistOptions.with;
 
   return async function findBy(
-    by: Record<string, string | number | boolean>,
+    by: Partial<ModelFactoryArgsFromModelArgs<T>>,
     {
       columns = ["*"],
       eager = true,
@@ -34,7 +39,7 @@ export function findByFactory<T extends ModelDataDefaultType>(
 
     const results = await query;
     const models = results.map(
-      data => modelFactory(data as T) as ReturnType<ModelFactoryWithPersist<T>>
+      data => modelFactory(data as ModelFactoryArgsFromModelArgs<T>) as Model<T>
     );
 
     if (eager) {

@@ -1,51 +1,43 @@
 import randomId from "uuid/v4";
 
-import {
-  Model,
-  ModelInternalProperties,
-  ModelFactoryWithPersist,
-  isModel,
-  ModelDataPropTypes
-} from "model/types";
+import { Model, isModel, ModelFactoryArgsFromModelArgs } from "model/types";
 
 import { cannotCreateExistingModel } from "./error/cannotCreateExistingModel";
 
-import { PersistSaveFunction, PersistTransaction } from "./types";
+import {
+  PersistSaveFunction,
+  PersistTransaction,
+  PersistedModelFactory,
+  PersistModelArgs
+} from "./types";
 
-export function createFactory<T extends ModelDataPropTypes>(
-  modelFactory: ModelFactoryWithPersist<T>
+export function createFactory<T extends PersistModelArgs>(
+  modelFactory: PersistedModelFactory<T>
 ): PersistSaveFunction<T> {
-  const tableName = modelFactory.tableName;
-  const connection = modelFactory.persistWith;
+  const persistOptions = modelFactory.$options.persist;
+  const tableName = persistOptions.tableName;
+  const connection = persistOptions.with;
+  const primaryKey = persistOptions.primaryKey;
 
   return async function(
-    initialData: ReturnType<ModelFactoryWithPersist<T>> | Partial<T>,
+    initialData: Model<T> | ModelFactoryArgsFromModelArgs<T>,
     trx: PersistTransaction = null
-  ): Promise<ReturnType<ModelFactoryWithPersist<T>>> {
+  ): Promise<Model<T>> {
     // Create a model here if the user passes in raw data to "create"
     const model: Model = isModel(initialData)
       ? initialData
       : modelFactory(initialData);
 
-    if (model[modelFactory.primaryKey]) {
+    if (model[primaryKey]) {
       throw cannotCreateExistingModel(model);
     }
 
-    const internalProps: ModelInternalProperties = model as any;
-    const props = internalProps.$nativeProperties();
+    const props = model.$baseValues;
     const cnx = trx || connection;
 
-    let id: string;
-    while (typeof id !== "string") {
-      const idToCheck = randomId();
-      const found = await cnx(tableName)
-        .where("id", "=", idToCheck)
-        .select("id");
-      if (found.length) continue;
-      id = idToCheck;
-    }
+    const id = randomId();
 
-    props[modelFactory.primaryKey] = id;
+    props[primaryKey] = id;
     await cnx(tableName).insert(props);
 
     return modelFactory.find(id);

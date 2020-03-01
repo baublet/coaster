@@ -1,14 +1,21 @@
-import { ModelFactoryWithPersist, ModelDataPropTypes } from "model/types";
-
-import { PersistFindQueryOptions, PersistFindFunction } from "./types";
+import {
+  PersistFindQueryOptions,
+  PersistFindFunction,
+  PersistModelArgs,
+  PersistedModelFactory
+} from "./types";
 import { cannotFindByBlankId } from "./error/cannotFindBlankId";
 import { loadRelationships } from "./loadRelationships";
+import { Model } from "model";
+import { ModelFactoryArgsFromModelArgs } from "model/types";
 
-export function findFactory<T extends ModelDataPropTypes>(
-  modelFactory: ModelFactoryWithPersist<T>
+export function findFactory<T extends PersistModelArgs>(
+  modelFactory: PersistedModelFactory<T>
 ): PersistFindFunction<T> {
-  const tableName = modelFactory.tableName;
-  const connection = modelFactory.persistWith;
+  const persistOptions = modelFactory.$options.persist;
+  const tableName = persistOptions.tableName;
+  const connection = persistOptions.with;
+  const primaryKey = persistOptions.primaryKey;
 
   return async function find(
     id: string | string[],
@@ -17,28 +24,22 @@ export function findFactory<T extends ModelDataPropTypes>(
       eager = true,
       persist = null
     }: PersistFindQueryOptions = {}
-  ): Promise<
-    | ReturnType<ModelFactoryWithPersist<T>>
-    | null
-    | (ReturnType<ModelFactoryWithPersist<T>> | null)[]
-  > {
+  ): Promise<Model<T> | null | (Model<T> | null)[]> {
     const cnx = persist || connection;
     const depth = typeof eager === "boolean" ? 0 : eager - 1;
 
     if (Array.isArray(id)) {
       const query = cnx<T>(tableName)
-        .whereIn(modelFactory.primaryKey, id)
+        .whereIn(primaryKey, id)
         .select(...columns);
       const results = await query;
 
       // This ensures that our slots are preserved, e.g., `find(1, 2, 3)`,
       // returns `[1, null, 3]` if "2" doesn't exist.
-      const resultsAsModels: (ReturnType<
-        ModelFactoryWithPersist<T>
-      > | null)[] = id.map(id => {
+      const resultsAsModels: (Model<T> | null)[] = id.map(id => {
         for (const result of results) {
-          if (result[modelFactory.primaryKey] === id)
-            return modelFactory(result as T);
+          if (result[primaryKey] === id)
+            return modelFactory(result as ModelFactoryArgsFromModelArgs<T>);
         }
         return null;
       });
@@ -53,14 +54,14 @@ export function findFactory<T extends ModelDataPropTypes>(
     }
 
     const results = await cnx<T>(tableName)
-      .where(modelFactory.primaryKey, "=", id)
+      .where(primaryKey, "=", id)
       .select(...columns)
       .limit(1);
 
     if (results[0]) {
-      const model = modelFactory(results[0] as T) as ReturnType<
-        ModelFactoryWithPersist<T>
-      >;
+      const model = modelFactory(
+        results[0] as ModelFactoryArgsFromModelArgs<T>
+      ) as Model<T>;
       if (eager) {
         await loadRelationships([model], cnx, depth);
       }
@@ -76,7 +77,7 @@ export function findFactory<T extends ModelDataPropTypes>(
      * any>'.
      *
      * I don't see any obvious places where we could have instantiated T with
-     * another sybtype /shrug.
+     * another subtype /shrug.
      */
   } as PersistFindFunction<T>;
 }

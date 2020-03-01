@@ -8,10 +8,25 @@ import {
   ModelInternalProperties
 } from "./types";
 import clone from "lodash.clonedeep";
+import {
+  PersistModelArgs,
+  PersistedModelFactory,
+  isPersistArgs
+} from "persist/types";
+import { attachPersistToModelFactory } from "persist/attachToModelFactory";
+import generateNames from "helpers/generateNames";
 
+export function createModel<Args extends PersistModelArgs>(
+  opts: Args
+): PersistedModelFactory<Args>;
 export function createModel<Args extends ModelArgs>(
   opts: Args
-): ModelFactory<Args> {
+): ModelFactory<Args>;
+export function createModel<Args extends ModelArgs | PersistModelArgs>(
+  opts: Args
+): Args extends PersistModelArgs
+  ? PersistedModelFactory<Args>
+  : ModelFactory<Args> {
   function modelFactory(
     initialValue: ModelFactoryArgsFromModelArgs<Args>
   ): Model<Args> {
@@ -58,8 +73,16 @@ export function createModel<Args extends ModelArgs>(
   modelFactory.$id = Symbol(opts.name);
   modelFactory.$name = opts.name;
   modelFactory.$options = opts;
+  modelFactory.$names = generateNames(opts.name);
 
-  return modelFactory;
+  if (!isPersistArgs(opts)) {
+    opts;
+    return modelFactory as any;
+  }
+
+  attachPersistToModelFactory(modelFactory);
+
+  return modelFactory as any;
 }
 
 // Test pad
@@ -92,5 +115,4 @@ const User = createModel({
 });
 
 const me = User({ name: "Ryan" });
-
 me;

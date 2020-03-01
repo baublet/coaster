@@ -1,29 +1,31 @@
-import {
-  ModelFactoryWithPersist,
-  ModelDataDefaultType,
-  ModelInternalProperties,
-  isModel
-} from "model/types";
+import { Model } from "model/types";
 
-import { PersistDeleteFunction, PersistTransaction } from "./types";
+import {
+  PersistDeleteFunction,
+  PersistTransaction,
+  PersistedModelFactory,
+  PersistModelArgs
+} from "./types";
 import { cannotDeleteUncreatedModel } from "./error/cannotDeleteUncreatedModel";
 import { cannotDeleteBlankId } from "./error/cannotDeleteBlankId";
 
-export function deleteFactory<T extends ModelDataDefaultType>(
-  modelFactory: ModelFactoryWithPersist<T>
+export function deleteFactory<T extends PersistModelArgs>(
+  modelFactory: PersistedModelFactory<T>
 ): PersistDeleteFunction<T> {
-  const tableName = modelFactory.tableName;
-  const connection = modelFactory.persistWith;
+  const persistOptions = modelFactory.$options.persist;
+  const tableName = persistOptions.tableName;
+  const connection = persistOptions.with;
+  const primaryKey = persistOptions.primaryKey;
 
   return async function(
-    model: ReturnType<ModelFactoryWithPersist<T>> | string,
+    model: Model<T> | string,
     trx: PersistTransaction = null
   ): Promise<boolean> {
-    const id =
-      typeof model === "string" ? model : model[modelFactory.primaryKey];
+    const id = typeof model === "string" ? model : model[primaryKey];
     const cnx = trx || connection;
 
-    // Throw here with a more helpful error message -- we get here when a user passes in an unsaved model
+    // Throw here with a more helpful error message - we get here when a user
+    // passes in an unsaved model
     if (typeof model !== "string" && !id) {
       throw cannotDeleteUncreatedModel(model);
     }
@@ -33,14 +35,11 @@ export function deleteFactory<T extends ModelDataDefaultType>(
     }
 
     const result = await cnx(tableName)
-      .where(modelFactory.primaryKey, id)
+      .where(primaryKey, id)
       .delete()
       .limit(1);
 
     if (result) {
-      if (isModel(model)) {
-        ((model as any) as ModelInternalProperties).$setDeleted(true);
-      }
       return true;
     }
     return false;
