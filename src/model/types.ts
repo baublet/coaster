@@ -156,15 +156,24 @@ export interface ModelFactory<Args extends ModelArgs = any> {
   /**
    * Returns the primitive data for the model
    */
-  readonly $data: (Model: Model<Args>) => Record<string, any>;
+  readonly $data: (model: Model<Args>) => Record<string, any>;
   readonly $name: string;
   readonly $names: GeneratedNames;
   readonly $options: Args;
+  /**
+   * Clones a model. Does not persist the clone to the database.
+   * @param model
+   */
+  readonly clone: (model: Model<Args>) => Model<Args>;
+  /**
+   * Renders the model to JSON.
+   * @param model
+   * @param maxDepth - Max levels to render to JSON. Default is 5.
+   */
   readonly toJson: (
     model: Model<Args>,
     maxDepth?: number,
-    currentDepth?: number,
-    data?: Record<string, any>
+    currentDepth?: number
   ) => Record<string, any>;
 }
 
@@ -174,7 +183,7 @@ export function isModel<Args extends ModelArgs = any>(
   if (typeof obj !== "object") return false;
   if (Array.isArray(obj)) return false;
   if ("$factory" in obj) return true;
-  return true;
+  return false;
 }
 
 export function isPersistedModel(model: Model): model is Model {

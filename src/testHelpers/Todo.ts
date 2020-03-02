@@ -61,40 +61,6 @@ export async function createUsersAndTodos() {
     table.text("bio");
   });
 
-  const pizzaTable = `pizzas_${testTableDelta}`;
-  const pizzaTablePlural = `${pizzaTable}s`;
-
-  await persist.schema.createTable(pizzaTablePlural, table => {
-    table
-      .bigInteger("id")
-      .unsigned()
-      .primary()
-      .unique()
-      .index();
-    table.text("type");
-  });
-
-  const deliveryTable = `deliveries_${testTableDelta}`;
-  const deliveryTablePlural = `${deliveryTable}s`;
-
-  await persist.schema.createTable(deliveryTablePlural, table => {
-    table
-      .bigInteger("id")
-      .unsigned()
-      .primary()
-      .unique()
-      .index();
-    table
-      .bigInteger("user_id")
-      .unsigned()
-      .index();
-    table
-      .bigInteger("pizza_id")
-      .unsigned()
-      .index();
-    table.bigInteger("orderDate");
-  });
-
   const Settings = createModel({
     name: settingsTable,
     properties: {
@@ -145,41 +111,6 @@ export async function createUsersAndTodos() {
     }
   });
 
-  const Pizza = createModel({
-    name: pizzaTable,
-    properties: {
-      id: {
-        type: ModelArgsPropertyType.STRING
-      },
-      type: {
-        type: ModelArgsPropertyType.STRING
-      }
-    },
-    persist: {
-      with: persist
-    }
-  });
-
-  const Delivery = createModel({
-    name: deliveryTable,
-    properties: {
-      id: {
-        type: ModelArgsPropertyType.STRING
-      },
-      orderDate: {
-        type: ModelArgsPropertyType.NUMBER
-      },
-      pizzas: {
-        type: ModelArgsPropertyType.RELATIONSHIP,
-        modelFactory: Pizza,
-        many: true
-      }
-    },
-    persist: {
-      with: persist
-    }
-  });
-
   const User = createModel({
     name: userTable,
     properties: {
@@ -202,10 +133,6 @@ export async function createUsersAndTodos() {
         type: ModelArgsPropertyType.RELATIONSHIP,
         modelFactory: TodoGroup,
         many: true
-      },
-      pizzas: {
-        type: ModelArgsPropertyType.RELATIONSHIP,
-        modelFactory: Pizza
       }
     },
     persist: {
@@ -261,8 +188,6 @@ export async function createUsersAndTodos() {
       bridgeTableName: todoGroupTodoBridgeTableName,
       todoGroupColumn: todoGroupTodoLeftColumn,
       todoColumn: todoGroupTodoRightColumn
-    },
-    Pizza,
-    Delivery
+    }
   };
 }

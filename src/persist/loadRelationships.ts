@@ -55,17 +55,16 @@ export async function loadRelationships(
   const leftFactoryPrimaryKey = leftFactory.$options.persist.primaryKey;
 
   leftFactory.$relationships.forEach(relationshipArgs => {
-    const isMultiple = relationshipArgs.many;
-
-    const rightFactory = relationshipArgs.modelFactory;
-    const rightFactoryPrimaryKey = rightFactory.$options.persist.primaryKey;
-
     const {
       bridgeTableName,
       localKey,
       foreignKey,
-      accessor
+      accessor,
+      many,
+      modelFactory: rightFactory
     } = relationshipArgs;
+
+    const rightFactoryPrimaryKey = rightFactory.$options.persist.primaryKey;
 
     // Operations grab stuff from the database
     operations.push(async () => {
@@ -94,9 +93,9 @@ export async function loadRelationships(
           // This allows us to cross-reference models to what relationships we
           // need to attach to them
           if (!modelNeeds[leftId][accessor])
-            modelNeeds[leftId][accessor] = isMultiple ? [] : null;
+            modelNeeds[leftId][accessor] = many ? [] : null;
 
-          if (isMultiple) {
+          if (many) {
             (modelNeeds[leftId][accessor] as string[]).push(result[foreignKey]);
           } else {
             (modelNeeds[leftId][accessor] as string) = result[foreignKey];
@@ -143,14 +142,14 @@ export async function loadRelationships(
 
         let relationships: Model | Model[];
         if (needs === undefined) {
-          relationships = isMultiple ? [] : null;
+          relationships = many ? [] : null;
         } else {
-          relationships = isMultiple
+          relationships = many
             ? ((needs as string[]) || []).map(id => modelMap.get(accessor)[id])
             : modelMap.get(accessor)[needs as string];
         }
 
-        model.$setRelationship(accessor, relationships);
+        model[accessor] = relationships;
       });
     });
   });

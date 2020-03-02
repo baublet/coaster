@@ -18,8 +18,7 @@ export function relationships(
     arg.localKey = arg.localKey || leftCol;
     arg.foreignKey = arg.foreignKey || rightCol;
     arg.bridgeTableName = arg.bridgeTableName || tableName;
-    relationships[prop] = arg;
-    relationships[prop].accessor = prop;
+    relationships.push(Object.assign({}, arg, { accessor: prop }) as any);
   }
 
   return relationships;

@@ -83,6 +83,8 @@ export function createModel<Args extends ModelArgs | PersistModelArgs>(
     primitiveProps.forEach(prop => (data[prop] = model[prop]));
     return data;
   };
+  modelFactory.clone = (model: Model<Args>) =>
+    modelFactory(modelFactory.$data(model) as any);
   modelFactory.toJson = toJson;
 
   if (!isPersistArgs(opts)) {
