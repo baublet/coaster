@@ -11,6 +11,8 @@ export type PersistConnectArguments = string | knex.Config;
 export type PersistConnection = knex;
 export type PersistTransaction = knex.Transaction;
 
+export type PersistGenericHookFunction = (model: Model) => void;
+
 export interface PersistModelArgs extends ModelBaseArgs {
   persist: {
     /**
@@ -26,6 +28,35 @@ export interface PersistModelArgs extends ModelBaseArgs {
      * Primary index key of the model. Default is "id"
      */
     primaryKey?: string;
+    /**
+     * Persist-related hooks
+     */
+    hooks?: {
+      /**
+       * Fires before we save the model to the database
+       */
+      beforeCreate: PersistGenericHookFunction;
+      /**
+       * Fires after we save the model to the database
+       */
+      afterCreate: PersistGenericHookFunction;
+      /**
+       * Fires right before we update the model to the database
+       */
+      beforeUpdate: PersistGenericHookFunction;
+      /**
+       * Fires right after we update the model to the database
+       */
+      afterUpdate: PersistGenericHookFunction;
+      /**
+       * Fires right before we delete the model from the database
+       */
+      beforeDelete: PersistGenericHookFunction;
+      /**
+       * Fires right after we delete the model from the database
+       */
+      afterDelete: PersistGenericHookFunction;
+    };
   };
 }
 

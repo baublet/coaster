@@ -2,7 +2,6 @@ import {
   ModelFactory,
   Model,
   ModelArgs,
-  ModelArgsPropertyType,
   ModelArgsPrimitivePropertyArgs,
   ModelArgsRelationshipPropertyArgs
 } from "../types";
@@ -26,11 +25,6 @@ export function validate<Args extends ModelArgs>(
   // Validate required props
   for (const prop in factory.$options.properties) {
     const field = factory.$options.properties[prop];
-
-    // Computed props can't be required
-    if (field.type === ModelArgsPropertyType.COMPUTED) {
-      continue;
-    }
 
     if (
       (field as

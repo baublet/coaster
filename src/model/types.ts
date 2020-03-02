@@ -74,6 +74,21 @@ export interface ModelBaseArgs {
    * The model's accessors for data retrieval and access
    */
   properties: Record<string, ModelArgsPropertyArgs>;
+  /**
+   * Model basic hooks
+   */
+  hooks?: {
+    /**
+     * Fires before we instantiate a model
+     */
+    beforeInstantiate: ((
+      initialData: Record<string, any>
+    ) => Record<string, any>)[];
+    /**
+     * Fires after we instantiate a model
+     */
+    afterInstantiate: ((model: Model) => void)[];
+  };
 }
 
 export type ModelArgs = ModelBaseArgs | PersistModelArgs;

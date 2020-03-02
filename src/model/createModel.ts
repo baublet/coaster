@@ -42,7 +42,12 @@ export function createModel<Args extends ModelArgs | PersistModelArgs>(
   function modelFactory(
     initialValue: ModelFactoryArgsFromModelArgs<Args>
   ): Model<Args> {
-    const modelData = clone(initialValue);
+    let modelData = clone(initialValue);
+
+    // Before instantiate hooks
+    opts.hooks?.beforeInstantiate?.forEach(hook => {
+      modelData = Object.assign({}, hook(modelData));
+    });
 
     const regularProps = {};
     const relationshipsProps = {};
@@ -70,6 +75,11 @@ export function createModel<Args extends ModelArgs | PersistModelArgs>(
       relationshipsProps,
       internalProps
     ) as any;
+
+    // After instantiate hooks
+    opts.hooks?.afterInstantiate?.forEach(hook => {
+      hook(modelData);
+    });
 
     return model;
   }
