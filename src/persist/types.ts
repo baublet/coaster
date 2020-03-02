@@ -4,7 +4,8 @@ import {
   ModelFactory,
   Model,
   ModelBaseArgs,
-  ModelFactoryArgsFromModelArgs
+  ModelFactoryArgsFromModelArgs,
+  ModelHooks
 } from "model/types";
 
 export type PersistConnectArguments = string | knex.Config;
@@ -12,6 +13,37 @@ export type PersistConnection = knex;
 export type PersistTransaction = knex.Transaction;
 
 export type PersistGenericHookFunction = (model: Model) => void;
+export type PersistDeleteHookFunction = (modelOrId: Model | string) => void;
+
+/**
+ * Persist-related hooks
+ */
+export interface PersistModelHooks {
+  /**
+   * Fires before we save the model to the database
+   */
+  beforeCreate?: PersistGenericHookFunction[];
+  /**
+   * Fires after we save the model to the database
+   */
+  afterCreate?: PersistGenericHookFunction[];
+  /**
+   * Fires right before we update the model to the database
+   */
+  beforeUpdate?: PersistGenericHookFunction[];
+  /**
+   * Fires right after we update the model to the database
+   */
+  afterUpdate?: PersistGenericHookFunction[];
+  /**
+   * Fires right before we delete the model from the database
+   */
+  beforeDelete?: PersistDeleteHookFunction[];
+  /**
+   * Fires right after we delete the model from the database
+   */
+  afterDelete?: PersistDeleteHookFunction[];
+}
 
 export interface PersistModelArgs extends ModelBaseArgs {
   persist: {
@@ -28,36 +60,11 @@ export interface PersistModelArgs extends ModelBaseArgs {
      * Primary index key of the model. Default is "id"
      */
     primaryKey?: string;
-    /**
-     * Persist-related hooks
-     */
-    hooks?: {
-      /**
-       * Fires before we save the model to the database
-       */
-      beforeCreate: PersistGenericHookFunction;
-      /**
-       * Fires after we save the model to the database
-       */
-      afterCreate: PersistGenericHookFunction;
-      /**
-       * Fires right before we update the model to the database
-       */
-      beforeUpdate: PersistGenericHookFunction;
-      /**
-       * Fires right after we update the model to the database
-       */
-      afterUpdate: PersistGenericHookFunction;
-      /**
-       * Fires right before we delete the model from the database
-       */
-      beforeDelete: PersistGenericHookFunction;
-      /**
-       * Fires right after we delete the model from the database
-       */
-      afterDelete: PersistGenericHookFunction;
-    };
   };
+  /**
+   * Persist-related hooks
+   */
+  hooks?: ModelHooks & PersistModelHooks;
 }
 
 /**
@@ -69,17 +76,14 @@ export interface PersistModelRelationship {
   foreignKey: string;
   localKey: string;
   many: boolean;
-  modelFactory: PersistedModelFactory;
+  modelFactory: PersistedModelFactory<any>;
   required: boolean;
 }
 
-export interface VanillaModelArgs extends ModelBaseArgs {
-  $options;
-}
-
-export interface PersistedModelFactory<Args extends PersistModelArgs = any>
+export interface PersistedModelFactory<Args extends ModelArgs>
   extends ModelFactory<Args> {
-  readonly $options: Args;
+  readonly $factory: PersistedModelFactory<Args>;
+  readonly $options: Args & PersistModelArgs;
   readonly $relationships: PersistModelRelationship[];
   readonly find: PersistFindFunction<Args>;
   readonly findBy: PersistFindByFunction<Args>;

@@ -38,7 +38,7 @@ export async function loadRelationships(
   if (!models.length) return;
 
   // Never let users pass different types of models here
-  const leftFactory: PersistedModelFactory = models[0].$factory as any;
+  const leftFactory = models[0].$factory as PersistedModelFactory<any>;
   for (const model of models) {
     if (model.$factory === leftFactory) continue;
     throw cannotLoadInvariantRelationships(models);

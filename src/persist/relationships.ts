@@ -3,7 +3,7 @@ import { getBridgeTableNames } from "persist/getBridgeTableNames";
 import { PersistedModelFactory, PersistModelRelationship } from "persist/types";
 
 export function relationships(
-  factory: PersistedModelFactory,
+  factory: PersistedModelFactory<any>,
   modelArgs: ModelArgs
 ): PersistModelRelationship[] {
   const relationships: PersistModelRelationship[] = [];
@@ -13,7 +13,7 @@ export function relationships(
     delete arg.type;
     const [tableName, leftCol, rightCol] = getBridgeTableNames(
       factory,
-      arg.modelFactory as PersistedModelFactory
+      arg.modelFactory as PersistedModelFactory<any>
     );
     arg.localKey = arg.localKey || leftCol;
     arg.foreignKey = arg.foreignKey || rightCol;

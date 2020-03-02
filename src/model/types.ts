@@ -62,6 +62,19 @@ export interface ModelArgsRelationshipPropertyArgs {
 export type ModelArgsPropertyArgs = ModelArgsDefaultPropertyArgs &
   (ModelArgsRelationshipPropertyArgs | ModelArgsPrimitivePropertyArgs);
 
+export type ModelHooks = {
+  /**
+   * Fires before we instantiate a model
+   */
+  beforeInstantiate?: ((
+    initialData: Record<string, any>
+  ) => Record<string, any>)[];
+  /**
+   * Fires after we instantiate a model
+   */
+  afterInstantiate?: ((model: Model) => void)[];
+};
+
 export interface ModelBaseArgs {
   /**
    * The canonical name of the model; be careful with changing this value.
@@ -77,18 +90,7 @@ export interface ModelBaseArgs {
   /**
    * Model basic hooks
    */
-  hooks?: {
-    /**
-     * Fires before we instantiate a model
-     */
-    beforeInstantiate: ((
-      initialData: Record<string, any>
-    ) => Record<string, any>)[];
-    /**
-     * Fires after we instantiate a model
-     */
-    afterInstantiate: ((model: Model) => void)[];
-  };
+  hooks?: ModelHooks;
 }
 
 export type ModelArgs = ModelBaseArgs | PersistModelArgs;

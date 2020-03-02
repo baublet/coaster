@@ -5,7 +5,7 @@ import {
   PersistedModelFactory
 } from "./types";
 import { cannotFindByBlankId } from "./error/cannotFindBlankId";
-// import { loadRelationships } from "./loadRelationships";
+import { loadRelationships } from "./loadRelationships";
 import { Model } from "model";
 import { ModelFactoryArgsFromModelArgs } from "model/types";
 
@@ -19,17 +19,12 @@ export function findFactory<T extends PersistModelArgs>(
 
   return async function find(
     id: string | string[],
-    {
-      columns = ["*"],
-      eager = true,
-      persist = null
-    }: PersistFindQueryOptions = {}
+    { columns = ["*"], eager = true }: PersistFindQueryOptions = {}
   ): Promise<Model<T> | null | (Model<T> | null)[]> {
-    const cnx = persist || connection;
-    // const depth = typeof eager === "boolean" ? 0 : eager - 1;
+    const depth = typeof eager === "boolean" ? 0 : eager - 1;
 
     if (Array.isArray(id)) {
-      const query = cnx<T>(tableName)
+      const query = connection<T>(tableName)
         .whereIn(primaryKey, id)
         .select(...columns);
       const results = await query;
@@ -44,7 +39,7 @@ export function findFactory<T extends PersistModelArgs>(
         return null;
       });
       if (eager) {
-        // await loadRelationships(resultsAsModels.filter(Boolean), cnx, depth);
+        await loadRelationships(resultsAsModels.filter(Boolean), depth);
       }
       return resultsAsModels;
     }
@@ -53,7 +48,7 @@ export function findFactory<T extends PersistModelArgs>(
       throw cannotFindByBlankId();
     }
 
-    const results = await cnx<T>(tableName)
+    const results = await connection<T>(tableName)
       .where(primaryKey, "=", id)
       .select(...columns)
       .limit(1);
@@ -63,7 +58,7 @@ export function findFactory<T extends PersistModelArgs>(
         results[0] as ModelFactoryArgsFromModelArgs<T>
       ) as Model<T>;
       if (eager) {
-        // await loadRelationships([model], cnx, depth);
+        await loadRelationships([model], depth);
       }
       return model;
     }

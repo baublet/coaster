@@ -4,7 +4,7 @@ import {
   PersistModelArgs,
   PersistedModelFactory
 } from "./types";
-// import { loadRelationships } from "./loadRelationships";
+import { loadRelationships } from "./loadRelationships";
 import { ModelFactoryArgsFromModelArgs, Model } from "model/types";
 
 export function findByFactory<T extends PersistModelArgs>(
@@ -21,13 +21,10 @@ export function findByFactory<T extends PersistModelArgs>(
       eager = true,
       limit = undefined,
       offset = undefined,
-      order = undefined,
-      persist = null
+      order = undefined
     }: PersistFindQueryOptions = {}
   ) {
-    const cnx = persist || connection;
-
-    const query = cnx<T>(tableName)
+    const query = connection<T>(tableName)
       .where(by)
       .select(...columns);
     if (limit !== undefined) query.limit(limit);
@@ -43,8 +40,8 @@ export function findByFactory<T extends PersistModelArgs>(
     );
 
     if (eager) {
-      // const depth = typeof eager === "boolean" ? 0 : eager - 1;
-      // await loadRelationships(models, cnx, depth);
+      const depth = typeof eager === "boolean" ? 0 : eager - 1;
+      await loadRelationships(models, depth);
     }
 
     return models;

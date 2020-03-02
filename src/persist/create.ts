@@ -19,6 +19,9 @@ export function createFactory<T extends PersistModelArgs>(
   const connection = persistOptions.with;
   const primaryKey = persistOptions.primaryKey;
 
+  const beforeHooks = modelFactory.$options.hooks?.beforeCreate;
+  const afterHooks = modelFactory.$options.hooks?.afterCreate;
+
   return async function(
     initialData: Model<T> | ModelFactoryArgsFromModelArgs<T>,
     trx: PersistTransaction = null
@@ -27,16 +30,24 @@ export function createFactory<T extends PersistModelArgs>(
     const model: Model<T> = isModel(initialData)
       ? initialData
       : modelFactory(initialData);
+
     if (model[primaryKey]) {
       throw cannotCreateExistingModel(model);
     }
 
-    const data: any = modelFactory.$data(model);
+    if (beforeHooks) beforeHooks.forEach(hook => hook(model));
+
+    const data = modelFactory.$data(model);
     const cnx = trx || connection;
 
     data[primaryKey] = randomId();
     await cnx(tableName).insert(data);
+
+    // We need to 'any' here because we can't know when we're here that
+    // primaryKey properly indexes model
     (model as any)[primaryKey] = data[primaryKey];
+
+    if (afterHooks) afterHooks.forEach(hook => hook(model));
 
     return model;
   };

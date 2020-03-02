@@ -17,6 +17,9 @@ export function deleteFactory<T extends PersistModelArgs>(
   const connection = persistOptions.with;
   const primaryKey = persistOptions.primaryKey;
 
+  const beforeHooks = modelFactory.$options.hooks?.beforeDelete;
+  const afterHooks = modelFactory.$options.hooks?.afterDelete;
+
   return async function(
     model: Model<T> | string,
     trx: PersistTransaction = null
@@ -34,10 +37,14 @@ export function deleteFactory<T extends PersistModelArgs>(
       throw cannotDeleteBlankId();
     }
 
+    if (beforeHooks) beforeHooks.forEach(hook => hook(model));
+
     const result = await cnx(tableName)
       .where(primaryKey, id)
       .delete()
       .limit(1);
+
+    if (afterHooks) afterHooks.forEach(hook => hook(model));
 
     if (result) {
       return true;
