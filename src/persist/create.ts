@@ -43,7 +43,7 @@ export function createFactory<T extends PersistModelArgs>(
     data[primaryKey] = randomId();
     await cnx(tableName).insert(data);
 
-    // We need to 'any' here because we can't know when we're here that
+    // We need to 'any' here because TS can't know when we're here that
     // primaryKey properly indexes model
     (model as any)[primaryKey] = data[primaryKey];
 

@@ -8,26 +8,12 @@ import {
   ModelInternalProperties
 } from "./types";
 import clone from "lodash.clonedeep";
-import {
-  PersistModelArgs,
-  PersistedModelFactory,
-  isPersistArgs
-} from "persist/types";
-import { attachPersistToModelFactory } from "persist/attachToModelFactory";
 import generateNames from "helpers/generateNames";
 import { toJson } from "./toJson";
 
-export function createModel<Args extends PersistModelArgs>(
-  opts: Args
-): PersistedModelFactory<Args>;
 export function createModel<Args extends ModelArgs>(
   opts: Args
-): ModelFactory<Args>;
-export function createModel<Args extends ModelArgs | PersistModelArgs>(
-  opts: Args
-): Args extends PersistModelArgs
-  ? PersistedModelFactory<Args>
-  : ModelFactory<Args> {
+): ModelFactory<Args> {
   const primitiveProps: string[] = [];
   for (const prop in opts.properties) {
     const propArguments = opts.properties[prop];
@@ -97,11 +83,7 @@ export function createModel<Args extends ModelArgs | PersistModelArgs>(
     modelFactory(modelFactory.$data(model) as any);
   modelFactory.toJson = toJson;
 
-  if (!isPersistArgs(opts)) {
-    return modelFactory as any;
-  }
-
-  return attachPersistToModelFactory(modelFactory, opts) as any;
+  return modelFactory;
 }
 
 // Test pad

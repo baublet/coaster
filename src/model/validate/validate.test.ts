@@ -4,13 +4,7 @@ import { validate } from "./validate";
 import { ModelArgsPropertyType } from "../types";
 
 function validateName(firstName: string) {
-  return firstName.length > 1
-    ? false
-    : ["First names have more than 1 character!"];
-}
-
-function validateFullName(fullName: string) {
-  return fullName.length > 3 ? false : ["Full name doesn't fit the minimum!"];
+  return firstName.length > 1 ? false : ["Names have more than 1 character!"];
 }
 
 const User = createModel({
@@ -25,11 +19,6 @@ const User = createModel({
       type: ModelArgsPropertyType.STRING,
       validate: [validateName],
       required: true
-    },
-    name: {
-      type: ModelArgsPropertyType.COMPUTED,
-      compute: data => data.firstName + " " + data.lastName,
-      validate: [validateFullName]
     }
   }
 });
@@ -42,9 +31,8 @@ it("validates fields", () => {
   expect(validate(User, user)).toEqual([
     true,
     {
-      firstName: ["First names have more than 1 character!"],
-      lastName: ["First names have more than 1 character!"],
-      name: ["Full name doesn't fit the minimum!"]
+      firstName: ["Names have more than 1 character!"],
+      lastName: ["Names have more than 1 character!"]
     }
   ]);
 });
@@ -55,6 +43,6 @@ it("validates required fields", () => {
   } as any);
   expect(validate(User, user)).toEqual([
     true,
-    { firstName: false, lastName: ["lastName is required"], name: false }
+    { firstName: false, lastName: ["lastName is required"] }
   ]);
 });

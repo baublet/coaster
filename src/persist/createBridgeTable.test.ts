@@ -1,14 +1,14 @@
-import { createModel } from "model";
 import { db } from "testHelpers/db";
 
 import { createBridgeTable } from "./createBridgeTable";
 import { connect } from "./connect";
 import { ModelArgsPropertyType } from "model/types";
+import { createPersistedModel } from "./createPersistedModel";
 
 it("creates a new table", async () => {
   const persist = connect(db);
 
-  const Penny = createModel({
+  const Penny = createPersistedModel({
     name: "Penny",
     properties: {
       id: {
@@ -18,7 +18,7 @@ it("creates a new table", async () => {
     persist: { with: persist }
   });
 
-  const Nickel = createModel({
+  const Nickel = createPersistedModel({
     name: "Nickel",
     properties: {
       id: {

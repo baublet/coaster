@@ -1,5 +1,5 @@
 import { db, getTestTableDelta } from "./db";
-import { createModel } from "model";
+import { createPersistedModel } from "persist/createPersistedModel";
 import { connect } from "persist/connect";
 import { createBridgeTable } from "persist/createBridgeTable";
 import { ModelArgsPropertyType } from "model/types";
@@ -61,7 +61,7 @@ export async function createUsersAndTodos() {
     table.text("bio");
   });
 
-  const Settings = createModel({
+  const Settings = createPersistedModel({
     name: settingsTable,
     properties: {
       id: {
@@ -76,7 +76,7 @@ export async function createUsersAndTodos() {
     }
   });
 
-  const Todo = createModel({
+  const Todo = createPersistedModel({
     name: todoTable,
     properties: {
       id: {
@@ -91,7 +91,7 @@ export async function createUsersAndTodos() {
     }
   });
 
-  const TodoGroup = createModel({
+  const TodoGroup = createPersistedModel({
     name: todoGroupTable,
     properties: {
       id: {
@@ -111,7 +111,7 @@ export async function createUsersAndTodos() {
     }
   });
 
-  const User = createModel({
+  const User = createPersistedModel({
     name: userTable,
     properties: {
       id: {

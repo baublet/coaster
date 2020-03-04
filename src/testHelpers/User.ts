@@ -1,11 +1,11 @@
 import { db } from "./db";
-import { createModel } from "model";
 import { connect } from "persist/connect";
 import { ModelArgsPropertyType } from "model/types";
+import { createPersistedModel } from "persist/createPersistedModel";
 
 const persist = connect(db);
 
-export const User = createModel({
+export const User = createPersistedModel({
   name: "User",
   properties: {
     id: {

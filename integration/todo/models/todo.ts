@@ -1,14 +1,20 @@
-import { createModel } from "model";
-import { propertyIsNotEmpty } from "model/validate";
 import { database } from "../persist";
+import { createPersistedModel } from "persist/createPersistedModel";
+import { ModelArgsPropertyType } from "model/types";
 
 export interface Todo {
   todo: string;
   userId?: string;
 }
 
-export default createModel<Todo>({
+export default createPersistedModel({
   name: "Todo",
-  validators: [propertyIsNotEmpty("todo")],
-  persistWith: database
+  properties: {
+    todo: {
+      type: ModelArgsPropertyType.STRING
+    }
+  },
+  persist: {
+    with: database
+  }
 });

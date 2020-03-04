@@ -1,9 +1,8 @@
 import knex from "knex";
 import {
-  ModelArgs,
   ModelFactory,
   Model,
-  ModelBaseArgs,
+  ModelArgs,
   ModelFactoryArgsFromModelArgs,
   ModelHooks
 } from "model/types";
@@ -45,7 +44,7 @@ export interface PersistModelHooks {
   afterDelete?: PersistDeleteHookFunction[];
 }
 
-export interface PersistModelArgs extends ModelBaseArgs {
+export interface PersistModelArgs extends ModelArgs {
   persist: {
     /**
      * Persistence database connection to use
@@ -80,7 +79,7 @@ export interface PersistModelRelationship {
   required: boolean;
 }
 
-export interface PersistedModelFactory<Args extends ModelArgs>
+export interface PersistedModelFactory<Args extends PersistModelArgs>
   extends ModelFactory<Args> {
   readonly $factory: PersistedModelFactory<Args>;
   readonly $options: Args & PersistModelArgs;
@@ -149,4 +148,10 @@ export function isPersistArgs(args: unknown): args is PersistModelArgs {
   if (typeof args !== "object") return false;
   if ("persist" in args) return true;
   return false;
+}
+
+export function isPersistedModel(model: Model): model is Model {
+  return Boolean(
+    (model?.$factory?.$options as PersistModelArgs)?.persist?.with
+  );
 }

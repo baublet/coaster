@@ -1,5 +1,4 @@
 import { ModelFieldValidator } from "./validate";
-import { PersistModelArgs } from "persist/types";
 import { GeneratedNames } from "helpers/generateNames";
 
 export type ObjectWithoutNeverProperties<
@@ -10,6 +9,8 @@ export type ObjectWithoutNeverProperties<
     [K in keyof O]: O[K] extends never ? never : K;
   }[keyof O]
 >;
+
+export type CoasterPropertyType = ModelArgsPropertyType;
 
 export enum ModelArgsPropertyType {
   BOOLEAN = "boolean",
@@ -25,7 +26,8 @@ export interface ModelArgsDefaultPropertyArgs {
   validate?: ModelFieldValidator[];
 }
 
-export interface ModelArgsPrimitivePropertyArgs {
+export interface ModelArgsPrimitivePropertyArgs
+  extends ModelArgsDefaultPropertyArgs {
   type:
     | ModelArgsPropertyType.STRING
     | ModelArgsPropertyType.NUMBER
@@ -33,7 +35,8 @@ export interface ModelArgsPrimitivePropertyArgs {
   required?: boolean;
 }
 
-export interface ModelArgsRelationshipPropertyArgs {
+export interface ModelArgsRelationshipPropertyArgs
+  extends ModelArgsDefaultPropertyArgs {
   type: ModelArgsPropertyType.RELATIONSHIP;
   /**
    * The model factory to relate this prop to.
@@ -59,8 +62,9 @@ export interface ModelArgsRelationshipPropertyArgs {
   required?: boolean;
 }
 
-export type ModelArgsPropertyArgs = ModelArgsDefaultPropertyArgs &
-  (ModelArgsRelationshipPropertyArgs | ModelArgsPrimitivePropertyArgs);
+export type ModelArgsPropertyArgs =
+  | ModelArgsRelationshipPropertyArgs
+  | ModelArgsPrimitivePropertyArgs;
 
 export type ModelHooks = {
   /**
@@ -75,7 +79,7 @@ export type ModelHooks = {
   afterInstantiate?: ((model: Model) => void)[];
 };
 
-export interface ModelBaseArgs {
+export interface ModelArgs {
   /**
    * The canonical name of the model; be careful with changing this value.
    * Coaster infers a lot from the name, including DB column names (when
@@ -84,7 +88,7 @@ export interface ModelBaseArgs {
    */
   name: string;
   /**
-   * The model's accessors for data retrieval and access
+   * The model's accessors for data
    */
   properties: Record<string, ModelArgsPropertyArgs>;
   /**
@@ -92,8 +96,6 @@ export interface ModelBaseArgs {
    */
   hooks?: ModelHooks;
 }
-
-export type ModelArgs = ModelBaseArgs | PersistModelArgs;
 
 type ModelTypeFromRelationshipPropertyArgs<
   Args extends ModelArgsRelationshipPropertyArgs
@@ -111,16 +113,16 @@ export type PropertyType<Args extends ModelArgsPropertyArgs> =
     ? boolean
     : Args["type"] extends ModelArgsPropertyType.NUMBER
     ? number
-    : /**
-     * Relationships. We need to extract ModelTypeFromRelationshipPropertyArgs
-     * or TypeScript yells that we're doing circular references...
-     */
-    Args extends ModelArgsRelationshipPropertyArgs
-    ? ModelTypeFromRelationshipPropertyArgs<Args>
       /**
+       * Relationships. We need to extract ModelTypeFromRelationshipPropertyArgs
+       * or TypeScript yells that we're doing circular references...
+       */
+    : Args extends ModelArgsRelationshipPropertyArgs
+    ? ModelTypeFromRelationshipPropertyArgs<Args>
+    : /**
        * Unknown!
        */
-    : never;
+      never;
 
 export type PropertiesFromModelArgs<Args extends ModelArgs> = Partial<
   {
@@ -176,9 +178,9 @@ export interface ModelFactory<Args extends ModelArgs = any> {
   readonly $data: (model: Model<Args>) => Record<string, any>;
   readonly $name: string;
   readonly $names: GeneratedNames;
-  readonly $options: Args;
+  readonly $options: ModelArgs;
   /**
-   * Clones a model. Does not persist the clone to the database.
+   * Clones a model
    * @param model
    */
   readonly clone: (model: Model<Args>) => Model<Args>;
@@ -201,8 +203,4 @@ export function isModel<Args extends ModelArgs = any>(
   if (Array.isArray(obj)) return false;
   if ("$factory" in obj) return true;
   return false;
-}
-
-export function isPersistedModel(model: Model): model is Model {
-  return Boolean(model?.$factory?.$options?.persist?.with);
 }

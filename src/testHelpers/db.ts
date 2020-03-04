@@ -1,6 +1,6 @@
 import { Model, ModelArgsPropertyType } from "model/types";
-import { createModel } from "model";
 import { PersistConnection, PersistedModelFactory } from "persist/types";
+import { createPersistedModel } from "persist/createPersistedModel";
 
 let testTableDelta = 0;
 export function getTestTableDelta() {
@@ -54,7 +54,7 @@ export async function createTableForNewModelFactory(
     }
   });
 
-  const factory = createModel({
+  const factory = createPersistedModel({
     name: tableName,
     properties: modelProps,
     persist: {
