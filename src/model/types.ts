@@ -10,14 +10,16 @@ export type ObjectWithoutNeverProperties<
   }[keyof O]
 >;
 
-export type CoasterPropertyType = ModelArgsPropertyType;
-
 export enum ModelArgsPropertyType {
   BOOLEAN = "boolean",
   STRING = "string",
   NUMBER = "number",
   RELATIONSHIP = "relationship"
 }
+
+export const CoasterPropertyType = {
+  ...ModelArgsPropertyType
+};
 
 export interface ModelArgsDefaultPropertyArgs {
   /**
@@ -47,18 +49,6 @@ export interface ModelArgsRelationshipPropertyArgs
    * single nodes, or use a boolean value for explicit value
    */
   many?: boolean;
-  /**
-   * The name of the table where we correlated the models.
-   */
-  bridgeTableName?: string;
-  /**
-   * The key in the bridge table that references the current model
-   */
-  localKey?: string;
-  /**
-   * The key in the bridge table that relates to the model declared in modelFactory
-   */
-  foreignKey?: string;
   required?: boolean;
 }
 

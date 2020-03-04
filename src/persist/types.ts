@@ -4,7 +4,9 @@ import {
   Model,
   ModelArgs,
   ModelFactoryArgsFromModelArgs,
-  ModelHooks
+  ModelHooks,
+  ModelArgsRelationshipPropertyArgs,
+  ModelArgsPrimitivePropertyArgs
 } from "model/types";
 
 export type PersistConnectArguments = string | knex.Config;
@@ -44,7 +46,28 @@ export interface PersistModelHooks {
   afterDelete?: PersistDeleteHookFunction[];
 }
 
+export interface PersistedModelRelationshipPropertyArgs
+  extends ModelArgsRelationshipPropertyArgs {
+  /**
+   * The name of the table where we correlated the models.
+   */
+  bridgeTableName?: string;
+  /**
+   * The key in the bridge table that references the current model
+   */
+  localKey?: string;
+  /**
+   * The key in the bridge table that relates to the model declared in modelFactory
+   */
+  foreignKey?: string;
+}
+
+export type PersistedModelArgsPropertyArgs =
+  | PersistedModelRelationshipPropertyArgs
+  | ModelArgsPrimitivePropertyArgs;
+
 export interface PersistModelArgs extends ModelArgs {
+  properties: Record<string, PersistedModelArgsPropertyArgs>;
   persist: {
     /**
      * Persistence database connection to use

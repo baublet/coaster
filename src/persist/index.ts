@@ -1,2 +1,4 @@
 export { connect } from "./connect";
-export { queryFactory } from "./query";
+export { createPersistedModel } from "./createPersistedModel";
+export { createBridgeTable } from "./createBridgeTable";
+export { PersistedModelFactory } from "./types";
