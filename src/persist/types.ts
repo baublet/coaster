@@ -1,6 +1,5 @@
 import knex from "knex";
 import {
-  ModelFactory,
   Model,
   ModelArgs,
   ModelFactoryArgsFromModelArgs,
@@ -8,13 +7,16 @@ import {
   ModelArgsRelationshipPropertyArgs,
   ModelArgsPrimitivePropertyArgs
 } from "model/types";
+import { GeneratedNames } from "helpers/generateNames";
 
 export type PersistConnectArguments = string | knex.Config;
 export type PersistConnection = knex;
 export type PersistTransaction = knex.Transaction;
 
-export type PersistGenericHookFunction = (model: Model) => void;
-export type PersistDeleteHookFunction = (modelOrId: Model | string) => void;
+export type PersistGenericHookFunction = (model: PersistedModel) => void;
+export type PersistDeleteHookFunction = (
+  modelOrId: PersistedModel | string
+) => void;
 
 /**
  * Persist-related hooks
@@ -102,10 +104,41 @@ export interface PersistModelRelationship {
   required: boolean;
 }
 
-export interface PersistedModelFactory<Args extends PersistModelArgs>
-  extends ModelFactory<Args> {
+export interface PersistedModel<Args extends PersistModelArgs = any>
+  extends Model {
+  readonly $factory: PersistedModelFactory<Args>;
+  readonly $relationshipsLoaded: boolean;
+}
+
+export interface PersistedModelFactory<Args extends PersistModelArgs = any> {
+  (initialValue: ModelFactoryArgsFromModelArgs<Args>): PersistedModel<Args>;
   readonly $factory: PersistedModelFactory<Args>;
   readonly $options: Args & PersistModelArgs;
+
+  (initialValue: ModelFactoryArgsFromModelArgs<Args>): Model<Args>;
+  readonly $id: Symbol;
+  /**
+   * Returns the primitive data for the model
+   */
+  readonly $data: (model: PersistedModel<Args>) => Record<string, any>;
+  readonly $name: string;
+  readonly $names: GeneratedNames;
+  /**
+   * Clones a model
+   * @param model
+   */
+  readonly clone: (model: PersistedModel<Args>) => PersistedModel<Args>;
+  /**
+   * Renders the model to JSON.
+   * @param model
+   * @param maxDepth - Max levels to render to JSON. Default is 5.
+   */
+  readonly toJson: (
+    model: Model<Args>,
+    maxDepth?: number,
+    currentDepth?: number
+  ) => Record<string, any>;
+
   readonly $relationships: PersistModelRelationship[];
   readonly find: PersistFindFunction<Args>;
   readonly findBy: PersistFindByFunction<Args>;
@@ -120,12 +153,12 @@ export type PersistQueryFunction = (
   knex: knex.QueryBuilder
 ) => knex.QueryBuilder;
 
-export type PersistQueryFunctionOnFactory<T extends ModelArgs> = (
+export type PersistQueryFunctionOnFactory<T extends PersistModelArgs> = (
   queryFunction: PersistQueryFunction
-) => Promise<Model<T>[]>;
+) => Promise<PersistedModel<T>[]>;
 
-export type PersistDeleteFunction<T extends ModelArgs> = (
-  modelOrId: Model<T> | string,
+export type PersistDeleteFunction<T extends PersistModelArgs> = (
+  modelOrId: PersistedModel<T> | string,
   persist?: PersistConnection
 ) => Promise<boolean>;
 
@@ -144,24 +177,26 @@ export interface PersistFindQueryOptions {
 }
 
 // This is an overloaded interface, that's why it looks funky
-export interface PersistFindFunction<T extends ModelArgs> {
+export interface PersistFindFunction<T extends PersistModelArgs> {
   // The first signature is passing in a single ID, which returns Model | null
-  (id: string, options?: PersistFindQueryOptions): Promise<Model<T> | null>;
+  (id: string, options?: PersistFindQueryOptions): Promise<PersistedModel<
+    T
+  > | null>;
   // Second signature returns (Model | null)[]
   (ids: string[], options?: PersistFindQueryOptions): Promise<
-    (Model<T> | null)[]
+    (PersistedModel<T> | null)[]
   >;
 }
 
-export type PersistFindByFunction<T extends ModelArgs> = (
+export type PersistFindByFunction<T extends PersistModelArgs> = (
   by: Partial<ModelFactoryArgsFromModelArgs<T>>,
   options?: PersistFindQueryOptions
-) => Promise<Model<T>[]>;
+) => Promise<PersistedModel<T>[]>;
 
-export type PersistSaveFunction<T extends ModelArgs> = (
-  model: Model<T> | ModelFactoryArgsFromModelArgs<T>,
+export type PersistSaveFunction<T extends PersistModelArgs> = (
+  model: PersistedModel<T> | ModelFactoryArgsFromModelArgs<T>,
   trx?: PersistTransaction
-) => Promise<Model<T>>;
+) => Promise<PersistedModel<T>>;
 
 export type PersistCountFunction = (
   persist?: PersistConnection
@@ -173,8 +208,8 @@ export function isPersistArgs(args: unknown): args is PersistModelArgs {
   return false;
 }
 
-export function isPersistedModel(model: Model): model is Model {
-  return Boolean(
-    (model?.$factory?.$options as PersistModelArgs)?.persist?.with
-  );
+export function isPersistedModel(model: unknown): model is PersistedModel {
+  if (typeof model !== "object") return false;
+  if ((model as any)?.$factory?.$options?.persist) return true;
+  return false;
 }

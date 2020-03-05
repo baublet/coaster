@@ -1,10 +1,14 @@
-import { ModelArgs, ModelArgsPropertyType } from "../model/types";
-import { getBridgeTableNames } from "persist/getBridgeTableNames";
-import { PersistedModelFactory, PersistModelRelationship } from "persist/types";
+import { ModelArgsPropertyType } from "../model/types";
+import { getBridgeTableNames } from "./getBridgeTableNames";
+import {
+  PersistedModelFactory,
+  PersistModelRelationship,
+  PersistModelArgs
+} from "./types";
 
 export function relationships(
-  factory: PersistedModelFactory<any>,
-  modelArgs: ModelArgs
+  factory: PersistedModelFactory,
+  modelArgs: PersistModelArgs
 ): PersistModelRelationship[] {
   const relationships: PersistModelRelationship[] = [];
 

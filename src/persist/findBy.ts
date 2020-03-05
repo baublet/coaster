@@ -5,7 +5,7 @@ import {
   PersistedModelFactory
 } from "./types";
 import { loadRelationships } from "./loadRelationships";
-import { ModelFactoryArgsFromModelArgs, Model } from "model/types";
+import { ModelFactoryArgsFromModelArgs } from "model/types";
 
 export function findByFactory<T extends PersistModelArgs>(
   modelFactory: PersistedModelFactory<T>
@@ -35,8 +35,8 @@ export function findByFactory<T extends PersistModelArgs>(
       );
 
     const results = await query;
-    const models = results.map(
-      data => modelFactory(data as ModelFactoryArgsFromModelArgs<T>) as Model<T>
+    const models = results.map(data =>
+      modelFactory(data as ModelFactoryArgsFromModelArgs<T>)
     );
 
     if (eager) {

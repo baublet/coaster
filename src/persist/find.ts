@@ -2,11 +2,11 @@ import {
   PersistFindQueryOptions,
   PersistFindFunction,
   PersistModelArgs,
-  PersistedModelFactory
+  PersistedModelFactory,
+  PersistedModel
 } from "./types";
 import { cannotFindByBlankId } from "./error/cannotFindBlankId";
 import { loadRelationships } from "./loadRelationships";
-import { Model } from "model";
 import { ModelFactoryArgsFromModelArgs } from "model/types";
 
 export function findFactory<T extends PersistModelArgs>(
@@ -20,7 +20,7 @@ export function findFactory<T extends PersistModelArgs>(
   return async function find(
     id: string | string[],
     { columns = ["*"], eager = true }: PersistFindQueryOptions = {}
-  ): Promise<Model<T> | null | (Model<T> | null)[]> {
+  ): Promise<PersistedModel<T> | null | (PersistedModel<T> | null)[]> {
     const depth = typeof eager === "boolean" ? 0 : eager - 1;
 
     if (Array.isArray(id)) {
@@ -31,7 +31,7 @@ export function findFactory<T extends PersistModelArgs>(
 
       // This ensures that our slots are preserved, e.g., `find(1, 2, 3)`,
       // returns `[1, null, 3]` if "2" doesn't exist.
-      const resultsAsModels: (Model<T> | null)[] = id.map(id => {
+      const resultsAsModels: (PersistedModel<T> | null)[] = id.map(id => {
         for (const result of results) {
           if (result[primaryKey] === id)
             return modelFactory(result as ModelFactoryArgsFromModelArgs<T>);
@@ -56,7 +56,7 @@ export function findFactory<T extends PersistModelArgs>(
     if (results[0]) {
       const model = modelFactory(
         results[0] as ModelFactoryArgsFromModelArgs<T>
-      ) as Model<T>;
+      );
       if (eager) {
         await loadRelationships([model], depth);
       }

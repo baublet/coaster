@@ -1,10 +1,9 @@
-import { Model } from "model/types";
-
 import {
   PersistDeleteFunction,
   PersistTransaction,
   PersistedModelFactory,
-  PersistModelArgs
+  PersistModelArgs,
+  PersistedModel
 } from "./types";
 import { cannotDeleteUncreatedModel } from "./error/cannotDeleteUncreatedModel";
 import { cannotDeleteBlankId } from "./error/cannotDeleteBlankId";
@@ -21,7 +20,7 @@ export function deleteFactory<T extends PersistModelArgs>(
   const afterHooks = modelFactory.$options.hooks?.afterDelete;
 
   return async function(
-    model: Model<T> | string,
+    model: PersistedModel<T> | string,
     trx: PersistTransaction = null
   ): Promise<boolean> {
     const id = typeof model === "string" ? model : model[primaryKey];

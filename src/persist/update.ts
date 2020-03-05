@@ -3,11 +3,12 @@ import {
   PersistTransaction,
   PersistSaveFunction,
   PersistModelArgs,
-  PersistedModelFactory
+  PersistedModelFactory,
+  PersistedModel,
+  isPersistedModel
 } from "./types";
 import { cannotUpdateWithoutPrimaryKey } from "./error/cannotUpdateWithoutPrimaryKey";
-import { Model } from "model";
-import { isModel, ModelFactoryArgsFromModelArgs } from "model/types";
+import { ModelFactoryArgsFromModelArgs } from "model/types";
 
 export function updateFactory<T extends PersistModelArgs>(
   modelFactory: PersistedModelFactory<T>
@@ -18,18 +19,18 @@ export function updateFactory<T extends PersistModelArgs>(
   const primaryKey = persistOptions.primaryKey;
 
   return async function update(
-    initialData: Model<T> | ModelFactoryArgsFromModelArgs<T>,
+    initialData: PersistedModel<T> | ModelFactoryArgsFromModelArgs<T>,
     trx: PersistTransaction = null
   ) {
     // If they pass in data, we assume they want to update it.
-    if (!isModel(initialData)) {
+    if (!isPersistedModel(initialData)) {
       if (!initialData[primaryKey])
         throw cannotUpdateWithoutPrimaryKey(modelFactory, initialData);
     }
 
-    const model = isModel(initialData)
+    const model = isPersistedModel(initialData)
       ? initialData
-      : (modelFactory(initialData) as Model<T>);
+      : modelFactory(initialData);
     const props = model.$initialValues;
     const id = model[primaryKey];
     const cnx = trx || connection;
@@ -41,7 +42,7 @@ export function updateFactory<T extends PersistModelArgs>(
       .where(primaryKey, "=", id)
       .update(props);
 
-    if (isModel(model)) {
+    if (isPersistedModel(model)) {
       return model;
     }
 
@@ -50,8 +51,6 @@ export function updateFactory<T extends PersistModelArgs>(
       .where(primaryKey, "=", id)
       .limit(1);
 
-    return modelFactory(result[0] as ModelFactoryArgsFromModelArgs<T>) as Model<
-      T
-    >;
+    return modelFactory(result[0] as ModelFactoryArgsFromModelArgs<T>);
   };
 }

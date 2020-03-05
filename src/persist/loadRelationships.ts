@@ -1,12 +1,11 @@
-import { Model } from "model";
-import { PersistedModelFactory } from "./types";
+import { PersistedModelFactory, PersistedModel } from "./types";
 import cannotLoadInvariantRelationships from "./error/cannotLoadInvariantRelationships";
 
 type ModelMap = Map<
   // The accessorName or the unique symbol of the ModelFactory
   Symbol | string,
   // Map of the models loaded in <id, Model>
-  Record<string, Model>
+  Record<string, PersistedModel>
 >;
 
 type ModelNeeds = Record<
@@ -22,7 +21,7 @@ type ModelNeeds = Record<
  * @param model
  */
 export async function loadRelationships(
-  models: Model[],
+  models: PersistedModel<any>[],
   depth: number = 0,
   // The below properties are for recursion purposes only. Do not modify
   // these or pass them in manually.
@@ -49,7 +48,8 @@ export async function loadRelationships(
   const operations = [];
   const collators = [];
 
-  modelMap = modelMap || new Map<Symbol | string, Record<string, Model>>();
+  modelMap =
+    modelMap || new Map<Symbol | string, Record<string, PersistedModel>>();
   modelNeeds = modelNeeds || {};
 
   const leftFactoryPrimaryKey = leftFactory.$options.persist.primaryKey;
@@ -140,7 +140,7 @@ export async function loadRelationships(
         if (!modelNeeds[leftId]) modelNeeds[leftId] = {};
         const needs = modelNeeds[leftId][accessor];
 
-        let relationships: Model | Model[];
+        let relationships: PersistedModel | PersistedModel[];
         if (needs === undefined) {
           relationships = many ? [] : null;
         } else {
@@ -150,6 +150,7 @@ export async function loadRelationships(
         }
 
         model[accessor] = relationships;
+        (model as any).$relationshipsLoaded = true;
       });
     });
   });
