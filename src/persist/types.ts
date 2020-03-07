@@ -6,9 +6,7 @@ import {
   ModelHooks,
   ModelArgsRelationshipPropertyArgs,
   ModelArgsPrimitivePropertyArgs,
-  ModelArgsPropertyType,
-  ObjectWithoutNeverProperties,
-  ModelArgsPropertyArgs
+  ObjectWithoutNeverProperties
 } from "model/types";
 import { GeneratedNames } from "helpers/generateNames";
 import { ValidationErrors } from "validate";
