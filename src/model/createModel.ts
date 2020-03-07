@@ -10,6 +10,7 @@ import {
 import clone from "lodash.clonedeep";
 import generateNames from "helpers/generateNames";
 import { toJson } from "./toJson";
+import { validateFactory } from "validate";
 
 export function createModel<Args extends ModelArgs>(
   opts: Args
@@ -82,6 +83,7 @@ export function createModel<Args extends ModelArgs>(
   modelFactory.clone = (model: Model<Args>) =>
     modelFactory(modelFactory.$data(model) as any);
   modelFactory.toJson = toJson;
+  modelFactory.validate = validateFactory(modelFactory as ModelFactory<Args>);
 
   return modelFactory;
 }

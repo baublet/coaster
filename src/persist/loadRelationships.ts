@@ -22,19 +22,18 @@ type ModelNeeds = Record<
  */
 export async function loadRelationships(
   models: PersistedModel<any>[],
-  depth: number = 0,
-  // The below properties are for recursion purposes only. Do not modify
-  // these or pass them in manually.
-  modelMap?: ModelMap,
-  modelNeeds?: ModelNeeds,
-  bridgeQueries: number = 0,
-  modelQueries: number = 0
+  relationships?: boolean | string[]
 ): Promise<{
   totalQueries: number;
   bridgeQueries: number;
   modelQueries: number;
 }> {
-  if (!models.length) return;
+  if (!models.length || relationships === false)
+    return {
+      totalQueries: 0,
+      bridgeQueries: 0,
+      modelQueries: 0
+    };
 
   // Never let users pass different types of models here
   const leftFactory = models[0].$factory as PersistedModelFactory<any>;
@@ -45,12 +44,14 @@ export async function loadRelationships(
 
   const persist = leftFactory.$options.persist.with;
 
+  let bridgeQueries = 0;
+  let modelQueries = 0;
+
   const operations = [];
   const collators = [];
 
-  modelMap =
-    modelMap || new Map<Symbol | string, Record<string, PersistedModel>>();
-  modelNeeds = modelNeeds || {};
+  const modelMap = new Map<Symbol | string, Record<string, PersistedModel>>();
+  const modelNeeds = {};
 
   const leftFactoryPrimaryKey = leftFactory.$options.persist.primaryKey;
 
@@ -63,6 +64,12 @@ export async function loadRelationships(
       many,
       modelFactory: rightFactory
     } = relationshipArgs;
+
+    // Do nothing if we only want to load specific relationships, and this isn't
+    // one of them.
+    if (Array.isArray(relationships) && !relationships.includes(accessor)) {
+      return;
+    }
 
     const rightFactoryPrimaryKey = rightFactory.$options.persist.primaryKey;
 
@@ -131,7 +138,7 @@ export async function loadRelationships(
       });
     });
 
-    // Our collators attach relationships to their parent models
+    // Collators attach relationships to their parent models
     collators.push(() => {
       models.forEach(model => {
         // For each right model data, load up the model from our map and set it
@@ -150,6 +157,7 @@ export async function loadRelationships(
         }
 
         model[accessor] = relationships;
+        // We need to cast to any here because this is a readonly prop
         (model as any).$relationshipsLoaded = true;
       });
     });
@@ -159,23 +167,6 @@ export async function loadRelationships(
   // to collate.
   await Promise.all(operations.map(op => op()));
   collators.forEach(op => op());
-
-  // For more depth than just the first slew of models
-  if (depth > 0) {
-    await Promise.all(
-      Array.from(modelMap.keys()).map(async (symbol: Symbol | string) => {
-        if (typeof symbol === "string") return;
-        const models = Object.values(modelMap.get(symbol));
-        const newDepth = depth - 1;
-        const {
-          bridgeQueries: childBridgeQueries,
-          modelQueries: childModelQueries
-        } = await loadRelationships(models, newDepth, modelMap, modelNeeds);
-        bridgeQueries += childBridgeQueries;
-        modelQueries += childModelQueries;
-      })
-    );
-  }
 
   return {
     totalQueries: bridgeQueries + modelQueries,

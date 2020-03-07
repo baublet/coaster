@@ -21,7 +21,6 @@ export function findFactory<T extends PersistModelArgs>(
     id: string | string[],
     { columns = ["*"], eager = true }: PersistFindQueryOptions = {}
   ): Promise<PersistedModel<T> | null | (PersistedModel<T> | null)[]> {
-    const depth = typeof eager === "boolean" ? 0 : eager - 1;
 
     if (Array.isArray(id)) {
       const query = connection<T>(tableName)
@@ -39,7 +38,7 @@ export function findFactory<T extends PersistModelArgs>(
         return null;
       });
       if (eager) {
-        await loadRelationships(resultsAsModels.filter(Boolean), depth);
+        await loadRelationships(resultsAsModels.filter(Boolean));
       }
       return resultsAsModels;
     }
@@ -58,7 +57,7 @@ export function findFactory<T extends PersistModelArgs>(
         results[0] as ModelFactoryArgsFromModelArgs<T>
       );
       if (eager) {
-        await loadRelationships([model], depth);
+        await loadRelationships([model]);
       }
       return model;
     }

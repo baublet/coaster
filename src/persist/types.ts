@@ -5,9 +5,13 @@ import {
   ModelFactoryArgsFromModelArgs,
   ModelHooks,
   ModelArgsRelationshipPropertyArgs,
-  ModelArgsPrimitivePropertyArgs
+  ModelArgsPrimitivePropertyArgs,
+  ModelArgsPropertyType,
+  ObjectWithoutNeverProperties,
+  ModelArgsPropertyArgs
 } from "model/types";
 import { GeneratedNames } from "helpers/generateNames";
+import { ValidationErrors } from "validate";
 
 export type PersistConnectArguments = string | knex.Config;
 export type PersistConnection = knex;
@@ -51,6 +55,10 @@ export interface PersistModelHooks {
 export interface PersistedModelRelationshipPropertyArgs
   extends ModelArgsRelationshipPropertyArgs {
   /**
+   * The model factory to relate this model to
+   */
+  modelFactory: PersistedModelFactory;
+  /**
    * The name of the table where we correlated the models.
    */
   bridgeTableName?: string;
@@ -62,6 +70,10 @@ export interface PersistedModelRelationshipPropertyArgs
    * The key in the bridge table that relates to the model declared in modelFactory
    */
   foreignKey?: string;
+  /**
+   * Persist connection to use for the bridge table between these two models
+   */
+  bridgeTablePersist?: PersistConnection;
 }
 
 export type PersistedModelArgsPropertyArgs =
@@ -97,6 +109,7 @@ export interface PersistModelArgs extends ModelArgs {
 export interface PersistModelRelationship {
   accessor: string;
   bridgeTableName: string;
+  bridgeTablePersist: PersistConnection;
   foreignKey: string;
   localKey: string;
   many: boolean;
@@ -110,7 +123,9 @@ export interface PersistedModel<Args extends PersistModelArgs = any>
   readonly $relationshipsLoaded: boolean;
 }
 
-export interface PersistedModelFactory<Args extends PersistModelArgs = any> {
+export type PersistedModelFactory<
+  Args extends PersistModelArgs = any
+> = PersistRelationships<Args> & {
   (initialValue: ModelFactoryArgsFromModelArgs<Args>): PersistedModel<Args>;
   readonly $factory: PersistedModelFactory<Args>;
   readonly $options: Args & PersistModelArgs;
@@ -140,14 +155,23 @@ export interface PersistedModelFactory<Args extends PersistModelArgs = any> {
   ) => Record<string, any>;
 
   readonly $relationships: PersistModelRelationship[];
+  readonly belongingTo: PersistBelongingToFunction;
+  readonly count: PersistCountFunction;
+  readonly create: PersistSaveFunction<Args>;
+  readonly delete: PersistDeleteFunction<Args>;
   readonly find: PersistFindFunction<Args>;
   readonly findBy: PersistFindByFunction<Args>;
-  readonly delete: PersistDeleteFunction<Args>;
-  readonly create: PersistSaveFunction<Args>;
-  readonly update: PersistSaveFunction<Args>;
-  readonly count: PersistCountFunction;
   readonly query: PersistQueryFunctionOnFactory<Args>;
-}
+  readonly update: PersistSaveFunction<Args>;
+
+  /**
+   * Validates the model. Returns a tuple. The first value is whether the model
+   * is valid. The second value are validation errors.
+   */
+  readonly validate: (
+    model: Model<Args>
+  ) => [boolean, ValidationErrors<Args>];
+};
 
 export type PersistQueryFunction = (
   knex: knex.QueryBuilder
@@ -165,11 +189,11 @@ export type PersistDeleteFunction<T extends PersistModelArgs> = (
 export interface PersistFindQueryOptions {
   columns?: string[];
   /**
-   * Eagerly load model relationships. If "true", we load the relationships on
-   * on the first level, the equivalent of passing in 1. If you need deeper
-   * depths, you may pass it in here as a number.
+   * Eagerly load model relationships. If "true", we load all of the related
+   * objects. If "false", we eagerly load none. To load specific objects, pass
+   * in an array of relationships to load.
    */
-  eager?: boolean | number;
+  eager?: boolean | string[];
   limit?: number;
   offset?: number;
   order?: { by: string; direction?: "asc" | "desc" }[];
@@ -198,9 +222,122 @@ export type PersistSaveFunction<T extends PersistModelArgs> = (
   trx?: PersistTransaction
 ) => Promise<PersistedModel<T>>;
 
+export type PersistBelongingToFunction = (
+  model: PersistedModel,
+  options?: PersistFindQueryOptions
+) => Promise<PersistedModel[]>;
+
 export type PersistCountFunction = (
   persist?: PersistConnection
 ) => Promise<number>;
+
+type PersistRelationshipFindByQueryOptions = Omit<
+  PersistFindQueryOptions,
+  "persist" | "eager"
+>;
+
+export type PersistModelFactoryRelationsipCreateFn<
+  MainArgs extends PersistModelArgs,
+  ForeignFactory extends PersistedModelFactory
+> = (
+  on: PersistedModel<MainArgs>,
+  model: ReturnType<ForeignFactory> | Partial<Parameters<ForeignFactory>>,
+  validate?: boolean
+) => Promise<ReturnType<ForeignFactory>>;
+
+export type PersistModelFactoryRelationsipCreateManyFn<
+  MainArgs extends PersistModelArgs,
+  ForeignFactory extends PersistedModelFactory
+> = (
+  on: PersistedModel<MainArgs>,
+  model: (ReturnType<ForeignFactory> | Partial<Parameters<ForeignFactory>>)[],
+  validate?: boolean
+) => Promise<ReturnType<ForeignFactory>[]>;
+
+export type PersistModelFactoryRelationsipDeleteFn<
+  MainArgs extends PersistModelArgs
+> = (
+  on: PersistedModelFactory<MainArgs>,
+  id: string | string[]
+) => Promise<number>;
+
+export type PersistModelFactoryRelationsipDeleteAllFn<
+  MainArgs extends PersistModelArgs
+> = (on: PersistedModel<MainArgs>) => Promise<number>;
+
+export type PersistModelFactoryRelationsipFindFn<
+  MainArgs extends PersistModelArgs,
+  ForeignFactory extends PersistedModelFactory
+> = (
+  on: PersistedModel<MainArgs>,
+  options?: PersistRelationshipFindByQueryOptions
+) => Promise<ReturnType<ForeignFactory>[]>;
+
+export type PersistModelFactoryRelationsipFindByFn<
+  MainArgs extends PersistModelArgs,
+  ForeignFactory extends PersistedModelFactory
+> = (
+  on: PersistedModel<MainArgs>,
+  by: Partial<Parameters<ForeignFactory>>,
+  options?: PersistRelationshipFindByQueryOptions
+) => Promise<ReturnType<ForeignFactory>[]>;
+
+export interface PersistRelationshipFunctions<
+  MainArgs extends PersistModelArgs,
+  ForeignFactory extends PersistedModelFactory
+> {
+  /**
+   * Creates a relationship using either a created model or partial data. By
+   * default, we validate the model before trying to create it and the link.
+   * Resolves the newly-created model that's linked to `on`
+   */
+  create: PersistModelFactoryRelationsipCreateFn<MainArgs, ForeignFactory>;
+  /**
+   * Creates a relationship using either a created model or partial data. By
+   * default, we validate the model before trying to create it and the link.
+   * Resolves the newly-created model that's linked to `on`
+   */
+  createMany: PersistModelFactoryRelationsipCreateManyFn<
+    MainArgs,
+    ForeignFactory
+  >;
+  /**
+   * Delete one or more relationship from a model. Resolves the number of models
+   * deleted.
+   */
+  delete: PersistModelFactoryRelationsipDeleteFn<MainArgs>;
+  /**
+   * Deletes all models related to `on` along this accessor. Resolves the number
+   * of deleted models.
+   */
+  deleteAll: PersistModelFactoryRelationsipDeleteAllFn<MainArgs>;
+  /**
+   * Resolves a number of models related to `on` along this accessor.
+   */
+  find: PersistModelFactoryRelationsipFindFn<MainArgs, ForeignFactory>;
+  /**
+   * Resolves a number of models related to `on` matching the criteria in `by`.
+   */
+  findBy: PersistModelFactoryRelationsipFindByFn<MainArgs, ForeignFactory>;
+}
+
+export type PersistRelationshipFilter<
+  Args extends PersistedModelArgsPropertyArgs,
+  MainArgs extends PersistModelArgs
+> = Args extends PersistedModelRelationshipPropertyArgs
+  ? PersistRelationshipFunctions<MainArgs, Args["modelFactory"]>
+  : never;
+
+export type PersistRelationships<
+  Args extends PersistModelArgs
+> = ObjectWithoutNeverProperties<
+  {
+    readonly [K in keyof Args["properties"]]: PersistRelationshipFilter<
+      Args["properties"][K],
+      Args
+    >;
+  }
+>;
 
 export function isPersistArgs(args: unknown): args is PersistModelArgs {
   if (typeof args !== "object") return false;

@@ -1,4 +1,4 @@
-import { PersistedModelFactory } from "./types";
+import { PersistedModelFactory, PersistConnection } from "./types";
 
 /**
  * Returns the names we need for simple bridge tables.
@@ -10,7 +10,7 @@ export function getBridgeTableNames(
   a: PersistedModelFactory,
   b: PersistedModelFactory,
   bridgeTableName?: string
-): [string, string, string] {
+): [string, string, string, PersistConnection] {
   // By design, we have to alphabetize these. The only issue here is that if
   // developers rename tables without specifying bridge table names, auto-
   // generated bridge table names may change.
@@ -25,8 +25,15 @@ export function getBridgeTableNames(
   const columns = [aName, bName];
   columns.sort();
 
+  const persists = [a.$name, b.$name];
+  persists.sort();
+  const defaultPersist =
+    persists[0] === a.$name
+      ? a.$options.persist.with
+      : b.$options.persist.with;
+
   const table: string =
     bridgeTableName || `${columns[0]}_${columns[1]}_relationships`;
 
-  return [table, aColumn, bColumn];
+  return [table, aColumn, bColumn, defaultPersist];
 }

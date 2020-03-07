@@ -1,4 +1,4 @@
-import { ModelFieldValidator } from "./validate";
+import { ModelFieldValidator, ValidationErrors } from "validate";
 import { GeneratedNames } from "helpers/generateNames";
 
 export type ObjectWithoutNeverProperties<
@@ -103,16 +103,16 @@ export type PropertyType<Args extends ModelArgsPropertyArgs> =
     ? boolean
     : Args["type"] extends ModelArgsPropertyType.NUMBER
     ? number
-      /**
-       * Relationships. We need to extract ModelTypeFromRelationshipPropertyArgs
-       * or TypeScript yells that we're doing circular references...
-       */
-    : Args extends ModelArgsRelationshipPropertyArgs
-    ? ModelTypeFromRelationshipPropertyArgs<Args>
     : /**
+     * Relationships. We need to extract ModelTypeFromRelationshipPropertyArgs
+     * or TypeScript yells that we're doing circular references...
+     */
+    Args extends ModelArgsRelationshipPropertyArgs
+    ? ModelTypeFromRelationshipPropertyArgs<Args>
+      /**
        * Unknown!
        */
-      never;
+    : never;
 
 export type PropertiesFromModelArgs<Args extends ModelArgs> = Partial<
   {
@@ -184,6 +184,13 @@ export interface ModelFactory<Args extends ModelArgs = any> {
     maxDepth?: number,
     currentDepth?: number
   ) => Record<string, any>;
+  /**
+   * Validates the model. Returns a tuple. The first value is whether the model
+   * is valid. The second value are validation errors.
+   */
+  readonly validate: (
+    model: Model<Args>
+  ) => [boolean, ValidationErrors<Args>];
 }
 
 export function isModel<Args extends ModelArgs = any>(

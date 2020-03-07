@@ -63,7 +63,7 @@ describe("hasOne", () => {
   });
 });
 
-describe("depth", () => {
+describe("specific fields", () => {
   async function setup() {
     const {
       User,
@@ -106,9 +106,14 @@ describe("depth", () => {
     };
   }
 
-  it("loads nested models of depth n", async () => {
+  it("loads specific models when asked", async () => {
     const { user, Todo, groupedTodos } = await setup();
-    await loadRelationships([user], 1);
+    await loadRelationships([user], ["todos"]);
+
+    expect(user.todos).toEqual([]);
+    expect(user.todoGroups).toEqual(undefined);
+
+    await loadRelationships([user], ["todoGroups"]);
 
     expect(user.todoGroups[0].todos.map(todo => Todo.toJson(todo))).toEqual(
       groupedTodos.map(todo => Todo.toJson(todo))
@@ -117,12 +122,12 @@ describe("depth", () => {
 
   it("properly prevents requerying within the context of a single loadRelationships call", async () => {
     const { user, User } = await setup();
-    const singlePopulatedData = await loadRelationships([user], 1);
+    const singlePopulatedData = await loadRelationships([user], ["todos"]);
     const duplicatedUser1 = User(User.$data(user));
     const duplicatedUser2 = User(User.$data(user));
     const doublePopulatedData = await loadRelationships(
       [duplicatedUser1, duplicatedUser2],
-      1
+      ["todos"]
     );
 
     expect(singlePopulatedData).toEqual(doublePopulatedData);

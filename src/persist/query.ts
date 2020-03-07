@@ -3,9 +3,9 @@ import {
   PersistQueryFunctionOnFactory,
   PersistQueryFunction,
   PersistModelArgs,
-  PersistedModelFactory
+  PersistedModelFactory,
+  PersistedModel
 } from "./types";
-import { Model } from "model";
 
 export function queryFactory<T extends PersistModelArgs>(
   modelFactory: PersistedModelFactory<T>
@@ -17,7 +17,7 @@ export function queryFactory<T extends PersistModelArgs>(
   return async function(
     q: PersistQueryFunction,
     trx: PersistTransaction = null
-  ): Promise<Model<T>[]> {
+  ): Promise<PersistedModel<T>[]> {
     const cnx = trx || connection;
     const results = await q(cnx<T>(tableName));
     if (results) {

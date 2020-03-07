@@ -14,11 +14,6 @@ export default createPersistedModel({
   properties: {
     todo: {
       type: ModelArgsPropertyType.STRING
-    },
-    user: {
-      type: ModelArgsPropertyType.RELATIONSHIP,
-      modelFactory: User,
-      many: false
     }
   },
   persist: {

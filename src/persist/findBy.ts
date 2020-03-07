@@ -40,8 +40,7 @@ export function findByFactory<T extends PersistModelArgs>(
     );
 
     if (eager) {
-      const depth = typeof eager === "boolean" ? 0 : eager - 1;
-      await loadRelationships(models, depth);
+      await loadRelationships(models, eager);
     }
 
     return models;

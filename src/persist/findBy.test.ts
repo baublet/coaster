@@ -34,7 +34,7 @@ async function setup(): Promise<[PersistedModelFactory, Model[]]> {
   return [User, users];
 }
 
-it.only("find models by a single field", async () => {
+it("find models by a single field", async () => {
   const [User] = await setup();
   const foundUsers = await User.findBy({ company: 2 });
 

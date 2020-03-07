@@ -15,13 +15,14 @@ export function relationships(
   for (const [prop, arg] of Object.entries(modelArgs.properties)) {
     if (arg.type !== ModelArgsPropertyType.RELATIONSHIP) continue;
     delete arg.type;
-    const [tableName, leftCol, rightCol] = getBridgeTableNames(
+    const [tableName, leftCol, rightCol, persist] = getBridgeTableNames(
       factory,
       arg.modelFactory as PersistedModelFactory<any>
     );
     arg.localKey = arg.localKey || leftCol;
     arg.foreignKey = arg.foreignKey || rightCol;
     arg.bridgeTableName = arg.bridgeTableName || tableName;
+    arg.bridgeTablePersist = arg.bridgeTablePersist || persist;
     relationships.push(Object.assign({}, arg, { accessor: prop }) as any);
   }
 
