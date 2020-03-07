@@ -8,7 +8,9 @@ import { PersistedModelFactory, PersistModelArgs } from "./types";
 import { queryFactory } from "./query";
 import { updateFactory } from "./update";
 import { relationships } from "./relationships";
-import { deleteAllFactory } from "./relationships/deleteAll";
+
+import { createFactory as createRelationshipFactory } from "./relationships/create";
+import { deleteAllFactory as deleteAllRelationshipFactory } from "./relationships/deleteAll";
 
 export function attachPersistToModelFactory<T extends PersistModelArgs>(
   modelFactory: ModelFactory,
@@ -44,7 +46,8 @@ export function attachPersistToModelFactory<T extends PersistModelArgs>(
 
   builtRelationships.forEach(({ accessor }) => {
     persistEnabledFactory[accessor] = {
-      deleteAll: deleteAllFactory(persistEnabledFactory, accessor)
+      create: createRelationshipFactory(persistEnabledFactory, accessor),
+      deleteAll: deleteAllRelationshipFactory(persistEnabledFactory, accessor)
     };
   });
 

@@ -37,7 +37,8 @@ async function setup() {
     Todo,
     user,
     todoGroup,
-    TodoGroup
+    TodoGroup,
+    groupTodoBridgeTableName
   };
 }
 
@@ -51,10 +52,20 @@ it("deletes all todos belonging to the group", async () => {
 });
 
 it("deletes the entries in the bridge table", async () => {
-  const { TodoGroup, todoGroup, Todo } = await setup();
-  const beforeCount = await Todo.count();
-  await TodoGroup.todos.deleteAll(todoGroup);
-  const afterCount = await Todo.count();
+  const {
+    groupTodoBridgeTableName,
+    Todo,
+    TodoGroup,
+    todoGroup
+  } = await setup();
 
-  expect(beforeCount).toBeGreaterThan(afterCount);
+  const beforeCount = (
+    await Todo.$options.persist.with(groupTodoBridgeTableName).count()
+  )[0]["count(*)"];
+  await TodoGroup.todos.deleteAll(todoGroup);
+  const afterCount = (
+    await Todo.$options.persist.with(groupTodoBridgeTableName).count()
+  )[0]["count(*)"];
+
+  expect(beforeCount).toBeGreaterThan(afterCount as number);
 });
