@@ -62,7 +62,7 @@ export function validateFactory<Args extends ModelArgs | PersistModelArgs>(
     // If there are required fields missing, we want to early exit to prevent
     // possible exceptions in our field validators
     if (hasError) {
-      return [hasError, errors as ValidationErrors<Args>];
+      return [!hasError, errors as ValidationErrors<Args>];
     }
 
     // Validate fields with custom validators
@@ -81,6 +81,6 @@ export function validateFactory<Args extends ModelArgs | PersistModelArgs>(
       }
     }
 
-    return [hasError, errors as ValidationErrors<Args>];
+    return [!hasError, errors as ValidationErrors<Args>];
   };
 }
