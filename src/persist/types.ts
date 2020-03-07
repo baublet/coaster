@@ -327,9 +327,12 @@ export type PersistRelationshipFilter<
   ? PersistRelationshipFunctions<MainArgs, Args["modelFactory"]>
   : never;
 
-export type PersistRelationships<
-  Args extends PersistModelArgs = any
-> = ObjectWithoutNeverProperties<
+export type PersistRelationships<Args extends PersistModelArgs = any> = {
+  // We need this line here because it tells TS how to index this object. If we
+  // don't have it, TS will complain that we might be giving it properties it
+  // shouldn't have.
+  [x: string]: any;
+} & ObjectWithoutNeverProperties<
   {
     readonly [K in keyof Args["properties"]]: PersistRelationshipFilter<
       Args["properties"][K],

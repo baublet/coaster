@@ -31,7 +31,7 @@ it("validates fields", () => {
     lastName: "2"
   });
   expect(validate(user)).toEqual([
-    true,
+    false,
     {
       firstName: ["Names have more than 1 character!"],
       lastName: ["Names have more than 1 character!"]
@@ -44,7 +44,7 @@ it("validates required fields", () => {
     firstName: "1"
   } as any);
   expect(validate(user)).toEqual([
-    true,
+    false,
     { firstName: false, lastName: ["lastName is required"] }
   ]);
 });
