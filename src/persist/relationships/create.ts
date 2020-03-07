@@ -37,7 +37,10 @@ export function createFactory<
       if (!valid) throw errors;
     }
 
-    const newModel = await modelFactory.create(model);
+    // Save the new model if it's not already saved
+    const newModel = dataAsModel[localPrimaryKey]
+      ? dataAsModel
+      : await modelFactory.create(dataAsModel);
 
     await bridgeTablePersist(bridgeTableName).insert({
       [localKey]: on[localPrimaryKey],
