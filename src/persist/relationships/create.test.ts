@@ -54,6 +54,17 @@ it("creates a todo belonging to the group", async () => {
   expect(beforeCount).toBeLessThan(afterCount);
 });
 
+it("doesn't let you create an invalid todo by default", async () => {
+  const { TodoGroup, todoGroup, Todo } = await setup();
+
+  await expect(
+    TodoGroup.todos.create(todoGroup, await Todo.create({ todo: "" }))
+  ).rejects.toEqual({
+    id: false,
+    todo: ["Todos must have a length of more than 1"]
+  });
+});
+
 it("creates the entry in the bridge table", async () => {
   const {
     groupTodoBridgeTableName,

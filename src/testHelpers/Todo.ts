@@ -83,7 +83,13 @@ export async function createUsersAndTodos() {
         type: ModelArgsPropertyType.STRING
       },
       todo: {
-        type: ModelArgsPropertyType.STRING
+        type: ModelArgsPropertyType.STRING,
+        validate: [
+          (value: string) => {
+            if (value.trim().length > 0) return false;
+            return ["Todos must have a length of more than 1"];
+          }
+        ]
       }
     },
     persist: {

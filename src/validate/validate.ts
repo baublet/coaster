@@ -2,8 +2,7 @@ import {
   ModelFactory,
   Model,
   ModelArgs,
-  ModelArgsPrimitivePropertyArgs,
-  ModelArgsRelationshipPropertyArgs
+  ModelArgsPrimitivePropertyArgs
 } from "model/types";
 import {
   PersistModelArgs,
@@ -44,11 +43,7 @@ export function validateFactory<Args extends ModelArgs | PersistModelArgs>(
     for (const prop in factory.$options.properties) {
       const field = factory.$options.properties[prop];
 
-      if (
-        (field as
-          | ModelArgsPrimitivePropertyArgs
-          | ModelArgsRelationshipPropertyArgs).required
-      ) {
+      if ((field as ModelArgsPrimitivePropertyArgs).required) {
         if (!(prop in model) || model[prop] === undefined) {
           const error = `${prop} is required`;
           errors[prop] = errors[prop]

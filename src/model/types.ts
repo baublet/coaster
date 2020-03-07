@@ -21,24 +21,22 @@ export const CoasterPropertyType = {
   ...ModelArgsPropertyType
 };
 
-export interface ModelArgsDefaultPropertyArgs {
+export interface ModelArgsPrimitivePropertyArgs {
+  type:
+    | ModelArgsPropertyType.STRING
+    | ModelArgsPropertyType.NUMBER
+    | ModelArgsPropertyType.BOOLEAN;
+  /**
+   * Whether or not this field is required for the instantiation of this model.
+   */
+  required?: boolean;
   /**
    * Validation rules for this property
    */
   validate?: ModelFieldValidator[];
 }
 
-export interface ModelArgsPrimitivePropertyArgs
-  extends ModelArgsDefaultPropertyArgs {
-  type:
-    | ModelArgsPropertyType.STRING
-    | ModelArgsPropertyType.NUMBER
-    | ModelArgsPropertyType.BOOLEAN;
-  required?: boolean;
-}
-
-export interface ModelArgsRelationshipPropertyArgs
-  extends ModelArgsDefaultPropertyArgs {
+export interface ModelArgsRelationshipPropertyArgs {
   type: ModelArgsPropertyType.RELATIONSHIP;
   /**
    * The model factory to relate this prop to.
@@ -49,7 +47,10 @@ export interface ModelArgsRelationshipPropertyArgs
    * single nodes, or use a boolean value for explicit value
    */
   many?: boolean;
-  required?: boolean;
+  /**
+   * Validation rules for this property
+   */
+  validate?: ModelFieldValidator[];
 }
 
 export type ModelArgsPropertyArgs =
@@ -159,7 +160,7 @@ export type Model<Args extends ModelArgs = any> = PropertiesFromModelArgs<
   RequiredPropertiesFromModelArgs<Args> &
   ModelInternalProperties<Args>;
 
-export interface ModelFactory<Args extends ModelArgs = any> {
+export type ModelFactory<Args extends ModelArgs = any> = {
   (initialValue: ModelFactoryArgsFromModelArgs<Args>): Model<Args>;
   readonly $id: Symbol;
   /**
@@ -189,7 +190,7 @@ export interface ModelFactory<Args extends ModelArgs = any> {
    * is valid. The second value are validation errors.
    */
   readonly validate: (model: Model<Args>) => [boolean, ValidationErrors<Args>];
-}
+};
 
 export function isModel<Args extends ModelArgs = any>(
   obj: unknown

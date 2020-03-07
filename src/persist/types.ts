@@ -4,12 +4,12 @@ import {
   ModelArgs,
   ModelFactoryArgsFromModelArgs,
   ModelHooks,
-  ModelArgsRelationshipPropertyArgs,
   ModelArgsPrimitivePropertyArgs,
-  ObjectWithoutNeverProperties
+  ObjectWithoutNeverProperties,
+  ModelArgsPropertyType
 } from "model/types";
 import { GeneratedNames } from "helpers/generateNames";
-import { ValidationErrors } from "validate";
+import { ValidationErrors, ModelFieldValidator } from "validate";
 
 export type PersistConnectArguments = string | knex.Config;
 export type PersistConnection = knex;
@@ -50,8 +50,8 @@ export interface PersistModelHooks {
   afterDelete?: PersistDeleteHookFunction[];
 }
 
-export interface PersistedModelRelationshipPropertyArgs
-  extends ModelArgsRelationshipPropertyArgs {
+export interface PersistedModelRelationshipPropertyArgs {
+  type: ModelArgsPropertyType.RELATIONSHIP;
   /**
    * The model factory to relate this model to
    */
@@ -72,6 +72,10 @@ export interface PersistedModelRelationshipPropertyArgs
    * Persist connection to use for the bridge table between these two models
    */
   bridgeTablePersist?: PersistConnection;
+  /**
+   * Validation rules for this property
+   */
+  validate?: ModelFieldValidator[];
 }
 
 export type PersistedModelArgsPropertyArgs =
@@ -115,11 +119,10 @@ export interface PersistModelRelationship {
   required: boolean;
 }
 
-export interface PersistedModel<Args extends PersistModelArgs = any>
-  extends Model {
+export type PersistedModel<Args extends PersistModelArgs = any> = Model & {
   readonly $factory: PersistedModelFactory<Args>;
   readonly $relationshipsLoaded: boolean;
-}
+};
 
 export type PersistedModelFactory<
   Args extends PersistModelArgs = any
@@ -127,8 +130,6 @@ export type PersistedModelFactory<
   (initialValue: ModelFactoryArgsFromModelArgs<Args>): PersistedModel<Args>;
   readonly $factory: PersistedModelFactory<Args>;
   readonly $options: Args & PersistModelArgs;
-
-  (initialValue: ModelFactoryArgsFromModelArgs<Args>): Model<Args>;
   readonly $id: Symbol;
   /**
    * Returns the primitive data for the model
@@ -167,7 +168,7 @@ export type PersistedModelFactory<
    * is valid. The second value are validation errors.
    */
   readonly validate: (
-    model: Model<Args>
+    model: PersistedModel
   ) => [boolean, ValidationErrors<Args>];
 };
 
@@ -280,10 +281,10 @@ export type PersistModelFactoryRelationsipFindByFn<
   options?: PersistRelationshipFindByQueryOptions
 ) => Promise<ReturnType<ForeignFactory>[]>;
 
-export interface PersistRelationshipFunctions<
+export type PersistRelationshipFunctions<
   MainArgs extends PersistModelArgs,
   ForeignFactory extends PersistedModelFactory
-> {
+> = {
   /**
    * Creates a relationship using either a created model or partial data. By
    * default, we validate the model before trying to create it and the link.
@@ -317,7 +318,7 @@ export interface PersistRelationshipFunctions<
    * Resolves a number of models related to `on` matching the criteria in `by`.
    */
   findBy: PersistModelFactoryRelationsipFindByFn<MainArgs, ForeignFactory>;
-}
+};
 
 export type PersistRelationshipFilter<
   Args extends PersistedModelArgsPropertyArgs,
@@ -327,7 +328,7 @@ export type PersistRelationshipFilter<
   : never;
 
 export type PersistRelationships<
-  Args extends PersistModelArgs
+  Args extends PersistModelArgs = any
 > = ObjectWithoutNeverProperties<
   {
     readonly [K in keyof Args["properties"]]: PersistRelationshipFilter<
