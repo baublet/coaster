@@ -11,6 +11,10 @@ import { relationships } from "./relationships";
 
 import { createFactory as createRelationshipFactory } from "./relationships/create";
 import { deleteAllFactory as deleteAllRelationshipFactory } from "./relationships/deleteAll";
+import { createManyFactory } from "./relationships/createMany";
+import { deleteRelationshipFactory } from "./relationships/delete";
+import { findRelationshipFactory } from "./relationships/find";
+import { findWhereRelationshipFactory } from "./relationships/findWhere";
 
 export function attachPersistToModelFactory<T extends PersistModelArgs>(
   modelFactory: ModelFactory,
@@ -47,7 +51,11 @@ export function attachPersistToModelFactory<T extends PersistModelArgs>(
   builtRelationships.forEach(({ accessor }) => {
     persistEnabledFactory[accessor] = {
       create: createRelationshipFactory(persistEnabledFactory, accessor),
-      deleteAll: deleteAllRelationshipFactory(persistEnabledFactory, accessor)
+      createMany: createManyFactory(persistEnabledFactory, accessor),
+      delete: deleteRelationshipFactory(persistEnabledFactory, accessor),
+      deleteAll: deleteAllRelationshipFactory(persistEnabledFactory, accessor),
+      find: findRelationshipFactory(persistEnabledFactory, accessor),
+      findWhere: findWhereRelationshipFactory(persistEnabledFactory, accessor)
     };
   });
 

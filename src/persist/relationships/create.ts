@@ -1,9 +1,7 @@
 import {
   PersistedModelFactory,
   PersistModelArgs,
-  PersistModelFactoryRelationsipDeleteAllFn,
   PersistedModel,
-  PersistModelFactoryRelationsipCreateManyFn,
   PersistModelFactoryRelationsipCreateFn,
   isPersistedModel
 } from "persist/types";

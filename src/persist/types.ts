@@ -14,6 +14,7 @@ import { ValidationErrors, ModelFieldValidator } from "validate";
 export type PersistConnectArguments = string | knex.Config;
 export type PersistConnection = knex;
 export type PersistTransaction = knex.Transaction;
+export type PersistQueryBuilder = knex.QueryBuilder;
 
 export type PersistGenericHookFunction = (model: PersistedModel) => void;
 export type PersistDeleteHookFunction = (
@@ -230,7 +231,7 @@ export type PersistCountFunction = (
   persist?: PersistConnection
 ) => Promise<number>;
 
-type PersistRelationshipFindByQueryOptions = Omit<
+export type PersistRelationshipQueryOptions = Omit<
   PersistFindQueryOptions,
   "persist" | "eager"
 >;
@@ -255,10 +256,7 @@ export type PersistModelFactoryRelationsipCreateManyFn<
 
 export type PersistModelFactoryRelationsipDeleteFn<
   MainArgs extends PersistModelArgs
-> = (
-  on: PersistedModelFactory<MainArgs>,
-  id: string | string[]
-) => Promise<number>;
+> = (on: PersistedModel<MainArgs>, id: string | string[]) => Promise<number>;
 
 export type PersistModelFactoryRelationsipDeleteAllFn<
   MainArgs extends PersistModelArgs
@@ -269,16 +267,29 @@ export type PersistModelFactoryRelationsipFindFn<
   ForeignFactory extends PersistedModelFactory
 > = (
   on: PersistedModel<MainArgs>,
-  options?: PersistRelationshipFindByQueryOptions
+  options?: PersistRelationshipQueryOptions
 ) => Promise<ReturnType<ForeignFactory>[]>;
+
+export type PersistWhereFunction = (
+  where: PersistQueryBuilder
+) => PersistQueryBuilder;
 
 export type PersistModelFactoryRelationsipFindByFn<
   MainArgs extends PersistModelArgs,
   ForeignFactory extends PersistedModelFactory
 > = (
   on: PersistedModel<MainArgs>,
-  by: Partial<Parameters<ForeignFactory>>,
-  options?: PersistRelationshipFindByQueryOptions
+  by: Partial<ModelFactoryArgsFromModelArgs<MainArgs>>,
+  options?: PersistRelationshipQueryOptions
+) => Promise<ReturnType<ForeignFactory>[]>;
+
+export type PersistModelFactoryRelationsipFindWhereFn<
+  MainArgs extends PersistModelArgs,
+  ForeignFactory extends PersistedModelFactory
+> = (
+  on: PersistedModel<MainArgs>,
+  where: PersistWhereFunction,
+  options?: PersistRelationshipQueryOptions
 ) => Promise<ReturnType<ForeignFactory>[]>;
 
 export type PersistRelationshipFunctions<
@@ -315,9 +326,17 @@ export type PersistRelationshipFunctions<
    */
   find: PersistModelFactoryRelationsipFindFn<MainArgs, ForeignFactory>;
   /**
-   * Resolves a number of models related to `on` matching the criteria in `by`.
+   * Resolves a number of models related to `on` matching basic parameters
    */
   findBy: PersistModelFactoryRelationsipFindByFn<MainArgs, ForeignFactory>;
+  /**
+   * Resolves a number of models related to `on` matching the criteria via the
+   * matcher parameters assigned via `where()`
+   */
+  findWhere: PersistModelFactoryRelationsipFindWhereFn<
+    MainArgs,
+    ForeignFactory
+  >;
 };
 
 export type PersistRelationshipFilter<
