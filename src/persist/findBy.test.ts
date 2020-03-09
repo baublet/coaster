@@ -107,11 +107,3 @@ describe("query options", () => {
     expect(User.toJson(foundUser)).toEqual({ employeeId: 1 });
   });
 });
-
-it("loads eagerly if you ask for it to", async () => {
-  const eagerMock = require("./loadRelationships").loadRelationships;
-  const [User] = await setup();
-  await User.findBy({ company: 2 }, { eager: true });
-
-  expect(eagerMock).toHaveBeenCalled();
-});

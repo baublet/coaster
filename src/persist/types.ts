@@ -188,12 +188,6 @@ export type PersistDeleteFunction<T extends PersistModelArgs> = (
 
 export interface PersistFindQueryOptions {
   columns?: string[];
-  /**
-   * Eagerly load model relationships. If "true", we load all of the related
-   * objects. If "false", we eagerly load none. To load specific objects, pass
-   * in an array of relationships to load.
-   */
-  eager?: boolean | string[];
   limit?: number;
   offset?: number;
   order?: { by: string; direction?: "asc" | "desc" }[];
@@ -231,10 +225,7 @@ export type PersistCountFunction = (
   persist?: PersistConnection
 ) => Promise<number>;
 
-export type PersistRelationshipQueryOptions = Omit<
-  PersistFindQueryOptions,
-  "persist" | "eager"
->;
+export type PersistRelationshipQueryOptions = PersistFindQueryOptions;
 
 export type PersistModelFactoryRelationsipCreateFn<
   MainArgs extends PersistModelArgs,

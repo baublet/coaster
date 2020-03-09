@@ -4,7 +4,6 @@ import {
   PersistModelArgs,
   PersistedModelFactory
 } from "./types";
-import { loadRelationships } from "./loadRelationships";
 import { ModelFactoryArgsFromModelArgs } from "model/types";
 
 export function findByFactory<T extends PersistModelArgs>(
@@ -18,7 +17,6 @@ export function findByFactory<T extends PersistModelArgs>(
     by: Partial<ModelFactoryArgsFromModelArgs<T>>,
     {
       columns = ["*"],
-      eager = true,
       limit = undefined,
       offset = undefined,
       order = undefined
@@ -38,10 +36,6 @@ export function findByFactory<T extends PersistModelArgs>(
     const models = results.map(data =>
       modelFactory(data as ModelFactoryArgsFromModelArgs<T>)
     );
-
-    if (eager) {
-      await loadRelationships(models, eager);
-    }
 
     return models;
   };

@@ -6,7 +6,6 @@ import {
   PersistedModel
 } from "./types";
 import { cannotFindByBlankId } from "./error/cannotFindBlankId";
-import { loadRelationships } from "./loadRelationships";
 import { ModelFactoryArgsFromModelArgs } from "model/types";
 
 export function findFactory<T extends PersistModelArgs>(
@@ -17,11 +16,10 @@ export function findFactory<T extends PersistModelArgs>(
   const connection = persistOptions.with;
   const primaryKey = persistOptions.primaryKey;
 
-  return async function find(
+  return async function(
     id: string | string[],
-    { columns = ["*"], eager = true }: PersistFindQueryOptions = {}
+    { columns = ["*"] }: PersistFindQueryOptions = {}
   ): Promise<PersistedModel<T> | null | (PersistedModel<T> | null)[]> {
-
     if (Array.isArray(id)) {
       const query = connection<T>(tableName)
         .whereIn(primaryKey, id)
@@ -37,9 +35,6 @@ export function findFactory<T extends PersistModelArgs>(
         }
         return null;
       });
-      if (eager) {
-        await loadRelationships(resultsAsModels.filter(Boolean));
-      }
       return resultsAsModels;
     }
 
@@ -56,9 +51,6 @@ export function findFactory<T extends PersistModelArgs>(
       const model = modelFactory(
         results[0] as ModelFactoryArgsFromModelArgs<T>
       );
-      if (eager) {
-        await loadRelationships([model]);
-      }
       return model;
     }
     return null;

@@ -24,16 +24,16 @@ export function deleteAllFactory<Args extends PersistModelArgs>(
       .where(localKey, "=", on[localPrimaryKey])
       .select(foreignKey);
 
-    const modelDeletions = bridgeTableRows.map(async row => {
-      deleted++;
-      return modelFactory.delete(row[foreignKey]);
-    });
-
     await bridgeTablePersist(bridgeTableName)
       .where(localKey, "=", on[localPrimaryKey])
       .delete();
 
-    await Promise.all(modelDeletions);
+    await Promise.all(
+      bridgeTableRows.map(async row => {
+        deleted++;
+        return modelFactory.delete(row[foreignKey]);
+      })
+    );
 
     return deleted;
   };
