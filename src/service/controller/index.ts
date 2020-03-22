@@ -19,12 +19,12 @@ export interface ControllerContext extends Record<string, any> {
 }
 
 export type Controller<
-  Args extends ControllerArguments,
-  Return extends ControllerReturn
+  ControllerArgs extends ControllerArguments,
+  ControllerReturnStructure extends ControllerReturn
 > = ({
-  args: Args,
+  args: ControllerArgs,
   context: ControllerContext,
   type: ControllerResourceType,
   uri: string,
   method: ControllerMethods
-}) => Promise<Return>;
+}) => Promise<ControllerReturnStructure>;

@@ -1,48 +1,61 @@
 import { ServiceType, ServiceDefaultProperties } from "../types";
 import { Controller } from "../controller";
+import { ModelFactory } from "model";
+import { ObjectWithoutNeverProperties } from "helperTypes/ObjectWithNeverProperties";
 
-export type GraphQLReturnStructureType =
-  | GraphQLPrimitiveType
-  | GraphQLArrayOfType
-  | GraphQLModelCollectionType
-  | GraphQLObjectType;
+type GraphQLPrimitiveTypes = {
+  type: GraphQLPrimitiveType;
+  nullable?: false;
+};
 
 type GraphQLModelCollectionType = {
-  type: GraphQLComplexType.MODEL_COLLECTION;
-  modelFactory: any;
+  type: GraphQLType.MODEL_COLLECTION;
+  modelFactory: ModelFactory;
+  nullable?: false;
 };
 
 type GraphQLArrayOfType = {
-  type: GraphQLComplexType.ARRAY_OF;
-  values: typeof GraphQLType;
+  type: GraphQLType.ARRAY_OF;
+  values: GraphQLType[];
+  nullable?: false;
 };
 
 type GraphQLObjectType = {
-  type: GraphQLComplexType.OBJECT;
+  type: GraphQLType.OBJECT;
   nodes: Record<string, typeof GraphQLType>;
+  nullable?: false;
 };
 
-enum GraphQLComplexType {
+export enum GraphQLType {
+  SCALAR,
+  STRING,
+  FLOAT,
+  INT,
   MODEL_COLLECTION,
   ARRAY_OF,
   OBJECT,
   MODEL
 }
 
-enum GraphQLPrimitiveType {
-  SCALAR,
-  STRING,
-  FLOAT,
-  INT
-}
+type GraphQLPrimitiveType =
+  | GraphQLType.SCALAR
+  | GraphQLType.STRING
+  | GraphQLType.FLOAT
+  | GraphQLType.INT;
 
-type GraphQLComplexArguments = GraphQLArrayOfType | GraphQLObjectType;
+type GraphQLReturnStructureNode =
+  | GraphQLPrimitiveTypes
+  | GraphQLModelCollectionType
+  | GraphQLArrayOfType
+  | GraphQLObjectType;
 
-type GraphQLResolverArgument = GraphQLPrimitiveType | GraphQLComplexArguments;
+// We omit models here. Models can't be arguments
+type GraphQLResolverArgument =
+  | GraphQLPrimitiveType
+  | GraphQLArrayOfType
+  | GraphQLObjectType;
 
-export const GraphQLType = { ...GraphQLComplexType, ...GraphQLPrimitiveType };
-
-export type GraphQLReturnStructure = Record<string, GraphQLReturnStructureType>;
+export type GraphQLReturnStructure = Record<string, GraphQLReturnStructureNode>;
 export type GraphQLResolverArguments = Record<string, GraphQLResolverArgument>;
 
 export interface GraphQLQueryControllerConfiguration<
@@ -50,7 +63,6 @@ export interface GraphQLQueryControllerConfiguration<
   ReturnStructure extends GraphQLReturnStructure = any
 > {
   description?: string;
-  notNull?: true;
   resolver: Controller<ResolverArguments, ReturnStructure>;
   resolverArguments?: GraphQLResolverArguments;
   returnStructure: GraphQLReturnStructure;
@@ -67,25 +79,41 @@ export interface GraphQLServiceArguments extends ServiceDefaultProperties {
 
 type GraphQLPrimitiveEnumToType<
   T extends GraphQLPrimitiveType
-> = T extends GraphQLPrimitiveType.STRING
+> = T extends GraphQLType.STRING
   ? string
-  : T extends GraphQLPrimitiveType.SCALAR
+  : T extends GraphQLType.SCALAR
   ? any
-  : T extends GraphQLPrimitiveType.FLOAT
+  : T extends GraphQLType.FLOAT
   ? number
-  : T extends GraphQLPrimitiveType.INT
+  : T extends GraphQLType.INT
   ? number
   : never;
 
-type StructureNodeToType<
-  T extends GraphQLReturnStructureType
-> = T extends GraphQLPrimitiveType ? GraphQLPrimitiveEnumToType<T> : never;
+type ReturnStructureNodeToType<
+  T extends GraphQLReturnStructureNode
+> = T extends GraphQLPrimitiveTypes
+  ? GraphQLPrimitiveEnumToType<T["type"]>
+  : "tbd";
 
 export type ArgumentTypeFromStructure<T> = {};
 
-export type ReturnTypeMapFromStructure<T extends GraphQLReturnStructure> = {
-  [K in keyof T]: StructureNodeToType<T[K]>;
+type OptionalNodes<T extends GraphQLReturnStructure> = {
+  [K in keyof T]?: ReturnStructureNodeToType<T[K]>;
 };
+
+type RequiredNodes<
+  T extends GraphQLReturnStructure
+> = ObjectWithoutNeverProperties<
+  {
+    [K in keyof T]: T[K]["nullable"] extends undefined | false
+      ? ReturnStructureNodeToType<T[K]>
+      : never;
+  }
+>;
+
+export type ReturnTypeMapFromStructure<
+  T extends GraphQLReturnStructure
+> = OptionalNodes<T> & RequiredNodes<T>;
 
 export type CompiledGraphQLResolverDeclaration<
   ResolverArguments extends GraphQLResolverArguments,
@@ -106,10 +134,13 @@ export const graphqlServiceArguments: GraphQLServiceArguments = {
       test: {
         description: "description",
         returnStructure: {
-          totalCount: GraphQLType.INT,
+          totalCount: {
+            type: GraphQLType.INT,
+            nullable: false
+          },
           nodes: {
-            type: GraphQLComplexType.MODEL_COLLECTION,
-            modelFactory: 123
+            type: GraphQLType.INT,
+            nullable: false
           }
         },
         resolver: async () => {}

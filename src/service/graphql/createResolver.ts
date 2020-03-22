@@ -49,13 +49,18 @@ export const graphqlServiceArguments: GraphQLServiceArguments = {
       test: createResolver({
         description: "description",
         returnStructure: {
-          totalCount: GraphQLType.INT,
-          nodes: GraphQLType.STRING
+          counter: { type: GraphQLType.INT },
+          text: { type: GraphQLType.STRING },
+          scalar: { type: GraphQLType.SCALAR },
+          nonNullableScalar: {
+            type: GraphQLType.SCALAR,
+            nullable: false
+          }
         },
         resolver: async () => {
           return {
-            totalCount: 0,
-            nodes: ""
+            text: "",
+            nonNullableScalar: 1
           };
         }
       })
