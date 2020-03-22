@@ -2,9 +2,11 @@ import {
   PersistedModelFactory,
   PersistModelArgs,
   PersistedModel,
-  PersistModelFactoryRelationsipDeleteFn
+  PersistModelFactoryRelationsipDeleteFn,
+  PersistTransaction
 } from "persist/types";
 import { relationshipOptionsFor } from "./relationshipOptionsFor";
+import { foreignAndBridgePersists } from "./foreignAndBridgePersists";
 
 export function deleteRelationshipFactory<Args extends PersistModelArgs>(
   baseFactory: PersistedModelFactory,
@@ -20,23 +22,32 @@ export function deleteRelationshipFactory<Args extends PersistModelArgs>(
   const localPrimaryKey = baseFactory.$options.persist.primaryKey || "id";
   return async function(
     on: PersistedModel<Args>,
-    ids: string | string[]
+    ids: string | string[],
+    transaction?: PersistTransaction,
+    bridgeTableTransaction?: PersistTransaction
   ): Promise<number> {
     ids = Array.isArray(ids) ? ids : [ids];
     let deleted = 0;
     const localId = on[localPrimaryKey];
 
-    const bridgeTableRows = await bridgeTablePersist(bridgeTableName)
+    const { modelPersist, bridgePersist } = foreignAndBridgePersists({
+      transaction,
+      bridgeTableTransaction,
+      bridgeTablePersist,
+      modelFactory
+    });
+
+    const bridgeTableRows = await bridgePersist(bridgeTableName)
       .where(localKey, "=", localId)
       .whereIn(foreignKey, ids)
       .select(foreignKey);
 
     const modelDeletions = bridgeTableRows.map(async row => {
       deleted++;
-      return modelFactory.delete(row[foreignKey]);
+      return modelFactory.delete(row[foreignKey], modelPersist);
     });
 
-    await bridgeTablePersist(bridgeTableName)
+    await bridgePersist(bridgeTableName)
       .where(localKey, "=", localId)
       .whereIn(foreignKey, ids)
       .delete();

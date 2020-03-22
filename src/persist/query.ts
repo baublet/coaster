@@ -16,7 +16,7 @@ export function queryFactory<T extends PersistModelArgs>(
 
   return async function(
     q: PersistQueryFunction,
-    trx: PersistTransaction = null
+    trx?: PersistTransaction
   ): Promise<PersistedModel<T>[]> {
     const cnx = trx || connection;
     const results = await q(cnx<T>(tableName));

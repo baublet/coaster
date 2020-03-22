@@ -166,7 +166,7 @@ export type PersistedModelFactory<
 
   /**
    * Validates the model. Returns a tuple. The first value is whether the model
-   * is valid. The second value are validation errors.
+   * is valid. The second value is a list of validation errors.
    */
   readonly validate: (
     model: PersistedModel
@@ -233,7 +233,9 @@ export type PersistModelFactoryRelationsipCreateFn<
 > = (
   on: PersistedModel<MainArgs>,
   model: ReturnType<ForeignFactory> | Partial<Parameters<ForeignFactory>>,
-  validate?: boolean
+  validate?: boolean,
+  transaction?: PersistTransaction,
+  bridgeTableTransaction?: PersistTransaction
 ) => Promise<ReturnType<ForeignFactory>>;
 
 export type PersistModelFactoryRelationsipCreateManyFn<
@@ -242,16 +244,27 @@ export type PersistModelFactoryRelationsipCreateManyFn<
 > = (
   on: PersistedModel<MainArgs>,
   model: (ReturnType<ForeignFactory> | Partial<Parameters<ForeignFactory>>)[],
-  validate?: boolean
+  validate?: boolean,
+  transaction?: PersistTransaction,
+  bridgeTableTransaction?: PersistTransaction
 ) => Promise<ReturnType<ForeignFactory>[]>;
 
 export type PersistModelFactoryRelationsipDeleteFn<
   MainArgs extends PersistModelArgs
-> = (on: PersistedModel<MainArgs>, id: string | string[]) => Promise<number>;
+> = (
+  on: PersistedModel<MainArgs>,
+  id: string | string[],
+  transaction?: PersistTransaction,
+  bridgeTableTransaction?: PersistTransaction
+) => Promise<number>;
 
 export type PersistModelFactoryRelationsipDeleteAllFn<
   MainArgs extends PersistModelArgs
-> = (on: PersistedModel<MainArgs>) => Promise<number>;
+> = (
+  on: PersistedModel<MainArgs>,
+  transaction?: PersistTransaction,
+  bridgeTableTransaction?: PersistTransaction
+) => Promise<number>;
 
 export type PersistModelFactoryRelationsipFindFn<
   MainArgs extends PersistModelArgs,

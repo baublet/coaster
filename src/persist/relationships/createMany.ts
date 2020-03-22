@@ -3,7 +3,8 @@ import {
   PersistModelArgs,
   PersistedModel,
   PersistModelFactoryRelationsipCreateManyFn,
-  PersistModelFactoryRelationsipCreateFn
+  PersistModelFactoryRelationsipCreateFn,
+  PersistTransaction
 } from "persist/types";
 
 export function createManyFactory<
@@ -19,7 +20,9 @@ export function createManyFactory<
       | ReturnType<ForeignFactory>
       | Partial<Parameters<ForeignFactory>>
     )[],
-    validate: boolean = true
+    validate: boolean = true,
+    transaction?: PersistTransaction,
+    bridgeTableTransaction?: PersistTransaction
   ): Promise<ReturnType<ForeignFactory>[]> {
     // This needs to be here! The create function doesn't exist on the base
     // factory until after full instantiation
@@ -27,7 +30,9 @@ export function createManyFactory<
       .create as PersistModelFactoryRelationsipCreateFn<Args, ForeignFactory>;
 
     return Promise.all(
-      models.map(model => createFunction(on, model, validate))
+      models.map(model =>
+        createFunction(on, model, validate, transaction, bridgeTableTransaction)
+      )
     );
   };
 }

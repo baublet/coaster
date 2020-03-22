@@ -3,9 +3,11 @@ import {
   PersistModelArgs,
   PersistedModel,
   PersistModelFactoryRelationsipCreateFn,
-  isPersistedModel
+  isPersistedModel,
+  PersistTransaction
 } from "persist/types";
 import { relationshipOptionsFor } from "./relationshipOptionsFor";
+import { foreignAndBridgePersists } from "./foreignAndBridgePersists";
 
 export function createFactory<
   Args extends PersistModelArgs,
@@ -26,7 +28,9 @@ export function createFactory<
   return async function(
     on: PersistedModel<Args>,
     model: ReturnType<ForeignFactory> | Partial<Parameters<ForeignFactory>>,
-    validate: boolean = true
+    validate: boolean = true,
+    transaction?: PersistTransaction,
+    bridgeTableTransaction?: PersistTransaction
   ): Promise<ReturnType<ForeignFactory>> {
     const dataAsModel = isPersistedModel(model) ? model : modelFactory(model);
 
@@ -35,12 +39,19 @@ export function createFactory<
       if (!valid) throw errors;
     }
 
+    const { modelPersist, bridgePersist } = foreignAndBridgePersists({
+      transaction,
+      bridgeTableTransaction,
+      bridgeTablePersist,
+      modelFactory
+    });
+
     // Save the new model if it's not already saved
     const newModel = dataAsModel[localPrimaryKey]
       ? dataAsModel
-      : await modelFactory.create(dataAsModel);
+      : await modelFactory.create(dataAsModel, modelPersist);
 
-    await bridgeTablePersist(bridgeTableName).insert({
+    await bridgePersist(bridgeTableName).insert({
       [localKey]: on[localPrimaryKey],
       [foreignKey]: newModel[foreignPrimaryKey]
     });
