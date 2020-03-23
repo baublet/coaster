@@ -1,11 +1,10 @@
 import {
   GraphQLResolverArguments,
   CompiledGraphQLResolverDeclaration,
-  GraphQLReturnStructure,
-  ArgumentTypeFromStructure,
-  ReturnTypeMapFromStructure,
   GraphQLServiceArguments,
-  GraphQLType
+  GraphQLType,
+  GraphQLReturnStructureNode,
+  ReturnNodeToType
 } from "./types";
 import { Controller } from "service/controller";
 import { ServiceType } from "service/types";
@@ -15,32 +14,33 @@ import { ServiceType } from "service/types";
  */
 export function createResolver<
   ResolverArguments extends GraphQLResolverArguments,
-  ReturnStructure extends GraphQLReturnStructure
+  ReturnNode extends GraphQLReturnStructureNode
 >({
   description,
-  returnStructure,
+  resolutionType,
   resolverArguments,
   resolver
 }: {
   description?: string;
   resolverArguments?: ResolverArguments;
-  returnStructure: ReturnStructure;
+  resolutionType: ReturnNode;
   resolver: Controller<
-    ArgumentTypeFromStructure<ResolverArguments>,
-    ReturnTypeMapFromStructure<ReturnStructure>
+    any,
+    //ArgumentTypeFromStructure<ResolverArguments>,
+    ReturnNodeToType<ReturnNode>
   >;
-}): CompiledGraphQLResolverDeclaration<ResolverArguments, ReturnStructure> {
+}): CompiledGraphQLResolverDeclaration<ResolverArguments, ReturnNode> {
   return {
     description,
     resolver,
-    returnStructure,
+    resolutionType,
     resolverArguments
   };
 }
 
 // Type Tests
 
-export const graphqlServiceArguments: GraphQLServiceArguments = {
+export const _graphqlServiceArgumentsPrimitiveReturn: GraphQLServiceArguments = {
   name: "name",
   port: 82,
   type: ServiceType.GRAPHQL,
@@ -48,19 +48,44 @@ export const graphqlServiceArguments: GraphQLServiceArguments = {
     resolvers: {
       test: createResolver({
         description: "description",
-        returnStructure: {
-          counter: { type: GraphQLType.INT },
-          text: { type: GraphQLType.STRING },
-          scalar: { type: GraphQLType.SCALAR },
-          nonNullableScalar: {
-            type: GraphQLType.SCALAR,
-            nullable: false
+        resolverArguments: {},
+        resolutionType: {
+          type: GraphQLType.INT
+        },
+        resolver: async () => {
+          return 2;
+        }
+      })
+    }
+  }
+};
+
+export const _graphqlServiceArgumentsComplexReturns: GraphQLServiceArguments = {
+  name: "name",
+  port: 82,
+  type: ServiceType.GRAPHQL,
+  options: {
+    resolvers: {
+      test: createResolver({
+        description: "description",
+        resolverArguments: {},
+        resolutionType: {
+          type: GraphQLType.OBJECT,
+          nodes: {
+            counter: { type: GraphQLType.INT },
+            text: { type: GraphQLType.STRING },
+            scalar: { type: GraphQLType.SCALAR },
+            nonNullableScalar: {
+              type: GraphQLType.SCALAR,
+              nullable: false
+            }
           }
         },
         resolver: async () => {
           return {
             text: "",
-            nonNullableScalar: 1
+            nonNullableScalar: 1,
+            counter: 2
           };
         }
       })

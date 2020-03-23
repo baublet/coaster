@@ -1,20 +1,36 @@
-export type ObjectWithoutNeverProperties<
-  O extends Record<string | number | symbol, any>
-> = Pick<
-  O,
+export type ObjectWithoutNeverProperties<Obj extends object> = Pick<
   {
-    [K in keyof O]: O[K] extends never ? never : K;
-  }[keyof O]
+    [Key in keyof Obj]: Obj[Key] extends object
+      ? ObjectWithoutNeverProperties<Obj[Key]>
+      : Obj[Key];
+  },
+  {
+    [Key in keyof Obj]: Obj[Key] extends never | Pick<never, never>
+      ? never
+      : Key;
+  }[keyof Obj]
 >;
+
 // Type tests
 
-type _TestObjectWithoutNeverProperties = ObjectWithoutNeverProperties<{
+type _TestObjectWithoutNeverPropertiesRecursive = ObjectWithoutNeverProperties<{
   a: number;
   c: string;
   b: never;
+  d: {
+    a: { a: "a" };
+    b: never;
+    c: never;
+    d: number;
+  };
+  e: { a: never };
 }>;
 
-export const _testObjectWithoutNeverProperties: _TestObjectWithoutNeverProperties = {
+export const _testObjectWithoutNeverPropertiesRecursive: _TestObjectWithoutNeverPropertiesRecursive = {
   a: 1,
-  c: "a"
+  c: "c",
+  d: {
+    a: { a: "a" },
+    d: 2
+  }
 };
