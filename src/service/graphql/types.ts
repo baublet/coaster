@@ -1,5 +1,5 @@
 import { ServiceType, ServiceDefaultProperties } from "../types";
-import { Controller } from "../controller";
+import { Controller } from "../controller/types";
 import { ModelFactory } from "model";
 
 type GraphQLPrimitiveTypes = {
@@ -56,6 +56,11 @@ type GraphQLResolverArgument =
 
 export type GraphQLResolverArguments = Record<string, GraphQLResolverArgument>;
 
+export type ArgumentTypeFromArguments<
+  T extends GraphQLResolverArguments
+> = OptionalNodes<GraphQLObjectDeclarationTypes<T>, RequiredKeysInNodes<T>> &
+  RequiredNodes<GraphQLObjectDeclarationTypes<T>, RequiredKeysInNodes<T>>;
+
 export interface GraphQLQueryControllerConfiguration<
   ResolverArguments extends GraphQLResolverArguments = any,
   ReturnStructure extends GraphQLReturnStructureNode = any
@@ -104,8 +109,6 @@ type GraphQLObjectDeclarationToType<
 > = RequiredNodes<GraphQLObjectDeclarationTypes<T>, RequiredKeysInNodes<T>> &
   OptionalNodes<GraphQLObjectDeclarationTypes<T>, RequiredKeysInNodes<T>>;
 
-export type ArgumentTypeFromArguments<T> = {};
-
 type RequiredKeysInNodes<T extends GraphQLObjectDeclarationNodes> = {
   [K in keyof T]: T[K]["nullable"] extends false ? K : never;
 }[keyof T];
@@ -128,7 +131,7 @@ export type ReturnNodeToType<
   ? GraphQLObjectDeclarationToType<T["nodes"]>
   : never;
 
-export type CompiledGraphQLResolverDeclaration<
+export type GraphQLTypedResolverDeclaration<
   ResolverArguments extends GraphQLResolverArguments,
   ReturnTypeArgument extends GraphQLReturnStructureNode
 > = GraphQLQueryControllerConfiguration<
@@ -136,38 +139,37 @@ export type CompiledGraphQLResolverDeclaration<
   ReturnNodeToType<ReturnTypeArgument>
 >;
 
-// Type tests
+// ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ! Type tests
+// ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-// Object declaration to object type
+// Argument type tests
 
-export function _graphQLObjectRequiredNodes<T extends GraphQLObjectType>(
-  _declaration: T
-): GraphQLObjectDeclarationToType<T> {
-  return {} as GraphQLObjectDeclarationToType<T>;
+function _argumentTypeFromArgumentsTestFn<T extends GraphQLResolverArguments>(
+  args: T
+) {
+  return (args as any) as ArgumentTypeFromArguments<T>;
 }
 
-export const _graphQLObjectRequiredNodesOutput: {
-  requiredString: string;
-} = _graphQLObjectRequiredNodes({
-  type: GraphQLType.OBJECT,
-  nodes: {
-    requiredString: {
-      type: GraphQLType.STRING,
-      nullable: false
-    },
-    optionalNumber: {
-      type: GraphQLType.FLOAT,
-      nullable: true
-    }
+export const _argumentTypeFromArgumentsTestFnResult: {
+  id: string;
+  limit?: number;
+} = _argumentTypeFromArgumentsTestFn({
+  id: {
+    type: GraphQLType.STRING,
+    nullable: false
+  },
+  limit: {
+    type: GraphQLType.INT
   }
 });
 
 // Optional types from nodes
 
 export function _optionalNodesFn<T extends GraphQLObjectDeclarationNodes>(
-  _declaration: T
+  declaration: T
 ): OptionalNodes<GraphQLObjectDeclarationTypes<T>, RequiredKeysInNodes<T>> {
-  return {} as OptionalNodes<
+  return (declaration as any) as OptionalNodes<
     GraphQLObjectDeclarationTypes<T>,
     RequiredKeysInNodes<T>
   >;
@@ -186,14 +188,12 @@ export const _optionalNodeFnReturn: {
   }
 });
 
-const {} = _optionalNodeFnReturn;
-
 // Required types from nodes
 
 export function _requiredNodesFn<T extends GraphQLObjectDeclarationNodes>(
-  _declaration: T
+  declaration: T
 ): GraphQLObjectDeclarationTypes<T> {
-  return {} as GraphQLObjectDeclarationTypes<T>;
+  return declaration as GraphQLObjectDeclarationTypes<T>;
 }
 
 export const _requiredNodeFnReturn: {
@@ -206,33 +206,6 @@ export const _requiredNodeFnReturn: {
   },
   optionalNumber: {
     type: GraphQLType.INT
-  }
-});
-
-// Optional arguments
-
-export function _graphQLObjectOptionalNodes<T extends GraphQLObjectType>(
-  _declaration: T
-): OptionalNodes<T["nodes"]> {
-  return {} as OptionalNodes<T["nodes"]>;
-}
-
-export const _graphQLObjectOptionalNodesOutput: {
-  optionalNumber?: {
-    type: GraphQLType.FLOAT;
-    nullable: true;
-  };
-} | null = _graphQLObjectOptionalNodes({
-  type: GraphQLType.OBJECT,
-  nodes: {
-    requiredString: {
-      type: GraphQLType.STRING,
-      nullable: false
-    },
-    optionalNumber: {
-      type: GraphQLType.FLOAT,
-      nullable: true
-    }
   }
 });
 
@@ -255,9 +228,9 @@ export const _requiredKeysInNode: RequiredKeysInNodes<{
 }> = "requiredString";
 
 export function _requiredKeysInNodeFn<T extends GraphQLObjectDeclarationNodes>(
-  _: T
+  node: T
 ): RequiredKeysInNodes<T> {
-  return "" as RequiredKeysInNodes<T>;
+  return (node as any) as RequiredKeysInNodes<T>;
 }
 
 export const _requiredKeysInNodeFnReturn: "requiredString" = _requiredKeysInNodeFn(
@@ -273,6 +246,7 @@ export const _requiredKeysInNodeFnReturn: "requiredString" = _requiredKeysInNode
 );
 
 // The below should fail if uncommented
+//
 // export const _requiredKeysInNode2: RequiredKeysInNodes<{
 //   requiredString: {
 //     type: GraphQLType.STRING;
@@ -285,14 +259,14 @@ export const _requiredKeysInNodeFnReturn: "requiredString" = _requiredKeysInNode
 
 // Required node types
 export function _requiredNodeTypes<T extends GraphQLObjectDeclarationNodes>(
-  _nodes: T
+  nodes: T
 ): GraphQLNodeMapToTypeMapInclusive<T> {
-  return {} as GraphQLNodeMapToTypeMapInclusive<T>;
+  return nodes as GraphQLNodeMapToTypeMapInclusive<T>;
 }
 
 export const _requiredNodes: {
+  // requiredNumber?: string; // Fails
   requiredNumber: number;
-  optionalString?: string; // This should fail if uncommented
 } = _requiredNodeTypes({
   requiredNumber: {
     type: GraphQLType.INT,
@@ -305,9 +279,9 @@ export const _requiredNodes: {
 
 // Return node types from declarations
 export function _returnNodeToTypeFn<T extends GraphQLReturnStructureNode>(
-  _declaration: T
+  declaration: T
 ): ReturnNodeToType<T> {
-  return 1 as ReturnNodeToType<T>;
+  return declaration as ReturnNodeToType<T>;
 }
 
 export const _returnNodeToTypeInt: number = _returnNodeToTypeFn({
@@ -374,6 +348,7 @@ export const graphqlServiceArguments: GraphQLServiceArguments = {
             }
           }
         },
+        // We can't strongly type this without passing it through a function
         resolver: async () => {}
       }
     }

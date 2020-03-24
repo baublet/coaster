@@ -1,16 +1,18 @@
 import {
   GraphQLResolverArguments,
-  CompiledGraphQLResolverDeclaration,
+  GraphQLTypedResolverDeclaration,
   GraphQLServiceArguments,
   GraphQLType,
   GraphQLReturnStructureNode,
-  ReturnNodeToType
+  ReturnNodeToType,
+  ArgumentTypeFromArguments
 } from "./types";
-import { Controller } from "service/controller";
+import { Controller } from "service/controller/types";
 import { ServiceType } from "service/types";
 
 /**
- * This function exists entirely to enforce strongly-typed resolvers.
+ * Creates a GraphQL resolver from a specified resolver configuration. Enforces
+ * strongly-typed resolvers.
  */
 export function createResolver<
   ResolverArguments extends GraphQLResolverArguments,
@@ -25,11 +27,10 @@ export function createResolver<
   resolverArguments?: ResolverArguments;
   resolutionType: ReturnNode;
   resolver: Controller<
-    any,
-    //ArgumentTypeFromStructure<ResolverArguments>,
+    ArgumentTypeFromArguments<ResolverArguments>,
     ReturnNodeToType<ReturnNode>
   >;
-}): CompiledGraphQLResolverDeclaration<ResolverArguments, ReturnNode> {
+}): GraphQLTypedResolverDeclaration<ResolverArguments, ReturnNode> {
   return {
     description,
     resolver,
@@ -38,7 +39,9 @@ export function createResolver<
   };
 }
 
-// Type Tests
+// ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ! Type tests
+// ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 export const _graphqlServiceArgumentsPrimitiveReturn: GraphQLServiceArguments = {
   name: "name",
@@ -48,12 +51,20 @@ export const _graphqlServiceArgumentsPrimitiveReturn: GraphQLServiceArguments = 
     resolvers: {
       test: createResolver({
         description: "description",
-        resolverArguments: {},
+        resolverArguments: {
+          id: {
+            type: GraphQLType.STRING,
+            nullable: false
+          },
+          count: {
+            type: GraphQLType.INT
+          }
+        },
         resolutionType: {
           type: GraphQLType.INT
         },
-        resolver: async () => {
-          return 2;
+        resolver: async ({ args }) => {
+          return args.count; // ! I want this to throw an error...
         }
       })
     }
@@ -68,7 +79,12 @@ export const _graphqlServiceArgumentsComplexReturns: GraphQLServiceArguments = {
     resolvers: {
       test: createResolver({
         description: "description",
-        resolverArguments: {},
+        resolverArguments: {
+          id: {
+            type: GraphQLType.STRING,
+            nullable: false
+          }
+        },
         resolutionType: {
           type: GraphQLType.OBJECT,
           nodes: {
@@ -78,13 +94,21 @@ export const _graphqlServiceArgumentsComplexReturns: GraphQLServiceArguments = {
             nonNullableScalar: {
               type: GraphQLType.SCALAR,
               nullable: false
+            },
+            nonNullableFloat: {
+              type: GraphQLType.FLOAT,
+              nullable: false
             }
           }
         },
-        resolver: async () => {
+        resolver: async ({ args }) => {
           return {
-            text: "",
-            nonNullableScalar: 1,
+            // text: 1 // Fails
+            text: args.id,
+            nonNullableScalar: "test",
+            // nonNullableFloat: "test", // Fails
+            nonNullableFloat: 1,
+            // counter: {}, // Fails
             counter: 2
           };
         }
