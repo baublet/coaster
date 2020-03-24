@@ -64,7 +64,16 @@ export const _graphqlServiceArgumentsPrimitiveReturn: GraphQLServiceArguments = 
           type: GraphQLType.INT
         },
         resolver: async ({ args }) => {
-          return args.count; // ! I want this to throw an error...
+          /**
+           * TODO: Make `return args.count` error.
+           *
+           * This condition should raise an error since count is an
+           * optional property on arguments here...
+           *
+           * return args.count;
+           */
+          if (args.id) return 2;
+          return 1;
         }
       })
     }
