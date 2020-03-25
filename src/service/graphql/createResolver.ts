@@ -48,7 +48,7 @@ export const _graphqlServiceArgumentsPrimitiveReturn: GraphQLServiceArguments = 
   port: 82,
   type: ServiceType.GRAPHQL,
   options: {
-    resolvers: {
+    queries: {
       test: createResolver({
         description: "description",
         resolverArguments: {
@@ -85,7 +85,7 @@ export const _graphqlServiceArgumentsComplexReturns: GraphQLServiceArguments = {
   port: 82,
   type: ServiceType.GRAPHQL,
   options: {
-    resolvers: {
+    queries: {
       test: createResolver({
         description: "description",
         resolverArguments: {

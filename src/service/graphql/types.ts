@@ -13,16 +13,17 @@ type GraphQLModelCollectionType = {
   nullable?: boolean;
 };
 
-type GraphQLArrayOfType = {
+export type GraphQLArrayOfType = {
   type: GraphQLType.ARRAY_OF;
   values: GraphQLType[];
   nullable?: boolean;
 };
 
-type GraphQLObjectType = {
+export type GraphQLObjectType = {
   type: GraphQLType.OBJECT;
   nodes: Record<string, GraphQLReturnStructureNode>;
   nullable?: boolean;
+  name?: string
 };
 
 export enum GraphQLType {
@@ -61,6 +62,10 @@ export type ArgumentTypeFromArguments<
 > = OptionalNodes<GraphQLObjectDeclarationTypes<T>, RequiredKeysInNodes<T>> &
   RequiredNodes<GraphQLObjectDeclarationTypes<T>, RequiredKeysInNodes<T>>;
 
+type GraphQLReturnStructureRootNode = GraphQLReturnStructureNode & {
+  typename?: string;
+};
+
 export interface GraphQLQueryControllerConfiguration<
   ResolverArguments extends GraphQLResolverArguments = any,
   ReturnStructure extends GraphQLReturnStructureNode = any
@@ -68,11 +73,16 @@ export interface GraphQLQueryControllerConfiguration<
   description?: string;
   resolver: Controller<ResolverArguments, ReturnStructure>;
   resolverArguments?: GraphQLResolverArguments;
-  resolutionType: GraphQLReturnStructureNode;
+  resolutionType: GraphQLReturnStructureRootNode;
 }
 
+export type GraphQLQueryOrMutationNode = {
+  [key: string]: GraphQLQueryControllerConfiguration;
+};
+
 export interface GraphQLServiceOptions {
-  resolvers: { [key: string]: GraphQLQueryControllerConfiguration };
+  queries: GraphQLQueryOrMutationNode;
+  mutations?: GraphQLQueryOrMutationNode;
 }
 
 export interface GraphQLServiceArguments extends ServiceDefaultProperties {
@@ -332,7 +342,7 @@ export const graphqlServiceArguments: GraphQLServiceArguments = {
   port: 82,
   type: ServiceType.GRAPHQL,
   options: {
-    resolvers: {
+    queries: {
       test: {
         description: "description",
         resolutionType: {
