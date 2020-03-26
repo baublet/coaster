@@ -23,12 +23,14 @@ export type GraphQLObjectType = {
   type: GraphQLType.OBJECT;
   nodes: Record<string, GraphQLReturnStructureNode>;
   nullable?: boolean;
-  name?: string
+  name?: string;
+  description?: string;
 };
 
 export enum GraphQLType {
   ARRAY_OF,
   FLOAT,
+  ID,
   INT,
   MODEL_COLLECTION,
   MODEL,
@@ -41,6 +43,7 @@ type GraphQLPrimitiveType =
   | GraphQLType.SCALAR
   | GraphQLType.STRING
   | GraphQLType.FLOAT
+  | GraphQLType.ID
   | GraphQLType.INT;
 
 export type GraphQLReturnStructureNode =
@@ -100,6 +103,8 @@ type GraphQLPrimitiveEnumToType<
   ? number
   : T extends GraphQLType.INT
   ? number
+  : T extends GraphQLType.ID
+  ? string
   : never;
 
 type GraphQLObjectDeclarationNodes = Record<string, GraphQLReturnStructureNode>;

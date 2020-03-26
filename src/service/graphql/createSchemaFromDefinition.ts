@@ -8,7 +8,10 @@ import {
   GraphQLFieldConfigMap,
   GraphQLFloat,
   GraphQLNonNull,
-  GraphQLInt
+  GraphQLInt,
+  GraphQLNamedType,
+  GraphQLID,
+  GraphQLFieldConfig
 } from "graphql";
 import {
   GraphQLServiceArguments,
@@ -19,19 +22,31 @@ import {
   GraphQLObjectType as CoasterGraphQLObjectType
 } from "./types";
 
-function primitiveFieldOptions(field: GraphQLReturnStructureNode) {
+function getPrimitiveFieldOptions(field: GraphQLReturnStructureNode) {
   switch (field.type) {
     case GraphQLType.FLOAT:
       return {
-        type: field.nullable ? GraphQLFloat : new GraphQLNonNull(GraphQLFloat)
+        type:
+          field.nullable === false
+            ? new GraphQLNonNull(GraphQLFloat)
+            : GraphQLFloat
       };
     case GraphQLType.STRING:
       return {
-        type: field.nullable ? GraphQLString : new GraphQLNonNull(GraphQLString)
+        type:
+          field.nullable === false
+            ? new GraphQLNonNull(GraphQLString)
+            : GraphQLString
       };
     case GraphQLType.INT:
       return {
-        type: field.nullable ? GraphQLInt : new GraphQLNonNull(GraphQLInt)
+        type:
+          field.nullable === false ? new GraphQLNonNull(GraphQLInt) : GraphQLInt
+      };
+    case GraphQLType.ID:
+      return {
+        type:
+          field.nullable === false ? new GraphQLNonNull(GraphQLID) : GraphQLInt
       };
     default:
       throw new Error(`Unsupported GraphQL type: ${field.type}`);
@@ -41,12 +56,15 @@ function primitiveFieldOptions(field: GraphQLReturnStructureNode) {
 export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
   service: T
 ): GraphQLSchema {
-  const types = {};
+  const objectTypes: Record<string, GraphQLObjectType> = {};
   const scalars = {};
+  const enums = {};
+  const interfaces = {};
+  const lists = {};
 
   const {
-    queries: queryDefinitions,
-    mutations: mutationDefinitions
+    queries: queryDefinitions = {},
+    mutations: mutationDefinitions = {}
   } = service.options;
   const queryKeys = Object.keys(queryDefinitions);
   const mutationKeys = Object.keys(mutationDefinitions);
@@ -61,50 +79,68 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
       );
     }
 
-    const typeName = name || object.name;
-    if (types[typeName]) return types[typeName];
+    const typeName = object.name || name;
+    if (objectTypes[typeName]) return objectTypes[typeName];
 
     const fields = {};
+
     const fieldKeys = Object.keys(object.nodes);
     fieldKeys.forEach(key => {
       const field = object.nodes[key];
       switch (field.type) {
         case GraphQLType.OBJECT:
+          console.log("Object type");
           fields[key] = collateObjectTypes(field);
+          if (field.nullable) {
+            fields[key] = new GraphQLNonNull(fields[key]);
+          }
           break;
         default:
-          fields[key] = primitiveFieldOptions(field);
+          fields[key] = getPrimitiveFieldOptions(field);
       }
     });
 
-    types[typeName] = new GraphQLObjectType({
-      name: name || object.name,
-      fields
+    objectTypes[typeName] = new GraphQLObjectType({
+      name: typeName,
+      fields,
+      description: object.description
     });
 
-    return types[typeName];
+    return objectTypes[typeName];
   }
 
-  function collateType(
-    key: string,
-    { type, nullable }: GraphQLReturnStructureNode
-  ) {
-    switch (type) {
+  function collateType(key: string, node: GraphQLReturnStructureNode) {
+    switch (node.type) {
       case GraphQLType.OBJECT:
-
+        collateObjectTypes(node, key);
+        break;
       default:
         break;
     }
   }
 
-  function collateRootNode(node: GraphQLQueryControllerConfiguration) {
-    const typeKeys = Object.keys(node.resolutionType);
-    typeKeys.forEach(typeKey => {
-      collateType(typeKey, node.resolutionType[typeKey]);
-    });
-  }
+  const queryFields: Record<string, GraphQLFieldConfig<any, any>> = {};
+  queryKeys.forEach(key => {
+    const def = queryDefinitions[key];
+    collateType(undefined, def.resolutionType);
+    const resolutionType = def.resolutionType;
+    switch (resolutionType.type) {
+      case GraphQLType.OBJECT:
+        const returnTypeName = resolutionType.name;
+        queryFields[key] = {
+          type: objectTypes[returnTypeName],
+          resolve: def.resolver
+        };
+    }
+  });
 
-  queryKeys.forEach(resolver => {});
+  console.log("OBJECT TYPES: ", objectTypes);
 
-  return new GraphQLSchema({});
+  return new GraphQLSchema({
+    types: Object.values(objectTypes),
+    query: new GraphQLObjectType({
+      name: "Query",
+      fields: queryFields
+    })
+  });
 }
