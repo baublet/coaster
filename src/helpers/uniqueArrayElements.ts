@@ -2,6 +2,12 @@ export function defaultComparison(a1: any, a2: any): boolean {
   return a1 === a2;
 }
 
+/**
+ * Takes an array and an optional comparison function. Returns a new array of
+ * the unique elements on the original array.
+ * @param array
+ * @param comparison
+ */
 export default function uniqueArrayElements(
   array: any[],
   comparison: (a1: any, a2: any) => boolean = defaultComparison

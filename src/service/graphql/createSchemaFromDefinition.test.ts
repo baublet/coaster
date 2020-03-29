@@ -12,7 +12,7 @@ it("creates a schema", () => {
         type: ServiceType.GRAPHQL,
         options: {
           queries: {
-            testQuery: {
+            queryWithObjectReturn: {
               description: "description",
               resolutionType: {
                 type: GraphQLType.OBJECT,
@@ -26,6 +26,36 @@ it("creates a schema", () => {
                   },
                   nodes: {
                     type: GraphQLType.INT
+                  }
+                }
+              },
+              resolver: async () => {}
+            },
+            queryWithPrimitiveReturn: {
+              resolutionType: {
+                type: GraphQLType.BOOLEAN
+              },
+              resolver: async () => {}
+            },
+            queryWithListReturn: {
+              resolutionType: {
+                type: GraphQLType.ARRAY_OF,
+                value: {
+                  type: GraphQLType.OBJECT,
+                  name: "TestObjectWithinAList",
+                  nodes: {
+                    testListOfObjects: {
+                      type: GraphQLType.ID,
+                      nullable: false
+                    },
+                    enum: {
+                      type: GraphQLType.ENUM,
+                      name: "SomeTestEnum",
+                      values: {
+                        ENUM: "description",
+                        ANOTHER: "another description"
+                      }
+                    }
                   }
                 }
               },

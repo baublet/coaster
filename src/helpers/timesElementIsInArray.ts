@@ -8,6 +8,13 @@ function defaultComparator(element: any, array: any[]) {
   return times;
 }
 
+/**
+ * Returns the number of times `element` is in `array`. Takes an optional third
+ * argument in case you need a custom comparison function.
+ * @param element
+ * @param array
+ * @param comparator
+ */
 export default function timesElementIsInArray(
   element: any,
   array: any[],

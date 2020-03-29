@@ -3,15 +3,42 @@ import pluralize from "pluralize";
 import memoize from "lodash.memoize";
 
 export interface GeneratedNames {
+  /**
+   * The canonical name. Not safe for use in databases or in JS.
+   */
   canonical: string;
-  original: string;
-  originalPlural: string;
+  /**
+   * Plural version of canonical.
+   */
   plural: string;
-  pluralSafe: string;
+  /**
+   * Often the same as above, but in cases where canonical needs to vary from
+   * the canonical, use this.
+   */
+  original: string;
+  /**
+   * Pluralized version of original.
+   */
+  originalPlural: string;
+  /**
+   * A database- and javascript-safe version of the string. Suitable for using
+   * as database column names.
+   */
   safe: string;
+  /**
+   * The plural version of the safe name.
+   */
+  pluralSafe: string;
 }
 
-export default memoize(function generateNames(
+/**
+ * Takes a string and returns a structure of various names for use within an
+ * application. If `original` is passed in, we use that as the original value.
+ * This is useful if the name passed in is already transformed in some way.
+ * @param name
+ * @param original
+ */
+function generateNames(
   name: string,
   original: string | false = false
 ): GeneratedNames {
@@ -24,4 +51,6 @@ export default memoize(function generateNames(
     pluralSafe: pluralize(safe, 2),
     safe: safe
   };
-});
+}
+
+export default memoize<typeof generateNames>(generateNames);
