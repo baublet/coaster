@@ -3,7 +3,8 @@ import {
   GraphQLTypedResolverDeclaration,
   GraphQLReturnStructureNode,
   ReturnNodeToType,
-  ArgumentTypeFromArguments
+  ArgumentTypeFromArguments,
+  ReturnNodeToTypeOptionality
 } from "./types";
 import { Controller } from "service/controller/types";
 
@@ -25,7 +26,7 @@ export function createResolver<
   resolutionType: ReturnNode;
   resolver: Controller<
     ArgumentTypeFromArguments<ResolverArguments>,
-    ReturnNodeToType<ReturnNode>
+    ReturnNodeToTypeOptionality<ReturnNodeToType<ReturnNode>>
   >;
 }): GraphQLTypedResolverDeclaration<ResolverArguments, ReturnNode> {
   return {

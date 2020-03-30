@@ -172,10 +172,14 @@ export type ReturnNodeToType<
   ? keyof T["values"]
   : never;
 
+export type ReturnNodeToTypeOptionality<
+  T extends any
+> = T["nullable"] extends false ? undefined : T;
+
 export type GraphQLTypedResolverDeclaration<
   ResolverArguments extends GraphQLResolverArguments,
   ReturnTypeArgument extends GraphQLReturnStructureNode
 > = GraphQLQueryControllerConfiguration<
   ArgumentTypeFromArguments<ResolverArguments>,
-  ReturnNodeToType<ReturnTypeArgument>
+  ReturnNodeToTypeOptionality<ReturnNodeToType<ReturnTypeArgument>>
 >;

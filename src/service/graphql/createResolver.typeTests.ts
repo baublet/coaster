@@ -108,7 +108,7 @@ export const _graphqlServiceArgumentsComplexReturns: GraphQLServiceArguments = {
         },
         resolver: async ({ args }) => {
           return {
-            // text: 1 // Fails
+            // text: 1, // Fails
             text: args.id,
             nonNullableScalar: "test",
             // nonNullableFloat: "test", // Fails
@@ -117,6 +117,32 @@ export const _graphqlServiceArgumentsComplexReturns: GraphQLServiceArguments = {
             counter: 2,
             list: []
           };
+        }
+      })
+    }
+  }
+};
+
+export const _graphqlServiceArgumentsComplexReturns2: GraphQLServiceArguments = {
+  name: "name",
+  port: 82,
+  type: ServiceType.GRAPHQL,
+  options: {
+    queries: {
+      test: createResolver({
+        description: "description",
+        resolutionType: {
+          type: GraphQLType.INT,
+          nullable: false
+        },
+        resolverArguments: {
+          id: {
+            type: GraphQLType.STRING,
+            nullable: false
+          }
+        },
+        resolver: async () => {
+          return ;
         }
       })
     }

@@ -1,7 +1,27 @@
-import { createSchemaFromDefinition } from "./createSchemaFromDefinition";
-import { ServiceType } from "service/types";
-import { GraphQLType } from "./types";
 import { printSchema } from "graphql";
+
+import { ServiceType } from "service/types";
+import { createSchemaFromDefinition } from "./createSchemaFromDefinition";
+import { GraphQLType } from "./types";
+import { createResolver } from "./createResolver";
+import { createType } from "./createType";
+import { notNull } from "./notNull";
+
+const TestObject = createType({
+  type: GraphQLType.OBJECT,
+  name: "TestCollection",
+  nullable: false,
+  description: "This is a test description",
+  nodes: {
+    totalCount: {
+      type: GraphQLType.INT,
+      nullable: false
+    },
+    nodes: {
+      type: GraphQLType.INT
+    }
+  }
+});
 
 it("creates a schema", () => {
   expect(
@@ -12,25 +32,13 @@ it("creates a schema", () => {
         type: ServiceType.GRAPHQL,
         options: {
           queries: {
-            queryWithObjectReturn: {
+            queryWithObjectReturn: createResolver({
               description: "description",
-              resolutionType: {
-                type: GraphQLType.OBJECT,
-                nullable: false,
-                name: "TestCollection",
-                description: "This is a test description",
-                nodes: {
-                  totalCount: {
-                    type: GraphQLType.INT,
-                    nullable: false
-                  },
-                  nodes: {
-                    type: GraphQLType.INT
-                  }
-                }
-              },
-              resolver: async () => {}
-            },
+              resolutionType: notNull(TestObject),
+              resolver: async () => {
+                return null
+              }
+            }),
             queryWithPrimitiveReturn: {
               resolutionType: {
                 type: GraphQLType.BOOLEAN

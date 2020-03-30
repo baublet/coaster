@@ -6,6 +6,6 @@ import { GraphQLReturnStructureNode } from "./types";
  */
 export function notNull<T extends GraphQLReturnStructureNode>(
   node: T
-): GraphQLReturnStructureNode {
+): T {
   return Object.assign({}, node, { nullable: false });
 }
