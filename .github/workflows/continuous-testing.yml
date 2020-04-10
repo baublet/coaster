@@ -31,6 +31,4 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - run: yarn
-        if: steps.yarn-cache.outputs.cache-hit != 'true'
-
       - run: yarn test
