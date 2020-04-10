@@ -14,9 +14,10 @@ export type GraphQLModelType = {
   description?: string;
 };
 
-export type GraphQLModelCollectionType = {
-  type: GraphQLType.MODEL_COLLECTION;
-  modelFactory: ModelFactory;
+export type GraphQLCollectionType = {
+  type: GraphQLType.COLLECTION;
+  name?: string;
+  of: GraphQLReturnStructureNode;
   nullable?: boolean;
   description?: string;
 };
@@ -61,11 +62,11 @@ export type GraphQLEnumType = {
 export enum GraphQLType {
   ARRAY_OF = "ARRAY_OF",
   BOOLEAN = "BOOLEAN",
+  COLLECTION = "COLLECTION",
   ENUM = "ENUM",
   FLOAT = "FLOAT",
   ID = "ID",
   INT = "INT",
-  MODEL_COLLECTION = "MODEL_COLLECTION",
   MODEL = "MODEL",
   OBJECT = "OBJECT",
   SCALAR = "SCALAR",
@@ -84,7 +85,7 @@ export type GraphQLPrimitiveType =
 export type GraphQLReturnStructureNode =
   | GraphQLPrimitiveTypes
   | GraphQLModelType
-  | GraphQLModelCollectionType
+  | GraphQLCollectionType
   | GraphQLArrayOfType
   | GraphQLObjectType
   | GraphQLEnumType

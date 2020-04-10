@@ -17,7 +17,8 @@ import {
   GraphQLReturnStructureNode,
   GraphQLType,
   GraphQLObjectType as CoasterGraphQLObjectType,
-  GraphQLEnumType as CoasterGraphQLEnumType
+  GraphQLEnumType as CoasterGraphQLEnumType,
+  GraphQLCollectionType
 } from "./types";
 import { ModelFactory } from "model";
 import { ModelArgsPropertyType } from "model/types";
@@ -61,6 +62,42 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
   const queryKeys = Object.keys(queryDefinitions);
   // const mutationKeys = Object.keys(mutationDefinitions);
 
+  /**
+   * Turns an internal collection type into its associated type
+   */
+  function createCollectionType(
+    node: GraphQLCollectionType,
+    name?: string
+  ): GraphQLObjectType {
+    const typeName = name || node.name;
+
+    if (!typeName) {
+      throw new Error(
+        "GraphQL collection types require a name. This error usually happens when we forget to give a name to root nodes. Otherwise, we infer names based on the object key."
+      );
+    }
+
+    if (declarationMap.objectTypes[name]) {
+      return declarationMap.objectTypes[name];
+    }
+
+    return new GraphQLObjectType({
+      name: typeName,
+      description: node.description,
+      fields: {
+        totalCount: {
+          type: new GraphQLNonNull(GraphQLInt)
+        },
+        nodes: {
+          type: new GraphQLNonNull(new GraphQLList(collateType(node.of)))
+        }
+      }
+    });
+  }
+
+  /**
+   * Turns a Coaster Model into a GraphQL type
+   */
   function collateModel(
     model: ModelFactory | PersistedModelFactory,
     description?: string
@@ -208,6 +245,9 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
     switch (node.type) {
       case GraphQLType.MODEL:
         type = collateModel(node.modelFactory, node.description);
+        break;
+      case GraphQLType.COLLECTION:
+        type = createCollectionType(node, key);
         break;
       case GraphQLType.OBJECT:
         type = collateObjectTypes(node, key);

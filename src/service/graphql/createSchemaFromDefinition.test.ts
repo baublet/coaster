@@ -74,7 +74,21 @@ it("creates a schema", () => {
                 }
               },
               resolver: async () => {}
-            }
+            },
+            queryWithCollectionReturn: createResolver({
+              description: "Resolver description",
+              resolutionType: {
+                type: GraphQLType.COLLECTION,
+                description: "Collection description",
+                name: "TestingCollections",
+                of: {
+                  type: GraphQLType.STRING
+                }
+              },
+              resolver: async () => {
+                return null;
+              }
+            })
           }
         }
       })

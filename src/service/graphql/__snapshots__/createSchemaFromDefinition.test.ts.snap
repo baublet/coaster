@@ -5,6 +5,7 @@ exports[`creates a schema 1`] = `
   queryWithObjectReturn: TestCollection!
   queryWithPrimitiveReturn: Boolean
   queryWithListReturn: [TestObjectWithinAList]
+  queryWithCollectionReturn: TestingCollections
 }
 
 enum SomeTestEnum {
@@ -19,6 +20,12 @@ enum SomeTestEnum {
 type TestCollection {
   totalCount: Int!
   nodes: Int
+}
+
+\\"\\"\\"Collection description\\"\\"\\"
+type TestingCollections {
+  totalCount: Int!
+  nodes: [String]!
 }
 
 type TestObjectWithinAList {
