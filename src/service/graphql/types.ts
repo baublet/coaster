@@ -5,6 +5,7 @@ import { ModelFactory } from "model";
 export type GraphQLPrimitiveTypes = {
   type: GraphQLPrimitiveType;
   nullable?: boolean;
+  resolver?: GraphQLTypedResolverDeclaration;
 };
 
 export type GraphQLModelType = {
@@ -12,6 +13,7 @@ export type GraphQLModelType = {
   modelFactory: ModelFactory;
   nullable?: boolean;
   description?: string;
+  resolver?: GraphQLTypedResolverDeclaration;
 };
 
 export type GraphQLCollectionType = {
@@ -20,18 +22,21 @@ export type GraphQLCollectionType = {
   of: GraphQLReturnStructureNode;
   nullable?: boolean;
   description?: string;
+  resolver?: GraphQLTypedResolverDeclaration;
 };
 
 export type GraphQLArrayOfType = {
   type: GraphQLType.ARRAY_OF;
   value: GraphQLReturnStructureNode;
   nullable?: boolean;
+  resolver?: GraphQLTypedResolverDeclaration;
 };
 
 export type GraphQLUnionType = {
   type: GraphQLType.UNION;
   values: GraphQLObjectType[];
   nullable?: boolean;
+  resolver?: GraphQLTypedResolverDeclaration;
 };
 
 export type GraphQLObjectType = {
@@ -40,6 +45,7 @@ export type GraphQLObjectType = {
   nullable?: boolean;
   name?: string;
   description?: string;
+  resolver?: GraphQLTypedResolverDeclaration;
 };
 
 type GraphQLEnumFieldsMap = Record<
@@ -57,6 +63,7 @@ export type GraphQLEnumType = {
   name?: string;
   description?: string;
   values: GraphQLEnumFieldsMap;
+  resolver?: GraphQLTypedResolverDeclaration;
 };
 
 export enum GraphQLType {
@@ -195,8 +202,8 @@ export type ReturnNodeToTypeOptionality<
 > = T["nullable"] extends false ? undefined : T;
 
 export type GraphQLTypedResolverDeclaration<
-  ResolverArguments extends GraphQLResolverArguments,
-  ReturnTypeArgument extends GraphQLReturnStructureNode
+  ResolverArguments extends GraphQLResolverArguments = any,
+  ReturnTypeArgument extends GraphQLReturnStructureNode = any
 > = GraphQLQueryControllerConfiguration<
   ArgumentTypeFromArguments<ResolverArguments>,
   ReturnNodeToTypeOptionality<ReturnNodeToType<ReturnTypeArgument>>

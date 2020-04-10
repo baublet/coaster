@@ -18,11 +18,10 @@ import {
   GraphQLType,
   GraphQLObjectType as CoasterGraphQLObjectType,
   GraphQLEnumType as CoasterGraphQLEnumType,
-  GraphQLCollectionType
+  GraphQLCollectionType,
+  GraphQLModelType
 } from "./types";
-import { ModelFactory } from "model";
 import { ModelArgsPropertyType } from "model/types";
-import { PersistedModelFactory } from "persist";
 import { isPersistedModelFactory } from "persist/types";
 
 type GraphQLDeclarationMap = {
@@ -99,9 +98,10 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
    * Turns a Coaster Model into a GraphQL type
    */
   function collateModel(
-    model: ModelFactory | PersistedModelFactory,
+    node: GraphQLModelType,
     description?: string
   ): GraphQLObjectType {
+    const model = node.modelFactory;
     const typeName = model.$names.pascal;
 
     if (declarationMap[typeName]) {
@@ -136,8 +136,8 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
         type = GraphQLID;
       }
       fields[key] = {
-        type
-        // TODO: allow field-level shenanigans here that we inherit from models
+        type,
+        resolve: node.resolver?.resolver
       };
     });
 
@@ -157,22 +157,22 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
    * @param name
    */
   function collateEnum(
-    enumConfig: CoasterGraphQLEnumType,
+    node: CoasterGraphQLEnumType,
     name?: string
   ): GraphQLEnumType {
-    if (!name && !enumConfig.name) {
+    if (!name && !node.name) {
       throw new Error(
         "GraphQL enum types require a name. This error usually happens when we forget to give a name to root nodes. Otherwise, we infer names based on the object key."
       );
     }
 
-    const typeName = enumConfig.name || name;
+    const typeName = node.name || name;
     if (declarationMap.enumTypes[typeName])
       return declarationMap.enumTypes[typeName];
 
     const values: GraphQLEnumValueConfigMap = {};
 
-    for (const [key, config] of Object.entries(enumConfig.values)) {
+    for (const [key, config] of Object.entries(node.values)) {
       let description: string;
       let deprecationReason: string;
       if (typeof config === "string") {
@@ -219,8 +219,8 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
     const fieldKeys = Object.keys(object.nodes);
     fieldKeys.forEach(key => {
       const fieldConfig: GraphQLFieldConfig<any, any> = {
-        type: collateType(object.nodes[key], key)
-        // TODO: allow field-level resolvers here
+        type: collateType(object.nodes[key], key),
+        resolve: object.resolver?.resolver
       };
       fields[key] = fieldConfig;
     });
@@ -244,7 +244,7 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
     let type;
     switch (node.type) {
       case GraphQLType.MODEL:
-        type = collateModel(node.modelFactory, node.description);
+        type = collateModel(node, node.description);
         break;
       case GraphQLType.COLLECTION:
         type = createCollectionType(node, key);
