@@ -7,15 +7,29 @@ export type GraphQLPrimitiveTypes = {
   nullable?: boolean;
 };
 
+export type GraphQLModelType = {
+  type: GraphQLType.MODEL;
+  modelFactory: ModelFactory;
+  nullable?: boolean;
+  description?: string;
+};
+
 export type GraphQLModelCollectionType = {
   type: GraphQLType.MODEL_COLLECTION;
   modelFactory: ModelFactory;
   nullable?: boolean;
+  description?: string;
 };
 
 export type GraphQLArrayOfType = {
   type: GraphQLType.ARRAY_OF;
   value: GraphQLReturnStructureNode;
+  nullable?: boolean;
+};
+
+export type GraphQLUnionType = {
+  type: GraphQLType.UNION;
+  values: GraphQLObjectType[];
   nullable?: boolean;
 };
 
@@ -55,7 +69,8 @@ export enum GraphQLType {
   MODEL = "MODEL",
   OBJECT = "OBJECT",
   SCALAR = "SCALAR",
-  STRING = "STRING"
+  STRING = "STRING",
+  UNION = "UNION"
 }
 
 export type GraphQLPrimitiveType =
@@ -68,10 +83,12 @@ export type GraphQLPrimitiveType =
 
 export type GraphQLReturnStructureNode =
   | GraphQLPrimitiveTypes
+  | GraphQLModelType
   | GraphQLModelCollectionType
   | GraphQLArrayOfType
   | GraphQLObjectType
-  | GraphQLEnumType;
+  | GraphQLEnumType
+  | GraphQLUnionType;
 
 // We omit models and model collections here. They don't make sense as arguments
 export type GraphQLResolverArgument =

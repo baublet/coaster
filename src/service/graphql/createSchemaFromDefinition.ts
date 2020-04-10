@@ -19,6 +19,15 @@ import {
   GraphQLObjectType as CoasterGraphQLObjectType,
   GraphQLEnumType as CoasterGraphQLEnumType
 } from "./types";
+import { ModelFactory } from "model";
+import { ModelArgsPropertyType } from "model/types";
+import { PersistedModelFactory } from "persist";
+import { isPersistedModelFactory } from "persist/types";
+
+type GraphQLDeclarationMap = {
+  objectTypes: Record<string, GraphQLObjectType>;
+  enumTypes: Record<string, GraphQLEnumType>;
+};
 
 function getPrimitiveFieldOptions(field: GraphQLReturnStructureNode) {
   switch (field.type) {
@@ -40,10 +49,10 @@ function getPrimitiveFieldOptions(field: GraphQLReturnStructureNode) {
 export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
   service: T
 ): GraphQLSchema {
-  const objectTypes: Record<string, GraphQLObjectType> = {};
-  // const scalars = {};
-  const enumTypes = {};
-  // const interfaces = {};
+  const declarationMap: GraphQLDeclarationMap = {
+    objectTypes: {},
+    enumTypes: {}
+  };
 
   const {
     queries: queryDefinitions = {}
@@ -51,6 +60,58 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
   } = service.options;
   const queryKeys = Object.keys(queryDefinitions);
   // const mutationKeys = Object.keys(mutationDefinitions);
+
+  function collateModel(
+    model: ModelFactory | PersistedModelFactory,
+    description?: string
+  ): GraphQLObjectType {
+    const typeName = model.$names.pascal;
+
+    if (declarationMap[typeName]) {
+      return declarationMap[typeName];
+    }
+
+    const props = model.$options.properties;
+    const primaryKey = isPersistedModelFactory(model)
+      ? model.$options.persist.primaryKey
+      : undefined;
+    const fields: Record<string, GraphQLFieldConfig<any, any>> = {};
+
+    Object.keys(props).forEach(key => {
+      const propOptions = props[key];
+      let type;
+      switch (propOptions.type) {
+        case ModelArgsPropertyType.BOOLEAN:
+          type = GraphQLBoolean;
+          break;
+        case ModelArgsPropertyType.NUMBER:
+          type = GraphQLFloat;
+          break;
+        case ModelArgsPropertyType.STRING:
+          type = GraphQLString;
+          break;
+        default:
+          throw new Error(
+            `Model property type to GraphQL type conversion not supported: ${propOptions.type}`
+          );
+      }
+      if (key === primaryKey) {
+        type = GraphQLID;
+      }
+      fields[key] = {
+        type
+        // TODO: allow field-level shenanigans here that we inherit from models
+      };
+    });
+
+    declarationMap[typeName] = new GraphQLObjectType({
+      name: model.$names.pascal,
+      description,
+      fields
+    });
+
+    return declarationMap[typeName];
+  }
 
   /**
    * Takes a Coaster GraphQL enum type and converts it into a GraphQL enum
@@ -69,7 +130,8 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
     }
 
     const typeName = enumConfig.name || name;
-    if (enumTypes[typeName]) return enumTypes[typeName];
+    if (declarationMap.enumTypes[typeName])
+      return declarationMap.enumTypes[typeName];
 
     const values: GraphQLEnumValueConfigMap = {};
 
@@ -112,7 +174,8 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
     }
 
     const typeName = object.name || name;
-    if (objectTypes[typeName]) return objectTypes[typeName];
+    if (declarationMap.objectTypes[typeName])
+      return declarationMap.objectTypes[typeName];
 
     const fields = {};
 
@@ -125,13 +188,13 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
       fields[key] = fieldConfig;
     });
 
-    objectTypes[typeName] = new GraphQLObjectType({
+    declarationMap.objectTypes[typeName] = new GraphQLObjectType({
       name: typeName,
       fields,
       description: object.description
     });
 
-    return objectTypes[typeName];
+    return declarationMap.objectTypes[typeName];
   }
 
   /**
@@ -143,6 +206,9 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
   function collateType(node: GraphQLReturnStructureNode, key?: string) {
     let type;
     switch (node.type) {
+      case GraphQLType.MODEL:
+        type = collateModel(node.modelFactory, node.description);
+        break;
       case GraphQLType.OBJECT:
         type = collateObjectTypes(node, key);
         break;
@@ -170,9 +236,10 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
   });
 
   // Step 2: Build the mutation fields
+  // TODO
 
   return new GraphQLSchema({
-    types: Object.values(objectTypes),
+    types: Object.values(declarationMap.objectTypes),
     query: new GraphQLObjectType({
       name: "Query",
       fields: queryFields

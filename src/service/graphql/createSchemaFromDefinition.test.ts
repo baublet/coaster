@@ -6,6 +6,7 @@ import { GraphQLType } from "./types";
 import { createResolver } from "./createResolver";
 import { createType } from "./createType";
 import { notNull } from "./notNull";
+import { User } from "testHelpers/User";
 
 const TestObject = createType({
   type: GraphQLType.OBJECT,
@@ -36,7 +37,7 @@ it("creates a schema", () => {
               description: "description",
               resolutionType: notNull(TestObject),
               resolver: async () => {
-                return null
+                return null;
               }
             }),
             queryWithPrimitiveReturn: {
@@ -56,6 +57,11 @@ it("creates a schema", () => {
                       type: GraphQLType.ID,
                       nullable: false
                     },
+                    testModel: {
+                      type: GraphQLType.MODEL,
+                      modelFactory: User,
+                      description: "Some user here"
+                    },
                     enum: {
                       type: GraphQLType.ENUM,
                       name: "SomeTestEnum",
@@ -73,5 +79,5 @@ it("creates a schema", () => {
         }
       })
     )
-  ).toEqual(1);
+  ).toMatchSnapshot();
 });

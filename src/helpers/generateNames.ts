@@ -1,4 +1,4 @@
-import toSnakeCase from "snake-case";
+import { camelCase, pascalCase, snakeCase } from "change-case";
 import pluralize from "pluralize";
 import memoize from "lodash.memoize";
 
@@ -29,6 +29,14 @@ export interface GeneratedNames {
    * The plural version of the safe name.
    */
   pluralSafe: string;
+  /**
+   * The pascal-case name
+   */
+  pascal: string;
+  /**
+   * The camel-case name
+   */
+  camel: string;
 }
 
 /**
@@ -42,14 +50,16 @@ function generateNames(
   name: string,
   original: string | false = false
 ): GeneratedNames {
-  const safe = toSnakeCase(name);
+  const safe = snakeCase(name);
   return {
     canonical: name,
     original: original || name,
     originalPlural: pluralize(original || name, 2),
     plural: pluralize(name, 2),
     pluralSafe: pluralize(safe, 2),
-    safe: safe
+    safe: safe,
+    pascal: pascalCase(name),
+    camel: camelCase(name)
   };
 }
 

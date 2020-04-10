@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`creates a schema 1`] = `
+"type Query {
+  queryWithObjectReturn: TestCollection!
+  queryWithPrimitiveReturn: Boolean
+  queryWithListReturn: [TestObjectWithinAList]
+}
+
+enum SomeTestEnum {
+  \\"\\"\\"description\\"\\"\\"
+  ENUM
+
+  \\"\\"\\"another description\\"\\"\\"
+  ANOTHER
+}
+
+\\"\\"\\"This is a test description\\"\\"\\"
+type TestCollection {
+  totalCount: Int!
+  nodes: Int
+}
+
+type TestObjectWithinAList {
+  testListOfObjects: ID!
+  testModel: User
+  enum: SomeTestEnum
+}
+
+\\"\\"\\"Some user here\\"\\"\\"
+type User {
+  id: String
+  name: String
+}
+"
+`;

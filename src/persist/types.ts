@@ -375,3 +375,11 @@ export function isPersistedModel(model: unknown): model is PersistedModel {
   if ((model as any)?.$factory?.$options?.persist) return true;
   return false;
 }
+
+export function isPersistedModelFactory(
+  factory: unknown
+): factory is PersistedModelFactory {
+  if (typeof factory !== "object") return false;
+  if ((factory as any)?.$options?.persist) return true;
+  return false;
+}
