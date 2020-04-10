@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - uses: actions/cache@v1
-        id: yarn-cache
+        id: node_modules
         with:
           path: node_modules
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
@@ -27,6 +27,6 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - run: yarn
-        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        if: steps.node_modules.outputs.cache-hit != 'true'
 
       - run: yarn test
