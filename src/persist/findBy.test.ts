@@ -6,8 +6,6 @@ import { createFactory } from "./create";
 import { connect } from "./connect";
 import { PersistedModelFactory } from "./types";
 
-jest.mock("./loadRelationships");
-
 it("returns a function", () => {
   const factory = createFactory(User);
   expect(factory).toBeInstanceOf(Function);
