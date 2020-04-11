@@ -47,9 +47,8 @@ export function deleteFactory<T extends PersistModelArgs>(
 
     if (afterHooks) afterHooks.forEach(hook => hook(model));
 
-    if (result) {
-      return true;
-    }
+    if (result) return true;
+
     return false;
   };
 }
