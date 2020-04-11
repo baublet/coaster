@@ -43,6 +43,8 @@ export function deleteFactory<T extends PersistModelArgs>(
       .delete()
       .limit(1);
 
+    modelFactory.dataLoader.clear(id);
+
     if (afterHooks) afterHooks.forEach(hook => hook(model));
 
     if (result) {
