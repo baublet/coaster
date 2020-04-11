@@ -101,7 +101,10 @@ describe("query options", () => {
 
   it("selects only certain columns", async () => {
     const [User, users] = await setup();
-    const foundUser = await User.find(users[0].id, { columns: ["employeeId"] });
-    expect(User.toJson(foundUser)).toEqual({ employeeId: 1 });
+    const foundUser = await User.findBy(
+      { id: users[0].id },
+      { columns: ["employeeId"] }
+    );
+    expect(User.toJson(foundUser[0])).toEqual({ employeeId: 1 });
   });
 });
