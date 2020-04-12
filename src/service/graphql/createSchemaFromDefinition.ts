@@ -10,7 +10,8 @@ import {
   GraphQLList,
   GraphQLBoolean,
   GraphQLEnumType,
-  GraphQLEnumValueConfigMap
+  GraphQLEnumValueConfigMap,
+  GraphQLInputObjectType
 } from "graphql";
 import {
   GraphQLServiceArguments,
@@ -18,15 +19,22 @@ import {
   GraphQLType,
   GraphQLObjectType as CoasterGraphQLObjectType,
   GraphQLEnumType as CoasterGraphQLEnumType,
-  GraphQLCollectionType,
-  GraphQLModelType
+  GraphQLConnectionType,
+  GraphQLModelType,
+  GraphQLModelConnectionType
 } from "./types";
 import { ModelArgsPropertyType } from "model/types";
 import { isPersistedModelFactory } from "persist/types";
+import {
+  connectionInput,
+  totalCountResolver,
+  modelListResolverFactory
+} from "./modelConnectionResolvers";
 
 type GraphQLDeclarationMap = {
   objectTypes: Record<string, GraphQLObjectType>;
   enumTypes: Record<string, GraphQLEnumType>;
+  inputTypes: Record<string, GraphQLInputObjectType>;
 };
 
 function getPrimitiveFieldOptions(field: GraphQLReturnStructureNode) {
@@ -51,7 +59,8 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
 ): GraphQLSchema {
   const declarationMap: GraphQLDeclarationMap = {
     objectTypes: {},
-    enumTypes: {}
+    enumTypes: {},
+    inputTypes: {}
   };
 
   const {
@@ -62,17 +71,54 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
   // const mutationKeys = Object.keys(mutationDefinitions);
 
   /**
-   * Turns an internal collection type into its associated type
+   * Turns a model connection into a GraphQL type structure
    */
-  function createCollectionType(
-    node: GraphQLCollectionType,
+  function collateModelConnectionType(node: GraphQLModelConnectionType) {
+    const typeName = node.name || `${node.modelFactory.name}ModelConnection`;
+    const inputName = node.inputName || `${typeName}Input`;
+
+    if (declarationMap.objectTypes[typeName]) {
+      return typeName;
+    }
+
+    if (!declarationMap.inputTypes[inputName]) {
+      declarationMap.inputTypes[inputName] = connectionInput(node.modelFactory);
+    }
+
+    declarationMap.objectTypes[typeName] = new GraphQLObjectType({
+      name: typeName,
+      fields: {
+        totalCount: {
+          resolve: totalCountResolver,
+          type: new GraphQLNonNull(GraphQLInt)
+        },
+        nodes: {
+          resolve: modelListResolverFactory(node.modelFactory),
+          type: new GraphQLList(
+            new GraphQLNonNull(
+              collateModel({
+                type: GraphQLType.MODEL,
+                modelFactory: node.modelFactory
+              })
+            )
+          )
+        }
+      }
+    });
+  }
+
+  /**
+   * Turns an internal connection type into its associated type
+   */
+  function createConnectionType(
+    node: GraphQLConnectionType,
     name?: string
   ): GraphQLObjectType {
     const typeName = name || node.name;
 
     if (!typeName) {
       throw new Error(
-        "GraphQL collection types require a name. This error usually happens when we forget to give a name to root nodes. Otherwise, we infer names based on the object key."
+        "GraphQL connection types require a name. This error usually happens when we forget to give a name to root nodes. Otherwise, we infer names based on the object key."
       );
     }
 
@@ -246,8 +292,11 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
       case GraphQLType.MODEL:
         type = collateModel(node, node.description);
         break;
-      case GraphQLType.COLLECTION:
-        type = createCollectionType(node, key);
+      case GraphQLType.MODEL_CONNECTION:
+        type = collateModelConnectionType(node);
+        break;
+      case GraphQLType.CONNECTION:
+        type = createConnectionType(node, key);
         break;
       case GraphQLType.OBJECT:
         type = collateObjectTypes(node, key);

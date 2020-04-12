@@ -1,6 +1,9 @@
 import { ServiceType, ServiceDefaultProperties } from "../types";
 import { Controller } from "../controller/types";
 import { ModelFactory } from "model";
+import { PersistedModelFactory } from "persist";
+import { PersistQueryBuilder } from "persist/types";
+import { ModelConnectionInputArguments } from "./modelConnectionResolvers";
 
 export type GraphQLPrimitiveTypes = {
   type: GraphQLPrimitiveType;
@@ -16,8 +19,24 @@ export type GraphQLModelType = {
   resolver?: GraphQLTypedResolverDeclaration;
 };
 
-export type GraphQLCollectionType = {
-  type: GraphQLType.COLLECTION;
+export type GraphQLModelConnectionType = {
+  type: GraphQLType.MODEL_CONNECTION;
+  /**
+   * Pass in a name here to override the <Model>ModelConnection default name
+   */
+  name?: string;
+  /**
+   * Connections allow constraints for pagination and searching. By default, we
+   * name that input <Model>ModelConnectionInput. Override the default with this
+   */
+  inputName?: string;
+  modelFactory: PersistedModelFactory;
+  nullable?: boolean;
+  description?: string;
+};
+
+export type GraphQLConnectionType = {
+  type: GraphQLType.CONNECTION;
   name?: string;
   of: GraphQLReturnStructureNode;
   nullable?: boolean;
@@ -69,12 +88,13 @@ export type GraphQLEnumType = {
 export enum GraphQLType {
   ARRAY_OF = "ARRAY_OF",
   BOOLEAN = "BOOLEAN",
-  COLLECTION = "COLLECTION",
+  CONNECTION = "CONNECTION",
   ENUM = "ENUM",
   FLOAT = "FLOAT",
   ID = "ID",
   INT = "INT",
   MODEL = "MODEL",
+  MODEL_CONNECTION = "MODEL_CONNECTION",
   OBJECT = "OBJECT",
   SCALAR = "SCALAR",
   STRING = "STRING",
@@ -92,7 +112,8 @@ export type GraphQLPrimitiveType =
 export type GraphQLReturnStructureNode =
   | GraphQLPrimitiveTypes
   | GraphQLModelType
-  | GraphQLCollectionType
+  | GraphQLModelConnectionType
+  | GraphQLConnectionType
   | GraphQLArrayOfType
   | GraphQLObjectType
   | GraphQLEnumType
@@ -208,3 +229,13 @@ export type GraphQLTypedResolverDeclaration<
   ArgumentTypeFromArguments<ResolverArguments>,
   ReturnNodeToTypeOptionality<ReturnNodeToType<ReturnTypeArgument>>
 >;
+
+export type GraphQLModelConnectionResolver = (
+  parent: any,
+  input: ModelConnectionInputArguments,
+  context: any,
+  info: any
+) => Promise<{
+  queryWithBaseConstraints: PersistQueryBuilder;
+  input: ModelConnectionInputArguments;
+}>;

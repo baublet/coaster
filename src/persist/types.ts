@@ -227,7 +227,7 @@ export type PersistCountFunction = (
 
 export type PersistRelationshipQueryOptions = PersistFindQueryOptions;
 
-export type PersistModelFactoryRelationsipCreateFn<
+export type PersistModelFactoryRelationshipCreateFn<
   MainArgs extends PersistModelArgs,
   ForeignFactory extends PersistedModelFactory
 > = (
@@ -249,7 +249,7 @@ export type PersistModelFactoryRelationsipCreateManyFn<
   bridgeTableTransaction?: PersistTransaction
 ) => Promise<ReturnType<ForeignFactory>[]>;
 
-export type PersistModelFactoryRelationsipDeleteFn<
+export type PersistModelFactoryRelationshipDeleteFn<
   MainArgs extends PersistModelArgs
 > = (
   on: PersistedModel<MainArgs>,
@@ -266,7 +266,7 @@ export type PersistModelFactoryRelationsipDeleteAllFn<
   bridgeTableTransaction?: PersistTransaction
 ) => Promise<number>;
 
-export type PersistModelFactoryRelationsipFindFn<
+export type PersistModelFactoryRelationshipFindFn<
   MainArgs extends PersistModelArgs,
   ForeignFactory extends PersistedModelFactory
 > = (
@@ -278,7 +278,7 @@ export type PersistWhereFunction = (
   where: PersistQueryBuilder
 ) => PersistQueryBuilder;
 
-export type PersistModelFactoryRelationsipFindByFn<
+export type PersistModelFactoryRelationshipFindByFn<
   MainArgs extends PersistModelArgs,
   ForeignFactory extends PersistedModelFactory
 > = (
@@ -305,7 +305,7 @@ export type PersistRelationshipFunctions<
    * default, we validate the model before trying to create it and the link.
    * Resolves the newly-created model that's linked to `on`
    */
-  create: PersistModelFactoryRelationsipCreateFn<MainArgs, ForeignFactory>;
+  create: PersistModelFactoryRelationshipCreateFn<MainArgs, ForeignFactory>;
   /**
    * Creates a relationship using either a created model or partial data. By
    * default, we validate the model before trying to create it and the link.
@@ -319,7 +319,7 @@ export type PersistRelationshipFunctions<
    * Delete one or more relationship from a model. Resolves the number of models
    * deleted.
    */
-  delete: PersistModelFactoryRelationsipDeleteFn<MainArgs>;
+  delete: PersistModelFactoryRelationshipDeleteFn<MainArgs>;
   /**
    * Deletes all models related to `on` along this accessor. Resolves the number
    * of deleted models.
@@ -328,11 +328,11 @@ export type PersistRelationshipFunctions<
   /**
    * Resolves a number of models related to `on` along this accessor.
    */
-  find: PersistModelFactoryRelationsipFindFn<MainArgs, ForeignFactory>;
+  find: PersistModelFactoryRelationshipFindFn<MainArgs, ForeignFactory>;
   /**
    * Resolves a number of models related to `on` matching basic parameters
    */
-  findBy: PersistModelFactoryRelationsipFindByFn<MainArgs, ForeignFactory>;
+  findBy: PersistModelFactoryRelationshipFindByFn<MainArgs, ForeignFactory>;
   /**
    * Resolves a number of models related to `on` matching the criteria via the
    * matcher parameters assigned via `where()`

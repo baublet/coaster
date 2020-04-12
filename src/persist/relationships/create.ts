@@ -2,7 +2,7 @@ import {
   PersistedModelFactory,
   PersistModelArgs,
   PersistedModel,
-  PersistModelFactoryRelationsipCreateFn,
+  PersistModelFactoryRelationshipCreateFn,
   isPersistedModel,
   PersistTransaction
 } from "persist/types";
@@ -15,7 +15,7 @@ export function createFactory<
 >(
   baseFactory: PersistedModelFactory,
   relationship: string
-): PersistModelFactoryRelationsipCreateFn<Args, ForeignFactory> {
+): PersistModelFactoryRelationshipCreateFn<Args, ForeignFactory> {
   const {
     bridgeTableName,
     bridgeTablePersist,

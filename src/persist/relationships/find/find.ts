@@ -2,7 +2,7 @@ import {
   PersistedModelFactory,
   PersistModelArgs,
   PersistedModel,
-  PersistModelFactoryRelationsipFindFn,
+  PersistModelFactoryRelationshipFindFn,
   PersistRelationshipQueryOptions,
   PersistConnection
 } from "persist/types";
@@ -30,7 +30,7 @@ export function findRelationshipFactory<
 >(
   baseFactory: PersistedModelFactory,
   relationship: string
-): PersistModelFactoryRelationsipFindFn<Args, ForeignFactory> {
+): PersistModelFactoryRelationshipFindFn<Args, ForeignFactory> {
   const {
     bridgeTableName,
     bridgeTablePersist,

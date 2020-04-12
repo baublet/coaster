@@ -2,7 +2,7 @@ import {
   PersistedModelFactory,
   PersistModelArgs,
   PersistedModel,
-  PersistModelFactoryRelationsipDeleteFn,
+  PersistModelFactoryRelationshipDeleteFn,
   PersistTransaction
 } from "persist/types";
 import { relationshipOptionsFor } from "./relationshipOptionsFor";
@@ -11,7 +11,7 @@ import { foreignAndBridgePersists } from "./foreignAndBridgePersists";
 export function deleteRelationshipFactory<Args extends PersistModelArgs>(
   baseFactory: PersistedModelFactory,
   relationship: string
-): PersistModelFactoryRelationsipDeleteFn<Args> {
+): PersistModelFactoryRelationshipDeleteFn<Args> {
   const {
     bridgeTableName,
     bridgeTablePersist,
