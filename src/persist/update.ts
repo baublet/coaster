@@ -46,14 +46,10 @@ export function updateFactory<T extends PersistModelArgs>(
       return model;
     }
 
-    modelFactory.dataLoader.clear(id);
-
     const result = await cnx(tableName)
       .select("*")
       .where(primaryKey, "=", id)
       .limit(1);
-
-    modelFactory.dataLoader.prime(id, modelFactory(result[0]));
 
     return modelFactory(result[0] as ModelFactoryArgsFromModelArgs<T>);
   };

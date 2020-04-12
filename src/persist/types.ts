@@ -1,6 +1,4 @@
 import knex from "knex";
-import DataLoader from "dataloader";
-
 import {
   Model,
   ModelArgs,
@@ -165,11 +163,6 @@ export type PersistedModelFactory<
   readonly findBy: PersistFindByFunction<Args>;
   readonly query: PersistQueryFunctionOnFactory<Args>;
   readonly update: PersistSaveFunction<Args>;
-
-  /**
-   * A DataLoader for the model
-   */
-  readonly dataLoader: DataLoader<string, PersistedModel<Args>>;
 
   /**
    * Validates the model. Returns a tuple. The first value is whether the model

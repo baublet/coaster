@@ -15,7 +15,6 @@ import { createManyFactory } from "./relationships/createMany";
 import { deleteRelationshipFactory } from "./relationships/delete";
 import { findRelationshipFactory } from "./relationships/find";
 import { findWhereRelationshipFactory } from "./relationships/findWhere";
-import { dataLoaderFactory } from "./dataLoaderFactory";
 
 export function attachPersistToModelFactory<T extends PersistModelArgs>(
   modelFactory: ModelFactory,
@@ -45,11 +44,6 @@ export function attachPersistToModelFactory<T extends PersistModelArgs>(
   persistEnabledFactory.findBy = findByFactory<T>(persistEnabledFactory);
   persistEnabledFactory.query = queryFactory<T>(persistEnabledFactory);
   persistEnabledFactory.update = updateFactory<T>(persistEnabledFactory);
-
-  // Attach the DataLoader
-  persistEnabledFactory.dataLoader = dataLoaderFactory<T>(
-    persistEnabledFactory
-  );
 
   const builtRelationships = relationships(persistEnabledFactory, opts);
   persistEnabledFactory.$relationships = builtRelationships;

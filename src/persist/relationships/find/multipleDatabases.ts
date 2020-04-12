@@ -1,19 +1,5 @@
 import { FindRelationshipStrategyOptions } from "./find";
-import { PersistedModel, isPersistedModel } from "persist/types";
-
-/**
- * If all the user wants to do is load all of the relationships, we can use the
- * modelFactory's dataLoader to load the relationships, potentially saving us
- * some round trips.
- */
-function isSimpleMode(
-  options: FindRelationshipStrategyOptions["options"]
-): boolean {
-  if (options.limit) return false;
-  if (options.offset) return false;
-  if (options.order) return false;
-  return true;
-}
+import { PersistedModel } from "persist/types";
 
 export async function findRelationshipsMultipleDatabases<
   Model extends PersistedModel
@@ -38,20 +24,6 @@ export async function findRelationshipsMultipleDatabases<
     .select(foreignKey);
 
   const ids = bridgeTableRows.map(row => row[foreignKey]);
-
-  // In simple mode, the user is just requesting all of the relationships. We
-  // can therefore use the built-in dataLoader to load them to save some round-
-  // trips.
-  if (isSimpleMode(options)) {
-    const models = await modelFactory.dataLoader.loadMany(ids);
-    // If there is even a single error, we want to throw here.
-    for (const model of models) {
-      if (!isPersistedModel(model)) {
-        throw model;
-      }
-    }
-    return models as Model[];
-  }
 
   const modelData = foreignPersist(foreignTableName).whereIn(
     foreignPrimaryKey,
