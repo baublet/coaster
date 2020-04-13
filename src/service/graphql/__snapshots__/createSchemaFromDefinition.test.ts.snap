@@ -1,11 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`creates a schema 1`] = `
-"type Query {
+"type modelFactoryModelConnection {
+  totalCount: Int!
+  nodes: [Settings_0!]
+}
+
+type Query {
   queryWithObjectReturn: TestCollection!
   queryWithPrimitiveReturn: Boolean
   queryWithListReturn: [TestObjectWithinAList]
-  queryWithCollectionReturn: TestingCollections
+  queryWithCollectionReturn: TestingConnections
+}
+
+type Settings_0 {
+  id: String
+  bio: String
 }
 
 enum SomeTestEnum {
@@ -22,22 +32,25 @@ type TestCollection {
   nodes: Int
 }
 
-\\"\\"\\"Collection description\\"\\"\\"
-type TestingCollections {
+\\"\\"\\"Connection description\\"\\"\\"
+type TestingConnections {
   totalCount: Int!
   nodes: [String]!
 }
 
 type TestObjectWithinAList {
   testListOfObjects: ID!
-  testModel: User
+  testModel: UserWithTodos_0
   enum: SomeTestEnum
 }
 
 \\"\\"\\"Some user here\\"\\"\\"
-type User {
+type UserWithTodos_0 {
   id: String
   name: String
+  settings: modelFactoryModelConnection
+  todos: modelFactoryModelConnection
+  todoGroups: modelFactoryModelConnection
 }
 "
 `;

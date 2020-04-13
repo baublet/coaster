@@ -57,6 +57,25 @@ const SortOptions = new GraphQLInputObjectType({
   }
 });
 
+/**
+ * Returns a resolver for default model connections when they're associated
+ * with models they have relationships to.
+ */
+export function defaultRelationshipFactory() {
+// parentFactory: PersistedModelFactory,
+// childFactory: PersistedModelFactory
+  // const parentPrimaryKey = parentFactory.$options.primaryKey;
+  // const childPrimaryKey = childFactory.$options.primaryKey;
+
+  return (): // parent: PersistedModelFactory,
+  // input: ModelConnectionInputArguments,
+  // context: ServiceContext
+  Promise<PersistQueryBuilder> => {
+    // TODO: filter along input.filter
+    return 1 as any;
+  };
+}
+
 export function connectionInput(factory: PersistedModelFactory) {
   return new GraphQLInputObjectType({
     name: `${factory.name}ModelConnectionInput`,

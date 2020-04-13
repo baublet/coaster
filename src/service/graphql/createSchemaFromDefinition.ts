@@ -24,11 +24,12 @@ import {
   GraphQLModelConnectionType
 } from "./types";
 import { ModelArgsPropertyType } from "model/types";
-import { isPersistedModelFactory } from "persist/types";
+import { isPersistedModelFactory, PersistedModelFactory } from "persist/types";
 import {
   connectionInput,
   totalCountResolver,
-  modelListResolverFactory
+  modelListResolverFactory,
+  defaultRelationshipFactory
 } from "./modelConnectionResolvers";
 
 type GraphQLDeclarationMap = {
@@ -73,12 +74,14 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
   /**
    * Turns a model connection into a GraphQL type structure
    */
-  function collateModelConnectionType(node: GraphQLModelConnectionType) {
+  function collateModelConnection(
+    node: GraphQLModelConnectionType
+  ): GraphQLObjectType {
     const typeName = node.name || `${node.modelFactory.name}ModelConnection`;
     const inputName = node.inputName || `${typeName}Input`;
 
     if (declarationMap.objectTypes[typeName]) {
-      return typeName;
+      return declarationMap.objectTypes[typeName];
     }
 
     if (!declarationMap.inputTypes[inputName]) {
@@ -105,6 +108,8 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
         }
       }
     });
+
+    return declarationMap.objectTypes[typeName];
   }
 
   /**
@@ -147,7 +152,7 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
     node: GraphQLModelType,
     description?: string
   ): GraphQLObjectType {
-    const model = node.modelFactory;
+    const model = node.modelFactory as PersistedModelFactory;
     const typeName = model.$names.pascal;
 
     if (declarationMap[typeName]) {
@@ -160,9 +165,11 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
       : undefined;
     const fields: Record<string, GraphQLFieldConfig<any, any>> = {};
 
-    Object.keys(props).forEach(key => {
+    for (const key of Object.keys(props)) {
+      console.log("KEY: ", key);
       const propOptions = props[key];
       let type;
+      let defaultFieldResolver;
       switch (propOptions.type) {
         case ModelArgsPropertyType.BOOLEAN:
           type = GraphQLBoolean;
@@ -173,19 +180,28 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
         case ModelArgsPropertyType.STRING:
           type = GraphQLString;
           break;
-        default:
-          throw new Error(
-            `Model property type to GraphQL type conversion not supported: ${propOptions.type}`
-          );
       }
       if (key === primaryKey) {
         type = GraphQLID;
       }
       fields[key] = {
         type,
-        resolve: node.resolver?.resolver
+        resolve: node.resolver?.resolver || defaultFieldResolver
       };
-    });
+    }
+
+    // Collate the relationships
+    for (const relationship of model.$relationships) {
+      const key = relationship.accessor;
+      const type = collateModelConnection({
+        type: GraphQLType.MODEL_CONNECTION,
+        modelFactory: relationship.modelFactory
+      });
+      fields[key] = {
+        type: relationship.required ? new GraphQLNonNull(type) : type,
+        resolve: defaultRelationshipFactory(model, relationship.modelFactory)
+      };
+    }
 
     declarationMap[typeName] = new GraphQLObjectType({
       name: model.$names.pascal,
@@ -262,14 +278,13 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
 
     const fields = {};
 
-    const fieldKeys = Object.keys(object.nodes);
-    fieldKeys.forEach(key => {
+    for (const key of Object.keys(object.nodes)) {
       const fieldConfig: GraphQLFieldConfig<any, any> = {
         type: collateType(object.nodes[key], key),
         resolve: object.resolver?.resolver
       };
       fields[key] = fieldConfig;
-    });
+    }
 
     declarationMap.objectTypes[typeName] = new GraphQLObjectType({
       name: typeName,
@@ -287,13 +302,16 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
    * @param key
    */
   function collateType(node: GraphQLReturnStructureNode, key?: string) {
+    if ((node as any).localKey) {
+      console.trace("wtf -> ", (node as any).localKey);
+    }
     let type;
     switch (node.type) {
       case GraphQLType.MODEL:
         type = collateModel(node, node.description);
         break;
       case GraphQLType.MODEL_CONNECTION:
-        type = collateModelConnectionType(node);
+        type = collateModelConnection(node);
         break;
       case GraphQLType.CONNECTION:
         type = createConnectionType(node, key);
@@ -315,14 +333,14 @@ export function createSchemaFromDefinition<T extends GraphQLServiceArguments>(
 
   // Step 1: Build the query fields
   const queryFields: Record<string, GraphQLFieldConfig<any, any>> = {};
-  queryKeys.forEach(key => {
+  for (const key of queryKeys) {
     const definition = queryDefinitions[key];
     const type = collateType(definition.resolutionType);
     queryFields[key] = {
       type,
       resolve: definition.resolver
     };
-  });
+  }
 
   // Step 2: Build the mutation fields
   // TODO

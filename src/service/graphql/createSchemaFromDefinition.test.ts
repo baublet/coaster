@@ -6,7 +6,7 @@ import { GraphQLType } from "./types";
 import { createResolver } from "./createResolver";
 import { createType } from "./createType";
 import { notNull } from "./notNull";
-import { User } from "testHelpers/User";
+import { createUsersAndTodos } from "testHelpers/Todo";
 
 const TestObject = createType({
   type: GraphQLType.OBJECT,
@@ -24,7 +24,8 @@ const TestObject = createType({
   }
 });
 
-it("creates a schema", () => {
+it("creates a schema", async () => {
+  const { User } = await createUsersAndTodos();
   expect(
     printSchema(
       createSchemaFromDefinition({
@@ -78,9 +79,9 @@ it("creates a schema", () => {
             queryWithCollectionReturn: createResolver({
               description: "Resolver description",
               resolutionType: {
-                type: GraphQLType.COLLECTION,
-                description: "Collection description",
-                name: "TestingCollections",
+                type: GraphQLType.CONNECTION,
+                description: "Connection description",
+                name: "TestingConnections",
                 of: {
                   type: GraphQLType.STRING
                 }
