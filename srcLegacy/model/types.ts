@@ -104,16 +104,16 @@ export type PropertyType<Args extends ModelArgsPropertyArgs> =
     ? boolean
     : Args["type"] extends ModelArgsPropertyType.NUMBER
     ? number
-      /**
-       * Relationships. We need to extract ModelTypeFromRelationshipPropertyArgs
-       * or TypeScript yells that we're doing circular references...
-       */
-    : Args extends ModelArgsRelationshipPropertyArgs
-    ? ModelTypeFromRelationshipPropertyArgs<Args>
     : /**
+     * Relationships. We need to extract ModelTypeFromRelationshipPropertyArgs
+     * or TypeScript yells that we're doing circular references...
+     */
+    Args extends ModelArgsRelationshipPropertyArgs
+    ? ModelTypeFromRelationshipPropertyArgs<Args>
+      /**
        * Unknown!
        */
-      never;
+    : never;
 
 export type PropertiesFromModelArgs<Args extends ModelArgs> = Partial<
   {

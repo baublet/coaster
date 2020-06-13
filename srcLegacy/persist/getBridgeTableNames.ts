@@ -28,9 +28,7 @@ export function getBridgeTableNames(
   const persists = [a.$name, b.$name];
   persists.sort();
   const defaultPersist =
-    persists[0] === a.$name
-      ? a.$options.persist.with
-      : b.$options.persist.with;
+    persists[0] === a.$name ? a.$options.persist.with : b.$options.persist.with;
 
   const table: string =
     bridgeTableName || `${columns[0]}_${columns[1]}_relationships`;

@@ -62,8 +62,8 @@ const SortOptions = new GraphQLInputObjectType({
  * with models they have relationships to.
  */
 export function defaultRelationshipFactory() {
-// parentFactory: PersistedModelFactory,
-// childFactory: PersistedModelFactory
+  // parentFactory: PersistedModelFactory,
+  // childFactory: PersistedModelFactory
   // const parentPrimaryKey = parentFactory.$options.primaryKey;
   // const childPrimaryKey = childFactory.$options.primaryKey;
 

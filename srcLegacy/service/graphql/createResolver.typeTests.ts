@@ -142,7 +142,7 @@ export const _graphqlServiceArgumentsComplexReturns2: GraphQLServiceArguments = 
           }
         },
         resolver: async () => {
-          return ;
+          return;
         }
       })
     }
