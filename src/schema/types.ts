@@ -22,12 +22,14 @@ export enum SchemaNodeType {
 
 export interface PrimitiveSchemaNode {
   description?: string;
+  maybe?: true;
   type: SchemaNodeType.NUMBER | SchemaNodeType.STRING | SchemaNodeType.BOOLEAN;
 }
 
 export interface ObjectPointerObjectPropertySchemaNode {
   type: SchemaNodeType.OBJECT;
   name: string;
+  maybe?: true;
   description?: string;
 }
 
@@ -47,6 +49,7 @@ export interface ObjectPropertyArraySchemaNode {
   type: SchemaNodeType.ARRAY;
   of: ArraySchemaOfNode | ArraySchemaOfNode[];
   description?: string;
+  maybe?: true;
 }
 
 export interface ArraySchemaNode {

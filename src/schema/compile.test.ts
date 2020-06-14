@@ -51,6 +51,23 @@ describe("objects", () => {
     );
   });
 
+  it("compiles maybe object properties", () => {
+    expect(
+      compileObject({
+        name: "TestName",
+        type: SchemaNodeType.OBJECT,
+        nodes: {
+          test: {
+            type: SchemaNodeType.STRING,
+            maybe: true
+          }
+        }
+      })
+    ).toEqual(
+      `/**\n * TestName\n */\nexport interface TestName {\n  test?: string;\n};`
+    );
+  });
+
   it("compiles object pointer properties", () => {
     expect(
       compileObject({

@@ -35,21 +35,6 @@ export function compileArray(node: ArraySchemaNode): string {
   return `(${of.map(nodeToName).join(" | ")})[]`;
 }
 
-export function compileObjectProperties(node: RootObjectSchemaNode): string {
-  const indent = "  ";
-  const { nodes } = node;
-  const properties: string[] = [];
-  for (const [property, node] of Object.entries(nodes)) {
-    const declaration = nodeToName(node);
-    const doc = node.description
-      ? `\n${indent}/**\n${indent} * ${node.description}\n${indent} */\n`
-      : ``;
-    properties.push(`${doc}${indent}${property}: ${declaration};`);
-  }
-  const doc = node.description ? `/**\n * ${node.description}\n */\n` : ``;
-  return `${doc}export interface ${node.name} {\n${properties.join("\n")}\n}`;
-}
-
 export function compileObject(node: RootObjectSchemaNode): string {
   const doc = `/**\n * ${node.name}${
     node.description ? `\n * ${node.description}` : ``
@@ -63,7 +48,8 @@ export function compileObject(node: RootObjectSchemaNode): string {
     const doc = node.description
       ? `${indent}/**\n${indent} * ${node.description}\n${indent} */\n`
       : ``;
-    properties.push(`${doc}${indent}${property}: ${declaration};`);
+    const maybe = node.maybe ? "?" : "";
+    properties.push(`${doc}${indent}${property}${maybe}: ${declaration};`);
   }
 
   return `${doc}export interface ${node.name} {\n${properties.join("\n")}\n};`;
