@@ -1,6 +1,5 @@
 import { camelCase, pascalCase, snakeCase } from "change-case";
 import pluralize from "pluralize";
-import memoize from "lodash.memoize";
 
 export interface GeneratedNames {
   /**
@@ -46,7 +45,7 @@ export interface GeneratedNames {
  * @param name
  * @param original
  */
-function generateNames(
+export function generateNames(
   name: string,
   original: string | false = false
 ): GeneratedNames {
@@ -62,5 +61,3 @@ function generateNames(
     camel: camelCase(name)
   };
 }
-
-export default memoize<typeof generateNames>(generateNames);

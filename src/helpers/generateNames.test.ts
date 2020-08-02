@@ -1,4 +1,4 @@
-import generateNames from "./generateNames";
+import { generateNames } from "./generateNames";
 
 const generated = generateNames("TypesPer Second");
 
