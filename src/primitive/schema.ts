@@ -3,35 +3,45 @@ import { GeneratedNames } from "helpers/generateNames";
 export type Schema = {
   name?: string;
   description?: string;
-  nodes: SchemaEntity[];
+  entities: SchemaEntity[];
 };
 
 export enum SchemaNodeType {
-  STRING,
-  NUMBER,
-  BOOLEAN
+  ARRAY = "array",
+  BOOLEAN = "boolean",
+  NUMBER = "number",
+  RAW = "raw",
+  STRING = "string"
 }
+
+export type SchemaNodePrimitive =
+  | SchemaNodeType.BOOLEAN
+  | SchemaNodeType.NUMBER
+  | SchemaNodeType.STRING;
 
 export interface SchemaEntity {
   names: GeneratedNames;
-  description?: string;
   nodes: Record<string, SchemaEntityPropertyType>;
+  description?: string;
 }
 
 export type SchemaEntityPropertyType =
-  | SchemaNodeType
+  | SchemaNodePrimitive
   | SchemaEntityConfiguration;
 
+// Entity types that require configuration
 export type SchemaEntityConfiguration =
   | SchemaNodeString
   | SchemaNodeNumber
-  | SchemaNodeBoolean;
+  | SchemaNodeBoolean
+  | SchemaNodeArray
+  | SchemaNodeRaw;
 
 export function isSchemaEntityConfiguration(
   v: any
 ): v is SchemaEntityConfiguration {
   if (typeof v === "object") {
-    if (typeof v.type === "number") {
+    if (typeof v.type === "string") {
       return true;
     }
   }
@@ -41,6 +51,16 @@ export function isSchemaEntityConfiguration(
 export interface SchemaNodeBase {
   type: SchemaNodeType;
   nullable?: boolean;
+}
+
+export interface SchemaNodeBaseWithInternalTypes {
+  type: SchemaNodeType;
+  nullable?: boolean;
+}
+
+export interface SchemaNodeRaw extends SchemaNodeBaseWithInternalTypes {
+  type: SchemaNodeType.RAW;
+  definition: string;
 }
 
 export interface SchemaNodeString extends SchemaNodeBase {
@@ -53,4 +73,9 @@ export interface SchemaNodeNumber extends SchemaNodeBase {
 
 export interface SchemaNodeBoolean extends SchemaNodeBase {
   type: SchemaNodeType.BOOLEAN;
+}
+
+export interface SchemaNodeArray extends SchemaNodeBase {
+  type: SchemaNodeType.ARRAY;
+  of: SchemaNodeType.STRING | SchemaNodeType.NUMBER | SchemaNodeType.BOOLEAN;
 }
