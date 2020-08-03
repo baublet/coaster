@@ -48,8 +48,7 @@ it("generates types from a schema", () => {
       }
     })
   ).toMatchInlineSnapshot(`
-    Object {
-      "compiledTypes": "interface User {
+    "interface User {
       id: number;
       name: string;
       active: boolean;
@@ -65,66 +64,6 @@ it("generates types from a schema", () => {
       content: string;
       authors: number[];
       modifications?: number[];
-    }",
-      "schema": Object {
-        "description": "A schema for an application",
-        "entities": Array [
-          Object {
-            "names": Object {
-              "camel": "user",
-              "canonical": "user",
-              "original": "user",
-              "originalPlural": "users",
-              "pascal": "User",
-              "plural": "users",
-              "pluralSafe": "users",
-              "safe": "user",
-            },
-            "nodes": Object {
-              "active": "boolean",
-              "id": "number",
-              "jobTitle": Object {
-                "nullable": true,
-                "type": "string",
-              },
-              "name": "string",
-              "rawTest": Object {
-                "definition": "Partial<{}>",
-                "type": "raw",
-              },
-            },
-          },
-          Object {
-            "names": Object {
-              "camel": "post",
-              "canonical": "post",
-              "original": "post",
-              "originalPlural": "posts",
-              "pascal": "Post",
-              "plural": "posts",
-              "pluralSafe": "posts",
-              "safe": "post",
-            },
-            "nodes": Object {
-              "authors": Object {
-                "of": "number",
-                "type": "array",
-              },
-              "content": "string",
-              "createdDate": "number",
-              "id": "number",
-              "modifications": Object {
-                "nullable": true,
-                "of": "number",
-                "type": "array",
-              },
-              "modifiedDate": "number",
-              "title": "string",
-            },
-          },
-        ],
-        "name": "Test schema",
-      },
-    }
+    }"
   `);
 });
