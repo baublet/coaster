@@ -1,9 +1,10 @@
 import clone from "lodash.clonedeep";
 import didYouMean from "didyoumean";
 
-import { GenerateTypesBaseArguments } from "primitive/generatePrimitiveTypes";
-import { Schema, SchemaEntity, SchemaNodeType } from "primitive/schema";
 import { GeneratedNames, generateNames } from "helpers/generateNames";
+
+import { GenerateTypesBaseArguments } from "schema/primitive/generatePrimitiveTypes";
+import { Schema, SchemaEntity, SchemaNodeType } from "schema/primitive/schema";
 
 import {
   SchemaWithRelationships,

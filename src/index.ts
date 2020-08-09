@@ -1,1 +1,1 @@
-export { SchemaNodeType, createSchema } from "./schema";
+export { SchemaNodeType, createTypes } from "./schema";

@@ -1,9 +1,9 @@
-import { createSchema, SchemaNodeType } from "./createSchema";
+import { createTypes, SchemaNodeType } from "./createTypes";
 import { generateNames } from "helpers/generateNames";
 
 it("generates a full schema", () => {
   expect(
-    createSchema({
+    createTypes({
       schema: {
         name: "Test Schema!",
         description: "Description of the schema",

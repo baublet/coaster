@@ -1,7 +1,7 @@
 import { generateRelationalTypes } from "./generateRelationalTypes";
 import { generateNames } from "helpers/generateNames";
 import { SchemaWithRelationshipNodeType } from "./schema";
-import { SchemaNodeType } from "primitive/schema";
+import { SchemaNodeType } from "schema/primitive/schema";
 
 it("throws if we can't find the relationship: no inference", () => {
   expect(() =>
