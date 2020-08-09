@@ -1,14 +1,17 @@
 import clone from "lodash.clonedeep";
 
-import { Schema as BaseSchema } from "./primitive/schema";
 import { generatePrimitiveTypes } from "./primitive/generatePrimitiveTypes";
-
-import { SchemaWithRelationships } from "./relationship/schema";
 import { generateRelationalTypes } from "./relationship/generateRelationalTypes";
 
 import { GenerateRelationalTypesArguments } from "./relationship/generateRelationalTypes";
 
-export type Schema = BaseSchema | SchemaWithRelationships;
+import { SchemaNodeType as PrimitiveSchemaNodeType } from "./primitive/schema";
+import { SchemaWithRelationshipNodeType } from "./relationship/schema";
+
+export const SchemaNodeType = {
+  ...PrimitiveSchemaNodeType,
+  ...SchemaWithRelationshipNodeType
+};
 
 export function createSchema(
   options: GenerateRelationalTypesArguments
