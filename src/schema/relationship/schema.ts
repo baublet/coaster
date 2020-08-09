@@ -3,7 +3,7 @@ import {
   SchemaNodeType,
   SchemaEntityConfiguration,
   SchemaNodePrimitive
-} from "primitive/schema";
+} from "schema/primitive/schema";
 
 export enum SchemaWithRelationshipNodeType {
   ONE_TO_ONE = "one_to_one",

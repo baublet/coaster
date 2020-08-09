@@ -3,6 +3,72 @@ import { generateNames } from "helpers/generateNames";
 import { SchemaWithRelationshipNodeType } from "./schema";
 import { SchemaNodeType } from "primitive/schema";
 
+it("throws if we can't find the relationship: no inference", () => {
+  expect(() =>
+    generateRelationalTypes({
+      schema: {
+        name: "Name",
+        description: "Description",
+        entities: [
+          {
+            names: generateNames("user"),
+            description: "The user record",
+            nodes: {
+              id: SchemaNodeType.NUMBER,
+              username: SchemaNodeType.STRING,
+              profile: {
+                type: SchemaWithRelationshipNodeType.ONE_TO_ONE,
+                of: "UserProfile"
+              }
+            }
+          }
+        ]
+      }
+    })
+  ).toThrow(
+    "Entity User references an unknown entity: UserProfile. Known entities: User"
+  );
+});
+
+it("throws if we can't find the relationship: did you mean", () => {
+  expect(() =>
+    generateRelationalTypes({
+      schema: {
+        name: "Name",
+        description: "Description",
+        entities: [
+          {
+            names: generateNames("user"),
+            description: "The user record",
+            nodes: {
+              id: SchemaNodeType.NUMBER,
+              username: SchemaNodeType.STRING,
+              profile: {
+                type: SchemaWithRelationshipNodeType.ONE_TO_ONE,
+                of: "User profile"
+              }
+            }
+          },
+          {
+            names: generateNames("userProfile"),
+            description:
+              "Information the user wants to display on their profile",
+            nodes: {
+              user: {
+                type: SchemaWithRelationshipNodeType.ONE_TO_ONE,
+                of: "User"
+              },
+              name: SchemaNodeType.STRING
+            }
+          }
+        ]
+      }
+    })
+  ).toThrow(
+    "Entity User references an unknown entity: User profile. Did you mean UserProfile?"
+  );
+});
+
 it("transforms relationships to multiple objects: one to one", () => {
   expect(
     generateRelationalTypes({

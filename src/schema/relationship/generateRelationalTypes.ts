@@ -1,4 +1,5 @@
 import clone from "lodash.clonedeep";
+import didYouMean from "didyoumean";
 
 import { GenerateTypesBaseArguments } from "primitive/generatePrimitiveTypes";
 import { Schema, SchemaEntity, SchemaNodeType } from "primitive/schema";
@@ -103,10 +104,18 @@ export function generateRelationalTypes({
 
       const referencedNode = entityReferences[node.of];
       if (!referencedNode) {
+        const referenceNodes = Object.keys(entityReferences).map(id => ({
+          id
+        }));
+        const similar = didYouMean(node.of, referenceNodes, "id");
         throw new Error(
           `Entity ${entity.names.pascal} references an unknown entity: ${
             node.of
-          }. Known entities: ${Object.keys(entityReferences)}`
+          }. ${
+            similar
+              ? `Did you mean ${similar}?`
+              : `Known entities: ${Object.keys(entityReferences)}`
+          }`
         );
       }
 

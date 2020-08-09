@@ -1,6 +1,6 @@
 import { generatePrimitiveTypes } from "./generatePrimitiveTypes";
 import { generateNames } from "helpers/generateNames";
-import { SchemaNodeType } from "primitive/schema";
+import { SchemaNodeType } from "schema/primitive/schema";
 
 it("generates types from a schema", () => {
   expect(

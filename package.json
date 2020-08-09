@@ -10,6 +10,7 @@
     "better-sqlite3": "^5.4.3",
     "change-case": "^4.1.1",
     "dataloader": "^2.0.0",
+    "didyoumean": "^1.2.1",
     "graphql": "^14.6.0",
     "knex": "^0.20.8",
     "lodash.clonedeep": "^4.5.0",
