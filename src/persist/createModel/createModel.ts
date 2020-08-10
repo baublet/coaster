@@ -1,5 +1,19 @@
 import { Schema } from "schema";
-import { QueryBuilder } from "persist/connection";
+import { QueryBuilder, Connection } from "persist/connection";
+
+export interface CreateModelFactoryArguments {
+  schema: Schema;
+  entity: string;
+  connection: Connection;
+  tableName?: string;
+}
+
+export interface CreateModelFactoryFullArguments {
+  schema: Schema;
+  entity: string;
+  connection: Connection;
+  tableName: string;
+}
 
 export type Model = Record<
   string,
@@ -10,19 +24,15 @@ export type NormalizedModel = Record<
   string | number | boolean | null | undefined
 >;
 
-export interface CreateModelFactoryArguments {
-  schema: Schema;
-}
-
 export type ConstrainerFunction = (qb: QueryBuilder) => Promise<QueryBuilder>;
 
 export interface NormalizedModelFactory<
   M extends Model,
   NM extends NormalizedModel
 > {
-  (): (input: Partial<NM | M>) => NM;
-  create(model: Partial<NM | M>): Promise<NM>;
-  create(models: Partial<NM | M>[]): Promise<NM>;
+  (): (input: Partial<M | NM>) => NM;
+  create(model: Partial<M | NM>): Promise<NM>;
+  create(models: Partial<M | NM>[]): Promise<NM>;
   delete(id: string | number): Promise<boolean>;
   delete(ids: string[] | number[]): Promise<boolean>;
   deleteWhere(constrainer: ConstrainerFunction): Promise<number>;
@@ -30,8 +40,8 @@ export interface NormalizedModelFactory<
   find(ids: string[] | number[]): Promise<NM[]>;
   findWhere(constraints: Partial<NM | NM>): Promise<NM[]>;
   findWhere(constrainer: ConstrainerFunction): Promise<NM[]>;
-  update(model: Partial<NM | M>): Promise<NM>;
-  update(id: string | number, data: Partial<NM | M>): Promise<NM>;
+  update(model: Partial<M | NM>): Promise<NM>;
+  update(id: string | number, data: Partial<M | NM>): Promise<NM>;
   updateWhere(constrainer: ConstrainerFunction): Promise<NM[]>;
 
   // Denormalized chain
@@ -39,18 +49,18 @@ export interface NormalizedModelFactory<
 }
 
 export interface ModelFactory<M extends Model, NM extends NormalizedModel> {
-  (): (input: Partial<NM | M>) => NM;
-  create(model: Partial<NM | M>): Promise<M>;
-  create(models: Partial<NM | M>[]): Promise<M>;
+  (): (input: Partial<M | NM>) => NM;
+  create(model: Partial<M | NM>): Promise<M>;
+  create(models: Partial<M | NM>[]): Promise<M>;
   delete(id: string | number): Promise<boolean>;
   delete(ids: string[] | number[]): Promise<boolean>;
   deleteWhere(constrainer: ConstrainerFunction): Promise<number>;
   find(id: string | number): Promise<M | undefined>;
   find(ids: string[] | number[]): Promise<M[]>;
-  findWhere(constraints: Partial<NM | M>): Promise<M[]>;
+  findWhere(constraints: Partial<M | NM>): Promise<M[]>;
   findWhere(constrainer: ConstrainerFunction): Promise<M[]>;
-  update(model: Partial<NM | M>): Promise<M>;
-  update(id: string | number, data: Partial<NM | M>): Promise<M>;
+  update(model: Partial<M | NM>): Promise<M>;
+  update(id: string | number, data: Partial<M | NM>): Promise<M>;
   updateWhere(constrainer: ConstrainerFunction): Promise<M[]>;
 
   // Normalized chain
@@ -58,5 +68,5 @@ export interface ModelFactory<M extends Model, NM extends NormalizedModel> {
 }
 
 export function createModel<M extends Model, NM extends NormalizedModel>(
-  schema: Schema
+  args: CreateModelFactoryArguments
 ) {}

@@ -1,5 +1,4 @@
 import clone from "lodash.clonedeep";
-import didYouMean from "didyoumean";
 
 import { GeneratedNames, generateNames } from "helpers/generateNames";
 
@@ -10,8 +9,9 @@ import {
   SchemaWithRelationships,
   isRelationalNode,
   SchemaWithRelationshipNodeType,
-  SchemaWithRelationshipsEntity
+  SchemaWithRelationshipsEntity,
 } from "./schema";
+import { entityNotFoundError } from "helpers/entityNotFoundError";
 
 export type GenerateRelationalTypesArguments = GenerateTypesBaseArguments & {
   schema: SchemaWithRelationships;
@@ -31,17 +31,17 @@ function getEntityIdFieldAndType(
 
   return {
     uniqueIdField,
-    uniqueIdType: uniqueIdType as SchemaNodeType.STRING | SchemaNodeType.NUMBER
+    uniqueIdType: uniqueIdType as SchemaNodeType.STRING | SchemaNodeType.NUMBER,
   };
 }
 
 export function generateRelationalTypes({
-  schema
+  schema,
 }: GenerateRelationalTypesArguments) {
   const newSchema: Schema = {
     name: schema.name,
     description: schema.description,
-    entities: []
+    entities: [],
   };
 
   const allTransformedEntities: SchemaWithRelationshipsEntity[] =
@@ -65,7 +65,7 @@ export function generateRelationalTypes({
     entityReferences[entity.names.pascal] = {
       names: entity.names,
       uniqueIdField,
-      uniqueIdType
+      uniqueIdType,
     };
 
     // Separate our primitive entities from our relational entities
@@ -91,7 +91,7 @@ export function generateRelationalTypes({
     const normalizedEntity: SchemaEntity = {
       names: generateNames(`normalized${entity.names.pascal}`),
       description: entity.description,
-      nodes: {}
+      nodes: {},
     };
     const denormalizedEntity: SchemaEntity = clone(normalizedEntity);
     denormalizedEntity.names = entity.names;
@@ -105,18 +105,12 @@ export function generateRelationalTypes({
 
       const referencedNode = entityReferences[node.of];
       if (!referencedNode) {
-        const referenceNodes = Object.keys(entityReferences).map(id => ({
-          id
-        }));
-        const similar = didYouMean(node.of, referenceNodes, "id");
         throw new Error(
-          `Entity ${entity.names.pascal} references an unknown entity: ${
-            node.of
-          }. ${
-            similar
-              ? `Did you mean ${similar}?`
-              : `Known entities: ${Object.keys(entityReferences)}`
-          }`
+          entityNotFoundError(
+            node.of,
+            schema.entities,
+            `Entity ${entity.names.pascal} references an unknown entity.`
+          )
         );
       }
 
@@ -128,12 +122,12 @@ export function generateRelationalTypes({
       ) {
         normalizedEntity.nodes[newKey] = {
           type: referencedNode.uniqueIdType,
-          nullable: Boolean(node.nullable)
+          nullable: Boolean(node.nullable),
         };
         denormalizedEntity.nodes[property] = {
           type: SchemaNodeType.RAW,
           nullable: Boolean(node.nullable),
-          definition: referencedNode.names.pascal
+          definition: referencedNode.names.pascal,
         };
         continue;
       }
@@ -144,12 +138,12 @@ export function generateRelationalTypes({
       ) {
         normalizedEntity.nodes[newKey] = {
           type: referencedNode.uniqueIdType,
-          nullable: Boolean(node.nullable)
+          nullable: Boolean(node.nullable),
         };
         denormalizedEntity.nodes[property] = {
           type: SchemaNodeType.RAW,
           nullable: Boolean(node.nullable),
-          definition: `${referencedNode.names.pascal}[]`
+          definition: `${referencedNode.names.pascal}[]`,
         };
         continue;
       }
