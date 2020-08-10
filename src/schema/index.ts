@@ -1,2 +1,2 @@
 export { createTypes } from "./createTypes";
-export { SchemaNodeType, createSchema } from "./createSchema";
+export { SchemaNodeType, createSchema, Schema } from "./createSchema";

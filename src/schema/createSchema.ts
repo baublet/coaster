@@ -5,14 +5,16 @@ import { GeneratedNames, generateNames } from "helpers/generateNames";
 import {
   SchemaWithRelationships,
   SchemaWithRelationshipNodeType,
-  SchemaWithRelationshipEntityPropertyType
+  SchemaWithRelationshipEntityPropertyType,
 } from "./relationship/schema";
 import { SchemaNodeType as PrimitiveSchemaNodeType } from "./primitive/schema";
 
 export const SchemaNodeType = {
   ...PrimitiveSchemaNodeType,
-  ...SchemaWithRelationshipNodeType
+  ...SchemaWithRelationshipNodeType,
 };
+
+export type Schema = SchemaWithRelationships;
 
 export interface SchemaNodeEntityWithNames {
   names: GeneratedNames;
@@ -44,12 +46,14 @@ function hasNames(obj: SchemaNode): obj is SchemaNodeEntityWithNames {
   return false;
 }
 
-export function createSchema(schema: SchemaOptions): SchemaWithRelationships {
+export function createSchema(schema: SchemaOptions): Schema {
   const clonedSchema: SchemaOptions = cloneDeep(schema);
-  const transformedEntities: SchemaNode[] = clonedSchema.entities.map(node => ({
-    ...node,
-    names: hasNames(node) ? node.names : generateNames(node.name)
-  }));
+  const transformedEntities: SchemaNode[] = clonedSchema.entities.map(
+    (node) => ({
+      ...node,
+      names: hasNames(node) ? node.names : generateNames(node.name),
+    })
+  );
   clonedSchema.entities = transformedEntities;
-  return clonedSchema as SchemaWithRelationships;
+  return clonedSchema as Schema;
 }

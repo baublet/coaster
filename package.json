@@ -12,7 +12,7 @@
     "dataloader": "^2.0.0",
     "didyoumean": "^1.2.1",
     "graphql": "^14.6.0",
-    "knex": "^0.20.8",
+    "knex": "^0.21.3",
     "lodash.clonedeep": "^4.5.0",
     "lodash.get": "^4.4.2",
     "lodash.intersectionwith": "^4.4.0",
