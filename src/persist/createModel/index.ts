@@ -1,1 +1,1 @@
-export { Model, createModelFactory } from "./createModelFactory";
+export { Model, createModel } from "./createModel";
