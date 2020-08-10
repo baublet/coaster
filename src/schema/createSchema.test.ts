@@ -8,10 +8,10 @@ it("allows pre-formed generated names", () => {
         {
           name: "test",
           nodes: {
-            id: SchemaNodeType.NUMBER
-          }
-        }
-      ]
+            id: SchemaNodeType.NUMBER,
+          },
+        },
+      ],
     })
   ).toMatchInlineSnapshot(`
     Object {
@@ -44,16 +44,16 @@ it("allows fully-formed names", () => {
         {
           name: "test",
           nodes: {
-            id: SchemaNodeType.NUMBER
-          }
+            id: SchemaNodeType.NUMBER,
+          },
         },
         {
           names: generateNames("test-again"),
           nodes: {
-            id: SchemaNodeType.STRING
-          }
-        }
-      ]
+            id: SchemaNodeType.STRING,
+          },
+        },
+      ],
     })
   ).toMatchInlineSnapshot(`
     Object {
