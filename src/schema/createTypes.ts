@@ -5,14 +5,6 @@ import { generateRelationalTypes } from "./relationship/generateRelationalTypes"
 
 import { GenerateRelationalTypesArguments } from "./relationship/generateRelationalTypes";
 
-import { SchemaNodeType as PrimitiveSchemaNodeType } from "./primitive/schema";
-import { SchemaWithRelationshipNodeType } from "./relationship/schema";
-
-export const SchemaNodeType = {
-  ...PrimitiveSchemaNodeType,
-  ...SchemaWithRelationshipNodeType
-};
-
 export function createTypes(options: GenerateRelationalTypesArguments): string {
   const layers = [generateRelationalTypes];
   const clonedOptions = clone(options);

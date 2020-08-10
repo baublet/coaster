@@ -1,4 +1,5 @@
-import { createTypes, SchemaNodeType } from "./createTypes";
+import { SchemaNodeType } from "./createSchema";
+import { createTypes } from "./createTypes";
 import { generateNames } from "helpers/generateNames";
 
 it("generates a full schema", () => {
