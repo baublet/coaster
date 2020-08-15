@@ -15,14 +15,8 @@ export interface CreateModelFactoryFullArguments {
   tableName: string;
 }
 
-export type Model = Record<
-  string,
-  string | number | boolean | null | undefined | Model[]
->;
-export type NormalizedModel = Record<
-  string,
-  string | number | boolean | null | undefined
->;
+export type Model = object;
+export type NormalizedModel = object;
 
 export type ConstrainerFunction = (qb: QueryBuilder) => Promise<QueryBuilder>;
 
@@ -33,8 +27,8 @@ export interface NormalizedModelFactory<
   (): (input: Partial<M | NM>) => NM;
   create(model: Partial<M | NM>): Promise<NM>;
   create(models: Partial<M | NM>[]): Promise<NM>;
-  delete(id: string | number): Promise<boolean>;
-  delete(ids: string[] | number[]): Promise<boolean>;
+  delete(id: string | number): Promise<number>;
+  delete(ids: string[] | number[]): Promise<number>;
   deleteWhere(constrainer: ConstrainerFunction): Promise<number>;
   find(id: string | number): Promise<NM | undefined>;
   find(ids: string[] | number[]): Promise<NM[]>;
@@ -52,8 +46,8 @@ export interface ModelFactory<M extends Model, NM extends NormalizedModel> {
   (): (input: Partial<M | NM>) => NM;
   create(model: Partial<M | NM>): Promise<M>;
   create(models: Partial<M | NM>[]): Promise<M>;
-  delete(id: string | number): Promise<boolean>;
-  delete(ids: string[] | number[]): Promise<boolean>;
+  delete(id: string | number): Promise<number>;
+  delete(ids: string[] | number[]): Promise<number>;
   deleteWhere(constrainer: ConstrainerFunction): Promise<number>;
   find(id: string | number): Promise<M | undefined>;
   find(ids: string[] | number[]): Promise<M[]>;

@@ -1,12 +1,12 @@
 module.exports = {
-  roots: ["<rootDir>/src", "<rootDir>/integration"],
+  roots: ["<rootDir>/src"],
   modulePaths: ["<rootDir>/src/"],
   transform: {
-    "^.+\\.tsx?$": "ts-jest"
+    "^.+\\.tsx?$": "ts-jest",
   },
   coverageThreshold: {
     global: {
-      functions: 100
-    }
-  }
+      functions: 100,
+    },
+  },
 };

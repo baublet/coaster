@@ -13,7 +13,8 @@ async function createAndReturn<M extends Model, NM extends NormalizedModel>(
   const id = await connection.table(tableName).insert(data);
   const results = await connection
     .table(tableName)
-    .select({ [uniqueIdField]: id })
+    .select("*")
+    .where({ [uniqueIdField]: id })
     .limit(1);
   if (results.length) {
     return results[0] as NM;

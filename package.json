@@ -7,6 +7,8 @@
     "lint:all": "eslint src/ --ext ts --fix"
   },
   "dependencies": {
+    "@types/didyoumean": "^1.2.0",
+    "@types/uuid": "^8.0.1",
     "better-sqlite3": "^5.4.3",
     "change-case": "^4.1.1",
     "dataloader": "^2.0.0",

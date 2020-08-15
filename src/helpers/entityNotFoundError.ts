@@ -11,7 +11,7 @@ export function entityNotFoundError(
   entities: EntityLikeObject[],
   message: string
 ): string {
-  const entityList = entities.map((entity) => ({ id: entity.names.canonical }));
+  const entityList = entities.map((entity) => entity.names.canonical);
   const suggestion = didYouMean(entityName, entityList);
 
   throw new Error(
