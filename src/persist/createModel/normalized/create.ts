@@ -14,7 +14,7 @@ async function createAndReturn<M extends Model, NM extends NormalizedModel>(
   const results = await connection
     .table(tableName)
     .select("*")
-    .where({ [uniqueIdField]: id })
+    .where({ [uniqueIdField]: id[0] })
     .limit(1);
   if (results.length) {
     return results[0] as NM;
@@ -38,8 +38,8 @@ export function createCreateFunction<
     modelOrModels: Partial<M | NM>[] | Partial<M | NM>
   ): Promise<NM | NM[]> {
     if (Array.isArray(modelOrModels)) {
-      const promises = modelOrModels.map((d) =>
-        createAndReturn<M, NM>(connection, tableName, uniqueIdField, d)
+      const promises = modelOrModels.map((data) =>
+        createAndReturn<M, NM>(connection, tableName, uniqueIdField, data)
       );
       return Promise.all(promises);
     }

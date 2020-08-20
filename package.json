@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "test": "jest",
+    "test": "rm -rf ./testDatabases/*.sqlite && jest",
     "coverage": "jest --coverage --silent",
     "coverage:view": "open coverage/lcov-report/index.html",
     "coverage:report": "yarn coverage; yarn coverage:view",

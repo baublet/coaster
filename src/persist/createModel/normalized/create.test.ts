@@ -40,5 +40,25 @@ it("creates and persists an entity", async () => {
     .from(tables["TestObject"])
     .where({ id: createdObject.id });
 
-  expect(createdObject).toEqual(persistedObject);
+  expect(createdObject).toEqual(persistedObject[0]);
+});
+
+it("creates and persists multiple entities", async () => {
+  const connection = await createTestConnection();
+  const [tables] = await createTablesFromSchema(connection, schema);
+  const create = createCreateFunction<TestObject, TestObject>({
+    schema,
+    connection,
+    entity: "TestObject",
+    tableName: tables["TestObject"],
+  });
+
+  await create([
+    { name: "Object 1", active: true },
+    { name: "Object 2", active: true },
+  ]);
+
+  const results = await connection.from(tables["TestObject"]).count("*");
+
+  expect(results).toEqual([{ "count(*)": 2 }]);
 });
