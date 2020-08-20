@@ -24,7 +24,7 @@ interface TestObject {
   active: boolean;
 }
 
-it("creates and persists an entity: partial model", async () => {
+it("updates an entity: model as only argument", async () => {
   const connection = await createTestConnection();
   const [tables] = await createTablesFromSchema(connection, schema);
   const update = createUpdateFunction<TestObject, TestObject>({
@@ -57,7 +57,7 @@ it("creates and persists an entity: partial model", async () => {
   expect(updatedObject).toEqual(objectToChange);
 });
 
-it("creates and persists an entity: partial model", async () => {
+it("updates an entity: id and partial data", async () => {
   const connection = await createTestConnection();
   const [tables] = await createTablesFromSchema(connection, schema);
   const update = createUpdateFunction<TestObject, TestObject>({
