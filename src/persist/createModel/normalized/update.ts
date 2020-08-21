@@ -4,7 +4,7 @@ import { Connection } from "persist/connection";
 import { CreateModelFactoryFullArguments } from "../createModel";
 import { getUniqueIdFieldForEntityInSchema } from "persist/helpers/getUniqueIdFieldForEntityInSchema";
 
-async function updateAndReturn<M extends Model, NM extends NormalizedModel>(
+async function updateAndReturn<NM extends NormalizedModel>(
   connection: Connection,
   tableName: string,
   uniqueIdField: string,
@@ -56,13 +56,19 @@ export function createUpdateFunction<
       if (typeof data[uniqueIdField] !== "undefined") {
         delete data[uniqueIdField];
       }
-      return updateAndReturn(connection, tableName, uniqueIdField, id, data);
+      return updateAndReturn<NM>(
+        connection,
+        tableName,
+        uniqueIdField,
+        id,
+        data
+      );
     }
     const data = { ...maybeData };
     if (typeof data[uniqueIdField] !== "undefined") {
       delete data[uniqueIdField];
     }
-    return updateAndReturn<M, NM>(
+    return updateAndReturn<NM>(
       connection,
       tableName,
       uniqueIdField,
