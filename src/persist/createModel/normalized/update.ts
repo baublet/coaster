@@ -1,4 +1,4 @@
-import { NormalizedModelFactory, Model, NormalizedModel } from "../createModel";
+import { NormalizedModelFactory, NormalizedModel } from "../createModel";
 import { Connection } from "persist/connection";
 
 import { CreateModelFactoryFullArguments } from "../createModel";
@@ -29,15 +29,12 @@ async function updateAndReturn<NM extends NormalizedModel>(
   );
 }
 
-export function createUpdateFunction<
-  M extends Model,
-  NM extends NormalizedModel
->({
+export function createUpdateFunction<NM extends NormalizedModel>({
   schema,
   entity,
   connection,
   tableName,
-}: CreateModelFactoryFullArguments): NormalizedModelFactory<M, NM>["update"] {
+}: CreateModelFactoryFullArguments): NormalizedModelFactory<NM>["update"] {
   const uniqueIdField = getUniqueIdFieldForEntityInSchema(schema, entity);
   async function update(
     modelOrId: Partial<NM> | string | number,
@@ -77,5 +74,5 @@ export function createUpdateFunction<
     );
   }
 
-  return update as NormalizedModelFactory<M, NM>["update"];
+  return update as NormalizedModelFactory<NM>["update"];
 }

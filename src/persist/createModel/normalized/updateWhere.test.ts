@@ -27,7 +27,7 @@ interface TestObject {
 it("creates and persists an entity: partial model", async () => {
   const connection = await createTestConnection();
   const [tables] = await createTablesFromSchema(connection, schema);
-  const updateWhere = createUpdateWhereFunction<TestObject, TestObject>({
+  const updateWhere = createUpdateWhereFunction<TestObject>({
     schema,
     connection,
     entity: "TestObject",

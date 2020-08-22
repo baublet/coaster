@@ -27,7 +27,7 @@ interface TestObject {
 it("creates and persists an entity", async () => {
   const connection = await createTestConnection();
   const [tables] = await createTablesFromSchema(connection, schema);
-  const create = createCreateFunction<TestObject, TestObject>({
+  const create = createCreateFunction<TestObject>({
     schema,
     connection,
     entity: "TestObject",
@@ -46,7 +46,7 @@ it("creates and persists an entity", async () => {
 it("creates and persists multiple entities", async () => {
   const connection = await createTestConnection();
   const [tables] = await createTablesFromSchema(connection, schema);
-  const create = createCreateFunction<TestObject, TestObject>({
+  const create = createCreateFunction<TestObject>({
     schema,
     connection,
     entity: "TestObject",

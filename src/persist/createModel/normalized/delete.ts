@@ -1,17 +1,14 @@
-import { NormalizedModelFactory, Model, NormalizedModel } from "../createModel";
+import { NormalizedModelFactory, NormalizedModel } from "../createModel";
 
 import { CreateModelFactoryFullArguments } from "../createModel";
 import { getUniqueIdFieldForEntityInSchema } from "persist/helpers/getUniqueIdFieldForEntityInSchema";
 
-export function createDeleteFunction<
-  M extends Model,
-  NM extends NormalizedModel
->({
+export function createDeleteFunction<NM extends NormalizedModel>({
   schema,
   entity,
   connection,
   tableName,
-}: CreateModelFactoryFullArguments): NormalizedModelFactory<M, NM>["delete"] {
+}: CreateModelFactoryFullArguments): NormalizedModelFactory<NM>["delete"] {
   const uniqueIdField = getUniqueIdFieldForEntityInSchema(schema, entity);
   async function deleteFunction(
     idOrIds: string[] | number[] | string | number
@@ -24,5 +21,5 @@ export function createDeleteFunction<
       .limit(idsToDelete.length);
   }
 
-  return deleteFunction as NormalizedModelFactory<M, NM>["delete"];
+  return deleteFunction as NormalizedModelFactory<NM>["delete"];
 }

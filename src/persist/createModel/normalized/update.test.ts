@@ -27,7 +27,7 @@ interface TestObject {
 it("updates an entity: model as only argument", async () => {
   const connection = await createTestConnection();
   const [tables] = await createTablesFromSchema(connection, schema);
-  const update = createUpdateFunction<TestObject, TestObject>({
+  const update = createUpdateFunction<TestObject>({
     schema,
     connection,
     entity: "TestObject",
@@ -60,7 +60,7 @@ it("updates an entity: model as only argument", async () => {
 it("updates an entity: id and partial data", async () => {
   const connection = await createTestConnection();
   const [tables] = await createTablesFromSchema(connection, schema);
-  const update = createUpdateFunction<TestObject, TestObject>({
+  const update = createUpdateFunction<TestObject>({
     schema,
     connection,
     entity: "TestObject",

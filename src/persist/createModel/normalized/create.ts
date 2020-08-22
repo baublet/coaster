@@ -1,14 +1,14 @@
-import { NormalizedModelFactory, Model, NormalizedModel } from "../createModel";
+import { NormalizedModelFactory, NormalizedModel } from "../createModel";
 import { Connection } from "persist/connection";
 
 import { CreateModelFactoryFullArguments } from "../createModel";
 import { getUniqueIdFieldForEntityInSchema } from "persist/helpers/getUniqueIdFieldForEntityInSchema";
 
-async function createAndReturn<M extends Model, NM extends NormalizedModel>(
+async function createAndReturn<NM extends NormalizedModel>(
   connection: Connection,
   tableName: string,
   uniqueIdField: string,
-  data: Partial<M | NM>
+  data: Partial<NM>
 ): Promise<NM> {
   const id = await connection.table(tableName).insert(data);
   const results = await connection
@@ -24,26 +24,23 @@ async function createAndReturn<M extends Model, NM extends NormalizedModel>(
   );
 }
 
-export function createCreateFunction<
-  M extends Model,
-  NM extends NormalizedModel
->({
+export function createCreateFunction<NM extends NormalizedModel>({
   schema,
   entity,
   connection,
   tableName,
-}: CreateModelFactoryFullArguments): NormalizedModelFactory<M, NM>["create"] {
+}: CreateModelFactoryFullArguments): NormalizedModelFactory<NM>["create"] {
   const uniqueIdField = getUniqueIdFieldForEntityInSchema(schema, entity);
   async function create(
-    modelOrModels: Partial<M | NM>[] | Partial<M | NM>
+    modelOrModels: Partial<NM>[] | Partial<NM>
   ): Promise<NM | NM[]> {
     if (Array.isArray(modelOrModels)) {
       const promises = modelOrModels.map((data) =>
-        createAndReturn<M, NM>(connection, tableName, uniqueIdField, data)
+        createAndReturn<NM>(connection, tableName, uniqueIdField, data)
       );
       return Promise.all(promises);
     }
-    return createAndReturn<M, NM>(
+    return createAndReturn<NM>(
       connection,
       tableName,
       uniqueIdField,
@@ -51,5 +48,5 @@ export function createCreateFunction<
     );
   }
 
-  return create as NormalizedModelFactory<M, NM>["create"];
+  return create as NormalizedModelFactory<NM>["create"];
 }

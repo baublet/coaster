@@ -2,8 +2,7 @@ import { createSchema, Schema, SchemaNodeType } from "schema";
 
 import { createTablesFromSchema } from "persist/helpers/createTablesFromSchema";
 import { createTestConnection } from "persist/helpers/createTestConnection";
-
-import { createDeleteWhereFunction } from "./deleteWhere";
+import { createModel } from "./createModel";
 
 const schema: Schema = createSchema({
   entities: [
@@ -24,32 +23,31 @@ interface TestObject {
   active: boolean;
 }
 
-it("deletes an entity by a constrainer", async () => {
+it("creates, reads, updates, and deletes: simple types", async () => {
   const connection = await createTestConnection();
   const [tables] = await createTablesFromSchema(connection, schema);
-  const deleteWhereFn = createDeleteWhereFunction<TestObject>({
+
+  const TestObject = createModel<TestObject>({
     schema,
     connection,
     entity: "TestObject",
     tableName: tables["TestObject"],
   });
 
-  // Insert the records
-  await connection
-    .insert({ name: "Object 1", active: false })
-    .into(tables["TestObject"]);
-  await connection
-    .insert({ name: "Object 2", active: false })
-    .into(tables["TestObject"]);
-  await connection
-    .insert({ name: "Object 3", active: true })
-    .into(tables["TestObject"]);
+  const created = await TestObject.create({
+    name: "Test Name",
+    active: false,
+  });
+  expect(created).toEqual({ active: 0, id: 1, name: "Test Name" });
 
-  await deleteWhereFn((qb) => qb.where({ active: false }));
+  const found = await TestObject.find(1);
+  expect(created).toEqual(found);
 
-  const resultsAfterDelete = await connection
-    .from(tables["TestObject"])
-    .count("*");
+  const updated = await TestObject.update(1, { active: true });
+  expect(updated).not.toEqual(found);
+  expect(updated).toEqual({ active: 1, id: 1, name: "Test Name" });
 
-  expect(resultsAfterDelete).toEqual([{ "count(*)": 1 }]);
+  TestObject.delete(updated.id);
+  const foundAfterDeleted = await TestObject.find(1);
+  expect(foundAfterDeleted).toBeFalsy();
 });

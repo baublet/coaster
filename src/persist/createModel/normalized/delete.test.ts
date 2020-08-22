@@ -27,7 +27,7 @@ interface TestObject {
 it("creates and persists an entity", async () => {
   const connection = await createTestConnection();
   const [tables] = await createTablesFromSchema(connection, schema);
-  const deleteFn = createDeleteFunction<TestObject, TestObject>({
+  const deleteFn = createDeleteFunction<TestObject>({
     schema,
     connection,
     entity: "TestObject",
@@ -52,7 +52,7 @@ it("creates and persists an entity", async () => {
 it("deletes multiples", async () => {
   const connection = await createTestConnection();
   const [tables] = await createTablesFromSchema(connection, schema);
-  const deleteFn = createDeleteFunction<TestObject, TestObject>({
+  const deleteFn = createDeleteFunction<TestObject>({
     schema,
     connection,
     entity: "TestObject",

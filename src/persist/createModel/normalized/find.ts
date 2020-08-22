@@ -1,24 +1,19 @@
-import { NormalizedModelFactory, Model, NormalizedModel } from "../createModel";
+import { NormalizedModel } from "../createModel";
 
 import { CreateModelFactoryFullArguments } from "../createModel";
 import { getUniqueIdFieldForEntityInSchema } from "persist/helpers/getUniqueIdFieldForEntityInSchema";
 
-export function createFindFunction<
-  M extends Model,
-  NM extends NormalizedModel
->({
+export function createFindFunction<NM extends NormalizedModel>({
   schema,
   entity,
   connection,
   tableName,
-}: CreateModelFactoryFullArguments): NormalizedModelFactory<M, NM>["find"] {
+}: CreateModelFactoryFullArguments) {
   const uniqueIdField = getUniqueIdFieldForEntityInSchema(schema, entity);
-  async function findFunction(
-    idOrIds: string[] | number[] | string | number
-  ): Promise<NM | NM[]> {
+  async function findFunction(idOrIds: string[] | number[] | string | number) {
     const idsToFind = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
     const results = await connection
-      .table(tableName)
+      .table<NM>(tableName)
       .select("*")
       .whereIn(uniqueIdField, idsToFind)
       .limit(idsToFind.length);
@@ -29,5 +24,5 @@ export function createFindFunction<
     return results[0];
   }
 
-  return findFunction as NormalizedModelFactory<M, NM>["find"];
+  return findFunction;
 }

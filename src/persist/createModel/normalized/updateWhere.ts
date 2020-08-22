@@ -1,21 +1,14 @@
 import {
   NormalizedModelFactory,
-  Model,
   NormalizedModel,
   CreateModelFactoryFullArguments,
 } from "../createModel";
 import { ConstrainerFunction } from "../../connection";
 
-export function createUpdateWhereFunction<
-  M extends Model,
-  NM extends NormalizedModel
->({
+export function createUpdateWhereFunction<NM extends NormalizedModel>({
   connection,
   tableName,
-}: CreateModelFactoryFullArguments): NormalizedModelFactory<
-  M,
-  NM
->["updateWhere"] {
+}: CreateModelFactoryFullArguments): NormalizedModelFactory<NM>["updateWhere"] {
   async function updateWhere(
     data: Partial<NM>,
     constrainer: ConstrainerFunction<NM>
@@ -27,5 +20,5 @@ export function createUpdateWhereFunction<
     return results as number;
   }
 
-  return updateWhere as NormalizedModelFactory<M, NM>["updateWhere"];
+  return updateWhere as NormalizedModelFactory<NM>["updateWhere"];
 }

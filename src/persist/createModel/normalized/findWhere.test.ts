@@ -27,7 +27,7 @@ interface TestObject {
 it("finds one and multiples", async () => {
   const connection = await createTestConnection();
   const [tables] = await createTablesFromSchema(connection, schema);
-  const findWhere = createFindWhereFunction<TestObject, TestObject>({
+  const findWhere = createFindWhereFunction<TestObject>({
     schema,
     connection,
     entity: "TestObject",

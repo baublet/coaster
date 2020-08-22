@@ -1,5 +1,16 @@
 import { Schema } from "schema";
-import { Connection, ConstrainerFunction } from "persist/connection";
+
+import { Connection, ConstrainerFunction } from "../connection";
+import {
+  createCreateFunction,
+  createDeleteFunction,
+  createDeleteWhereFunction,
+  createFindFunction,
+  createFindWhereFunction,
+  createUpdateFunction,
+  createUpdateWhereFunction,
+} from "./normalized";
+import { getTableNameForEntityInSchema } from "persist/helpers/getTableNameForEntityInSchema";
 
 export interface CreateModelFactoryArguments {
   schema: Schema;
@@ -17,18 +28,16 @@ export interface CreateModelFactoryFullArguments {
 
 export type Model = object;
 export type NormalizedModel = object;
+export type Maybe<T> = void | T;
 
-export interface NormalizedModelFactory<
-  M extends Model,
-  NM extends NormalizedModel
-> {
+export type NormalizedModelFactory<NM extends NormalizedModel> = {
   (): (input: Partial<NM>) => NM;
   create(model: Partial<NM>): Promise<NM>;
   create(models: Partial<NM>[]): Promise<NM>;
   delete(id: string | number): Promise<number>;
   delete(ids: string[] | number[]): Promise<number>;
   deleteWhere(constrainer: ConstrainerFunction<NM>): Promise<number>;
-  find(id: string | number): Promise<NM | undefined>;
+  find(id: string | number): Promise<Maybe<NM>>;
   find(ids: string[] | number[]): Promise<NM[]>;
   findWhere(constrainer: ConstrainerFunction<NM>): Promise<NM[]>;
   update(model: Partial<NM>): Promise<NM>;
@@ -37,32 +46,60 @@ export interface NormalizedModelFactory<
     data: Partial<NM>,
     constrainer: ConstrainerFunction<NM>
   ): Promise<number>;
+};
 
-  // Denormalized chain
-  denormalized(): ModelFactory<M, NM>;
-}
+export function createModel<M extends Model, NM extends NormalizedModel = M>(
+  args: CreateModelFactoryArguments
+) {
+  const table =
+    args.tableName || getTableNameForEntityInSchema(args.schema, args.entity);
 
-export interface ModelFactory<M extends Model, NM extends NormalizedModel> {
-  (): (input: Partial<NM>) => M;
-  create(model: Partial<NM>): Promise<M>;
-  create(models: Partial<NM>[]): Promise<M>;
-  delete(id: string | number): Promise<number>;
-  delete(ids: string[] | number[]): Promise<number>;
-  deleteWhere(constrainer: ConstrainerFunction<M>): Promise<number>;
-  find(id: string | number): Promise<M | undefined>;
-  find(ids: string[] | number[]): Promise<M[]>;
-  findWhere(constrainer: ConstrainerFunction<M>): Promise<M[]>;
-  update(model: Partial<M>): Promise<M>;
-  update(id: string | number, data: Partial<NM>): Promise<M>;
-  updateWhere(
-    data: Partial<NM>,
-    constrainer: ConstrainerFunction<NM>
-  ): Promise<number>;
+  const partialNormalized: any = (partial: Partial<NM>): NM => {
+    return { ...partial } as NM;
+  };
 
-  // Normalized chain
-  normalized(): NormalizedModelFactory<M, NM>;
-}
+  partialNormalized.create = createCreateFunction<NM>({
+    schema: args.schema,
+    entity: args.entity,
+    connection: args.connection,
+    tableName: table,
+  });
+  partialNormalized.delete = createDeleteFunction<NM>({
+    schema: args.schema,
+    entity: args.entity,
+    connection: args.connection,
+    tableName: table,
+  });
+  partialNormalized.deleteWhere = createDeleteWhereFunction<NM>({
+    schema: args.schema,
+    entity: args.entity,
+    connection: args.connection,
+    tableName: table,
+  });
+  partialNormalized.find = createFindFunction<NM>({
+    schema: args.schema,
+    entity: args.entity,
+    connection: args.connection,
+    tableName: table,
+  });
+  partialNormalized.findWhere = createFindWhereFunction<NM>({
+    schema: args.schema,
+    entity: args.entity,
+    connection: args.connection,
+    tableName: table,
+  });
+  partialNormalized.update = createUpdateFunction<NM>({
+    schema: args.schema,
+    entity: args.entity,
+    connection: args.connection,
+    tableName: table,
+  });
+  partialNormalized.updateWhere = createUpdateWhereFunction<NM>({
+    schema: args.schema,
+    entity: args.entity,
+    connection: args.connection,
+    tableName: table,
+  });
 
-export function createModel<M extends Model, NM extends NormalizedModel>() {
-  // args: CreateModelFactoryArguments
+  return partialNormalized as NormalizedModelFactory<NM>;
 }
