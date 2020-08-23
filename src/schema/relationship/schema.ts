@@ -2,14 +2,15 @@ import { GeneratedNames } from "helpers/generateNames";
 import {
   SchemaNodeType,
   SchemaEntityConfiguration,
-  SchemaNodePrimitive
+  SchemaNodePrimitive,
 } from "schema/primitive/schema";
+import { QueryBuilder } from "knex";
 
 export enum SchemaWithRelationshipNodeType {
   ONE_TO_ONE = "one_to_one",
   ONE_TO_MANY = "one_to_many",
   MANY_TO_ONE = "many_to_one",
-  MANY_TO_MANY = "many_to_many"
+  MANY_TO_MANY = "many_to_many",
 }
 
 export interface SchemaWithRelationships {
@@ -88,3 +89,10 @@ export function isRelationalNode(
   if (node.type === SchemaWithRelationshipNodeType.MANY_TO_ONE) return true;
   return false;
 }
+
+/**
+ * When querying for relational entities, use this to constrain the results, if
+ * applicable. If no argument is passed in, we load all relational entities for
+ * this property.
+ */
+export type RelationalDiscriminator = (qb?: QueryBuilder) => QueryBuilder;

@@ -15,6 +15,7 @@ it("allows pre-formed generated names", () => {
     })
   ).toMatchInlineSnapshot(`
     Object {
+      "customTypes": Array [],
       "entities": Array [
         Object {
           "name": "test",
@@ -57,6 +58,7 @@ it("allows fully-formed names", () => {
     })
   ).toMatchInlineSnapshot(`
     Object {
+      "customTypes": Array [],
       "entities": Array [
         Object {
           "name": "test",

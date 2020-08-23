@@ -12,6 +12,7 @@ import {
   SchemaWithRelationshipsEntity,
 } from "./schema";
 import { entityNotFoundError } from "helpers/entityNotFoundError";
+import { CustomTypes } from "../createSchema";
 
 export type GenerateRelationalTypesArguments = GenerateTypesBaseArguments & {
   schema: SchemaWithRelationships;
@@ -37,7 +38,8 @@ function getEntityIdFieldAndType(
 
 export function generateRelationalTypes({
   schema,
-}: GenerateRelationalTypesArguments) {
+}: GenerateRelationalTypesArguments): [Schema, CustomTypes] {
+  const customTypes: CustomTypes = [];
   const newSchema: Schema = {
     name: schema.name,
     description: schema.description,
@@ -85,6 +87,12 @@ export function generateRelationalTypes({
     }
   }
 
+  // If there are second-pass entities, we need to add some custom types to the
+  // emitted type definitions.
+  if (secondPassEntities.length > 0) {
+    customTypes.push('import { RelationalDiscriminator } from "coaster";');
+  }
+
   // Second pass: normalize the original entities
   for (const entity of secondPassEntities) {
     const nodes = Object.entries(entity.nodes);
@@ -127,7 +135,7 @@ export function generateRelationalTypes({
         denormalizedEntity.nodes[property] = {
           type: SchemaNodeType.RAW,
           nullable: Boolean(node.nullable),
-          definition: referencedNode.names.pascal,
+          definition: `() => Promise<${referencedNode.names.pascal}>`,
         };
         continue;
       }
@@ -143,7 +151,7 @@ export function generateRelationalTypes({
         denormalizedEntity.nodes[property] = {
           type: SchemaNodeType.RAW,
           nullable: Boolean(node.nullable),
-          definition: `${referencedNode.names.pascal}[]`,
+          definition: `(discriminator?: RelationalDiscriminator) => Promise<${referencedNode.names.pascal}[]>`,
         };
         continue;
       }
@@ -153,5 +161,5 @@ export function generateRelationalTypes({
     newSchema.entities.push(denormalizedEntity);
   }
 
-  return newSchema;
+  return [newSchema, customTypes];
 }

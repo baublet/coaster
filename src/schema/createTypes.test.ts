@@ -16,9 +16,25 @@ it("generates a full schema", () => {
               username: SchemaNodeType.STRING,
               profile: {
                 type: SchemaNodeType.ONE_TO_ONE,
-                of: "Profile"
-              }
-            }
+                of: "Profile",
+              },
+              posts: {
+                type: SchemaNodeType.ONE_TO_MANY,
+                of: "Post",
+              },
+            },
+          },
+          {
+            names: generateNames("post"),
+            nodes: {
+              id: SchemaNodeType.NUMBER,
+              title: SchemaNodeType.STRING,
+              content: SchemaNodeType.STRING,
+              user: {
+                type: SchemaNodeType.MANY_TO_ONE,
+                of: "User",
+              },
+            },
           },
           {
             names: generateNames("profile"),
@@ -26,19 +42,21 @@ it("generates a full schema", () => {
               id: SchemaNodeType.NUMBER,
               preferredName: {
                 type: SchemaNodeType.STRING,
-                nullable: true
+                nullable: true,
               },
               location: {
                 type: SchemaNodeType.STRING,
-                nullable: true
-              }
-            }
-          }
-        ]
-      }
+                nullable: true,
+              },
+            },
+          },
+        ],
+      },
     })
   ).toMatchInlineSnapshot(`
-    "interface Profile {
+    "import { RelationalDiscriminator } from \\"coaster\\";
+
+    interface Profile {
       id: number;
       preferredName?: string;
       location?: string;
@@ -48,12 +66,28 @@ it("generates a full schema", () => {
       id: number;
       username: string;
       profileId: number;
+      postId: number;
     }
 
     interface User {
       id: number;
       username: string;
-      profile: Profile;
+      profile: () => Promise<Profile>;
+      posts: (discriminator?: RelationalDiscriminator) => Promise<Post[]>;
+    }
+
+    interface NormalizedPost {
+      id: number;
+      title: string;
+      content: string;
+      userId: number;
+    }
+
+    interface Post {
+      id: number;
+      title: string;
+      content: string;
+      user: () => Promise<User>;
     }"
   `);
 });

@@ -9,6 +9,8 @@ import {
 } from "./relationship/schema";
 import { SchemaNodeType as PrimitiveSchemaNodeType } from "./primitive/schema";
 
+export type CustomTypes = string[];
+
 export const SchemaNodeType = {
   ...PrimitiveSchemaNodeType,
   ...SchemaWithRelationshipNodeType,
@@ -38,6 +40,12 @@ export interface SchemaOptions {
   name?: string;
   description?: string;
   entities: SchemaNode[];
+  /**
+   * When generating types, we may need to throw custom things into the file,
+   * like imports, custom interfaces that aren't entities, and the like. Add
+   * them to this array, and these will be added to the top of the file.
+   */
+  customTypes?: CustomTypes;
 }
 
 function hasNames(obj: SchemaNode): obj is SchemaNodeEntityWithNames {
@@ -55,5 +63,8 @@ export function createSchema(schema: SchemaOptions): Schema {
     })
   );
   clonedSchema.entities = transformedEntities;
+  if (!clonedSchema.customTypes) {
+    clonedSchema.customTypes = [];
+  }
   return clonedSchema as Schema;
 }

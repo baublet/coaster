@@ -11,14 +11,14 @@ export function entityNotFoundError(
   entities: EntityLikeObject[],
   message: string
 ): string {
-  const entityList = entities.map((entity) => entity.names.canonical);
+  const entityList = entities.map((entity) => entity.names.pascal);
   const suggestion = didYouMean(entityName, entityList);
 
   throw new Error(
     `${message} Searched for: ${entityName}. ${
       suggestion
-        ? `Did you mean ${suggestion}`
-        : `No partial matches. Known entities: ${entities.join(", ")}`
+        ? `Did you mean ${suggestion}?`
+        : `No partial matches. Known entities: ${entityList.join(", ")}`
     }`
   );
 }
