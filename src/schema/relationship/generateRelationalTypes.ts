@@ -128,14 +128,17 @@ export function generateRelationalTypes({
         node.type === SchemaWithRelationshipNodeType.ONE_TO_ONE ||
         node.type === SchemaWithRelationshipNodeType.MANY_TO_ONE
       ) {
+        const nullable = Boolean(node.nullable);
         normalizedEntity.nodes[newKey] = {
           type: referencedNode.uniqueIdType,
-          nullable: Boolean(node.nullable),
+          nullable,
         };
         denormalizedEntity.nodes[property] = {
           type: SchemaNodeType.RAW,
-          nullable: Boolean(node.nullable),
-          definition: `() => Promise<${referencedNode.names.pascal}>`,
+          nullable,
+          definition: `() => Promise<Normalized${referencedNode.names.pascal}${
+            nullable ? " | null" : ""
+          }>`,
         };
         continue;
       }
@@ -144,14 +147,15 @@ export function generateRelationalTypes({
         node.type === SchemaWithRelationshipNodeType.ONE_TO_MANY ||
         node.type === SchemaWithRelationshipNodeType.MANY_TO_MANY
       ) {
+        const nullable = Boolean(node.nullable);
         normalizedEntity.nodes[newKey] = {
           type: referencedNode.uniqueIdType,
-          nullable: Boolean(node.nullable),
+          nullable,
         };
         denormalizedEntity.nodes[property] = {
           type: SchemaNodeType.RAW,
-          nullable: Boolean(node.nullable),
-          definition: `(discriminator?: RelationalDiscriminator) => Promise<${referencedNode.names.pascal}[]>`,
+          nullable,
+          definition: `(discriminator?: RelationalDiscriminator) => Promise<Normalized${referencedNode.names.pascal}[]>`,
         };
         continue;
       }

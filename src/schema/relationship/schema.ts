@@ -4,7 +4,6 @@ import {
   SchemaEntityConfiguration,
   SchemaNodePrimitive,
 } from "schema/primitive/schema";
-import { QueryBuilder } from "knex";
 
 export enum SchemaWithRelationshipNodeType {
   ONE_TO_ONE = "one_to_one",
@@ -89,10 +88,3 @@ export function isRelationalNode(
   if (node.type === SchemaWithRelationshipNodeType.MANY_TO_ONE) return true;
   return false;
 }
-
-/**
- * When querying for relational entities, use this to constrain the results, if
- * applicable. If no argument is passed in, we load all relational entities for
- * this property.
- */
-export type RelationalDiscriminator = (qb?: QueryBuilder) => QueryBuilder;

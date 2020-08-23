@@ -1,6 +1,6 @@
 import { Schema } from "schema";
 
-import { Connection, ConstrainerFunction } from "../connection";
+import { Connection, RelationalDiscriminator } from "../connection";
 import {
   createCreateFunction,
   createDeleteFunction,
@@ -36,15 +36,15 @@ export type NormalizedModelFactory<NM extends NormalizedModel> = {
   create(models: Partial<NM>[]): Promise<NM>;
   delete(id: string | number): Promise<number>;
   delete(ids: string[] | number[]): Promise<number>;
-  deleteWhere(constrainer: ConstrainerFunction<NM>): Promise<number>;
+  deleteWhere(constrainer: RelationalDiscriminator<NM>): Promise<number>;
   find(id: string | number): Promise<Maybe<NM>>;
   find(ids: string[] | number[]): Promise<NM[]>;
-  findWhere(constrainer: ConstrainerFunction<NM>): Promise<NM[]>;
+  findWhere(constrainer: RelationalDiscriminator<NM>): Promise<NM[]>;
   update(model: Partial<NM>): Promise<NM>;
   update(id: string | number, data: Partial<NM>): Promise<NM>;
   updateWhere(
     data: Partial<NM>,
-    constrainer: ConstrainerFunction<NM>
+    constrainer: RelationalDiscriminator<NM>
   ): Promise<number>;
 };
 

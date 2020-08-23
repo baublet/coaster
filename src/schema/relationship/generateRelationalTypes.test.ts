@@ -144,7 +144,7 @@ it("transforms relationships to multiple objects: one to one", () => {
             "nodes": Object {
               "id": "number",
               "profile": Object {
-                "definition": "() => Promise<UserProfile>",
+                "definition": "() => Promise<NormalizedUserProfile>",
                 "nullable": false,
                 "type": "raw",
               },
@@ -186,7 +186,7 @@ it("transforms relationships to multiple objects: one to one", () => {
             "nodes": Object {
               "name": "string",
               "user": Object {
-                "definition": "() => Promise<User>",
+                "definition": "() => Promise<NormalizedUser>",
                 "nullable": false,
                 "type": "raw",
               },
@@ -196,7 +196,7 @@ it("transforms relationships to multiple objects: one to one", () => {
         "name": "Name",
       },
       Array [
-        "import { Discriminator } from \\"coaster\\";",
+        "import { RelationalDiscriminator } from \\"coaster\\";",
       ],
     ]
   `);
@@ -270,7 +270,7 @@ it("transforms relationships to multiple objects: one to many / many to one", ()
             },
             "nodes": Object {
               "posts": Object {
-                "definition": "(discriminator?: RelationalDiscriminator) => Promise<Post[]>",
+                "definition": "(discriminator?: RelationalDiscriminator) => Promise<NormalizedPost[]>",
                 "nullable": false,
                 "type": "raw",
               },
@@ -313,7 +313,7 @@ it("transforms relationships to multiple objects: one to many / many to one", ()
               "content": "string",
               "title": "string",
               "user": Object {
-                "definition": "() => Promise<User>",
+                "definition": "() => Promise<NormalizedUser>",
                 "nullable": false,
                 "type": "raw",
               },
@@ -323,7 +323,7 @@ it("transforms relationships to multiple objects: one to many / many to one", ()
         "name": "Name",
       },
       Array [
-        "import { Discriminator } from \\"coaster\\";",
+        "import { RelationalDiscriminator } from \\"coaster\\";",
       ],
     ]
   `);

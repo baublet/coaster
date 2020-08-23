@@ -3,14 +3,14 @@ import {
   NormalizedModelFactory,
   NormalizedModel,
 } from "../createModel";
-import { ConstrainerFunction } from "../../connection";
+import { RelationalDiscriminator } from "../../connection";
 
 export function createDeleteWhereFunction<NM extends NormalizedModel>({
   connection,
   tableName,
 }: CreateModelFactoryFullArguments): NormalizedModelFactory<NM>["deleteWhere"] {
   async function deleteWhereFunction(
-    constrainer: ConstrainerFunction<NM>
+    constrainer: RelationalDiscriminator<NM>
   ): Promise<number> {
     return constrainer(connection.table(tableName)).delete();
   }
