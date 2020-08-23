@@ -6,14 +6,6 @@ export interface GeneratedNames {
    * The canonical name. Not safe for use in databases or in JS.
    */
   canonical: string;
-  /**
-   * Plural version of canonical.
-   */
-  plural: string;
-  /**
-   * Often the same as above, but in cases where canonical needs to vary from
-   * the canonical, use this.
-   */
   original: string;
   /**
    * Pluralized version of original.
@@ -27,15 +19,13 @@ export interface GeneratedNames {
   /**
    * The plural version of the safe name.
    */
-  pluralSafe: string;
-  /**
-   * The pascal-case name
-   */
+  safePlural: string;
   pascal: string;
-  /**
-   * The camel-case name
-   */
+  pascalPlural: string;
   camel: string;
+  camelPlural: string;
+  snake: string;
+  snakePlural: string;
 }
 
 /**
@@ -45,19 +35,22 @@ export interface GeneratedNames {
  * @param name
  * @param original
  */
-export function generateNames(
-  name: string,
-  original: string | false = false
-): GeneratedNames {
-  const safe = snakeCase(name);
+export function generateNames(name: string): GeneratedNames {
+  const snake = snakeCase(name);
+  const pascal = pascalCase(name);
+  const camel = camelCase(name);
+  const plural = pluralize(name);
   return {
-    canonical: name,
-    original: original || name,
-    originalPlural: pluralize(original || name, 2),
-    plural: pluralize(name, 2),
-    pluralSafe: pluralize(safe, 2),
-    safe: safe,
-    pascal: pascalCase(name),
-    camel: camelCase(name)
+    canonical: pascal,
+    original: name,
+    originalPlural: plural,
+    safe: snake,
+    safePlural: snakeCase(plural),
+    pascal: pascal,
+    pascalPlural: pascalCase(plural),
+    camel: camel,
+    camelPlural: camelCase(plural),
+    snake,
+    snakePlural: snakeCase(plural),
   };
 }
