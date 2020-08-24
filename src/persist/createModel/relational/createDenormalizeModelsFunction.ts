@@ -1,9 +1,4 @@
-import {
-  Model,
-  NormalizedModel,
-  CreateModelFactoryFullArguments,
-} from "../createModel";
-import { getEntityFromSchemaByName } from "persist/helpers/getEntityFromSchemaByName";
+import { isEmptyObject, Maybe } from "helpers";
 import {
   isRelationalNode,
   SchemaNodeWithOneToOne,
@@ -12,24 +7,28 @@ import {
   SchemaNodeWithManyToMany,
   SchemaWithRelationshipNodeType,
 } from "schema/relationship/schema";
-import { RelationalDiscriminator } from "persist/connection";
-import { isEmptyObject } from "helpers/isEmptyObject";
 
-type Maybe<T> = T | void;
-type DenormalizerWithNullable<
-  NM extends NormalizedModel,
-  Nullable extends boolean
-> = Nullable extends true ? Maybe<NM> : NM;
+import {
+  Model,
+  NormalizedModel,
+  CreateModelFactoryFullArguments,
+} from "../createModel";
+import { getEntityFromSchemaByName } from "../../helpers/getEntityFromSchemaByName";
+import { RelationalDiscriminator } from "../../connection";
 
-type DenormalizerFactorySingle<
+import { createOneToOneFunction } from "./createOneToOneFunction";
+import { createOneToManyFunction } from "./createOneToManyFunction";
+import { createManyToOneFunction } from "./createManyToOneFunction";
+import { createManyToManyFunction } from "./createManyToManyFunction";
+
+export type DenormalizerFactorySingle<
   ParentNormalizedModel extends NormalizedModel = any,
-  NodeNormalizedModel extends NormalizedModel = any,
-  Nullable extends boolean = false
+  NodeNormalizedModel extends NormalizedModel = any
 > = (
   parentModel: ParentNormalizedModel
-) => () => Promise<DenormalizerWithNullable<NodeNormalizedModel, Nullable>>;
+) => () => Promise<Maybe<NodeNormalizedModel>>;
 
-type DenormalizerFactoryMultiple<
+export type DenormalizerFactoryMultiple<
   ParentNormalizedModel extends NormalizedModel = any,
   NodeNormalizedModel extends NormalizedModel = any
 > = (
@@ -40,7 +39,7 @@ type DenormalizeModels<M extends Model, NM extends NormalizedModel> = (
   models: NM[]
 ) => M[];
 
-type DenormalizableNodes =
+export type DenormalizableNodes =
   | SchemaNodeWithOneToOne
   | SchemaNodeWithOneToMany
   | SchemaNodeWithManyToOne
@@ -54,9 +53,9 @@ type DenormalizerFactoryFunctions = Record<
 export function createDenormalizeModelsFunction<
   M extends Model,
   NM extends NormalizedModel
->({ schema, connection, entity, tableName }: CreateModelFactoryFullArguments) {
+>({ schema, connection, entity }: CreateModelFactoryFullArguments) {
   const nodesToDenormalize: DenormalizeNodeMap = {};
-  const entityToDenormalize = getEntityFromSchemaByName(entity, schema);
+  const entityToDenormalize = getEntityFromSchemaByName(schema, entity);
 
   for (const [nodeName, nodePropertyDeclaration] of Object.entries(
     entityToDenormalize.nodes
@@ -78,9 +77,59 @@ export function createDenormalizeModelsFunction<
   for (const [nodeName, nodePropertyDeclaration] of Object.entries(
     nodesToDenormalize
   )) {
+    // One to one
     if (
       nodePropertyDeclaration.type === SchemaWithRelationshipNodeType.ONE_TO_ONE
     ) {
+      denormalizeFactoryFunctions[nodeName] = createOneToOneFunction({
+        connection,
+        localEntityName: entity,
+        property: nodePropertyDeclaration,
+        schema,
+      });
+      continue;
+    }
+
+    // One to many
+    if (
+      nodePropertyDeclaration.type ===
+      SchemaWithRelationshipNodeType.ONE_TO_MANY
+    ) {
+      denormalizeFactoryFunctions[nodeName] = createOneToManyFunction({
+        connection,
+        localEntityName: entity,
+        property: nodePropertyDeclaration,
+        schema,
+      });
+      continue;
+    }
+
+    // Many to one
+    if (
+      nodePropertyDeclaration.type ===
+      SchemaWithRelationshipNodeType.MANY_TO_ONE
+    ) {
+      denormalizeFactoryFunctions[nodeName] = createManyToOneFunction({
+        connection,
+        localEntityName: entity,
+        property: nodePropertyDeclaration,
+        schema,
+      });
+      continue;
+    }
+
+    // Many to many
+    if (
+      nodePropertyDeclaration.type ===
+      SchemaWithRelationshipNodeType.MANY_TO_MANY
+    ) {
+      denormalizeFactoryFunctions[nodeName] = createManyToManyFunction({
+        connection,
+        localEntityName: entity,
+        property: nodePropertyDeclaration,
+        schema,
+      });
+      continue;
     }
   }
 

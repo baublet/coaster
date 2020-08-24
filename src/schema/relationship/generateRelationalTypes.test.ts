@@ -18,7 +18,7 @@ it("throws if we can't find the relationship: no inference", () => {
               username: SchemaNodeType.STRING,
               profile: {
                 type: SchemaWithRelationshipNodeType.ONE_TO_ONE,
-                of: "UserProfile",
+                of: "UserProfile"
               },
             },
           },

@@ -17,7 +17,7 @@ export function getUniqueIdFieldForEntityInSchema(
     entityNotFoundError(
       entityName,
       entities,
-      "We were unable to find the entity we want to create a model for."
+      "We were unable to find the entity when trying to retrieve or infer its unique ID field."
     )
   );
 }
