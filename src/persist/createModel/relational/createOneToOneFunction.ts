@@ -33,10 +33,7 @@ export function createOneToOneFunction<
   const foreignIdField =
     property.foreignColumn ||
     getForeignIdFieldForRelationship(property, localEntity);
-  const foreignTableName = getTableNameForEntityInSchema(
-    schema,
-    localEntityName
-  );
+  const foreignTableName = getTableNameForEntityInSchema(schema, property.of);
 
   return (parent: PNM) => {
     const localId = parent[localIdField];

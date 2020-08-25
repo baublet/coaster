@@ -2,6 +2,7 @@ import {
   NormalizedModelFactory,
   NormalizedModel,
   CreateModelFactoryFullArguments,
+  ModelFactoryOptions,
 } from "../createModel";
 import { RelationalDiscriminator } from "../../connection";
 
@@ -11,9 +12,12 @@ export function createUpdateWhereFunction<NM extends NormalizedModel>({
 }: CreateModelFactoryFullArguments): NormalizedModelFactory<NM>["updateWhere"] {
   async function updateWhere(
     data: Partial<NM>,
-    constrainer: RelationalDiscriminator<NM>
+    constrainer: RelationalDiscriminator<NM>,
+    options: ModelFactoryOptions = {}
   ): Promise<number> {
-    const results = await constrainer(connection.table(tableName).update(data));
+    const results = await constrainer(
+      (options.connection || connection).table(tableName).update(data)
+    );
     if (Array.isArray(results)) {
       return results[0];
     }

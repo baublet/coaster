@@ -1,5 +1,6 @@
 import { Schema } from "schema";
 
+import { getTableNameForEntityInSchema } from "../helpers/getTableNameForEntityInSchema";
 import { Connection, RelationalDiscriminator } from "../connection";
 import {
   createCreateFunction,
@@ -10,7 +11,11 @@ import {
   createUpdateFunction,
   createUpdateWhereFunction,
 } from "./normalized";
-import { getTableNameForEntityInSchema } from "persist/helpers/getTableNameForEntityInSchema";
+import { createDenormalizeModelsFunction } from "./relational";
+
+export interface ModelFactoryOptions {
+  connection?: Connection;
+}
 
 export interface CreateModelFactoryArguments {
   schema: Schema;
@@ -30,22 +35,41 @@ export type Model = object;
 export type NormalizedModel = object;
 export type Maybe<T> = void | T;
 
-export type NormalizedModelFactory<NM extends NormalizedModel> = {
+export type NormalizedModelFactory<
+  M extends Model = any,
+  NM extends NormalizedModel = any
+> = {
   (): (input: Partial<NM>) => NM;
-  create(model: Partial<NM>): Promise<NM>;
-  create(models: Partial<NM>[]): Promise<NM>;
-  delete(id: string | number): Promise<number>;
-  delete(ids: string[] | number[]): Promise<number>;
-  deleteWhere(constrainer: RelationalDiscriminator<NM>): Promise<number>;
-  find(id: string | number): Promise<Maybe<NM>>;
-  find(ids: string[] | number[]): Promise<NM[]>;
-  findWhere(constrainer: RelationalDiscriminator<NM>): Promise<NM[]>;
-  update(model: Partial<NM>): Promise<NM>;
-  update(id: string | number, data: Partial<NM>): Promise<NM>;
+  create(model: Partial<NM>, options?: ModelFactoryOptions): Promise<NM>;
+  create(models: Partial<NM>[], options?: ModelFactoryOptions): Promise<NM>;
+  delete(id: string | number, options?: ModelFactoryOptions): Promise<number>;
+  delete(
+    ids: string[] | number[],
+    options?: ModelFactoryOptions
+  ): Promise<number>;
+  deleteWhere(
+    constrainer: RelationalDiscriminator<NM>,
+    options?: ModelFactoryOptions
+  ): Promise<number>;
+  find(id: string | number, options?: ModelFactoryOptions): Promise<Maybe<NM>>;
+  find(ids: string[] | number[], options?: ModelFactoryOptions): Promise<NM[]>;
+  findWhere(
+    constrainer: RelationalDiscriminator<NM>,
+    options?: ModelFactoryOptions
+  ): Promise<NM[]>;
+  update(model: Partial<NM>, options?: ModelFactoryOptions): Promise<NM>;
+  update(
+    id: string | number,
+    data: Partial<NM>,
+    options?: ModelFactoryOptions
+  ): Promise<NM>;
   updateWhere(
     data: Partial<NM>,
-    constrainer: RelationalDiscriminator<NM>
+    constrainer: RelationalDiscriminator<NM>,
+    options?: ModelFactoryOptions
   ): Promise<number>;
+  denormalize(model: NM, options?: ModelFactoryOptions): M;
+  denormalize(model: NM[], options?: ModelFactoryOptions): M[];
 };
 
 export function createModel<M extends Model, NM extends NormalizedModel = M>(
@@ -101,5 +125,17 @@ export function createModel<M extends Model, NM extends NormalizedModel = M>(
     tableName: table,
   });
 
-  return partialNormalized as NormalizedModelFactory<NM>;
+  // Denormalization overloads
+  const denormalizeMany = createDenormalizeModelsFunction<M, NM>({
+    schema: args.schema,
+    entity: args.entity,
+    connection: args.connection,
+    tableName: table,
+  });
+  partialNormalized.denormalize = (nm: NM | NM[]): M | M[] => {
+    if (Array.isArray(nm)) return denormalizeMany(nm);
+    return denormalizeMany([nm])[0];
+  };
+
+  return partialNormalized as NormalizedModelFactory<M, NM>;
 }

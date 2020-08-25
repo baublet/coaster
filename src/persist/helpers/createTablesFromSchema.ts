@@ -1,9 +1,14 @@
 import { v4 as uuid } from "uuid";
 
-import { Schema } from "schema";
-import { Connection, ColumnBuilder } from "persist/connection";
-import { SchemaWithRelationshipEntityPropertyType } from "schema/relationship/schema";
-import { SchemaNodeType } from "schema/primitive/schema";
+import { Schema, SchemaNodeType } from "schema";
+import {
+  SchemaWithRelationshipEntityPropertyType,
+  SchemaNodeWithOneToOne,
+} from "schema/relationship/schema";
+
+import { Connection, ColumnBuilder } from "../connection";
+import { getForeignIdFieldForRelationship } from "./getForeignIdFieldForRelationship";
+import { getEntityFromSchemaByName } from "./getEntityFromSchemaByName";
 
 type SchemaTableNames = [Record<string, string>, Schema];
 
@@ -24,18 +29,30 @@ export async function createTablesFromSchema(
   const entityTableMap: Record<string, string> = {};
   const seed = uuid();
   const tableCreationPromises = schema.entities.map((entity) => {
-    const tableName = `${seed}-${entity.names.safe}`;
+    const tableName = `${seed}-${entity.names.safePlural}`;
     entityTableMap[entity.names.pascal] = tableName;
     return connection.schema.createTable(tableName, function (table) {
       const columns = Object.keys(entity.nodes);
       for (const column of columns) {
+        const entityNode = entity.nodes[column];
         if (column === "id") {
           table.increments();
           continue;
         }
-        const nodeType = getTypeByNode(entity.nodes[column]);
+        const nodeType = getTypeByNode(entityNode);
         let node: ColumnBuilder;
         switch (nodeType) {
+          case SchemaNodeType.ONE_TO_ONE:
+            node = table.bigInteger(
+              getForeignIdFieldForRelationship(
+                entityNode as SchemaNodeWithOneToOne,
+                getEntityFromSchemaByName(
+                  schema,
+                  (entityNode as SchemaNodeWithOneToOne).of
+                )
+              )
+            );
+            break;
           case SchemaNodeType.BOOLEAN:
             node = table.boolean(column);
             break;

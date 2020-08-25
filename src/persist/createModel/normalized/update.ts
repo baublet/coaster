@@ -1,8 +1,11 @@
-import { NormalizedModelFactory, NormalizedModel } from "../createModel";
-import { Connection } from "persist/connection";
-
+import {
+  NormalizedModelFactory,
+  NormalizedModel,
+  ModelFactoryOptions,
+} from "../createModel";
 import { CreateModelFactoryFullArguments } from "../createModel";
-import { getUniqueIdFieldForEntityInSchema } from "persist/helpers/getUniqueIdFieldForEntityInSchema";
+import { getUniqueIdFieldForEntityInSchema } from "../../helpers/getUniqueIdFieldForEntityInSchema";
+import { Connection, isConnection } from "../../connection";
 
 async function updateAndReturn<NM extends NormalizedModel>(
   connection: Connection,
@@ -38,8 +41,14 @@ export function createUpdateFunction<NM extends NormalizedModel>({
   const uniqueIdField = getUniqueIdFieldForEntityInSchema(schema, entity);
   async function update(
     modelOrId: Partial<NM> | string | number,
-    maybeData?: Partial<NM>
+    maybeData: Partial<NM> = {},
+    maybeOptions: ModelFactoryOptions = {}
   ): Promise<NM | NM[]> {
+    const resolvedConnection = isConnection(maybeData)
+      ? maybeData
+      : maybeOptions.connection
+      ? maybeOptions.connection
+      : connection;
     if (typeof modelOrId === "object") {
       const id = modelOrId[uniqueIdField];
       if (!id) {
@@ -54,7 +63,7 @@ export function createUpdateFunction<NM extends NormalizedModel>({
         delete data[uniqueIdField];
       }
       return updateAndReturn<NM>(
-        connection,
+        resolvedConnection,
         tableName,
         uniqueIdField,
         id,

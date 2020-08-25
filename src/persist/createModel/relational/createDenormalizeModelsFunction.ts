@@ -133,5 +133,14 @@ export function createDenormalizeModelsFunction<
     }
   }
 
-  return (models: NM[]): M[] => {};
+  return (models: NM[]): M[] =>
+    models.map((nm) => {
+      const model: any = {
+        ...nm,
+      };
+      for (const k of Object.keys(denormalizeFactoryFunctions)) {
+        model[k] = denormalizeFactoryFunctions[k](nm);
+      }
+      return model as M;
+    });
 }

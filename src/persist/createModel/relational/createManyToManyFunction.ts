@@ -6,7 +6,6 @@ import { Connection, RelationalDiscriminator } from "../../connection";
 import { NormalizedModel } from "../createModel";
 import { getUniqueIdFieldForEntityInSchema } from "../../helpers/getUniqueIdFieldForEntityInSchema";
 import { getTableNameForEntityInSchema } from "../../helpers/getTableNameForEntityInSchema";
-import { getForeignIdFieldForRelationship } from "../../helpers/getForeignIdFieldForRelationship";
 import { getEntityFromSchemaByName } from "persist/helpers/getEntityFromSchemaByName";
 import { getEntityReferentialColumnName } from "persist/helpers/getEntityReferentialColumnName";
 
@@ -75,10 +74,17 @@ export function createManyToManyFunction<
         }
 
         const results = await builder;
+        const cleanedResults = results.map((r) => {
+          const newObject = {};
+          for (const [k, v] of Object.entries(r)) {
+            if (!k.includes(`${foreignTableName}.`)) continue;
+            newObject[k.replace(`${foreignTableName}.`, "")] = v;
+          }
+          return newObject as CNM;
+        });
 
-        if (results.length > 0) {
-          // TODO: remove the namespaced column data
-          loadedEntities.push(...results);
+        if (cleanedResults.length > 0) {
+          loadedEntities.push(...cleanedResults);
         }
       }
       return loadedEntities;

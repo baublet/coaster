@@ -22,7 +22,21 @@ export interface SchemaWithRelationshipsEntity {
   names: GeneratedNames;
   description?: string;
   nodes: Record<string, SchemaWithRelationshipEntityPropertyType>;
+  /**
+   * If you pass this field to Coaster, your entity will be persisted on this
+   * table.
+   */
+  tableName?: string;
+  /**
+   * The unique ID field (e.g., `id`) of the entity. You almost never need to
+   * change this.
+   */
   uniqueIdField?: string;
+  /**
+   * The type annotation for this node's unique ID field. If you set your IDs to
+   * be UUIDs, you would set this as SchemaNodeType.STRING. Otherwise, Coaster
+   * defaults to using a number.
+   */
   uniqueIdType?: SchemaNodeType.NUMBER | SchemaNodeType.STRING;
 }
 
@@ -69,9 +83,9 @@ export interface SchemaNodeWithOneToMany
    * If the foreign column references this entity in some other way than
    * "entityId", use this field to tell Coaster how foreign columns denote their
    * attachment to this entity.
-   * 
+   *
    * For example: User -> many Posts.
-   * 
+   *
    * Posts has a "userId" field normally to denote their attachment to a User.
    * If your database model mandates that column be called "personId" instead,
    * you would enter "personId" as the value here.
@@ -89,25 +103,25 @@ export interface SchemaNodeWithManyToOne
   /**
    * If this entity references the foreign column by something other than
    * "entityId", denote that here.
-   * 
+   *
    * For example: many Posts -> one User
-   * 
+   *
    * A Post has a "userId" field on it that might reference which user it is
    * attached to. But if you need to call it something like "authorId" instead,
    * enter "authorId" as the value of this field.
    */
-  localColumn?: string
+  localColumn?: string;
   /**
    * If this entity references the foreign column by something other than its
    * unique ID field, denote that here.
-   * 
+   *
    * For example: many Posts -> one User
-   * 
+   *
    * A Post has a "username" field on it that references the "username" field on
    * the User object. For this scenario, `localColumn` would be "username", and
    * this field would also be called "username".
    */
-  foreignColumn?: string
+  foreignColumn?: string;
 }
 
 export interface SchemaNodeWithManyToMany
@@ -121,9 +135,9 @@ export interface SchemaNodeWithManyToMany
    * Many-to-many relationships must be managed by an entirely separate database
    * table that manages these relationships. Enter the entity defined in your
    * schema that manages them.
-   * 
+   *
    * For example: many Users <-> many Posts
-   * 
+   *
    * Posts might be authored by multiple users. So we need at least an entity
    * referenced here called, for example, "UserPosts" with at least three
    * columns on it: "id", "postId", and "userId". If your data model is simple,
@@ -134,9 +148,9 @@ export interface SchemaNodeWithManyToMany
   /**
    * If your through column references relationships via columns that Coaster
    * may not be able to infer, enter it here.
-   * 
+   *
    * For example: many Users <-> many Posts
-   * 
+   *
    * You might name your join table "PostAuthors", and reference the "User"
    * entities via a column called "authorId". If so, you would name this field
    * "authorId"
@@ -145,9 +159,9 @@ export interface SchemaNodeWithManyToMany
   /**
    * If your through column references relationships via columns that Coaster
    * may not be able to infer, enter it here.
-   * 
+   *
    * For example: many Users <-> many Posts
-   * 
+   *
    * You might name your join table "UserBlogs", and reference the "Post"
    * entities via a column called "blogId". You would thus name this field
    * "blogId".
@@ -156,9 +170,9 @@ export interface SchemaNodeWithManyToMany
   /**
    * If you reference your local column on your join table via any other field
    * but the ID, enter that here.
-   * 
+   *
    * For example: many Users <-> many Posts
-   * 
+   *
    * You might want to reference "PostUsers" by the user's username, rather than
    * their ID. If so, set this value to "username" and "localThroughColumn"
    * something like "username," as well.
@@ -167,10 +181,10 @@ export interface SchemaNodeWithManyToMany
   /**
    * If you reference your foreign column on your join table via any other field
    * but the ID, enter that here.
-   * 
+   *
    * For example: many Users <-> many Posts
-   * 
-   * You might want to reference "PostUsers" by the post's unique slug. If so, 
+   *
+   * You might want to reference "PostUsers" by the post's unique slug. If so,
    * you would set this field to "slug". Similarly, you might set the value of
    * "foreignThroughColumn" to "slug", as well, so your data and application
    * models are consistent.

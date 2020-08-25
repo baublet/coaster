@@ -1,8 +1,12 @@
-import { NormalizedModelFactory, NormalizedModel } from "../createModel";
+import {
+  NormalizedModelFactory,
+  NormalizedModel,
+  ModelFactoryOptions,
+} from "../createModel";
 import { Connection } from "persist/connection";
 
 import { CreateModelFactoryFullArguments } from "../createModel";
-import { getUniqueIdFieldForEntityInSchema } from "persist/helpers/getUniqueIdFieldForEntityInSchema";
+import { getUniqueIdFieldForEntityInSchema } from "../../helpers/getUniqueIdFieldForEntityInSchema";
 
 async function createAndReturn<NM extends NormalizedModel>(
   connection: Connection,
@@ -32,7 +36,8 @@ export function createCreateFunction<NM extends NormalizedModel>({
 }: CreateModelFactoryFullArguments): NormalizedModelFactory<NM>["create"] {
   const uniqueIdField = getUniqueIdFieldForEntityInSchema(schema, entity);
   async function create(
-    modelOrModels: Partial<NM>[] | Partial<NM>
+    modelOrModels: Partial<NM>[] | Partial<NM>,
+    options: ModelFactoryOptions = {}
   ): Promise<NM | NM[]> {
     if (Array.isArray(modelOrModels)) {
       const promises = modelOrModels.map((data) =>
@@ -41,7 +46,7 @@ export function createCreateFunction<NM extends NormalizedModel>({
       return Promise.all(promises);
     }
     return createAndReturn<NM>(
-      connection,
+      options.connection || connection,
       tableName,
       uniqueIdField,
       modelOrModels

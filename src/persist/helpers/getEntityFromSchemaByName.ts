@@ -2,8 +2,8 @@ import { Schema } from "schema";
 import { SchemaWithRelationshipsEntity } from "schema/relationship/schema";
 
 export function getEntityFromSchemaByName(
-  entityName: string,
-  schema: Schema
+  schema: Schema,
+  entityName: string
 ): SchemaWithRelationshipsEntity {
   const entity = schema.entities.find(
     (node) => node.names.pascal === entityName

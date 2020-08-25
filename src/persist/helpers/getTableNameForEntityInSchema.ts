@@ -9,7 +9,7 @@ export function getTableNameForEntityInSchema(
 
   for (const entity of entities) {
     if (entity.names.canonical === entityName) {
-      return entity.uniqueIdField || "id";
+      return entity.tableName || entity.names.snakePlural;
     }
   }
 
