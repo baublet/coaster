@@ -158,6 +158,31 @@ it("transforms relationships to multiple objects: one to one", () => {
             },
           },
           Object {
+            "names": Object {
+              "camel": "userModel",
+              "camelPlural": "userModels",
+              "canonical": "UserModel",
+              "original": "UserModel",
+              "originalPlural": "UserModels",
+              "pascal": "UserModel",
+              "pascalPlural": "UserModels",
+              "safe": "user_model",
+              "safePlural": "user_models",
+              "snake": "user_model",
+              "snakePlural": "user_models",
+            },
+            "nodes": Object {
+              "denormalized": Object {
+                "definition": "User",
+                "type": "raw",
+              },
+              "normalized": Object {
+                "definition": "NormalizedUser",
+                "type": "raw",
+              },
+            },
+          },
+          Object {
             "description": "Information the user wants to display on their profile",
             "names": Object {
               "camel": "normalizedUserProfile",
@@ -200,6 +225,31 @@ it("transforms relationships to multiple objects: one to one", () => {
               "user": Object {
                 "definition": "() => Promise<NormalizedUser>",
                 "nullable": false,
+                "type": "raw",
+              },
+            },
+          },
+          Object {
+            "names": Object {
+              "camel": "userProfileModel",
+              "camelPlural": "userProfileModels",
+              "canonical": "UserProfileModel",
+              "original": "UserProfileModel",
+              "originalPlural": "UserProfileModels",
+              "pascal": "UserProfileModel",
+              "pascalPlural": "UserProfileModels",
+              "safe": "user_profile_model",
+              "safePlural": "user_profile_models",
+              "snake": "user_profile_model",
+              "snakePlural": "user_profile_models",
+            },
+            "nodes": Object {
+              "denormalized": Object {
+                "definition": "UserProfile",
+                "type": "raw",
+              },
+              "normalized": Object {
+                "definition": "NormalizedUserProfile",
                 "type": "raw",
               },
             },
@@ -295,6 +345,31 @@ it("transforms relationships to multiple objects: one to many / many to one", ()
             },
           },
           Object {
+            "names": Object {
+              "camel": "userModel",
+              "camelPlural": "userModels",
+              "canonical": "UserModel",
+              "original": "UserModel",
+              "originalPlural": "UserModels",
+              "pascal": "UserModel",
+              "pascalPlural": "UserModels",
+              "safe": "user_model",
+              "safePlural": "user_models",
+              "snake": "user_model",
+              "snakePlural": "user_models",
+            },
+            "nodes": Object {
+              "denormalized": Object {
+                "definition": "User",
+                "type": "raw",
+              },
+              "normalized": Object {
+                "definition": "NormalizedUser",
+                "type": "raw",
+              },
+            },
+          },
+          Object {
             "description": undefined,
             "names": Object {
               "camel": "normalizedPost",
@@ -339,6 +414,31 @@ it("transforms relationships to multiple objects: one to many / many to one", ()
               "user": Object {
                 "definition": "() => Promise<NormalizedUser>",
                 "nullable": false,
+                "type": "raw",
+              },
+            },
+          },
+          Object {
+            "names": Object {
+              "camel": "postModel",
+              "camelPlural": "postModels",
+              "canonical": "PostModel",
+              "original": "PostModel",
+              "originalPlural": "PostModels",
+              "pascal": "PostModel",
+              "pascalPlural": "PostModels",
+              "safe": "post_model",
+              "safePlural": "post_models",
+              "snake": "post_model",
+              "snakePlural": "post_models",
+            },
+            "nodes": Object {
+              "denormalized": Object {
+                "definition": "Post",
+                "type": "raw",
+              },
+              "normalized": Object {
+                "definition": "NormalizedPost",
                 "type": "raw",
               },
             },

@@ -35,10 +35,6 @@ export type DenormalizerFactoryMultiple<
   parentModel: ParentNormalizedModel
 ) => (discriminator: RelationalDiscriminator) => Promise<NodeNormalizedModel[]>;
 
-type DenormalizeModels<M extends Model, NM extends NormalizedModel> = (
-  models: NM[]
-) => M[];
-
 export type DenormalizableNodes =
   | SchemaNodeWithOneToOne
   | SchemaNodeWithOneToMany
@@ -111,7 +107,6 @@ export function createDenormalizeModelsFunction<
     ) {
       denormalizeFactoryFunctions[nodeName] = createManyToOneFunction({
         connection,
-        localEntityName: entity,
         property: nodePropertyDeclaration,
         schema,
       });

@@ -161,8 +161,25 @@ export function generateRelationalTypes({
       }
     }
 
+    // Third pass: attach all of the normalized and denormalized entities onto a
+    // root entity for the purposes of creating persistent models
+    const modelRoots: SchemaEntity = {
+      names: generateNames(`${entity.names.pascal}Model`),
+      nodes: {
+        denormalized: {
+          type: SchemaNodeType.RAW,
+          definition: denormalizedEntity.names.canonical,
+        },
+        normalized: {
+          type: SchemaNodeType.RAW,
+          definition: normalizedEntity.names.canonical,
+        },
+      },
+    };
+
     newSchema.entities.push(normalizedEntity);
     newSchema.entities.push(denormalizedEntity);
+    newSchema.entities.push(modelRoots);
   }
 
   return [newSchema, customTypes];

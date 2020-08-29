@@ -3,7 +3,7 @@ import { Schema } from "schema";
 
 import { DenormalizerFactoryMultiple } from "./createDenormalizeModelsFunction";
 import { Connection, RelationalDiscriminator } from "../../connection";
-import { NormalizedModel } from "../createModel";
+import { NormalizedModel, ModelFactoryOptions } from "../createModel";
 import { getUniqueIdFieldForEntityInSchema } from "../../helpers/getUniqueIdFieldForEntityInSchema";
 import { getTableNameForEntityInSchema } from "../../helpers/getTableNameForEntityInSchema";
 import { getEntityFromSchemaByName } from "persist/helpers/getEntityFromSchemaByName";
@@ -51,11 +51,14 @@ export function createManyToManyFunction<
     let attempted = false;
     const loadedEntities: CNM[] = [];
 
-    async function manyToMany(discriminator?: RelationalDiscriminator) {
+    async function manyToMany(
+      discriminator?: RelationalDiscriminator,
+      options: ModelFactoryOptions = {}
+    ) {
       if (!attempted) {
         attempted = true;
 
-        let builder = connection
+        let builder = (options.connection || connection)
           .table(foreignTableName)
           .select("*")
           .join(joinTableName, (j) =>

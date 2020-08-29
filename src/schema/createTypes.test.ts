@@ -76,6 +76,11 @@ it("generates a full schema", () => {
       posts: (discriminator?: RelationalDiscriminator) => Promise<NormalizedPost[]>;
     }
 
+    interface UserModel {
+      denormalized: User;
+      normalized: NormalizedUser;
+    }
+
     interface NormalizedPost {
       id: number;
       title: string;
@@ -88,6 +93,11 @@ it("generates a full schema", () => {
       title: string;
       content: string;
       user: () => Promise<NormalizedUser>;
+    }
+
+    interface PostModel {
+      denormalized: Post;
+      normalized: NormalizedPost;
     }"
   `);
 });

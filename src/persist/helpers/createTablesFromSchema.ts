@@ -53,6 +53,21 @@ export async function createTablesFromSchema(
               )
             );
             break;
+          case SchemaNodeType.MANY_TO_ONE:
+            node = table.bigInteger(
+              getForeignIdFieldForRelationship(
+                entityNode as SchemaNodeWithOneToOne,
+                getEntityFromSchemaByName(
+                  schema,
+                  (entityNode as SchemaNodeWithOneToOne).of
+                )
+              )
+            );
+            break;
+          case SchemaNodeType.ONE_TO_MANY:
+            // No op. E.g., User.Post[]. Post is where the association is stored
+            // so that User gets posts via Post.userId.
+            continue;
           case SchemaNodeType.BOOLEAN:
             node = table.boolean(column);
             break;
