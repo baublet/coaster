@@ -13,6 +13,7 @@ import {
 } from "./schema";
 import { entityNotFoundError } from "helpers/entityNotFoundError";
 import { CustomTypes } from "../createSchema";
+import { addRelationalManyToManyModelMethods } from "./addRelationalManyToManyModelMethods";
 
 export type GenerateRelationalTypesArguments = GenerateTypesBaseArguments & {
   schema: SchemaWithRelationships;
@@ -161,8 +162,25 @@ export function generateRelationalTypes({
       }
     }
 
-    // Third pass: attach all of the normalized and denormalized entities onto a
-    // root entity for the purposes of creating persistent models
+    // Third pass: gather the methods for manage relational entities
+    const modelMethods: Record<string, string> = {};
+    for (const [property, node] of nodes) {
+      if (!isRelationalNode(node)) {
+        continue;
+      }
+      if (node.type === SchemaWithRelationshipNodeType.MANY_TO_MANY) {
+        modelMethods[property] = addRelationalManyToManyModelMethods(node);
+      }
+    }
+    const modelMethodTypes = `interface ${
+      entity.names.canonical
+    }ModelMethods = ${Object.keys(modelMethods)
+      .map((k) => `${modelMethods[k]};`)
+      .join("\n")}`;
+    customTypes.push(modelMethodTypes);
+
+    // Fourth pass: attach all of the normalized and denormalized entities onto
+    // a root entity for the purposes of creating persistent models
     const modelRoots: SchemaEntity = {
       names: generateNames(`${entity.names.pascal}Model`),
       nodes: {
@@ -173,6 +191,10 @@ export function generateRelationalTypes({
         normalized: {
           type: SchemaNodeType.RAW,
           definition: normalizedEntity.names.canonical,
+        },
+        methods: {
+          type: SchemaNodeType.RAW,
+          definition: `${entity.names.canonical}ModelMethods`,
         },
       },
     };

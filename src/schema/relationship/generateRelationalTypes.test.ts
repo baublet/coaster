@@ -176,6 +176,10 @@ it("transforms relationships to multiple objects: one to one", () => {
                 "definition": "User",
                 "type": "raw",
               },
+              "methods": Object {
+                "definition": "UserModelMethods",
+                "type": "raw",
+              },
               "normalized": Object {
                 "definition": "NormalizedUser",
                 "type": "raw",
@@ -248,6 +252,10 @@ it("transforms relationships to multiple objects: one to one", () => {
                 "definition": "UserProfile",
                 "type": "raw",
               },
+              "methods": Object {
+                "definition": "UserProfileModelMethods",
+                "type": "raw",
+              },
               "normalized": Object {
                 "definition": "NormalizedUserProfile",
                 "type": "raw",
@@ -259,6 +267,8 @@ it("transforms relationships to multiple objects: one to one", () => {
       },
       Array [
         "import { RelationalDiscriminator } from \\"coaster\\";",
+        "interface UserModelMethods = ",
+        "interface UserProfileModelMethods = ",
       ],
     ]
   `);
@@ -363,6 +373,10 @@ it("transforms relationships to multiple objects: one to many / many to one", ()
                 "definition": "User",
                 "type": "raw",
               },
+              "methods": Object {
+                "definition": "UserModelMethods",
+                "type": "raw",
+              },
               "normalized": Object {
                 "definition": "NormalizedUser",
                 "type": "raw",
@@ -437,6 +451,10 @@ it("transforms relationships to multiple objects: one to many / many to one", ()
                 "definition": "Post",
                 "type": "raw",
               },
+              "methods": Object {
+                "definition": "PostModelMethods",
+                "type": "raw",
+              },
               "normalized": Object {
                 "definition": "NormalizedPost",
                 "type": "raw",
@@ -448,6 +466,247 @@ it("transforms relationships to multiple objects: one to many / many to one", ()
       },
       Array [
         "import { RelationalDiscriminator } from \\"coaster\\";",
+        "interface UserModelMethods = ",
+        "interface PostModelMethods = ",
+      ],
+    ]
+  `);
+});
+
+it("transforms relationships to multiple objects: many to many", () => {
+  expect(
+    generateRelationalTypes({
+      schema: {
+        name: "Name",
+        description: "Description",
+        entities: [
+          {
+            names: generateNames("user"),
+            nodes: {
+              posts: {
+                type: SchemaWithRelationshipNodeType.MANY_TO_MANY,
+                of: "Post",
+                through: "PostAuthor",
+              },
+            },
+          },
+          {
+            names: generateNames("postAuthor"),
+            nodes: {
+              id: SchemaNodeType.NUMBER,
+              userId: SchemaNodeType.NUMBER,
+              postId: SchemaNodeType.NUMBER,
+            },
+          },
+          {
+            names: generateNames("post"),
+            nodes: {
+              title: SchemaNodeType.STRING,
+              content: SchemaNodeType.STRING,
+              user: {
+                type: SchemaWithRelationshipNodeType.MANY_TO_MANY,
+                of: "User",
+                through: "PostAuthor",
+              },
+            },
+          },
+        ],
+      },
+    })
+  ).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "description": "Description",
+        "entities": Array [
+          Object {
+            "names": Object {
+              "camel": "postAuthor",
+              "camelPlural": "postAuthors",
+              "canonical": "PostAuthor",
+              "original": "postAuthor",
+              "originalPlural": "postAuthors",
+              "pascal": "PostAuthor",
+              "pascalPlural": "PostAuthors",
+              "safe": "post_author",
+              "safePlural": "post_authors",
+              "snake": "post_author",
+              "snakePlural": "post_authors",
+            },
+            "nodes": Object {
+              "id": "number",
+              "postId": "number",
+              "userId": "number",
+            },
+          },
+          Object {
+            "description": undefined,
+            "names": Object {
+              "camel": "normalizedUser",
+              "camelPlural": "normalizedUsers",
+              "canonical": "NormalizedUser",
+              "original": "normalizedUser",
+              "originalPlural": "normalizedUsers",
+              "pascal": "NormalizedUser",
+              "pascalPlural": "NormalizedUsers",
+              "safe": "normalized_user",
+              "safePlural": "normalized_users",
+              "snake": "normalized_user",
+              "snakePlural": "normalized_users",
+            },
+            "nodes": Object {
+              "postId": Object {
+                "nullable": false,
+                "type": "number",
+              },
+            },
+          },
+          Object {
+            "description": undefined,
+            "names": Object {
+              "camel": "user",
+              "camelPlural": "users",
+              "canonical": "User",
+              "original": "user",
+              "originalPlural": "users",
+              "pascal": "User",
+              "pascalPlural": "Users",
+              "safe": "user",
+              "safePlural": "users",
+              "snake": "user",
+              "snakePlural": "users",
+            },
+            "nodes": Object {
+              "posts": Object {
+                "definition": "(discriminator?: RelationalDiscriminator) => Promise<NormalizedPost[]>",
+                "nullable": false,
+                "type": "raw",
+              },
+            },
+          },
+          Object {
+            "names": Object {
+              "camel": "userModel",
+              "camelPlural": "userModels",
+              "canonical": "UserModel",
+              "original": "UserModel",
+              "originalPlural": "UserModels",
+              "pascal": "UserModel",
+              "pascalPlural": "UserModels",
+              "safe": "user_model",
+              "safePlural": "user_models",
+              "snake": "user_model",
+              "snakePlural": "user_models",
+            },
+            "nodes": Object {
+              "denormalized": Object {
+                "definition": "User",
+                "type": "raw",
+              },
+              "methods": Object {
+                "definition": "UserModelMethods",
+                "type": "raw",
+              },
+              "normalized": Object {
+                "definition": "NormalizedUser",
+                "type": "raw",
+              },
+            },
+          },
+          Object {
+            "description": undefined,
+            "names": Object {
+              "camel": "normalizedPost",
+              "camelPlural": "normalizedPosts",
+              "canonical": "NormalizedPost",
+              "original": "normalizedPost",
+              "originalPlural": "normalizedPosts",
+              "pascal": "NormalizedPost",
+              "pascalPlural": "NormalizedPosts",
+              "safe": "normalized_post",
+              "safePlural": "normalized_posts",
+              "snake": "normalized_post",
+              "snakePlural": "normalized_posts",
+            },
+            "nodes": Object {
+              "content": "string",
+              "title": "string",
+              "userId": Object {
+                "nullable": false,
+                "type": "number",
+              },
+            },
+          },
+          Object {
+            "description": undefined,
+            "names": Object {
+              "camel": "post",
+              "camelPlural": "posts",
+              "canonical": "Post",
+              "original": "post",
+              "originalPlural": "posts",
+              "pascal": "Post",
+              "pascalPlural": "Posts",
+              "safe": "post",
+              "safePlural": "posts",
+              "snake": "post",
+              "snakePlural": "posts",
+            },
+            "nodes": Object {
+              "content": "string",
+              "title": "string",
+              "user": Object {
+                "definition": "(discriminator?: RelationalDiscriminator) => Promise<NormalizedUser[]>",
+                "nullable": false,
+                "type": "raw",
+              },
+            },
+          },
+          Object {
+            "names": Object {
+              "camel": "postModel",
+              "camelPlural": "postModels",
+              "canonical": "PostModel",
+              "original": "PostModel",
+              "originalPlural": "PostModels",
+              "pascal": "PostModel",
+              "pascalPlural": "PostModels",
+              "safe": "post_model",
+              "safePlural": "post_models",
+              "snake": "post_model",
+              "snakePlural": "post_models",
+            },
+            "nodes": Object {
+              "denormalized": Object {
+                "definition": "Post",
+                "type": "raw",
+              },
+              "methods": Object {
+                "definition": "PostModelMethods",
+                "type": "raw",
+              },
+              "normalized": Object {
+                "definition": "NormalizedPost",
+                "type": "raw",
+              },
+            },
+          },
+        ],
+        "name": "Name",
+      },
+      Array [
+        "import { RelationalDiscriminator } from \\"coaster\\";",
+        "interface UserModelMethods = {
+      add(Post | NormalizedPost): Promise<void>;
+      clear(): Promise<void>;
+      remove(Post | NormalizedPost): Promise<void>;
+      set((Post | NormalizedPost)[]): Promise<void>;
+    };",
+        "interface PostModelMethods = {
+      add(User | NormalizedUser): Promise<void>;
+      clear(): Promise<void>;
+      remove(User | NormalizedUser): Promise<void>;
+      set((User | NormalizedUser)[]): Promise<void>;
+    };",
       ],
     ]
   `);
