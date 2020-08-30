@@ -79,6 +79,7 @@ it("generates a full schema", () => {
     interface UserModel {
       denormalized: User;
       normalized: NormalizedUser;
+      methods: UserModelMethods;
     }
 
     interface NormalizedPost {
@@ -98,6 +99,7 @@ it("generates a full schema", () => {
     interface PostModel {
       denormalized: Post;
       normalized: NormalizedPost;
+      methods: PostModelMethods;
     }"
   `);
 });

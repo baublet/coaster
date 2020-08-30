@@ -3,7 +3,7 @@ import { generateNames } from "./generateNames";
 const generated = generateNames("TypesPer Second");
 
 it("generates a canonical name", () => {
-  expect(generated.canonical).toBe("TypesPer Second");
+  expect(generated.canonical).toBe("TypesPerSecond");
 });
 
 it("generates a safe name for databases", () => {
