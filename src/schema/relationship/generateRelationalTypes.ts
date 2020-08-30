@@ -14,6 +14,7 @@ import {
 import { entityNotFoundError } from "helpers/entityNotFoundError";
 import { CustomTypes } from "../createSchema";
 import { addRelationalManyToManyModelMethods } from "./addRelationalManyToManyModelMethods";
+import { isEmptyObject } from "helpers";
 
 export type GenerateRelationalTypesArguments = GenerateTypesBaseArguments & {
   schema: SchemaWithRelationships;
@@ -172,12 +173,14 @@ export function generateRelationalTypes({
         modelMethods[property] = addRelationalManyToManyModelMethods(node);
       }
     }
-    const modelMethodTypes = `interface ${
-      entity.names.canonical
-    }ModelMethods = ${Object.keys(modelMethods)
-      .map((k) => `${modelMethods[k]};`)
-      .join("\n")}`;
-    customTypes.push(modelMethodTypes);
+    if (!isEmptyObject(modelMethods)) {
+      const modelMethodTypes = `interface ${
+        entity.names.canonical
+      }ModelMethods {\n${Object.keys(modelMethods)
+        .map((k) => `  ${k}: ${modelMethods[k]}`)
+        .join("\n")}\n}`;
+      customTypes.push(modelMethodTypes);
+    }
 
     // Fourth pass: attach all of the normalized and denormalized entities onto
     // a root entity for the purposes of creating persistent models

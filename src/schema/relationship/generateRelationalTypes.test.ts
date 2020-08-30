@@ -267,8 +267,6 @@ it("transforms relationships to multiple objects: one to one", () => {
       },
       Array [
         "import { RelationalDiscriminator } from \\"coaster\\";",
-        "interface UserModelMethods = ",
-        "interface UserProfileModelMethods = ",
       ],
     ]
   `);
@@ -466,8 +464,6 @@ it("transforms relationships to multiple objects: one to many / many to one", ()
       },
       Array [
         "import { RelationalDiscriminator } from \\"coaster\\";",
-        "interface UserModelMethods = ",
-        "interface PostModelMethods = ",
       ],
     ]
   `);
@@ -695,18 +691,22 @@ it("transforms relationships to multiple objects: many to many", () => {
       },
       Array [
         "import { RelationalDiscriminator } from \\"coaster\\";",
-        "interface UserModelMethods = {
-      add(Post | NormalizedPost): Promise<void>;
-      clear(): Promise<void>;
-      remove(Post | NormalizedPost): Promise<void>;
-      set((Post | NormalizedPost)[]): Promise<void>;
-    };",
-        "interface PostModelMethods = {
-      add(User | NormalizedUser): Promise<void>;
-      clear(): Promise<void>;
-      remove(User | NormalizedUser): Promise<void>;
-      set((User | NormalizedUser)[]): Promise<void>;
-    };",
+        "interface UserModelMethods {
+      posts: {
+        add(post: Post | NormalizedPost): Promise<void>;
+        clear(): Promise<void>;
+        remove(post:Post | NormalizedPost): Promise<void>;
+        set(posts: (Post | NormalizedPost)[]): Promise<void>;
+      }
+    }",
+        "interface PostModelMethods {
+      user: {
+        add(user: User | NormalizedUser): Promise<void>;
+        clear(): Promise<void>;
+        remove(user:User | NormalizedUser): Promise<void>;
+        set(users: (User | NormalizedUser)[]): Promise<void>;
+      }
+    }",
       ],
     ]
   `);

@@ -33,6 +33,12 @@ export interface CreateModelFactoryFullArguments {
 
 export type Model = object;
 export type NormalizedModel = object;
+export type GeneratedModel = {
+  normalizedModel: NormalizedModel;
+  denormalizedModel: Model;
+  methods?: Record<string, Record<string, Function>>;
+};
+
 export type Maybe<T> = void | T;
 
 export type NormalizedModelFactory<

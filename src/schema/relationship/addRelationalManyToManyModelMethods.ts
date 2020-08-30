@@ -6,11 +6,13 @@ export function addRelationalManyToManyModelMethods(
 ): string {
   const names = generateNames(node.of);
   const normalizedModelName = `Normalized${names.canonical}`;
+  const helpfulArgumentName = names.camel;
+  const helpfulArgumentNamePlural = names.camelPlural;
 
   return `{
-  add(${node.of} | ${normalizedModelName}): Promise<void>;
-  clear(): Promise<void>;
-  remove(${node.of} | ${normalizedModelName}): Promise<void>;
-  set((${node.of} | ${normalizedModelName})[]): Promise<void>;
-}`;
+    add(${helpfulArgumentName}: ${node.of} | ${normalizedModelName}): Promise<void>;
+    clear(): Promise<void>;
+    remove(${helpfulArgumentName}:${node.of} | ${normalizedModelName}): Promise<void>;
+    set(${helpfulArgumentNamePlural}: (${node.of} | ${normalizedModelName})[]): Promise<void>;
+  }`;
 }
