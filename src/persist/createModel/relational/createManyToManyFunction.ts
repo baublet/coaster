@@ -8,6 +8,7 @@ import { getUniqueIdFieldForEntityInSchema } from "../../helpers/getUniqueIdFiel
 import { getTableNameForEntityInSchema } from "../../helpers/getTableNameForEntityInSchema";
 import { getEntityFromSchemaByName } from "persist/helpers/getEntityFromSchemaByName";
 import { getEntityReferentialColumnName } from "persist/helpers/getEntityReferentialColumnName";
+import { batchLoaderMany } from "./batchLoaderMany";
 
 interface ManyToManyArguments {
   connection: Connection;
@@ -45,19 +46,25 @@ export function createManyToManyFunction<
     property.foreignThroughColumn ||
     getEntityReferentialColumnName(foreignEntity);
 
+  const batchLoader = batchLoaderMany<CNM>({
+    connection,
+    searchColumn: foreignIdField,
+    tableName: foreignTableName,
+  });
+
   return (parent: PNM) => {
     const localId = parent[localIdField];
-
-    let attempted = false;
-    const loadedEntities: CNM[] = [];
 
     async function manyToMany(
       discriminator?: RelationalDiscriminator,
       options: ModelFactoryOptions = {}
     ) {
-      if (!attempted) {
-        attempted = true;
+      const loadedEntities: CNM[] = [];
 
+      if (!options.connection && !discriminator) {
+        const results = await batchLoader(localId);
+        loadedEntities.push(...results);
+      } else {
         let builder = (options.connection || connection)
           .table(foreignTableName)
           .select("*")
@@ -72,9 +79,7 @@ export function createManyToManyFunction<
             )
           );
 
-        if (discriminator) {
-          builder = discriminator(builder);
-        }
+        builder = discriminator(builder);
 
         const results = await builder;
         const cleanedResults = results.map((r) => {

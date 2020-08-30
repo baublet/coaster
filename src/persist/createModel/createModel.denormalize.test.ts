@@ -2,7 +2,7 @@ import { createSchema, Schema, SchemaNodeType } from "schema";
 
 import { createTablesFromSchema } from "persist/helpers/createTablesFromSchema";
 import { createTestConnection } from "persist/helpers/createTestConnection";
-import { createModel } from "./createModel";
+import { createModel, NormalizedModelFactory } from "./createModel";
 
 const schema: Schema = createSchema({
   entities: [
@@ -45,6 +45,29 @@ const schema: Schema = createSchema({
         date: SchemaNodeType.NUMBER,
       },
     },
+    {
+      name: "Article",
+      nodes: {
+        id: SchemaNodeType.NUMBER,
+        title: SchemaNodeType.STRING,
+        content: SchemaNodeType.STRING,
+        date: SchemaNodeType.NUMBER,
+        authors: {
+          type: SchemaNodeType.MANY_TO_MANY,
+          of: "User",
+          through: "ArticleAuthor",
+          localThroughColumn: "articleId",
+        },
+      },
+    },
+    {
+      name: "ArticleAuthor",
+      nodes: {
+        id: SchemaNodeType.NUMBER,
+        articleId: SchemaNodeType.NUMBER,
+        userId: SchemaNodeType.NUMBER,
+      },
+    },
   ],
 });
 
@@ -63,6 +86,13 @@ interface NormalizedUser {
 interface NormalizedPost {
   id: number;
   userId: number;
+  date: number;
+  title: string;
+  content: string;
+}
+
+interface NormalizedArticle {
+  id: number;
   date: number;
   title: string;
   content: string;
@@ -89,6 +119,14 @@ interface DenormalizedPost {
   content: string;
 }
 
+interface DenormalizedArticle {
+  id: number;
+  date: number;
+  title: string;
+  content: string;
+  authors: () => Promise<NormalizedUser>;
+}
+
 interface GeneratedPostModel {
   normalizedModel: NormalizedPost;
   denormalizedModel: DenormalizedPost;
@@ -97,6 +135,19 @@ interface GeneratedPostModel {
 interface GeneratedUserModel {
   normalizedModel: NormalizedUser;
   denormalizedModel: DenormalizedUser;
+  methods: {
+    articles: {
+      associate(
+        article: NormalizedArticle | DenormalizedArticle,
+        user: NormalizedUser | DenormalizedUser
+      ): Promise<void>;
+      disassociate(
+        article: NormalizedArticle | DenormalizedArticle,
+        user: NormalizedUser | DenormalizedUser
+      ): Promise<void>;
+      clear(article: NormalizedArticle | DenormalizedArticle): Promise<void>;
+    };
+  };
 }
 
 interface GeneratedProfileModel {
@@ -104,16 +155,44 @@ interface GeneratedProfileModel {
   denormalizedModel: DenormalizedProfile;
 }
 
+interface GeneratedArticleModel {
+  normalizedModel: NormalizedArticle;
+  denormalizedModel: DenormalizedArticle;
+  methods: {
+    users: {
+      associate(
+        article: NormalizedArticle | DenormalizedArticle,
+        user: NormalizedUser | DenormalizedUser
+      ): Promise<void>;
+      disassociate(
+        article: NormalizedArticle | DenormalizedArticle,
+        user: NormalizedUser | DenormalizedUser
+      ): Promise<void>;
+      clear(article: NormalizedArticle | DenormalizedArticle): Promise<void>;
+    };
+  };
+}
+
 let connection;
 let tables;
-let User;
-let Profile;
-let Post;
+let Article: NormalizedModelFactory<
+  DenormalizedArticle,
+  NormalizedArticle,
+  GeneratedArticleModel["methods"]
+>;
+let User: NormalizedModelFactory<
+  DenormalizedUser,
+  NormalizedUser,
+  GeneratedUserModel["methods"]
+>;
+let Profile: NormalizedModelFactory<DenormalizedProfile, NormalizedProfile, {}>;
+let Post: NormalizedModelFactory<DenormalizedPost, NormalizedPost, {}>;
 let user;
 let profile;
 let post1;
 let denormalizedUser;
 let denormalizedProfile;
+let denormalizedArticle;
 let denormalizedPost1;
 
 beforeAll(async () => {
@@ -126,6 +205,8 @@ beforeAll(async () => {
   schema.entities[0].tableName = tables["User"];
   schema.entities[1].tableName = tables["Profile"];
   schema.entities[2].tableName = tables["Post"];
+  schema.entities[3].tableName = tables["Article"];
+  schema.entities[4].tableName = tables["ArticleAuthor"];
 
   User = createModel<GeneratedUserModel>({
     schema,
@@ -146,6 +227,13 @@ beforeAll(async () => {
     connection,
     entity: "Post",
     tableName: tables["Post"],
+  });
+
+  Article = createModel<GeneratedArticleModel>({
+    schema,
+    connection,
+    entity: "Article",
+    tableName: tables["Article"],
   });
 
   user = await User.create({ email: "email", profileId: 1 });
@@ -220,3 +308,5 @@ it("works for one-to-many and many-to-one relationships", async () => {
     },
   ]);
 });
+
+it("works on many-to-many relationships", async () => {});

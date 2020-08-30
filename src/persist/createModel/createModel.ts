@@ -158,6 +158,7 @@ export function createModel<GM extends GeneratedModel>(
 
   return partialNormalized as NormalizedModelFactory<
     GM["denormalizedModel"],
-    GM["normalizedModel"]
+    GM["normalizedModel"],
+    GM["methods"]
   >;
 }
