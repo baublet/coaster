@@ -23,11 +23,16 @@ interface TestObject {
   active: boolean;
 }
 
+interface GeneratedTestObject {
+  normalizedModel: TestObject;
+  denormalizedModel: TestObject;
+}
+
 it("creates, reads, updates, and deletes: simple types", async () => {
   const connection = await createTestConnection();
   const [tables] = await createTablesFromSchema(connection, schema);
 
-  const TestObject = createModel<TestObject>({
+  const TestObject = createModel<GeneratedTestObject>({
     schema,
     connection,
     entity: "TestObject",

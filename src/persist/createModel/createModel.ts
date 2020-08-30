@@ -33,18 +33,20 @@ export interface CreateModelFactoryFullArguments {
 
 export type Model = object;
 export type NormalizedModel = object;
+export type ModelMethods = Record<string, Record<string, Function>>;
 export type GeneratedModel = {
   normalizedModel: NormalizedModel;
   denormalizedModel: Model;
-  methods?: Record<string, Record<string, Function>>;
+  methods?: ModelMethods;
 };
 
 export type Maybe<T> = void | T;
 
 export type NormalizedModelFactory<
   M extends Model = any,
-  NM extends NormalizedModel = any
-> = {
+  NM extends NormalizedModel = any,
+  MM extends ModelMethods = {}
+> = MM & {
   (): (input: Partial<NM>) => NM;
   create(model: Partial<NM>, options?: ModelFactoryOptions): Promise<NM>;
   create(models: Partial<NM>[], options?: ModelFactoryOptions): Promise<NM>;
@@ -78,53 +80,59 @@ export type NormalizedModelFactory<
   denormalize(model: NM[], options?: ModelFactoryOptions): M[];
 };
 
-export function createModel<M extends Model, NM extends NormalizedModel = M>(
+export function createModel<GM extends GeneratedModel>(
   args: CreateModelFactoryArguments
 ) {
   const table =
     args.tableName || getTableNameForEntityInSchema(args.schema, args.entity);
 
-  const partialNormalized: any = (partial: Partial<NM>): NM => {
-    return { ...partial } as NM;
+  const partialNormalized: any = (
+    partial: Partial<GM["normalizedModel"]>
+  ): GM["normalizedModel"] => {
+    return { ...partial } as GM["normalizedModel"];
   };
 
-  partialNormalized.create = createCreateFunction<NM>({
+  partialNormalized.create = createCreateFunction<GM["normalizedModel"]>({
     schema: args.schema,
     entity: args.entity,
     connection: args.connection,
     tableName: table,
   });
-  partialNormalized.delete = createDeleteFunction<NM>({
+  partialNormalized.delete = createDeleteFunction<GM["normalizedModel"]>({
     schema: args.schema,
     entity: args.entity,
     connection: args.connection,
     tableName: table,
   });
-  partialNormalized.deleteWhere = createDeleteWhereFunction<NM>({
+  partialNormalized.deleteWhere = createDeleteWhereFunction<
+    GM["normalizedModel"]
+  >({
     schema: args.schema,
     entity: args.entity,
     connection: args.connection,
     tableName: table,
   });
-  partialNormalized.find = createFindFunction<NM>({
+  partialNormalized.find = createFindFunction<GM["normalizedModel"]>({
     schema: args.schema,
     entity: args.entity,
     connection: args.connection,
     tableName: table,
   });
-  partialNormalized.findWhere = createFindWhereFunction<NM>({
+  partialNormalized.findWhere = createFindWhereFunction<GM["normalizedModel"]>({
     schema: args.schema,
     entity: args.entity,
     connection: args.connection,
     tableName: table,
   });
-  partialNormalized.update = createUpdateFunction<NM>({
+  partialNormalized.update = createUpdateFunction<GM["normalizedModel"]>({
     schema: args.schema,
     entity: args.entity,
     connection: args.connection,
     tableName: table,
   });
-  partialNormalized.updateWhere = createUpdateWhereFunction<NM>({
+  partialNormalized.updateWhere = createUpdateWhereFunction<
+    GM["normalizedModel"]
+  >({
     schema: args.schema,
     entity: args.entity,
     connection: args.connection,
@@ -132,16 +140,24 @@ export function createModel<M extends Model, NM extends NormalizedModel = M>(
   });
 
   // Denormalization overloads
-  const denormalizeMany = createDenormalizeModelsFunction<M, NM>({
+  const denormalizeMany = createDenormalizeModelsFunction<
+    GM["denormalizedModel"],
+    GM["normalizedModel"]
+  >({
     schema: args.schema,
     entity: args.entity,
     connection: args.connection,
     tableName: table,
   });
-  partialNormalized.denormalize = (nm: NM | NM[]): M | M[] => {
+  partialNormalized.denormalize = (
+    nm: GM["normalizedModel"] | GM["normalizedModel"][]
+  ): GM["denormalizedModel"] | GM["denormalizedModel"][] => {
     if (Array.isArray(nm)) return denormalizeMany(nm);
     return denormalizeMany([nm])[0];
   };
 
-  return partialNormalized as NormalizedModelFactory<M, NM>;
+  return partialNormalized as NormalizedModelFactory<
+    GM["denormalizedModel"],
+    GM["normalizedModel"]
+  >;
 }

@@ -89,6 +89,21 @@ interface DenormalizedPost {
   content: string;
 }
 
+interface GeneratedPostModel {
+  normalizedModel: NormalizedPost;
+  denormalizedModel: DenormalizedPost;
+}
+
+interface GeneratedUserModel {
+  normalizedModel: NormalizedUser;
+  denormalizedModel: DenormalizedUser;
+}
+
+interface GeneratedProfileModel {
+  normalizedModel: NormalizedProfile;
+  denormalizedModel: DenormalizedProfile;
+}
+
 let connection;
 let tables;
 let User;
@@ -112,21 +127,21 @@ beforeAll(async () => {
   schema.entities[1].tableName = tables["Profile"];
   schema.entities[2].tableName = tables["Post"];
 
-  User = createModel<DenormalizedUser, NormalizedUser>({
+  User = createModel<GeneratedUserModel>({
     schema,
     connection,
     entity: "User",
     tableName: tables["User"],
   });
 
-  Profile = createModel<DenormalizedProfile, NormalizedProfile>({
+  Profile = createModel<GeneratedProfileModel>({
     schema,
     connection,
     entity: "Profile",
     tableName: tables["Profile"],
   });
 
-  Post = createModel<DenormalizedPost, NormalizedPost>({
+  Post = createModel<GeneratedPostModel>({
     schema,
     connection,
     entity: "Post",
