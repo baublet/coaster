@@ -1,8 +1,10 @@
 {
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"],
   "compilerOptions": {
     "downlevelIteration": true,
     "esModuleInterop": true,
-    "lib": ["es2017"],
+    "lib": ["esnext"],
     "baseUrl": "./src"
   }
 }

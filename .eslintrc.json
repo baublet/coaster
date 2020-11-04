@@ -11,5 +11,13 @@
   "rules": {
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": "error"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["*typeTests.ts"],
+      "rules": {
+        "@typescript-eslint/no-unused-vars": "off"
+      }
+    }
+  ]
 }

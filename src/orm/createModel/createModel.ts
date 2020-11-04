@@ -51,23 +51,27 @@ export function createModel<T extends CreateModelArguments>(
     return model as ModelDetails<T>;
   };
 
+  model.withValidators = (validators) => {
+    model.$validators.push(...validators);
+    return model as ModelDetails<T>;
+  };
+
   model.validate = async (m) => {
     const validators = model.$validators.map((v) => v(m));
     const settled = await Promise.all(validators);
     const errors: string[] = [];
     let valid = true;
-    for (const [success, error] of settled) {
-      if (!success) {
-        valid = false;
+    for (const validity of settled) {
+      if (validity === true) {
+        continue;
       }
-      if (error) {
-        errors.push(error);
-      }
+      valid = false;
+      errors.push(validity);
     }
     if (valid) {
-      return true;
+      return [true, []];
     }
-    return errors;
+    return [false, errors];
   };
 
   return model as ModelDetails<T>;

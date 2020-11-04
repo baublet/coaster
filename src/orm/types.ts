@@ -89,7 +89,7 @@ export type ModelPrimitiveTypes<
 >;
 
 type IdType = string | number;
-type Validator<P extends object> = (
+export type Validator<P extends object> = (
   args: P
 ) => true | string | Promise<true | string>;
 
@@ -131,8 +131,11 @@ export interface ModelDetails<T extends CreateModelArguments> {
   delete: CustomMethodOr<T, "delete", DeleteMethod<T>>;
   find: CustomMethodOr<T, "find", FindMethod<T>>;
   save: CustomMethodOr<T, "save", SaveMethod<T>>;
-  validate(m: ModelPrimitiveTypes<T>): Promise<true | string[]>;
+  validate(m: ModelPrimitiveTypes<T>): Promise<[boolean, string[]]>;
   withValidator(
-    Validator: Validator<Partial<ModelPrimitiveTypes<T>>>
+    validator: Validator<Partial<ModelPrimitiveTypes<T>>>
+  ): ModelDetails<T>;
+  withValidators(
+    v: Validator<Partial<ModelPrimitiveTypes<T>>>[]
   ): ModelDetails<T>;
 }

@@ -5,6 +5,7 @@ import {
   CustomMethodOr,
   Model,
   RecordFromTypeWithOptionals,
+  Validator,
 } from "./types";
 
 const testRecord = { required: 123, maybe: 321 };
@@ -55,3 +56,11 @@ const customMethodsModelDefault = customMethods({
 // @ts-expect-error
 const customMethodsModelDefaultFn: "not hi!" = customMethodsModelDefault();
 const customMethodsModelDefaultFnFail: "Hi!" = customMethodsModelDefault();
+
+const validatorTest1: Validator<{}> = () => Promise.resolve("string");
+const validatorTest2: Validator<{}> = () => "string";
+const validatorTest3: Validator<{}> = () => true;
+const validatorTest4: Validator<{}> = () => Promise.resolve(true);
+const validatorTest5: Validator<{}> = () => new Promise((r) => r(true));
+// @ts-expect-error
+const validatorTest6: Validator<{}> = () => false;
