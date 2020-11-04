@@ -17,13 +17,13 @@ it("generates types from a schema", () => {
               active: SchemaNodeType.BOOLEAN,
               rawTest: {
                 type: SchemaNodeType.RAW,
-                definition: "Partial<{}>"
+                definition: "Partial<{}>",
               } as any,
               jobTitle: {
                 type: SchemaNodeType.STRING,
-                nullable: true
-              }
-            }
+                nullable: true,
+              },
+            },
           },
           {
             names: generateNames("post"),
@@ -35,17 +35,17 @@ it("generates types from a schema", () => {
               content: SchemaNodeType.STRING,
               authors: {
                 type: SchemaNodeType.ARRAY,
-                of: SchemaNodeType.NUMBER
+                of: SchemaNodeType.NUMBER,
               },
               modifications: {
                 type: SchemaNodeType.ARRAY,
                 of: SchemaNodeType.NUMBER,
-                nullable: true
-              }
-            }
-          }
-        ]
-      }
+                nullable: true,
+              },
+            },
+          },
+        ],
+      },
     })
   ).toMatchInlineSnapshot(`
     "interface User {

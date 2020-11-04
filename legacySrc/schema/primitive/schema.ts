@@ -11,7 +11,7 @@ export enum SchemaNodeType {
   BOOLEAN = "boolean",
   NUMBER = "number",
   RAW = "raw",
-  STRING = "string"
+  STRING = "string",
 }
 
 export type SchemaNodePrimitive =

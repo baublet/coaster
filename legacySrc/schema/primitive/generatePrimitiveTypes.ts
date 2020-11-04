@@ -4,7 +4,7 @@ import {
   SchemaEntity,
   isSchemaEntityConfiguration,
   SchemaNodeArray,
-  SchemaNodeRaw
+  SchemaNodeRaw,
 } from "./schema";
 
 export interface GenerateTypesFromNodesArguments {
@@ -99,7 +99,7 @@ export function generatePrimitiveTypes(
     types.push(
       schemaEntityToTypeDefinition(schemaNode, {
         schema,
-        indent
+        indent,
       })
     );
   }
