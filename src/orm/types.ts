@@ -44,7 +44,7 @@ export type ModelPropertyDefinitionPrimitive<
   T extends ModelPropertyType,
   Nullable extends boolean = false
 > = {
-  default?: ModelPropertyDefinitionPrimitive<"string", Nullable>;
+  default?: ModelPrimitivePropertyTypeFromDefinition<T>;
   nullable: Nullable;
   type: T;
 };

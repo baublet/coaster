@@ -5,6 +5,7 @@ import {
   ModelPrimitiveTypes,
   ModelPropertyDefinitionPrimitive,
   ModelPropertyType,
+  ModelPrimitivePropertyTypeFromDefinition,
   NullableKeys,
 } from "../types";
 import { createFn } from "./createFn";
@@ -12,21 +13,29 @@ import { deleteFn } from "./deleteFn";
 import { findFn } from "./findFn";
 import { saveFn } from "./saveFn";
 
+type PropArguments<T extends ModelPropertyType> = {
+  defaultValue?: ModelPrimitivePropertyTypeFromDefinition<T>;
+};
+
 export function prop<T extends ModelPropertyType>(
-  type: T
+  type: T,
+  { defaultValue }: PropArguments<T> = {}
 ): ModelPropertyDefinitionPrimitive<T> {
   return {
     type,
     nullable: false,
+    default: defaultValue,
   };
 }
 
 export function nullable<T extends ModelPropertyType>(
-  type: T
+  type: T,
+  { defaultValue }: PropArguments<T> = {}
 ): ModelPropertyDefinitionPrimitive<T, true> {
   return {
     type,
     nullable: true,
+    default: defaultValue,
   };
 }
 
@@ -69,7 +78,7 @@ export function createModel<T extends CreateModelArguments>(
       errors.push(validity);
     }
     if (valid) {
-      return [true, []];
+      return [true, errors];
     }
     return [false, errors];
   };
