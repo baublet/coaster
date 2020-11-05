@@ -9,7 +9,11 @@ export type RelationalDiscriminator<T = any> = (
   qb: QueryBuilder<T>
 ) => QueryBuilder<T>;
 
-export type Model<T extends ModelDetails<any>> = T["$modelPrimitiveTypes"];
+export type NiceType<T> = {} & { [P in keyof T]: T[P] };
+
+export type Model<T extends ModelDetails<any>> = NiceType<
+  T["$modelPrimitiveTypes"]
+>;
 
 export function isConnection(value: any): value is Connection {
   if (typeof value !== "object") {
@@ -38,7 +42,7 @@ export type ModelPrimitivePropertyTypeFromDefinition<
 export type RecordFromTypeWithOptionals<
   T extends object,
   OptionalKeys extends keyof T
-> = Required<Omit<T, OptionalKeys>> & Partial<Pick<T, OptionalKeys>>;
+> = NiceType<Required<Omit<T, OptionalKeys>> & Partial<Pick<T, OptionalKeys>>>;
 
 export type ModelPropertyDefinitionPrimitive<
   T extends ModelPropertyType,
@@ -101,7 +105,7 @@ export type CustomMethodOr<
 
 export type CreateMethod<T extends CreateModelArguments, Relationships> = (
   args: Partial<ModelPrimitiveTypes<T>>
-) => Promise<ModelPrimitiveTypes<T> & Relationships>;
+) => Promise<NiceType<ModelPrimitiveTypes<T> & Relationships>>;
 
 export type DeleteMethod<T extends CreateModelArguments> = ((
   id: IdType
