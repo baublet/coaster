@@ -123,20 +123,24 @@ export type SaveMethod<T extends CreateModelArguments> = (
 
 type WithOneToOneRelationshipArguments<
   T extends CreateModelArguments,
-  O extends ModelDetails
+  O extends ModelDetails,
+  N extends boolean
 > =
   | {
       of: O;
       localKey: AllKeyNames<T>;
+      nullable?: N;
     }
   | {
       of: O;
       foreignKey: O["$allKeys"];
+      nullable?: N;
     }
   | {
       of: O;
       localKey: AllKeyNames<T>;
       foreignKey: O["$allKeys"];
+      nullable?: N;
     };
 
 type WithOneToManyRelationshipArguments<O extends ModelDetails> = {
@@ -146,10 +150,24 @@ type WithOneToManyRelationshipArguments<O extends ModelDetails> = {
 
 type WithManyToOneRelationshipArguments<
   T extends CreateModelArguments,
-  O extends ModelDetails
+  O extends ModelDetails,
+  N extends boolean
 > = {
   of: O;
   localKey: AllKeyNames<T>;
+  nullable?: N;
+};
+
+type WithManyToManyRelationshipArguments<
+  O extends ModelDetails,
+  T extends ModelDetails
+> = {
+  of: O;
+  through: {
+    model: T;
+    localKey: string;
+    foreignKey: string;
+  };
 };
 
 export type AllKeyNames<T extends CreateModelArguments> = keyof T["properties"];
@@ -160,7 +178,7 @@ export type PossibleNames<
 > = Exclude<Str, AllKeyNames<T> | OtherRelationships>;
 
 type RelationshipsLoader<M = any> = () => Promise<M[]>;
-type RelationshipLoader<M = any> = () => Promise<M>;
+type RelationshipLoader<M = any> = () => Promise<M | null>;
 
 export interface ModelDetails<
   T extends CreateModelArguments = any,
@@ -189,13 +207,17 @@ export interface ModelDetails<
   withValidators(
     v: Validator<Partial<ModelPrimitiveTypes<T>>>[]
   ): ModelDetails<T, RelationshipNames, Relationships>;
-  withOneToOneRelationship<F extends ModelDetails, K extends string>(
+  withOneToOneRelationship<
+    F extends ModelDetails,
+    K extends string,
+    N extends boolean
+  >(
     name: PossibleNames<K, T, RelationshipNames>,
-    args: WithOneToOneRelationshipArguments<T, F>
+    args: WithOneToOneRelationshipArguments<T, F, N>
   ): ModelDetails<
     T,
     PossibleNames<K, T, RelationshipNames>,
-    Relationships & Record<K, RelationshipsLoader<F["$model"]>>
+    Relationships & Record<K, RelationshipLoader<F["$model"]>>
   >;
   withOneToManyRelationship<F extends ModelDetails, K extends string>(
     name: PossibleNames<K, T, RelationshipNames>,
@@ -205,12 +227,28 @@ export interface ModelDetails<
     PossibleNames<K, T, RelationshipNames>,
     Relationships & Record<K, RelationshipsLoader<F["$model"]>>
   >;
-  withManyToOneRelationship<F extends ModelDetails, K extends string>(
+  withManyToOneRelationship<
+    F extends ModelDetails,
+    K extends string,
+    N extends boolean
+  >(
     name: PossibleNames<K, T, RelationshipNames>,
-    args: WithManyToOneRelationshipArguments<T, F>
+    args: WithManyToOneRelationshipArguments<T, F, N>
   ): ModelDetails<
     T,
     PossibleNames<K, T, RelationshipNames>,
     Relationships & Record<K, RelationshipLoader<F["$model"]>>
+  >;
+  withManyToManyRelationship<
+    F extends ModelDetails,
+    K extends string,
+    Th extends ModelDetails
+  >(
+    name: PossibleNames<K, T, RelationshipNames>,
+    args: WithManyToManyRelationshipArguments<F, Th>
+  ): ModelDetails<
+    T,
+    PossibleNames<K, T, RelationshipNames>,
+    Relationships & Record<K, RelationshipsLoader<F["$model"]>>
   >;
 }
