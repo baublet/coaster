@@ -99,9 +99,9 @@ export type CustomMethodOr<
   D
 > = T["methods"][K] extends Function ? T["methods"][K] : D;
 
-export type CreateMethod<T extends CreateModelArguments> = (
+export type CreateMethod<T extends CreateModelArguments, Relationships> = (
   args: Partial<ModelPrimitiveTypes<T>>
-) => Promise<ModelPrimitiveTypes<T>>;
+) => Promise<ModelPrimitiveTypes<T> & Relationships>;
 
 export type DeleteMethod<T extends CreateModelArguments> = ((
   id: IdType
@@ -121,21 +121,96 @@ export type SaveMethod<T extends CreateModelArguments> = (
   args: Partial<ModelPrimitiveTypes<T>>
 ) => Promise<ModelPrimitiveTypes<T>>;
 
-export interface ModelDetails<T extends CreateModelArguments> {
+type WithOneToOneRelationshipArguments<
+  T extends CreateModelArguments,
+  O extends ModelDetails
+> =
+  | {
+      of: O;
+      localKey: AllKeyNames<T>;
+    }
+  | {
+      of: O;
+      foreignKey: O["$allKeys"];
+    }
+  | {
+      of: O;
+      localKey: AllKeyNames<T>;
+      foreignKey: O["$allKeys"];
+    };
+
+type WithOneToManyRelationshipArguments<O extends ModelDetails> = {
+  of: O;
+  foreignKey: O["$allKeys"];
+};
+
+type WithManyToOneRelationshipArguments<
+  T extends CreateModelArguments,
+  O extends ModelDetails
+> = {
+  of: O;
+  localKey: AllKeyNames<T>;
+};
+
+export type AllKeyNames<T extends CreateModelArguments> = keyof T["properties"];
+export type PossibleNames<
+  Str,
+  T extends CreateModelArguments,
+  OtherRelationships
+> = Exclude<Str, AllKeyNames<T> | OtherRelationships>;
+
+type RelationshipsLoader<M = any> = () => Promise<M[]>;
+type RelationshipLoader<M = any> = () => Promise<M>;
+
+export interface ModelDetails<
+  T extends CreateModelArguments = any,
+  RelationshipNames = "",
+  Relationships extends Record<
+    string,
+    RelationshipLoader | RelationshipsLoader
+  > = {}
+> {
+  $allKeys: AllKeyNames<T>;
   $originalArguments: T;
+  $model: ModelPrimitiveTypes<T> & Relationships;
   $modelPrimitiveTypes: ModelPrimitiveTypes<T>;
   $nullableKeys: NullableKeys<T["properties"]>[];
   $nullableKeyType: NullableKeys<T["properties"]>;
+  $relationships: boolean;
   $validators: Validator<Partial<ModelPrimitiveTypes<T>>>[];
-  create: CustomMethodOr<T, "create", CreateMethod<T>>;
+  create: CustomMethodOr<T, "create", CreateMethod<T, Relationships>>;
   delete: CustomMethodOr<T, "delete", DeleteMethod<T>>;
   find: CustomMethodOr<T, "find", FindMethod<T>>;
   save: CustomMethodOr<T, "save", SaveMethod<T>>;
   validate(m: ModelPrimitiveTypes<T>): Promise<[boolean, string[]]>;
   withValidator(
     validator: Validator<Partial<ModelPrimitiveTypes<T>>>
-  ): ModelDetails<T>;
+  ): ModelDetails<T, RelationshipNames, Relationships>;
   withValidators(
     v: Validator<Partial<ModelPrimitiveTypes<T>>>[]
-  ): ModelDetails<T>;
+  ): ModelDetails<T, RelationshipNames, Relationships>;
+  withOneToOneRelationship<F extends ModelDetails, K extends string>(
+    name: PossibleNames<K, T, RelationshipNames>,
+    args: WithOneToOneRelationshipArguments<T, F>
+  ): ModelDetails<
+    T,
+    PossibleNames<K, T, RelationshipNames>,
+    Relationships & Record<K, RelationshipsLoader<F["$model"]>>
+  >;
+  withOneToManyRelationship<F extends ModelDetails, K extends string>(
+    name: PossibleNames<K, T, RelationshipNames>,
+    args: WithOneToManyRelationshipArguments<F>
+  ): ModelDetails<
+    T,
+    PossibleNames<K, T, RelationshipNames>,
+    Relationships & Record<K, RelationshipsLoader<F["$model"]>>
+  >;
+  withManyToOneRelationship<F extends ModelDetails, K extends string>(
+    name: PossibleNames<K, T, RelationshipNames>,
+    args: WithManyToOneRelationshipArguments<T, F>
+  ): ModelDetails<
+    T,
+    PossibleNames<K, T, RelationshipNames>,
+    Relationships & Record<K, RelationshipLoader<F["$model"]>>
+  >;
 }

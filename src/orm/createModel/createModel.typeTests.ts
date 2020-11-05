@@ -50,3 +50,29 @@ const testModel: TestModel = {
 const testModel2: TestModel = {
   booleanTest: true,
 };
+
+const WithRelationships = createModel({
+  name: generateNames("WithRelationships"),
+  properties: {
+    id: prop("string"),
+    name: prop("string"),
+    fooId: prop("string"),
+  },
+})
+  // @ts-expect-error
+  .withOneToOneRelationship("name", { of: test, localKey: "fooId" })
+  .withOneToOneRelationship("foo", { of: test, localKey: "fooId" })
+  // @ts-expect-error
+  .withOneToOneRelationship("foo", { of: test, localKey: "fooId" })
+  // @ts-expect-error
+  .withOneToOneRelationship("foo2", { of: test, localKey: "not a real key" });
+
+async () => {
+  const withRelationshipsModel = await WithRelationships.create({
+    name: "name",
+  });
+  const foos = await withRelationshipsModel.foo();
+  // @ts-expect-error
+  foos[0].booleanTest = "true";
+  foos[0].booleanTest = true;
+};
