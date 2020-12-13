@@ -1,0 +1,12 @@
+type SomeType {
+  id: ID!
+  name: String
+}
+
+type Query {
+  test: String!
+}
+
+type Mutation {
+  mutationTest: Boolean!
+}
