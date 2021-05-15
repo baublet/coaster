@@ -1,10 +1,53 @@
+import knex from "knex";
+import DataLoader from "dataloader";
+
+type ModelFactoryFactory<TModel = {}, TRawModel = {}, TConnection = any> = (
+  getConnection: () => Promise<TConnection>
+) => ModelFactory<TModel, TRawModel, TConnection>;
+
+interface ModelFactory<
+  TModel = {},
+  TRawModel = {},
+  TConnection = any,
+  TQuery = any
+> {
+  getConnection: () => Promise<TConnection>;
+  getDataLoader: <
+    TKey extends keyof TRawModel,
+    TMany extends boolean | undefined
+  >(
+    key: keyof TRawModel,
+    many?: TMany
+  ) => Promise<
+    DataLoader<TRawModel[TKey], TMany extends true ? TRawModel[] : TRawModel>
+  >;
+  getQuery: () => Promise<TQuery>;
+  create: (args: Partial<TRawModel>) => Promise<TRawModel>;
+  createMany: (args: Partial<TRawModel>[]) => Promise<TRawModel[]>;
+  update: (args: Partial<TRawModel>) => Promise<TRawModel>;
+  updateMany: (args: Partial<TRawModel>) => Promise<TRawModel>;
+  upsert: (args: Partial<TRawModel>) => Promise<TRawModel>;
+  upsertMany: (args: Partial<TRawModel[]>) => Promise<TRawModel[]>;
+}
+
 interface Schema {
   name: string;
   models: SchemaModel[];
+  modelFactory: ModelFactoryFactory;
 }
 
 interface SchemaModel {
   id: string;
+  names: {
+    singularCamel: string;
+    singularPascal: string;
+    pluralCamel: string;
+    pluralPascal: string;
+  };
+  properties: Record<string, ModelPropertyDefinition>;
+}
+
+interface ModelDefinition {
   names: {
     singularCamel: string;
     singularPascal: string;
