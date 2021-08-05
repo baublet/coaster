@@ -6,7 +6,8 @@
     "coverage:view": "open coverage/lcov-report/index.html",
     "coverage:report": "yarn coverage; yarn coverage:view",
     "lint:all": "eslint src/ --ext ts --fix",
-    "lint:tsc": "tsc --noEmit"
+    "lint:tsc": "tsc --noEmit",
+    "test:pg:driver": "sh src/generateORM/drivers/postgres/scripts/test.sh"
   },
   "dependencies": {
     "@graphql-codegen/core": "^1.17.9",
@@ -31,12 +32,14 @@
     "lodash.memoize": "^4.1.2",
     "lodash.orderby": "^4.6.0",
     "owasp-password-strength-test": "^1.3.0",
+    "pg": "^8.7.1",
     "pluralize": "^8.0.0",
     "sqlstring": "^2.3.1",
     "stringify-object": "^3.3.0",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.0",
     "uuid": "^3.4.0",
+    "wildcard-match": "^5.1.2",
     "yargs": "^16.2.0"
   },
   "devDependencies": {
