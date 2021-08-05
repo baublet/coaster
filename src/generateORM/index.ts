@@ -1,5 +1,8 @@
 import knex from "knex";
 
+export type Database = typeof knex;
+export const db = knex;
+
 export type DatabaseConnection<
   TRecord extends {} = {},
   TResult extends any[] = unknown[]

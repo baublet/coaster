@@ -13,6 +13,7 @@ const unmemoizedGenerateNames = (
   singularCamel: string;
   singularPascal: string;
 } => {
+  name = name || "";
   return {
     pluralCamel: camelCase(pluralize.plural(name)),
     pluralPascal: pascalCase(pluralize.plural(name)),

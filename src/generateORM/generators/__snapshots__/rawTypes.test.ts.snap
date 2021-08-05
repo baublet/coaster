@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`interfaces/types spits out interfaces 1`] = `
+"interface RawUser {
+id: unknown;
+/** Users don't have to provide their name */
+name?: string;
+data: JSON;
+};
+
+/** Singular users can have multiple accounts */
+interface RawUserAccount {
+id: unknown;
+/** Who sent us this users' data? */
+source: string;
+/** The raw data sent from the source provider */
+source_data: JSON;
+};
+"
+`;
+
+exports[`interfaces/types spits out types 1`] = `
+"type RawUser = {
+id: unknown;
+/** Users don't have to provide their name */
+name?: string;
+data: JSON;
+};
+
+/** Singular users can have multiple accounts */
+type RawUserAccount = {
+id: unknown;
+/** Who sent us this users' data? */
+source: string;
+/** The raw data sent from the source provider */
+source_data: JSON;
+};
+"
+`;

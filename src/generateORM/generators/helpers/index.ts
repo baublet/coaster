@@ -1,2 +1,3 @@
 export { getName } from "./getName";
-export { assertHasTypeMap } from "./assertHasTypeMap";
+export { assertHasRawTypeMap } from "./assertHasRawTypeMap";
+export { getSchemaAndTablePath } from "./getSchemaAndTablePath";

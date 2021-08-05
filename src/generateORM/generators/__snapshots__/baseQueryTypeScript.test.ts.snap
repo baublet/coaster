@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generates a schema 1`] = `
+"export const getPublicConnection = () => knex();
+
+export function RawUsers<Result = RawUser[]>(
+  options: options = { connection: getPublicConnection() }
+) {
+  return options.connection<RawUser, Result>(\\"user\\");
+};
+
+export function RawUserAccounts<Result = RawUserAccount[]>(
+  options: options = { connection: getPublicConnection() }
+) {
+  return options.connection<RawUserAccount, Result>(\\"userAccount\\");
+};
+
+"
+`;

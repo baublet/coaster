@@ -31,9 +31,10 @@ export function getName(
   if (table) {
     const tableNames = generateNames(table);
     const entityName =
-      (prefixSchemaName ? schemaNameInType : "") + getNameFn
+      (prefixSchemaName ? schemaNameInType : "") +
+      (getNameFn
         ? getNameFn(schema, table) || tableNames.singularPascal
-        : tableNames.singularPascal;
+        : tableNames.singularPascal);
 
     return entityName;
   }
