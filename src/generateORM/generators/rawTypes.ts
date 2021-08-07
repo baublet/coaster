@@ -1,4 +1,4 @@
-import { MetaData } from ".";
+import { MetaData, GetTypeName } from ".";
 import { RawSchema } from "../drivers";
 import { getName } from "./helpers";
 
@@ -9,22 +9,25 @@ export const rawTypes = (
     typesOrInterfaces: "types" | "interfaces";
     prefixSchemaName?: boolean;
     rawPrefix?: string;
-    getTypeName?: (
-      schema: string,
-      table: string,
-      column: string
-    ) => string | undefined;
+    getTypeName?: GetTypeName;
   } = {
     typesOrInterfaces: "interfaces",
     prefixSchemaName: false,
     getTypeName: () => undefined,
   }
 ) => {
-  let code = "";
+  let code = `function objectHasProperties(obj: Record<string, any>, properties: string[]): boolean {
+  for(const property of properties) {
+    if(!obj.hasOwnProperty(property)) {
+      return false;
+    }
+  }
+  return true;
+}\n`;
   const rawPrefix = options.rawPrefix === undefined ? "Raw" : options.rawPrefix;
 
   for (const table of schema.tables) {
-    const tableName = getName(
+    const entityName = getName(
       schema.name,
       table.name,
       undefined,
@@ -34,19 +37,20 @@ export const rawTypes = (
     const schemaAndTablePath = `${schema.name ? schema.name + "." : ""}${
       table.name
     }`;
-    metaData.tableEntityNames.set(schemaAndTablePath, rawPrefix + tableName);
-    metaData.entityTableNames.set(rawPrefix + tableName, schemaAndTablePath);
+    metaData.tableEntityNames.set(schemaAndTablePath, rawPrefix + entityName);
+    metaData.entityTableNames.set(rawPrefix + entityName, schemaAndTablePath);
 
     if (table.comment) {
       code += `\n/** ${table.comment} */\n`;
     }
 
-    code += `${
+    code += `export ${
       options.typesOrInterfaces === "interfaces" ? "interface" : "type"
-    } ${rawPrefix}${tableName} ${
+    } ${rawPrefix}${entityName} ${
       options.typesOrInterfaces === "interfaces" ? "" : "= "
     }{`;
 
+    const rawRequiredColumnNames: string[] = [];
     for (const column of table.columns) {
       if (column.comment) {
         code += `\n/** ${column.comment} */`;
@@ -54,12 +58,46 @@ export const rawTypes = (
       code += `\n${column.name}`;
       code += column.nullable ? "?: " : ": ";
       code +=
-        options.getTypeName?.(schema.name, table.name, column.name) ||
-        column.type;
+        options.getTypeName?.(
+          column.type,
+          column.name,
+          table.name,
+          schema.name
+        ) || column.type;
       code += ";";
+      if (!column.nullable) {
+        rawRequiredColumnNames.push(column.name);
+      }
     }
 
     code += `\n};\n`;
+
+    const columnNamesAsJsonString = JSON.stringify(rawRequiredColumnNames);
+    // Type assertions
+    code += `export function assertIs${rawPrefix}${entityName}Like(subject: any): asserts subject is ${rawPrefix}${entityName} {\n`;
+    code += `  if(typeof subject === "object") {\n`;
+    code += `    if(objectHasProperties(subject, ${columnNamesAsJsonString})) { return; }\n`;
+    code += `  }\n`;
+    code += `  throw new Error("Invariance violation! Expected subject to be a ${rawPrefix}${entityName}, but it was instead: " + JSON.stringify(subject));\n`;
+    code += `}\n`;
+
+    metaData.typeAssertionFunctionNames.set(
+      schemaAndTablePath,
+      `assertIs${rawPrefix}${entityName}`
+    );
+
+    // Type guards
+    code += `export function is${rawPrefix}${entityName}Like(subject: any): subject is ${rawPrefix}${entityName} {\n`;
+    code += `  if(typeof subject === "object") {\n`;
+    code += `    if(objectHasProperties(subject, ${columnNamesAsJsonString})) { return true; }\n`;
+    code += `  }\n`;
+    code += `  return false;\n`;
+    code += `}\n`;
+
+    metaData.typeGuardFunctionNames.set(
+      schemaAndTablePath,
+      `is${rawPrefix}${entityName}`
+    );
   }
 
   return code;

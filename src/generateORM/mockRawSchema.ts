@@ -34,7 +34,7 @@ export const mockRawSchema: RawSchema = {
       ],
     },
     {
-      name: "userAccount",
+      name: "user_account",
       comment: "Singular users can have multiple accounts",
       columns: [
         {

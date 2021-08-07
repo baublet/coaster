@@ -1,12 +1,14 @@
 import { Database, db } from "./";
 import { SchemaFetcher } from "./drivers";
 import { Generator, MetaData } from "./generators";
+import { PostProcessor } from "./postProcessors";
 
 interface GenerateORMOptions<T extends SchemaFetcher> {
   connectionOptions: Parameters<Database>;
   fetcher: T;
   fetcherOptions: Parameters<T>[1];
   generators: Generator[];
+  postProcessors: PostProcessor[];
 }
 
 export async function generateORM<T extends SchemaFetcher>(
@@ -19,10 +21,13 @@ export async function generateORM<T extends SchemaFetcher>(
   const headers = new Map<string, string>();
   const metaData: MetaData = {
     setHeader: (key: string, value: string) => headers.set(key, value),
-    entityTableNames: new Map<string, string>(),
-    rawBaseQueryFunctionNames: new Map<string, string>(),
-    tableEntityNames: new Map<string, string>(),
+    entityTableNames: new Map(),
+    rawBaseQueryFunctionNames: new Map(),
+    tableEntityNames: new Map(),
     connectionInfo: options.connectionOptions,
+    typeAssertionFunctionNames: new Map(),
+    typeGuardFunctionNames: new Map(),
+    transformerFunctionNames: {},
   };
 
   for (const generator of options.generators) {

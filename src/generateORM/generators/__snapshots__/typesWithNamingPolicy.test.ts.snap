@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`interfaces/types spits out types with the proper naming policy 1`] = `
+"export type User = {
+id: unknown;
+/** Users don't have to provide their name */
+name?: string;
+data: JSON;
+};
+export function assertIsUserLike(subject: any): asserts subject is User {
+  if(typeof subject === \\"object\\") {
+    if(objectHasProperties(subject, [\\"id\\",\\"data\\"])) { return; }
+  }
+  throw new Error(\\"Invariance violation! Expected subject to be a User, but it was instead: \\" + JSON.stringify(subject));
+}
+export function isUserLike(subject: any): subject is User {
+  if(typeof subject === \\"object\\") {
+    if(objectHasProperties(subject, [\\"id\\",\\"data\\"])) { return true; }
+  }
+  return false;
+}
+export function rawUserToUser(subject: RawUser): User {
+  return {
+    id: subject['id'],
+    name: subject['name'],
+    data: subject['data'],
+  };
+}
+
+/** Singular users can have multiple accounts */
+export type UserAccount = {
+id: unknown;
+/** Who sent us this users' data? */
+source: string;
+/** The raw data sent from the source provider */
+sourceData: JSON;
+};
+export function assertIsUserAccountLike(subject: any): asserts subject is UserAccount {
+  if(typeof subject === \\"object\\") {
+    if(objectHasProperties(subject, [\\"id\\",\\"source\\",\\"sourceData\\"])) { return; }
+  }
+  throw new Error(\\"Invariance violation! Expected subject to be a UserAccount, but it was instead: \\" + JSON.stringify(subject));
+}
+export function isUserAccountLike(subject: any): subject is UserAccount {
+  if(typeof subject === \\"object\\") {
+    if(objectHasProperties(subject, [\\"id\\",\\"source\\",\\"sourceData\\"])) { return true; }
+  }
+  return false;
+}
+export function rawUserAccountToUserAccount(subject: RawUserAccount): UserAccount {
+  return {
+    id: subject['id'],
+    source: subject['source'],
+    sourceData: subject['source_data'],
+  };
+}
+"
+`;

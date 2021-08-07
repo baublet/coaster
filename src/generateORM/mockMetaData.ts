@@ -7,5 +7,8 @@ export function getMockMetaData(): MetaData {
     tableEntityNames: new Map(),
     rawBaseQueryFunctionNames: new Map(),
     connectionInfo: {} as any,
+    transformerFunctionNames: {},
+    typeAssertionFunctionNames: new Map(),
+    typeGuardFunctionNames: new Map(),
   };
 }
