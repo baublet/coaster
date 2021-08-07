@@ -1,18 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`generates a schema 1`] = `
-"export const getDatabaseConnection = () => knex();
+"import knex from \\"knex\\";
+
+export const getDatabaseConnection = () => knex({});
 
 export function RawUsers<Result = RawUser[]>(
-  options: options = { connection: getDatabaseConnection() }
+  connection = getDatabaseConnection()
 ) {
-  return options.connection<RawUser, Result>(\\"user\\");
+  return connection<RawUser, Result>(\\"user\\");
 };
 
 export function RawUserAccounts<Result = RawUserAccount[]>(
-  options: options = { connection: getDatabaseConnection() }
+  connection = getDatabaseConnection()
 ) {
-  return options.connection<RawUserAccount, Result>(\\"user_account\\");
+  return connection<RawUserAccount, Result>(\\"user_account\\");
 };
 
 "
