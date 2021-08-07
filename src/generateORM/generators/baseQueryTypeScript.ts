@@ -1,4 +1,4 @@
-import { Config } from "knex";
+import { ConnectionOptions } from "../";
 import { MetaData } from ".";
 import { generateNames } from "../../generateNames";
 import { RawSchema } from "../drivers";
@@ -12,7 +12,7 @@ export const baseQueryTypeScript = (
   schema: RawSchema,
   metaData: MetaData,
   options: {
-    knexConnectionOptions?: Config;
+    knexConnectionOptions?: ConnectionOptions;
   } = { knexConnectionOptions: {} }
 ) => {
   const connectionOptions = options.knexConnectionOptions
