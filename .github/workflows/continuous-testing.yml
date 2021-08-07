@@ -30,3 +30,4 @@ jobs:
         if: steps.node_modules.outputs.cache-hit != 'true'
 
       - run: yarn test
+      - run: yarn test:pg:driver
