@@ -19,3 +19,14 @@ describe("interfaces/types", () => {
     ).toMatchSnapshot();
   });
 });
+
+describe("prefix", () => {
+  it("allows a custom prefix", () => {
+    expect(
+      rawTypes(getMockRawSchema(), getMockMetaData(), {
+        typesOrInterfaces: "interfaces",
+        rawPrefix: "Database",
+      })
+    ).toMatchSnapshot();
+  });
+});

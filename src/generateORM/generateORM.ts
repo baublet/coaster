@@ -32,10 +32,14 @@ export async function generateORM(
     for (const rawSchema of rawSchemas) {
       let generatorResult = await generator(rawSchema, metaData);
       while (typeof generatorResult === "function") {
-        generatorResult = await generator(rawSchema, metaData);
+        generatorResult = await generatorResult(rawSchema, metaData);
       }
       code += generatorResult;
     }
+  }
+
+  for (const header of headers.values()) {
+    code = header + "\n" + code;
   }
 
   return code;

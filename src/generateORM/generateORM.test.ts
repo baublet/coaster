@@ -10,6 +10,7 @@ import {
   baseQueryTypeScript,
   rawTypes,
   typesWithNamingPolicy,
+  Generator,
 } from "./generators";
 
 import { getMockRawSchema } from "./mockRawSchema";
@@ -18,13 +19,22 @@ jest.setTimeout(20000);
 
 const mockFetcher = () => [getMockRawSchema()];
 
+// Testing our ability to resolve async, nested generators
+const customDummyGenerator: Generator = () => () =>
+  Promise.resolve(() => () => "");
+
 it("returns a string", async () => {
   const generatedCode = await generateORM({
     connectionOptions: {
       client: "pg",
     },
     fetcher: mockFetcher,
-    generators: [rawTypes, baseQueryTypeScript, typesWithNamingPolicy],
+    generators: [
+      rawTypes,
+      baseQueryTypeScript,
+      typesWithNamingPolicy,
+      customDummyGenerator,
+    ],
     postProcessors: [],
   });
 

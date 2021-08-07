@@ -1,6 +1,6 @@
 import { MetaData, GetTypeName } from ".";
 import { RawSchema } from "../drivers";
-import { getName } from "./helpers";
+import { getName, getSchemaAndTablePath } from "./helpers";
 
 /**
  * Creates types, guards, and assertions for the shape of data coming out of
@@ -20,27 +20,30 @@ export const rawTypes = (
     getTypeName: () => undefined,
   }
 ) => {
-  let code = `function objectHasProperties(obj: Record<string, any>, properties: string[]): boolean {
+  metaData.setHeader(
+    "objectHasProperties",
+    `function objectHasProperties(obj: Record<string, any>, properties: string[]): boolean {
   for(const property of properties) {
     if(!obj.hasOwnProperty(property)) {
       return false;
     }
   }
   return true;
-}\n`;
+}\n`
+  );
+
+  let code = "";
   const rawPrefix = options.rawPrefix === undefined ? "Raw" : options.rawPrefix;
 
   for (const table of schema.tables) {
     const entityName = getName(
-      schema.name,
-      table.name,
       undefined,
+      table.name,
+      schema.name,
       options.prefixSchemaName
     );
 
-    const schemaAndTablePath = `${schema.name ? schema.name + "." : ""}${
-      table.name
-    }`;
+    const schemaAndTablePath = getSchemaAndTablePath(schema.name, table.name);
     metaData.tableEntityNames.set(schemaAndTablePath, rawPrefix + entityName);
     metaData.entityTableNames.set(rawPrefix + entityName, schemaAndTablePath);
 

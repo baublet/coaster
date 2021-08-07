@@ -3,9 +3,21 @@ module.exports = {
   modulePaths: ["<rootDir>/src/"],
   testPathIgnorePatterns: ["/node_modules/", ".*.integration.test.ts", "tmp/*"],
   preset: "ts-jest",
+  coveragePathIgnorePatterns: [
+    "/node_modules/",
+    "index.ts",
+    "/scripts/.+.ts",
+    "/migrations/.+.ts",
+    ".+.test.ts",
+    // Tested separately
+    "/generateORM\\/drivers\\/postgres/",
+  ],
+  collectCoverageFrom: ["**/helpers/*.ts", "**/*.ts", "!**/node_modules/**"],
   coverageThreshold: {
     global: {
       functions: 100,
+      branches: 100,
+      lines: 100,
     },
   },
 };

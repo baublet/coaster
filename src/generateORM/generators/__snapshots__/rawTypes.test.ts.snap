@@ -1,15 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`interfaces/types spits out interfaces 1`] = `
-"function objectHasProperties(obj: Record<string, any>, properties: string[]): boolean {
-  for(const property of properties) {
-    if(!obj.hasOwnProperty(property)) {
-      return false;
-    }
-  }
-  return true;
-}
-export interface RawUser {
+"export interface RawUser {
 id: unknown;
 /** Users don't have to provide their name */
 name?: string;
@@ -52,15 +44,7 @@ export function isRawUserAccountLike(subject: any): subject is RawUserAccount {
 `;
 
 exports[`interfaces/types spits out types 1`] = `
-"function objectHasProperties(obj: Record<string, any>, properties: string[]): boolean {
-  for(const property of properties) {
-    if(!obj.hasOwnProperty(property)) {
-      return false;
-    }
-  }
-  return true;
-}
-export type RawUser = {
+"export type RawUser = {
 id: unknown;
 /** Users don't have to provide their name */
 name?: string;
@@ -94,6 +78,49 @@ export function assertIsRawUserAccountLike(subject: any): asserts subject is Raw
   throw new Error(\\"Invariance violation! Expected subject to be a RawUserAccount, but it was instead: \\" + JSON.stringify(subject));
 }
 export function isRawUserAccountLike(subject: any): subject is RawUserAccount {
+  if(typeof subject === \\"object\\") {
+    if(objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) { return true; }
+  }
+  return false;
+}
+"
+`;
+
+exports[`prefix allows a custom prefix 1`] = `
+"export interface DatabaseUser {
+id: unknown;
+/** Users don't have to provide their name */
+name?: string;
+data: JSON;
+};
+export function assertIsDatabaseUserLike(subject: any): asserts subject is DatabaseUser {
+  if(typeof subject === \\"object\\") {
+    if(objectHasProperties(subject, [\\"id\\",\\"data\\"])) { return; }
+  }
+  throw new Error(\\"Invariance violation! Expected subject to be a DatabaseUser, but it was instead: \\" + JSON.stringify(subject));
+}
+export function isDatabaseUserLike(subject: any): subject is DatabaseUser {
+  if(typeof subject === \\"object\\") {
+    if(objectHasProperties(subject, [\\"id\\",\\"data\\"])) { return true; }
+  }
+  return false;
+}
+
+/** Singular users can have multiple accounts */
+export interface DatabaseUserAccount {
+id: unknown;
+/** Who sent us this users' data? */
+source: string;
+/** The raw data sent from the source provider */
+source_data: JSON;
+};
+export function assertIsDatabaseUserAccountLike(subject: any): asserts subject is DatabaseUserAccount {
+  if(typeof subject === \\"object\\") {
+    if(objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) { return; }
+  }
+  throw new Error(\\"Invariance violation! Expected subject to be a DatabaseUserAccount, but it was instead: \\" + JSON.stringify(subject));
+}
+export function isDatabaseUserAccountLike(subject: any): subject is DatabaseUserAccount {
   if(typeof subject === \\"object\\") {
     if(objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) { return true; }
   }

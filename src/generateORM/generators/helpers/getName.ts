@@ -1,18 +1,18 @@
 import { generateNames } from "../../../generateNames";
 
 export function getName(
+  column: string | undefined,
+  table: string | undefined,
   schema: string,
-  table?: string,
-  column?: string,
-  prefixSchemaName?: boolean,
+  prefixSchemaName: boolean = false,
   getNameFn?: (
-    schema: string,
-    table?: string,
-    column?: string
+    column: string | undefined,
+    table: string | undefined,
+    schema: string
   ) => string | undefined
 ): string {
   if (getNameFn) {
-    const generatedName = getNameFn(schema, table, column);
+    const generatedName = getNameFn(column, table, schema);
     if (generatedName) {
       return generatedName;
     }
@@ -24,17 +24,12 @@ export function getName(
   }
 
   const schemaNames = generateNames(schema);
-  const schemaNameInType = getNameFn
-    ? getNameFn(schema) || schemaNames.rawPascal
-    : schemaNames.rawPascal;
+  const schemaNameInType = schemaNames.rawPascal;
 
   if (table) {
     const tableNames = generateNames(table);
     const entityName =
-      (prefixSchemaName ? schemaNameInType : "") +
-      (getNameFn
-        ? getNameFn(schema, table) || tableNames.singularPascal
-        : tableNames.singularPascal);
+      (prefixSchemaName ? schemaNameInType : "") + tableNames.singularPascal;
 
     return entityName;
   }
