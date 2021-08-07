@@ -3,6 +3,12 @@ import { camelCase } from "change-case";
 import { MetaData, GetTypeName } from ".";
 import { RawSchema } from "../drivers";
 
+/**
+ * JS code often has different name conventions than database names (e.g., your
+ * database might use snake_case, but your JS code might use camelCase). This
+ * generator creates types, assertions, guards, and transformers to transform
+ * raw DB types to any custom type structure and back again.
+ */
 export const typesWithNamingPolicy = (
   schema: RawSchema,
   metaData: MetaData,
@@ -79,7 +85,7 @@ export const typesWithNamingPolicy = (
 
     metaData.typeAssertionFunctionNames.set(
       schemaAndTablePath,
-      `assertIs${prefix}${entityName}`
+      `assertIs${prefix}${entityName}Like`
     );
 
     // Type guards
@@ -92,7 +98,7 @@ export const typesWithNamingPolicy = (
 
     metaData.typeGuardFunctionNames.set(
       schemaAndTablePath,
-      `is${entityNameWithPrefix}`
+      `is${entityNameWithPrefix}Like`
     );
 
     // Transformers

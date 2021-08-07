@@ -4,6 +4,10 @@ import { generateNames } from "../../generateNames";
 import { RawSchema } from "../drivers";
 import { getSchemaAndTablePath } from "./helpers";
 
+/**
+ * Generates the lowest-level possible accessor for accessing data in a table
+ * using raw database types.
+ */
 export const baseQueryTypeScript: Generator = (
   schema: RawSchema,
   metaData: MetaData,
@@ -11,11 +15,10 @@ export const baseQueryTypeScript: Generator = (
     knexConnectionOptions?: Config;
   } = {}
 ) => {
-  const schemaPascal = generateNames(schema.name).rawPascal;
   const connectionOptions = options.knexConnectionOptions
     ? JSON.stringify(options.knexConnectionOptions)
     : "";
-  let code = `export const get${schemaPascal}Connection = () => knex(${connectionOptions});\n\n`;
+  let code = `export const getDatabaseConnection = () => knex(${connectionOptions});\n\n`;
 
   for (const table of schema.tables) {
     const entityName = metaData.tableEntityNames.get(
@@ -23,7 +26,7 @@ export const baseQueryTypeScript: Generator = (
     );
     const pluralEntityName = generateNames(entityName).pluralPascal;
     code += `export function ${pluralEntityName}<Result = ${entityName}[]>(
-  options: options = { connection: get${schemaPascal}Connection() }
+  options: options = { connection: getDatabaseConnection() }
 ) {
   return options.connection<${entityName}, Result>("${table.name}");
 };\n\n`;

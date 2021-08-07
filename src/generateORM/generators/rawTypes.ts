@@ -2,6 +2,10 @@ import { MetaData, GetTypeName } from ".";
 import { RawSchema } from "../drivers";
 import { getName } from "./helpers";
 
+/**
+ * Creates types, guards, and assertions for the shape of data coming out of
+ * and going into the database.
+ */
 export const rawTypes = (
   schema: RawSchema,
   metaData: MetaData,
