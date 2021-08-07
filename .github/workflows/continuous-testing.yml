@@ -11,8 +11,8 @@ on:
     branches: [master]
 
 jobs:
-  test:
-    name: "Test"
+  unitTests:
+    name: "Unit Tests"
     runs-on: ubuntu-latest
 
     steps:
@@ -30,4 +30,23 @@ jobs:
         if: steps.node_modules.outputs.cache-hit != 'true'
 
       - run: yarn test
+
+  pgDriver:
+    name: "PG Driver"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/cache@v1
+        id: node_modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - run: yarn
+        if: steps.node_modules.outputs.cache-hit != 'true'
+
       - run: yarn test:pg:driver

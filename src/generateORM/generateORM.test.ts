@@ -14,6 +14,8 @@ import {
 
 import { getMockRawSchema } from "./mockRawSchema";
 
+jest.setTimeout(20000);
+
 const mockFetcher = () => [getMockRawSchema()];
 
 it("returns a string", async () => {
