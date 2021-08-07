@@ -9,19 +9,19 @@ exports[`interfaces/types spits out interfaces 1`] = `
   }
   return true;
 }
-interface RawUser {
+export interface RawUser {
 id: unknown;
 /** Users don't have to provide their name */
 name?: string;
 data: JSON;
 };
-function assertIsRawUserLike(subject: any): asserts subject is RawUser {
+export function assertIsRawUserLike(subject: any): asserts subject is RawUser {
   if(typeof subject === \\"object\\") {
     if(objectHasProperties(subject, [\\"id\\",\\"data\\"])) { return; }
   }
   throw new Error(\\"Invariance violation! Expected subject to be a RawUser, but it was instead: \\" + JSON.stringify(subject));
 }
-function isRawUserLike(subject: any): subject is RawUser {
+export function isRawUserLike(subject: any): subject is RawUser {
   if(typeof subject === \\"object\\") {
     if(objectHasProperties(subject, [\\"id\\",\\"data\\"])) { return true; }
   }
@@ -29,20 +29,20 @@ function isRawUserLike(subject: any): subject is RawUser {
 }
 
 /** Singular users can have multiple accounts */
-interface RawUserAccount {
+export interface RawUserAccount {
 id: unknown;
 /** Who sent us this users' data? */
 source: string;
 /** The raw data sent from the source provider */
 source_data: JSON;
 };
-function assertIsRawUserAccountLike(subject: any): asserts subject is RawUserAccount {
+export function assertIsRawUserAccountLike(subject: any): asserts subject is RawUserAccount {
   if(typeof subject === \\"object\\") {
     if(objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) { return; }
   }
   throw new Error(\\"Invariance violation! Expected subject to be a RawUserAccount, but it was instead: \\" + JSON.stringify(subject));
 }
-function isRawUserAccountLike(subject: any): subject is RawUserAccount {
+export function isRawUserAccountLike(subject: any): subject is RawUserAccount {
   if(typeof subject === \\"object\\") {
     if(objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) { return true; }
   }
@@ -60,19 +60,19 @@ exports[`interfaces/types spits out types 1`] = `
   }
   return true;
 }
-type RawUser = {
+export type RawUser = {
 id: unknown;
 /** Users don't have to provide their name */
 name?: string;
 data: JSON;
 };
-function assertIsRawUserLike(subject: any): asserts subject is RawUser {
+export function assertIsRawUserLike(subject: any): asserts subject is RawUser {
   if(typeof subject === \\"object\\") {
     if(objectHasProperties(subject, [\\"id\\",\\"data\\"])) { return; }
   }
   throw new Error(\\"Invariance violation! Expected subject to be a RawUser, but it was instead: \\" + JSON.stringify(subject));
 }
-function isRawUserLike(subject: any): subject is RawUser {
+export function isRawUserLike(subject: any): subject is RawUser {
   if(typeof subject === \\"object\\") {
     if(objectHasProperties(subject, [\\"id\\",\\"data\\"])) { return true; }
   }
@@ -80,20 +80,20 @@ function isRawUserLike(subject: any): subject is RawUser {
 }
 
 /** Singular users can have multiple accounts */
-type RawUserAccount = {
+export type RawUserAccount = {
 id: unknown;
 /** Who sent us this users' data? */
 source: string;
 /** The raw data sent from the source provider */
 source_data: JSON;
 };
-function assertIsRawUserAccountLike(subject: any): asserts subject is RawUserAccount {
+export function assertIsRawUserAccountLike(subject: any): asserts subject is RawUserAccount {
   if(typeof subject === \\"object\\") {
     if(objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) { return; }
   }
   throw new Error(\\"Invariance violation! Expected subject to be a RawUserAccount, but it was instead: \\" + JSON.stringify(subject));
 }
-function isRawUserAccountLike(subject: any): subject is RawUserAccount {
+export function isRawUserAccountLike(subject: any): subject is RawUserAccount {
   if(typeof subject === \\"object\\") {
     if(objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) { return true; }
   }
