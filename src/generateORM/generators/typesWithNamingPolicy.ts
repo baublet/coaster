@@ -1,7 +1,9 @@
 import { camelCase, pascalCase } from "change-case";
+import { orDefault } from "helpers";
 
 import { MetaData, GetTypeName } from ".";
 import { RawSchema } from "../drivers";
+import { getSchemaAndTablePath } from "./helpers";
 
 const defaultEntityNamingPolicy = (str: string) => pascalCase(str);
 const defaultPropertyNamingPolicy = (str: string) => camelCase(str);
@@ -33,15 +35,13 @@ export const typesWithNamingPolicy = (
   }
 ) => {
   let code = "";
-  const prefix = options.prefix === undefined ? "" : options.prefix;
+  const prefix = orDefault([options.prefix], "");
 
   for (const table of schema.tables) {
     const entityName = options.getEntityName(table.name, schema.name);
     const entityNameWithPrefix = prefix + entityName;
 
-    const schemaAndTablePath = `${schema.name ? schema.name + "." : ""}${
-      table.name
-    }`;
+    const schemaAndTablePath = getSchemaAndTablePath(schema.name, table.name);
     metaData.entityTableNames.set(entityNameWithPrefix, schemaAndTablePath);
 
     if (table.comment) {
@@ -66,13 +66,17 @@ export const typesWithNamingPolicy = (
       }
       code += `\n${columnName}`;
       code += column.nullable ? "?: " : ": ";
-      code +=
-        options.getTypeName?.(
-          column.type,
-          column.name,
-          table.name,
-          schema.name
-        ) || column.type;
+      code += orDefault(
+        [
+          options.getTypeName?.(
+            column.type,
+            column.name,
+            table.name,
+            schema.name
+          ),
+        ],
+        column.type
+      );
       code += ";";
       if (!column.nullable) {
         requiredColumnNames.push(columnName);

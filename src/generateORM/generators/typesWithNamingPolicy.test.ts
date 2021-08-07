@@ -22,3 +22,20 @@ describe("interfaces/types", () => {
     ).toMatchSnapshot();
   });
 });
+
+describe("custom type names: `string` to `CHUMBAWUMBA`", () => {
+  it("spits out types with the proper naming policy", () => {
+    expect(
+      typesWithNamingPolicy(getMockRawSchema(), mockMetaData, {
+        typesOrInterfaces: "types",
+        getEntityName: entityNamingPolicy,
+        getPropertyName: propertyNamingPolicy,
+        getTypeName: (typeName) => {
+          if (typeName === "string") {
+            return "CHUMBAWUMBA";
+          }
+        },
+      })
+    ).toMatchSnapshot();
+  });
+});

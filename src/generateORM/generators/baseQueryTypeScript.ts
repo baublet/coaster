@@ -1,5 +1,5 @@
 import { Config } from "knex";
-import { MetaData, Generator } from ".";
+import { MetaData } from ".";
 import { generateNames } from "../../generateNames";
 import { RawSchema } from "../drivers";
 import { getSchemaAndTablePath } from "./helpers";
@@ -8,7 +8,7 @@ import { getSchemaAndTablePath } from "./helpers";
  * Generates the lowest-level possible accessor for accessing data in a table
  * using raw database types.
  */
-export const baseQueryTypeScript: Generator = (
+export const baseQueryTypeScript = (
   schema: RawSchema,
   metaData: MetaData,
   options: {
