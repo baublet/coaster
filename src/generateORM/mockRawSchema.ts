@@ -1,6 +1,6 @@
 import { RawSchema } from "./drivers";
 
-export const mockRawSchema: RawSchema = {
+export const getMockRawSchema: () => RawSchema = () => ({
   name: "public",
   tables: [
     {
@@ -66,4 +66,4 @@ export const mockRawSchema: RawSchema = {
       ],
     },
   ],
-};
+});

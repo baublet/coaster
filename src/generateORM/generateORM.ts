@@ -1,21 +1,20 @@
-import { Database, db } from "./";
+import { db, ConnectionOptions } from "./";
 import { SchemaFetcher } from "./drivers";
 import { Generator, MetaData } from "./generators";
 import { PostProcessor } from "./postProcessors";
 
-interface GenerateORMOptions<T extends SchemaFetcher> {
-  connectionOptions: Parameters<Database>;
-  fetcher: T;
-  fetcherOptions: Parameters<T>[1];
+interface GenerateORMOptions {
+  connectionOptions: ConnectionOptions;
+  fetcher: SchemaFetcher;
   generators: Generator[];
   postProcessors: PostProcessor[];
 }
 
-export async function generateORM<T extends SchemaFetcher>(
-  options: GenerateORMOptions<T>
+export async function generateORM(
+  options: GenerateORMOptions
 ): Promise<string> {
-  const connection = db(...options.connectionOptions);
-  const rawSchemas = await options.fetcher(connection, options.fetcherOptions);
+  const connection = db(options.connectionOptions);
+  const rawSchemas = await options.fetcher(connection);
 
   let code = "";
   const headers = new Map<string, string>();
@@ -24,7 +23,6 @@ export async function generateORM<T extends SchemaFetcher>(
     entityTableNames: new Map(),
     rawBaseQueryFunctionNames: new Map(),
     tableEntityNames: new Map(),
-    connectionInfo: options.connectionOptions,
     typeAssertionFunctionNames: new Map(),
     typeGuardFunctionNames: new Map(),
     transformerFunctionNames: {},

@@ -29,7 +29,14 @@ export interface RawForeignKey {
 }
 
 export interface SchemaFetcher {
-  (connection: DatabaseConnection, options?: Record<string, any>): Promise<
-    RawSchema[]
-  >;
+  (connection: DatabaseConnection, options?: Record<string, any>):
+    | Promise<RawSchema[]>
+    | RawSchema[];
+}
+
+export function fetcherWithConfiguration<T extends SchemaFetcher>(
+  f: T,
+  fetcherOptions: Parameters<T>[1]
+): SchemaFetcher {
+  return (connection: DatabaseConnection) => f(connection, fetcherOptions);
 }

@@ -3,6 +3,7 @@
   "scripts": {
     "coaster": "yarn ts-node src/scripts/coaster.ts",
     "test": "jest",
+    "test:integration": "jest --testPathIgnorePatterns=\"/node_modules/\" --testPathPattern=--",
     "coverage": "jest --coverage --silent",
     "coverage:view": "open coverage/lcov-report/index.html",
     "coverage:report": "yarn coverage; yarn coverage:view",

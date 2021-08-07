@@ -1,7 +1,10 @@
-import { camelCase } from "change-case";
+import { camelCase, pascalCase } from "change-case";
 
 import { MetaData, GetTypeName } from ".";
 import { RawSchema } from "../drivers";
+
+const defaultEntityNamingPolicy = (str: string) => pascalCase(str);
+const defaultPropertyNamingPolicy = (str: string) => camelCase(str);
 
 /**
  * JS code often has different name conventions than database names (e.g., your
@@ -23,6 +26,10 @@ export const typesWithNamingPolicy = (
       tableName: string,
       schemaName: string
     ) => string;
+  } = {
+    typesOrInterfaces: "interfaces",
+    getEntityName: defaultEntityNamingPolicy,
+    getPropertyName: defaultPropertyNamingPolicy,
   }
 ) => {
   let code = "";

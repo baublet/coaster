@@ -1,11 +1,11 @@
 import { RawColumn, RawSchema } from "../drivers";
-import { Database } from "../index";
 
 export type GeneratorResult = Promise<string> | string;
 
 export type Generator = (
   rawSchema: RawSchema,
-  metaData: MetaData
+  metaData: MetaData,
+  options?: any
 ) =>
   | Generator
   | GeneratorResult
@@ -30,10 +30,6 @@ export type MetaData = {
    * Function names for querying raw DB entities
    */
   rawBaseQueryFunctionNames: Map<EntityPath, FunctionName>;
-  /**
-   * Knex connection info
-   */
-  connectionInfo: Parameters<Database>;
   /**
    * Each entity needs a type assertion shipped with it for runtime correctness
    * and data transformations
@@ -65,3 +61,15 @@ export type GetTypeName = (
   table: string,
   schema: string
 ) => string | undefined;
+
+export { rawTypes } from "./rawTypes";
+export { baseQueryTypeScript } from "./baseQueryTypeScript";
+export { typesWithNamingPolicy } from "./typesWithNamingPolicy";
+
+export function generatorWithConfiguration<T extends Generator>(
+  generator: T,
+  generatorOptions: Parameters<T>[2]
+): Generator {
+  return (rawSchema: RawSchema, metaData: MetaData) =>
+    generator(rawSchema, metaData, generatorOptions);
+}

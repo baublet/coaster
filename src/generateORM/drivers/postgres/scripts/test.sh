@@ -15,4 +15,4 @@ echo "(Re)Creating databases"
 echo "Migrating"
 yarn ts-node node_modules/.bin/knex --knexfile "$SRC_PATH/knexfile.js" --migrations-directory "$SRC_PATH/migrations" migrate:latest || exit
 
-(cd $SRC_PATH; yarn test postgres.integration.test.ts)
+(cd $SRC_PATH; yarn test:integration postgres.integration.test.ts)

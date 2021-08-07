@@ -13,12 +13,13 @@ export const baseQueryTypeScript: Generator = (
   metaData: MetaData,
   options: {
     knexConnectionOptions?: Config;
-  } = {}
+  } = { knexConnectionOptions: {} }
 ) => {
   const connectionOptions = options.knexConnectionOptions
     ? JSON.stringify(options.knexConnectionOptions)
     : "";
-  let code = `export const getDatabaseConnection = () => knex(${connectionOptions});\n\n`;
+  let code = `import knex from "knex";\n\n`;
+  code += `export const getDatabaseConnection = () => knex(${connectionOptions});\n\n`;
 
   for (const table of schema.tables) {
     const entityName = metaData.tableEntityNames.get(
@@ -26,9 +27,9 @@ export const baseQueryTypeScript: Generator = (
     );
     const pluralEntityName = generateNames(entityName).pluralPascal;
     code += `export function ${pluralEntityName}<Result = ${entityName}[]>(
-  options: options = { connection: getDatabaseConnection() }
+  connection = getDatabaseConnection()
 ) {
-  return options.connection<${entityName}, Result>("${table.name}");
+  return connection<${entityName}, Result>("${table.name}");
 };\n\n`;
   }
 
