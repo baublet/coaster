@@ -12,7 +12,7 @@ export function RawUsers<Result = RawUser[]>(
 export function RawUserAccounts<Result = RawUserAccount[]>(
   options: options = { connection: getPublicConnection() }
 ) {
-  return options.connection<RawUserAccount, Result>(\\"userAccount\\");
+  return options.connection<RawUserAccount, Result>(\\"user_account\\");
 };
 
 "

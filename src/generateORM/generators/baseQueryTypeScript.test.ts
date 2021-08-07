@@ -6,6 +6,6 @@ const metaData = getMockMetaData();
 
 it("generates a schema", () => {
   metaData.tableEntityNames.set("public.user", "RawUser");
-  metaData.tableEntityNames.set("public.userAccount", "RawUserAccount");
+  metaData.tableEntityNames.set("public.user_account", "RawUserAccount");
   expect(baseQueryTypeScript(mockRawSchema, metaData)).toMatchSnapshot();
 });
