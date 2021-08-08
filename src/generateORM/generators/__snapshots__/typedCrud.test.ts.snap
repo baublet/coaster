@@ -47,10 +47,11 @@ export async function updateUser(
     .where(\\"id\\", \\"=\\", id)
     .limit(1);
 }
+
 /** Update one more entities under specific conditions */
 export async function updateUserWhere(
   updatePayload: Partial<User>,
-  query: (query: knex.QueryBuilder<RawUser, void>) => void | Promise<void>,
+  query: (query: knex.QueryBuilder<RawUser, number>) => void | Promise<void>,
   connection = getDatabaseConnection()
 ): Promise<void> {
   const rawUpdatePayload = userToRawUser(updatePayload);
@@ -58,6 +59,7 @@ export async function updateUserWhere(
   await query(queryBuilder);
   await queryBuilder;
 }
+
 /** Insert a single UserAccount into the database, returning the inserted ID */
 export async function insertUserAccount(
   input: Partial<UserAccount>,
@@ -104,10 +106,11 @@ export async function updateUserAccount(
     .where(\\"id\\", \\"=\\", id)
     .limit(1);
 }
+
 /** Update one more entities under specific conditions */
 export async function updateUserAccountWhere(
   updatePayload: Partial<UserAccount>,
-  query: (query: knex.QueryBuilder<RawUserAccount, void>) => void | Promise<void>,
+  query: (query: knex.QueryBuilder<RawUserAccount, number>) => void | Promise<void>,
   connection = getDatabaseConnection()
 ): Promise<void> {
   const rawUpdatePayload = userAccountToRawUserAccount(updatePayload);
@@ -115,6 +118,7 @@ export async function updateUserAccountWhere(
   await query(queryBuilder);
   await queryBuilder;
 }
+
 "
 `;
 
@@ -125,7 +129,7 @@ export async function insertUser(
   connection = getDatabaseConnection()
 ): Promise<User> {
   const rawInput = userToRawUser(input);
-  const result = await RawUsers(connection).insert(rawInput).returning(*);
+  const result = await RawUsers(connection).insert(rawInput).returning(\\"*\\");
   return rawUserToUser(result[0]);
 };
 
@@ -166,10 +170,11 @@ export async function updateUser(
     .where(\\"id\\", \\"=\\", id)
     .limit(1);
 }
+
 /** Update one more entities under specific conditions */
 export async function updateUserWhere(
   updatePayload: Partial<User>,
-  query: (query: knex.QueryBuilder<RawUser, void>) => void | Promise<void>,
+  query: (query: knex.QueryBuilder<RawUser, number>) => void | Promise<void>,
   connection = getDatabaseConnection()
 ): Promise<void> {
   const rawUpdatePayload = userToRawUser(updatePayload);
@@ -177,13 +182,14 @@ export async function updateUserWhere(
   await query(queryBuilder);
   await queryBuilder;
 }
+
 /** Insert a single UserAccount into the database, returning the inserted entity */
 export async function insertUserAccount(
   input: Partial<UserAccount>,
   connection = getDatabaseConnection()
 ): Promise<UserAccount> {
   const rawInput = userAccountToRawUserAccount(input);
-  const result = await RawUserAccounts(connection).insert(rawInput).returning(*);
+  const result = await RawUserAccounts(connection).insert(rawInput).returning(\\"*\\");
   return rawUserAccountToUserAccount(result[0]);
 };
 
@@ -224,10 +230,11 @@ export async function updateUserAccount(
     .where(\\"id\\", \\"=\\", id)
     .limit(1);
 }
+
 /** Update one more entities under specific conditions */
 export async function updateUserAccountWhere(
   updatePayload: Partial<UserAccount>,
-  query: (query: knex.QueryBuilder<RawUserAccount, void>) => void | Promise<void>,
+  query: (query: knex.QueryBuilder<RawUserAccount, number>) => void | Promise<void>,
   connection = getDatabaseConnection()
 ): Promise<void> {
   const rawUpdatePayload = userAccountToRawUserAccount(updatePayload);
@@ -235,5 +242,6 @@ export async function updateUserAccountWhere(
   await query(queryBuilder);
   await queryBuilder;
 }
+
 "
 `;

@@ -69,6 +69,7 @@ export type GetTypeName = (
 export { rawTypes } from "./rawTypes";
 export { rawBaseQuery } from "./rawBaseQuery";
 export { typesWithNamingPolicy } from "./typesWithNamingPolicy";
+export { typedCrud } from "./typedCrud";
 
 export function generatorWithConfiguration<T extends Generator>(
   generator: T,

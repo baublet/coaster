@@ -21,7 +21,7 @@ export const rawBaseQuery = (
 
   metaData.setHeader("knex", 'import knex from "knex";');
   metaData.setHeader(
-    "knex",
+    "connection",
     `export const getDatabaseConnection = () => knex(${connectionOptions});`
   );
 

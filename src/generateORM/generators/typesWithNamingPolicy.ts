@@ -84,7 +84,7 @@ export const typesWithNamingPolicy = (
       }
     }
 
-    code += `\n};\n`;
+    code += `\n};\n\n`;
 
     const columnNamesAsJsonString = JSON.stringify(requiredColumnNames);
     // Type assertions
@@ -93,7 +93,7 @@ export const typesWithNamingPolicy = (
     code += `    if(objectHasProperties(subject, ${columnNamesAsJsonString})) { return; }\n`;
     code += `  }\n`;
     code += `  throw new Error("Invariance violation! Expected subject to be a ${entityNameWithPrefix}, but it was instead: " + JSON.stringify(subject));\n`;
-    code += `}\n`;
+    code += `}\n\n`;
 
     metaData.typeAssertionFunctionNames.set(
       schemaAndTablePath,
@@ -106,7 +106,7 @@ export const typesWithNamingPolicy = (
     code += `    if(objectHasProperties(subject, ${columnNamesAsJsonString})) { return true; }\n`;
     code += `  }\n`;
     code += `  return false;\n`;
-    code += `}\n`;
+    code += `}\n\n`;
 
     metaData.typeGuardFunctionNames.set(
       schemaAndTablePath,
@@ -117,28 +117,58 @@ export const typesWithNamingPolicy = (
     const rawEntityName = metaData.tableRawEntityNames.get(schemaAndTablePath);
     const namedEntityName = entityNameWithPrefix;
 
+    // Raw to named
     const rawToNamedFunctionName = camelCase(
       `${rawEntityName}To${namedEntityName}`
     );
     let rawToNamed = `export function ${rawToNamedFunctionName}`;
-    rawToNamed += `(subject: ${rawEntityName}): ${namedEntityName} {\n`;
-    rawToNamed += `  return {\n`;
+    const rawToNamedReturnTypeSignature = `T extends ${rawEntityName} ? ${namedEntityName} : Partial<${namedEntityName}>`;
+    rawToNamed += `<T extends ${rawEntityName} | Partial<${rawEntityName}>>(subject: T): ${rawToNamedReturnTypeSignature} {\n`;
+    rawToNamed += `  const namedSubject: Record<string, any> = {};\n`;
     for (const column of table.columns) {
       const columnName = options.getPropertyName(
         column.name,
         table.name,
         schema.name
       );
-      rawToNamed += `    ${columnName}: subject['${column.name}'],\n`;
+      rawToNamed += `    if(subject["${column.name}"] !== undefined) namedSubject["${columnName}"] = subject["${column.name}"];\n`;
     }
-    rawToNamed += `  };\n`;
-    rawToNamed += `}\n`;
+    rawToNamed += `  return namedSubject as ${rawToNamedReturnTypeSignature};\n`;
+    rawToNamed += `}\n\n`;
 
-    metaData.transformerFunctionNames[schemaAndTablePath] =
-      metaData.transformerFunctionNames[schemaAndTablePath] || {};
-    metaData.transformerFunctionNames[schemaAndTablePath][namedEntityName] =
+    metaData.transformerFunctionNames[rawEntityName] =
+      metaData.transformerFunctionNames[rawEntityName] || {};
+    metaData.transformerFunctionNames[rawEntityName][namedEntityName] =
       rawToNamedFunctionName;
+
     code += rawToNamed;
+
+    // Named to raw
+    const namedToRawFunctionName = camelCase(
+      `${namedEntityName}To${rawEntityName}`
+    );
+
+    let namedToRaw = `export function ${namedToRawFunctionName}`;
+    const namedToRawReturnTypeSignature = `T extends ${entityName} ? ${rawEntityName} : Partial<${rawEntityName}>`;
+    namedToRaw += `<T extends ${namedEntityName} | Partial<${namedEntityName}>>(subject: T): ${namedToRawReturnTypeSignature} {\n`;
+    namedToRaw += `  const rawSubject: Record<string, any> = {};\n`;
+    for (const column of table.columns) {
+      const columnName = options.getPropertyName(
+        column.name,
+        table.name,
+        schema.name
+      );
+      namedToRaw += `    if(subject["${columnName}"] !== undefined) rawSubject["${column.name}"] = subject["${columnName}"];\n`;
+    }
+    namedToRaw += `  return rawSubject as ${namedToRawReturnTypeSignature};\n`;
+    namedToRaw += `}\n\n`;
+
+    metaData.transformerFunctionNames[namedEntityName] =
+      metaData.transformerFunctionNames[namedEntityName] || {};
+    metaData.transformerFunctionNames[namedEntityName][rawEntityName] =
+      namedToRawFunctionName;
+
+    code += namedToRaw;
   }
 
   return code;

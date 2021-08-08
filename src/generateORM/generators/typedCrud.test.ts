@@ -1,4 +1,4 @@
-import { typescriptCrud } from "./typescriptCrud";
+import { typedCrud } from "./typedCrud";
 
 import { getMockRawSchema } from "../mockRawSchema";
 import { getMockMetaData } from "../mockMetaData";
@@ -30,12 +30,16 @@ metaData.transformerFunctionNames["UserAccount"]["RawUserAccount"] =
   "userAccountToRawUserAccount";
 
 it("generates some code: PG flavored", () => {
-  expect(typescriptCrud(mockSchema, metaData)).toMatchSnapshot();
+  expect(
+    typedCrud(mockSchema, metaData, {
+      knexConnectionOptions: {},
+    })
+  ).toMatchSnapshot();
 });
 
 it("generates some code: MySQL flavored", () => {
   const mockSchema = getMockRawSchema();
   mockSchema.flavor = "mysql";
 
-  expect(typescriptCrud(mockSchema, metaData)).toMatchSnapshot();
+  expect(typedCrud(mockSchema, metaData, {})).toMatchSnapshot();
 });

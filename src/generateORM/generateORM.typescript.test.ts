@@ -10,6 +10,7 @@ import {
   rawBaseQuery,
   rawTypes,
   typesWithNamingPolicy,
+  typedCrud,
   Generator,
 } from "./generators";
 
@@ -47,7 +48,7 @@ it("creates valid ts", async () => {
       client: "pg",
     },
     fetcher: mockFetcher,
-    generators: [rawTypes, rawBaseQuery, typesWithNamingPolicy],
+    generators: [rawTypes, rawBaseQuery, typesWithNamingPolicy, typedCrud],
     postProcessors: [],
   });
 

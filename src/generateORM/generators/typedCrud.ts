@@ -8,7 +8,7 @@ import { getSchemaAndTablePath } from "./helpers";
  * Generates the lowest-level possible accessor for accessing data in a table
  * using raw database types.
  */
-export const typescriptCrud = (
+export const typedCrud = (
   schema: RawSchema,
   metaData: MetaData,
   options: {
@@ -21,7 +21,7 @@ export const typescriptCrud = (
 
   metaData.setHeader("knex", 'import knex from "knex";');
   metaData.setHeader(
-    "knex",
+    "connection",
     `export const getDatabaseConnection = () => knex(${connectionOptions});`
   );
 
@@ -55,7 +55,7 @@ export const typescriptCrud = (
     } else {
       code += `): Promise<${entityName}> {\n`;
       code += `  const rawInput = ${namedToRawFunctionName}(input);\n`;
-      code += `  const result = await ${rawBaseQueryFunctionName}(connection).insert(rawInput).returning(*);\n`;
+      code += `  const result = await ${rawBaseQueryFunctionName}(connection).insert(rawInput).returning("*");\n`;
       code += `  return ${rawToNamedFunctionName}(result[0]);\n`;
     }
     code += `};\n\n`;
@@ -99,20 +99,20 @@ export const typescriptCrud = (
     code += `    .update(rawInput)\n`;
     code += `    .where("${table.primaryKeyColumn}", "=", ${table.primaryKeyColumn})\n`;
     code += `    .limit(1);\n`;
-    code += `}\n`;
+    code += `}\n\n`;
 
     // Update where
     code += `/** Update one more entities under specific conditions */\n`;
     code += `export async function update${entityName}Where(\n`;
     code += `  updatePayload: ${entityInputType},\n`;
-    code += `  query: (query: knex.QueryBuilder<${rawEntityTypeName}, void>) => void | Promise<void>,\n`;
+    code += `  query: (query: knex.QueryBuilder<${rawEntityTypeName}, number>) => void | Promise<void>,\n`;
     code += `  connection = getDatabaseConnection()\n`;
     code += `): Promise<void> {\n`;
     code += `  const rawUpdatePayload = ${namedToRawFunctionName}(updatePayload);\n`;
     code += `  const queryBuilder = ${rawBaseQueryFunctionName}(connection).update(rawUpdatePayload);\n`;
     code += `  await query(queryBuilder);\n`;
     code += `  await queryBuilder;\n`;
-    code += `}\n`;
+    code += `}\n\n`;
 
     // Delete
   }
