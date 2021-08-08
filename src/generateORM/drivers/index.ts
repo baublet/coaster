@@ -2,12 +2,15 @@ import { DatabaseConnection } from "../";
 
 export interface RawSchema {
   name: string;
+  flavor: "mysql" | "pg";
   tables: RawTable[];
 }
 
 export interface RawTable {
   name: string;
   comment?: string;
+  primaryKeyColumn: string;
+  primaryKeyType: RawColumn["type"];
   columns: RawColumn[];
 }
 

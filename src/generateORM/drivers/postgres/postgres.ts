@@ -60,9 +60,31 @@ export const pgSchemaFetcher: SchemaFetcher = async (
         .where("table_schema", "=", schemaName)
         .andWhere("table_name", "=", tableName);
 
+      const tablePrimaryKeys: {
+        rows: {
+          attname: string;
+          format_type: string;
+        }[];
+      } = await connection.raw(`
+      SELECT
+        pg_attribute.attname, 
+        format_type(pg_attribute.atttypid, pg_attribute.atttypmod)
+      FROM pg_index, pg_class, pg_attribute, pg_namespace 
+      WHERE 
+        pg_class.relname = '${tableName}' AND
+        indrelid = pg_class.oid AND 
+        nspname = '${schemaName}' AND 
+        pg_class.relnamespace = pg_namespace.oid AND 
+        pg_attribute.attrelid = pg_class.oid AND 
+        pg_attribute.attnum = any(pg_index.indkey)
+      AND indisprimary`);
+      const primaryKey = tablePrimaryKeys.rows[0];
+
       const rawTable: RawTable = {
         name: tableName,
         columns: [],
+        primaryKeyColumn: primaryKey.attname,
+        primaryKeyType: dbTypeToTypeScriptType(primaryKey.format_type),
       };
 
       for (const tableColumn of tableData) {
@@ -129,6 +151,7 @@ export const pgSchemaFetcher: SchemaFetcher = async (
     rawSchema.push({
       name: schemaName,
       tables: schemaTables,
+      flavor: "pg",
     });
   }
 

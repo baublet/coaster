@@ -3,6 +3,7 @@
 exports[`excludes things when asked 1`] = `
 Array [
   Object {
+    "flavor": "pg",
     "name": "public",
     "tables": Array [
       Object {
@@ -33,6 +34,8 @@ Array [
           },
         ],
         "name": "users",
+        "primaryKeyColumn": "id",
+        "primaryKeyType": "string",
       },
       Object {
         "columns": Array [
@@ -100,6 +103,8 @@ Array [
           },
         ],
         "name": "userAccounts",
+        "primaryKeyColumn": "id",
+        "primaryKeyType": "string",
       },
     ],
   },
@@ -109,6 +114,7 @@ Array [
 exports[`returns a schema in the right shape 1`] = `
 Array [
   Object {
+    "flavor": "pg",
     "name": "public",
     "tables": Array [
       Object {
@@ -147,6 +153,8 @@ Array [
           },
         ],
         "name": "knex_migrations",
+        "primaryKeyColumn": "id",
+        "primaryKeyType": "number",
       },
       Object {
         "columns": Array [
@@ -168,6 +176,8 @@ Array [
           },
         ],
         "name": "knex_migrations_lock",
+        "primaryKeyColumn": "index",
+        "primaryKeyType": "number",
       },
       Object {
         "columns": Array [
@@ -197,6 +207,8 @@ Array [
           },
         ],
         "name": "users",
+        "primaryKeyColumn": "id",
+        "primaryKeyType": "string",
       },
       Object {
         "columns": Array [
@@ -264,6 +276,8 @@ Array [
           },
         ],
         "name": "userAccounts",
+        "primaryKeyColumn": "id",
+        "primaryKeyType": "string",
       },
     ],
   },

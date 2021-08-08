@@ -37,6 +37,10 @@ export const rawBaseQuery = (
 ) {
   return connection<${entityName}, Result>("${table.name}");
 };\n\n`;
+    metaData.rawBaseQueryFunctionNames.set(
+      getSchemaAndTablePath(schema.name, table.name),
+      pluralEntityName
+    );
   }
 
   return code;
