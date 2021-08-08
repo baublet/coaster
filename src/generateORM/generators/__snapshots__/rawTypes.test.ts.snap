@@ -2,7 +2,7 @@
 
 exports[`interfaces/types spits out interfaces 1`] = `
 "export interface RawUser {
-id: unknown;
+id: string;
 /** Users don't have to provide their name */
 name?: string;
 data: JSON;
@@ -45,7 +45,7 @@ export function isRawUserAccountLike(subject: any): subject is RawUserAccount {
 
 exports[`interfaces/types spits out types 1`] = `
 "export type RawUser = {
-id: unknown;
+id: string;
 /** Users don't have to provide their name */
 name?: string;
 data: JSON;
@@ -88,7 +88,7 @@ export function isRawUserAccountLike(subject: any): subject is RawUserAccount {
 
 exports[`prefix allows a custom prefix 1`] = `
 "export interface DatabaseUser {
-id: unknown;
+id: string;
 /** Users don't have to provide their name */
 name?: string;
 data: JSON;

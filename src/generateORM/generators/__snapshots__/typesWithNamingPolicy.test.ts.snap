@@ -2,7 +2,7 @@
 
 exports[`custom type names: \`string\` to \`CHUMBAWUMBA\` spits out types with the proper naming policy 1`] = `
 "export type User = {
-id: unknown;
+id: CHUMBAWUMBA;
 /** Users don't have to provide their name */
 name?: CHUMBAWUMBA;
 data: JSON;
@@ -83,7 +83,7 @@ export function userAccountToRawUserAccount<T extends UserAccount | Partial<User
 
 exports[`interfaces/types spits out types with the proper naming policy 1`] = `
 "export type User = {
-id: unknown;
+id: string;
 /** Users don't have to provide their name */
 name?: string;
 data: JSON;

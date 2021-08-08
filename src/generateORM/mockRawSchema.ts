@@ -13,7 +13,7 @@ export const getMockRawSchema: () => RawSchema = () => ({
           name: "id",
           columnType: "columnType",
           nullable: false,
-          type: "unknown",
+          type: "string",
           foreignKeys: [],
           uniqueConstraints: [],
         },
