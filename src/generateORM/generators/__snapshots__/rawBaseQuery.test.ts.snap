@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generates a schema 1`] = `
+"export function <Result = undefined[]>(
+  connection = getDatabaseConnection()
+) {
+  return connection<undefined, Result>(\\"user\\");
+};
+
+export function <Result = undefined[]>(
+  connection = getDatabaseConnection()
+) {
+  return connection<undefined, Result>(\\"user_account\\");
+};
+
+"
+`;
+
+exports[`generates a schema with default knex options 1`] = `
+"export function <Result = undefined[]>(
+  connection = getDatabaseConnection()
+) {
+  return connection<undefined, Result>(\\"user\\");
+};
+
+export function <Result = undefined[]>(
+  connection = getDatabaseConnection()
+) {
+  return connection<undefined, Result>(\\"user_account\\");
+};
+
+"
+`;
+
+exports[`generates a schema: custom knex options 1`] = `
+"export function <Result = undefined[]>(
+  connection = getDatabaseConnection()
+) {
+  return connection<undefined, Result>(\\"user\\");
+};
+
+export function <Result = undefined[]>(
+  connection = getDatabaseConnection()
+) {
+  return connection<undefined, Result>(\\"user_account\\");
+};
+
+"
+`;

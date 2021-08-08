@@ -1,4 +1,4 @@
-import { baseQueryTypeScript } from "./baseQueryTypeScript";
+import { rawBaseQuery } from "./rawBaseQuery";
 import { getMockRawSchema } from "../mockRawSchema";
 import { getMockMetaData } from "../mockMetaData";
 
@@ -8,12 +8,12 @@ metaData.tableEntityNames.set("public.user", "RawUser");
 metaData.tableEntityNames.set("public.user_account", "RawUserAccount");
 
 it("generates a schema", () => {
-  expect(baseQueryTypeScript(getMockRawSchema(), metaData)).toMatchSnapshot();
+  expect(rawBaseQuery(getMockRawSchema(), metaData)).toMatchSnapshot();
 });
 
 it("generates a schema with default knex options", () => {
   expect(
-    baseQueryTypeScript(getMockRawSchema(), metaData, {
+    rawBaseQuery(getMockRawSchema(), metaData, {
       knexConnectionOptions: undefined,
     })
   ).toMatchSnapshot();
@@ -21,7 +21,7 @@ it("generates a schema with default knex options", () => {
 
 it("generates a schema: custom knex options", () => {
   expect(
-    baseQueryTypeScript(getMockRawSchema(), metaData, {
+    rawBaseQuery(getMockRawSchema(), metaData, {
       knexConnectionOptions: {
         client: "pg",
       },

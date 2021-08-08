@@ -21,11 +21,15 @@ export type MetaData = {
   /**
    * Map<table_name, TableName> - for mapping table names to their entities.
    */
-  tableEntityNames: Map<EntityPath, string>;
+  tableEntityNames: Map<EntityPath, EntityName>;
   /**
    * Map<EntityName, table_name>
    */
-  entityTableNames: Map<EntityPath, string>;
+  entityTableNames: Map<EntityName, EntityPath>;
+  /**
+   * Map<table_name, TableName> - for mapping table names to their raw entities.
+   */
+  tableRawEntityNames: Map<EntityPath, EntityName>;
   /**
    * Function names for querying raw DB entities
    */
@@ -47,13 +51,13 @@ export type MetaData = {
 } & Record<string, any>;
 
 /**
- * The raw path to the entity. E.g., in schema `my_app`, table `user_account`,
- * this would be `my_app.user_account`
+ * Named primitives to help understand the above maps
  */
 type EntityPath = string;
 type FromEntity = string;
 type ToEntity = string;
 type FunctionName = string;
+type EntityName = string;
 
 export type GetTypeName = (
   type: RawColumn["type"],
@@ -63,7 +67,7 @@ export type GetTypeName = (
 ) => string | undefined;
 
 export { rawTypes } from "./rawTypes";
-export { baseQueryTypeScript } from "./baseQueryTypeScript";
+export { rawBaseQuery } from "./rawBaseQuery";
 export { typesWithNamingPolicy } from "./typesWithNamingPolicy";
 
 export function generatorWithConfiguration<T extends Generator>(

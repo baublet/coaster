@@ -43,6 +43,7 @@ export const typesWithNamingPolicy = (
 
     const schemaAndTablePath = getSchemaAndTablePath(schema.name, table.name);
     metaData.entityTableNames.set(entityNameWithPrefix, schemaAndTablePath);
+    metaData.tableEntityNames.set(schemaAndTablePath, entityNameWithPrefix);
 
     if (table.comment) {
       code += `\n/** ${table.comment} */\n`;
@@ -113,7 +114,7 @@ export const typesWithNamingPolicy = (
     );
 
     // Transformers
-    const rawEntityName = metaData.tableEntityNames.get(schemaAndTablePath);
+    const rawEntityName = metaData.tableRawEntityNames.get(schemaAndTablePath);
     const namedEntityName = entityNameWithPrefix;
 
     const rawToNamedFunctionName = camelCase(

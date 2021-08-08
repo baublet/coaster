@@ -8,8 +8,8 @@ const entityNamingPolicy = (str: string) => pascalCase(str);
 const propertyNamingPolicy = (str: string) => camelCase(str);
 
 const mockMetaData = getMockMetaData();
-mockMetaData.tableEntityNames.set("public.user", "RawUser");
-mockMetaData.tableEntityNames.set("public.user_account", "RawUserAccount");
+mockMetaData.tableRawEntityNames.set("public.user", "RawUser");
+mockMetaData.tableRawEntityNames.set("public.user_account", "RawUserAccount");
 
 describe("interfaces/types", () => {
   it("spits out types with the proper naming policy", () => {

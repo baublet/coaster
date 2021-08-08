@@ -44,7 +44,10 @@ export const rawTypes = (
     );
 
     const schemaAndTablePath = getSchemaAndTablePath(schema.name, table.name);
-    metaData.tableEntityNames.set(schemaAndTablePath, rawPrefix + entityName);
+    metaData.tableRawEntityNames.set(
+      schemaAndTablePath,
+      rawPrefix + entityName
+    );
     metaData.entityTableNames.set(rawPrefix + entityName, schemaAndTablePath);
 
     if (table.comment) {

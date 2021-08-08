@@ -8,7 +8,7 @@ import { getSchemaAndTablePath } from "./helpers";
  * Generates the lowest-level possible accessor for accessing data in a table
  * using raw database types.
  */
-export const baseQueryTypeScript = (
+export const rawBaseQuery = (
   schema: RawSchema,
   metaData: MetaData,
   options: {
@@ -18,11 +18,17 @@ export const baseQueryTypeScript = (
   const connectionOptions = options.knexConnectionOptions
     ? JSON.stringify(options.knexConnectionOptions)
     : "";
-  let code = `import knex from "knex";\n\n`;
-  code += `export const getDatabaseConnection = () => knex(${connectionOptions});\n\n`;
+
+  metaData.setHeader("knex", 'import knex from "knex";');
+  metaData.setHeader(
+    "knex",
+    `export const getDatabaseConnection = () => knex(${connectionOptions});`
+  );
+
+  let code = "";
 
   for (const table of schema.tables) {
-    const entityName = metaData.tableEntityNames.get(
+    const entityName = metaData.tableRawEntityNames.get(
       getSchemaAndTablePath(schema.name, table.name)
     );
     const pluralEntityName = generateNames(entityName).pluralPascal;

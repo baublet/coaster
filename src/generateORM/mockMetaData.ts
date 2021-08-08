@@ -10,5 +10,6 @@ export function getMockMetaData(): MetaData {
     transformerFunctionNames: {},
     typeAssertionFunctionNames: new Map(),
     typeGuardFunctionNames: new Map(),
+    tableRawEntityNames: new Map(),
   };
 }

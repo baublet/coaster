@@ -23,6 +23,7 @@ export async function generateORM(
     entityTableNames: new Map(),
     rawBaseQueryFunctionNames: new Map(),
     tableEntityNames: new Map(),
+    tableRawEntityNames: new Map(),
     typeAssertionFunctionNames: new Map(),
     typeGuardFunctionNames: new Map(),
     transformerFunctionNames: {},

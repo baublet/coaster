@@ -7,7 +7,7 @@ import { resolve } from "path";
 
 import { generateORM } from "./generateORM";
 import {
-  baseQueryTypeScript,
+  rawBaseQuery,
   rawTypes,
   typesWithNamingPolicy,
   Generator,
@@ -31,7 +31,7 @@ it("returns a string", async () => {
     fetcher: mockFetcher,
     generators: [
       rawTypes,
-      baseQueryTypeScript,
+      rawBaseQuery,
       typesWithNamingPolicy,
       customDummyGenerator,
     ],
@@ -47,7 +47,7 @@ it("creates valid ts", async () => {
       client: "pg",
     },
     fetcher: mockFetcher,
-    generators: [rawTypes, baseQueryTypeScript, typesWithNamingPolicy],
+    generators: [rawTypes, rawBaseQuery, typesWithNamingPolicy],
     postProcessors: [],
   });
 
