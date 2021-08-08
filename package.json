@@ -1,4 +1,10 @@
 {
+  "name": "@baublet/coaster",
+  "author": {
+    "email": "baublet@gmail.com",
+    "name": "Ryan Poe",
+    "url": "https://www.ryanmpoe.com"
+  },
   "license": "MIT",
   "scripts": {
     "coaster": "yarn ts-node src/scripts/coaster.ts",

@@ -2,4 +2,4 @@
 
 # Coaster
 
-A framework for generating lightweight, horizontally-scalable web applications using strong types and generated code.
+A library for generating light-weight Object-Relational Mappers using Knex and TypeScript.
