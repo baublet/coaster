@@ -11,6 +11,7 @@ Array [
           Object {
             "columnType": "text",
             "foreignKeys": Array [],
+            "hasDefault": false,
             "name": "id",
             "nullable": false,
             "type": "string",
@@ -19,6 +20,7 @@ Array [
           Object {
             "columnType": "timestamp with time zone",
             "foreignKeys": Array [],
+            "hasDefault": true,
             "name": "created_at",
             "nullable": false,
             "type": "Date",
@@ -27,6 +29,7 @@ Array [
           Object {
             "columnType": "timestamp with time zone",
             "foreignKeys": Array [],
+            "hasDefault": true,
             "name": "updated_at",
             "nullable": false,
             "type": "Date",
@@ -42,6 +45,7 @@ Array [
           Object {
             "columnType": "text",
             "foreignKeys": Array [],
+            "hasDefault": false,
             "name": "id",
             "nullable": false,
             "type": "string",
@@ -50,6 +54,7 @@ Array [
           Object {
             "columnType": "timestamp with time zone",
             "foreignKeys": Array [],
+            "hasDefault": true,
             "name": "created_at",
             "nullable": false,
             "type": "Date",
@@ -58,6 +63,7 @@ Array [
           Object {
             "columnType": "timestamp with time zone",
             "foreignKeys": Array [],
+            "hasDefault": true,
             "name": "updated_at",
             "nullable": false,
             "type": "Date",
@@ -66,6 +72,7 @@ Array [
           Object {
             "columnType": "text",
             "foreignKeys": Array [],
+            "hasDefault": false,
             "name": "source",
             "nullable": false,
             "type": "string",
@@ -74,6 +81,7 @@ Array [
           Object {
             "columnType": "text",
             "foreignKeys": Array [],
+            "hasDefault": false,
             "name": "uniqueIdentifier",
             "nullable": false,
             "type": "string",
@@ -88,6 +96,7 @@ Array [
                 "table": "users",
               },
             ],
+            "hasDefault": false,
             "name": "userId",
             "nullable": false,
             "type": "string",
@@ -96,6 +105,7 @@ Array [
           Object {
             "columnType": "jsonb",
             "foreignKeys": Array [],
+            "hasDefault": false,
             "name": "rawUserData",
             "nullable": true,
             "type": "JSON",
@@ -122,6 +132,7 @@ Array [
           Object {
             "columnType": "integer",
             "foreignKeys": Array [],
+            "hasDefault": true,
             "name": "id",
             "nullable": false,
             "type": "number",
@@ -130,6 +141,7 @@ Array [
           Object {
             "columnType": "character varying",
             "foreignKeys": Array [],
+            "hasDefault": false,
             "name": "name",
             "nullable": true,
             "type": "string",
@@ -138,6 +150,7 @@ Array [
           Object {
             "columnType": "integer",
             "foreignKeys": Array [],
+            "hasDefault": false,
             "name": "batch",
             "nullable": true,
             "type": "number",
@@ -146,6 +159,7 @@ Array [
           Object {
             "columnType": "timestamp with time zone",
             "foreignKeys": Array [],
+            "hasDefault": false,
             "name": "migration_time",
             "nullable": true,
             "type": "Date",
@@ -161,6 +175,7 @@ Array [
           Object {
             "columnType": "integer",
             "foreignKeys": Array [],
+            "hasDefault": true,
             "name": "index",
             "nullable": false,
             "type": "number",
@@ -169,6 +184,7 @@ Array [
           Object {
             "columnType": "integer",
             "foreignKeys": Array [],
+            "hasDefault": false,
             "name": "is_locked",
             "nullable": true,
             "type": "number",
@@ -184,6 +200,7 @@ Array [
           Object {
             "columnType": "text",
             "foreignKeys": Array [],
+            "hasDefault": false,
             "name": "id",
             "nullable": false,
             "type": "string",
@@ -192,6 +209,7 @@ Array [
           Object {
             "columnType": "timestamp with time zone",
             "foreignKeys": Array [],
+            "hasDefault": true,
             "name": "created_at",
             "nullable": false,
             "type": "Date",
@@ -200,6 +218,7 @@ Array [
           Object {
             "columnType": "timestamp with time zone",
             "foreignKeys": Array [],
+            "hasDefault": true,
             "name": "updated_at",
             "nullable": false,
             "type": "Date",
@@ -215,6 +234,7 @@ Array [
           Object {
             "columnType": "text",
             "foreignKeys": Array [],
+            "hasDefault": false,
             "name": "id",
             "nullable": false,
             "type": "string",
@@ -223,6 +243,7 @@ Array [
           Object {
             "columnType": "timestamp with time zone",
             "foreignKeys": Array [],
+            "hasDefault": true,
             "name": "created_at",
             "nullable": false,
             "type": "Date",
@@ -231,6 +252,7 @@ Array [
           Object {
             "columnType": "timestamp with time zone",
             "foreignKeys": Array [],
+            "hasDefault": true,
             "name": "updated_at",
             "nullable": false,
             "type": "Date",
@@ -239,6 +261,7 @@ Array [
           Object {
             "columnType": "text",
             "foreignKeys": Array [],
+            "hasDefault": false,
             "name": "source",
             "nullable": false,
             "type": "string",
@@ -247,6 +270,7 @@ Array [
           Object {
             "columnType": "text",
             "foreignKeys": Array [],
+            "hasDefault": false,
             "name": "uniqueIdentifier",
             "nullable": false,
             "type": "string",
@@ -261,6 +285,7 @@ Array [
                 "table": "users",
               },
             ],
+            "hasDefault": false,
             "name": "userId",
             "nullable": false,
             "type": "string",
@@ -269,6 +294,7 @@ Array [
           Object {
             "columnType": "jsonb",
             "foreignKeys": Array [],
+            "hasDefault": false,
             "name": "rawUserData",
             "nullable": true,
             "type": "JSON",

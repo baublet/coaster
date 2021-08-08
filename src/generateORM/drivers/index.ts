@@ -19,6 +19,7 @@ export interface RawColumn {
   type: "number" | "string" | "boolean" | "Date" | "JSON" | "unknown";
   columnType: string;
   comment?: string;
+  hasDefault: boolean;
   nullable: boolean;
   uniqueConstraints: RawUniqueConstraint[];
   foreignKeys: RawForeignKey[];

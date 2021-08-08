@@ -48,6 +48,16 @@ export type MetaData = {
    * For transforming results from/to the raw/named types
    */
   transformerFunctionNames: Record<FromEntity, Record<ToEntity, FunctionName>>;
+  /**
+   * Named entity column names. E.g., for `public.user_accounts.user_data`, this
+   * might return `userData` depending on the naming policy
+   */
+  namedEntityColumnNames: Map<EntityPath, string>;
+  /**
+   * Inputs are different -- e.g., both nullable and non-nullable fields with
+   * defaults can both allow null values as input. This is how we reference them
+   */
+  namedEntityInputTypeName: Map<EntityPath, string>;
 } & Record<string, any>;
 
 /**

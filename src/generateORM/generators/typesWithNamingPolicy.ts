@@ -121,54 +121,93 @@ export const typesWithNamingPolicy = (
     const rawToNamedFunctionName = camelCase(
       `${rawEntityName}To${namedEntityName}`
     );
-    let rawToNamed = `export function ${rawToNamedFunctionName}`;
+
     const rawToNamedReturnTypeSignature = `T extends ${rawEntityName} ? ${namedEntityName} : Partial<${namedEntityName}>`;
-    rawToNamed += `<T extends ${rawEntityName} | Partial<${rawEntityName}>>(subject: T): ${rawToNamedReturnTypeSignature} {\n`;
-    rawToNamed += `  const namedSubject: Record<string, any> = {};\n`;
+    code += `export function ${rawToNamedFunctionName}`;
+    code += `<T extends ${rawEntityName} | Partial<${rawEntityName}>>(subject: T): ${rawToNamedReturnTypeSignature} {\n`;
+    code += `  const namedSubject: Record<string, any> = {};\n`;
     for (const column of table.columns) {
       const columnName = options.getPropertyName(
         column.name,
         table.name,
         schema.name
       );
-      rawToNamed += `    if(subject["${column.name}"] !== undefined) namedSubject["${columnName}"] = subject["${column.name}"];\n`;
+      code += `    if(subject["${column.name}"] !== undefined) namedSubject["${columnName}"] = subject["${column.name}"];\n`;
+
+      metaData.namedEntityColumnNames.set(
+        `${schemaAndTablePath}.${column.name}`,
+        columnName
+      );
     }
-    rawToNamed += `  return namedSubject as ${rawToNamedReturnTypeSignature};\n`;
-    rawToNamed += `}\n\n`;
+    code += `  return namedSubject as ${rawToNamedReturnTypeSignature};\n`;
+    code += `}\n\n`;
 
     metaData.transformerFunctionNames[rawEntityName] =
       metaData.transformerFunctionNames[rawEntityName] || {};
     metaData.transformerFunctionNames[rawEntityName][namedEntityName] =
       rawToNamedFunctionName;
 
-    code += rawToNamed;
-
     // Named to raw
     const namedToRawFunctionName = camelCase(
       `${namedEntityName}To${rawEntityName}`
     );
 
-    let namedToRaw = `export function ${namedToRawFunctionName}`;
     const namedToRawReturnTypeSignature = `T extends ${entityName} ? ${rawEntityName} : Partial<${rawEntityName}>`;
-    namedToRaw += `<T extends ${namedEntityName} | Partial<${namedEntityName}>>(subject: T): ${namedToRawReturnTypeSignature} {\n`;
-    namedToRaw += `  const rawSubject: Record<string, any> = {};\n`;
+    code += `export function ${namedToRawFunctionName}`;
+    code += `<T extends ${namedEntityName} | Partial<${namedEntityName}>>(subject: T): ${namedToRawReturnTypeSignature} {\n`;
+    code += `  const rawSubject: Record<string, any> = {};\n`;
     for (const column of table.columns) {
       const columnName = options.getPropertyName(
         column.name,
         table.name,
         schema.name
       );
-      namedToRaw += `    if(subject["${columnName}"] !== undefined) rawSubject["${column.name}"] = subject["${columnName}"];\n`;
+      code += `    if(subject["${columnName}"] !== undefined) rawSubject["${column.name}"] = subject["${columnName}"];\n`;
     }
-    namedToRaw += `  return rawSubject as ${namedToRawReturnTypeSignature};\n`;
-    namedToRaw += `}\n\n`;
+    code += `  return rawSubject as ${namedToRawReturnTypeSignature};\n`;
+    code += `}\n\n`;
 
     metaData.transformerFunctionNames[namedEntityName] =
       metaData.transformerFunctionNames[namedEntityName] || {};
     metaData.transformerFunctionNames[namedEntityName][rawEntityName] =
       namedToRawFunctionName;
 
-    code += namedToRaw;
+    // Named input type -- all nullable and non-nullable fields
+    // with defaults are partial
+    code += `export ${
+      options.typesOrInterfaces === "interfaces" ? "interface" : "type"
+    } ${entityNameWithPrefix}Input ${
+      options.typesOrInterfaces === "interfaces" ? "" : "= "
+    }{`;
+    for (const column of table.columns) {
+      const columnName = options.getPropertyName(
+        column.name,
+        table.name,
+        schema.name
+      );
+      if (column.comment) {
+        code += `\n/** ${column.comment} */`;
+      }
+      code += `\n${columnName}`;
+      code +=
+        column.nullable === true || column.hasDefault === true ? "?: " : ": ";
+      code += orDefault(
+        [
+          options.getTypeName?.(
+            column.type,
+            column.name,
+            table.name,
+            schema.name
+          ),
+        ],
+        column.type
+      );
+      code += ";";
+      if (!column.nullable) {
+        requiredColumnNames.push(columnName);
+      }
+    }
+    code += `}\n\n`;
   }
 
   return code;

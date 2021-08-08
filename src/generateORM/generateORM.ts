@@ -27,6 +27,7 @@ export async function generateORM(
     typeAssertionFunctionNames: new Map(),
     typeGuardFunctionNames: new Map(),
     transformerFunctionNames: {},
+    namedEntityColumnNames: new Map(),
   };
 
   for (const generator of options.generators) {

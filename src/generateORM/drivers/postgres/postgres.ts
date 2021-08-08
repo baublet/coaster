@@ -91,6 +91,7 @@ export const pgSchemaFetcher: SchemaFetcher = async (
         rawTable.columns.push({
           name: tableColumn.column_name,
           nullable: tableColumn.is_nullable === "YES",
+          hasDefault: tableColumn.column_default !== null,
           columnType: tableColumn.data_type,
           foreignKeys: [],
           uniqueConstraints: [],
