@@ -1,0 +1,239 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generates some code: MySQL flavored 1`] = `
+"/** Insert a single User into the database, returning the inserted ID */
+export async function insertUser(
+  input: Partial<User>,
+  connection = getDatabaseConnection()
+): Promise<string> {
+  const result = await RawUsers(connection).insert(input);
+  return result[0];
+};
+
+/** Find many Users in the database by a constraint function */
+export async function findUsers(
+  query: (query: knex.QueryBuilder<RawUser, RawUser[]>) => void | Promise<void>,
+  connection = getDatabaseConnection()
+): Promise<User[]> {
+  const queryBuilder = RawUsers(connection);
+  await query(queryBuilder);
+  const results = await queryBuilder;
+  return results.map((rawEntity) => rawUserToUser(rawEntity));
+};
+
+/** Find a User in the database or fail */
+export async function findUserOrFail(
+  query: (query: knex.QueryBuilder<RawUser, RawUser[]>) => void | Promise<void>,
+  connection = getDatabaseConnection()
+): Promise<User> {
+  const queryBuilder = RawUsers(connection);
+  await query(queryBuilder);
+  queryBuilder.limit(1);
+  const results = await queryBuilder;
+  if(results.length === 0) {
+    throw new Error(\\"Error! Unable to find User in findUserOrFail call\\");
+  }
+  return rawUserToUser(results[0])
+};
+
+/** Update a single entity */
+export async function updateUser(
+  input: Partial<User>,
+  connection = getDatabaseConnection()
+): Promise<void> {
+  const {id, ...rawInput} = userToRawUser(input);
+  await RawUsers(connection)
+    .update(rawInput)
+    .where(\\"id\\", \\"=\\", id)
+    .limit(1);
+}
+/** Update one more entities under specific conditions */
+export async function updateUserWhere(
+  updatePayload: Partial<User>,
+  query: (query: knex.QueryBuilder<RawUser, void>) => void | Promise<void>,
+  connection = getDatabaseConnection()
+): Promise<void> {
+  const rawUpdatePayload = userToRawUser(updatePayload);
+  const queryBuilder = RawUsers(connection).update(rawUpdatePayload);
+  await query(queryBuilder);
+  await queryBuilder;
+}
+/** Insert a single UserAccount into the database, returning the inserted ID */
+export async function insertUserAccount(
+  input: Partial<UserAccount>,
+  connection = getDatabaseConnection()
+): Promise<string> {
+  const result = await RawUserAccounts(connection).insert(input);
+  return result[0];
+};
+
+/** Find many UserAccounts in the database by a constraint function */
+export async function findUserAccounts(
+  query: (query: knex.QueryBuilder<RawUserAccount, RawUserAccount[]>) => void | Promise<void>,
+  connection = getDatabaseConnection()
+): Promise<UserAccount[]> {
+  const queryBuilder = RawUserAccounts(connection);
+  await query(queryBuilder);
+  const results = await queryBuilder;
+  return results.map((rawEntity) => rawUserAccountToUserAccount(rawEntity));
+};
+
+/** Find a UserAccount in the database or fail */
+export async function findUserAccountOrFail(
+  query: (query: knex.QueryBuilder<RawUserAccount, RawUserAccount[]>) => void | Promise<void>,
+  connection = getDatabaseConnection()
+): Promise<UserAccount> {
+  const queryBuilder = RawUserAccounts(connection);
+  await query(queryBuilder);
+  queryBuilder.limit(1);
+  const results = await queryBuilder;
+  if(results.length === 0) {
+    throw new Error(\\"Error! Unable to find UserAccount in findUserAccountOrFail call\\");
+  }
+  return rawUserAccountToUserAccount(results[0])
+};
+
+/** Update a single entity */
+export async function updateUserAccount(
+  input: Partial<UserAccount>,
+  connection = getDatabaseConnection()
+): Promise<void> {
+  const {id, ...rawInput} = userAccountToRawUserAccount(input);
+  await RawUserAccounts(connection)
+    .update(rawInput)
+    .where(\\"id\\", \\"=\\", id)
+    .limit(1);
+}
+/** Update one more entities under specific conditions */
+export async function updateUserAccountWhere(
+  updatePayload: Partial<UserAccount>,
+  query: (query: knex.QueryBuilder<RawUserAccount, void>) => void | Promise<void>,
+  connection = getDatabaseConnection()
+): Promise<void> {
+  const rawUpdatePayload = userAccountToRawUserAccount(updatePayload);
+  const queryBuilder = RawUserAccounts(connection).update(rawUpdatePayload);
+  await query(queryBuilder);
+  await queryBuilder;
+}
+"
+`;
+
+exports[`generates some code: PG flavored 1`] = `
+"/** Insert a single User into the database, returning the inserted entity */
+export async function insertUser(
+  input: Partial<User>,
+  connection = getDatabaseConnection()
+): Promise<User> {
+  const rawInput = userToRawUser(input);
+  const result = await RawUsers(connection).insert(rawInput).returning(*);
+  return rawUserToUser(result[0]);
+};
+
+/** Find many Users in the database by a constraint function */
+export async function findUsers(
+  query: (query: knex.QueryBuilder<RawUser, RawUser[]>) => void | Promise<void>,
+  connection = getDatabaseConnection()
+): Promise<User[]> {
+  const queryBuilder = RawUsers(connection);
+  await query(queryBuilder);
+  const results = await queryBuilder;
+  return results.map((rawEntity) => rawUserToUser(rawEntity));
+};
+
+/** Find a User in the database or fail */
+export async function findUserOrFail(
+  query: (query: knex.QueryBuilder<RawUser, RawUser[]>) => void | Promise<void>,
+  connection = getDatabaseConnection()
+): Promise<User> {
+  const queryBuilder = RawUsers(connection);
+  await query(queryBuilder);
+  queryBuilder.limit(1);
+  const results = await queryBuilder;
+  if(results.length === 0) {
+    throw new Error(\\"Error! Unable to find User in findUserOrFail call\\");
+  }
+  return rawUserToUser(results[0])
+};
+
+/** Update a single entity */
+export async function updateUser(
+  input: Partial<User>,
+  connection = getDatabaseConnection()
+): Promise<void> {
+  const {id, ...rawInput} = userToRawUser(input);
+  await RawUsers(connection)
+    .update(rawInput)
+    .where(\\"id\\", \\"=\\", id)
+    .limit(1);
+}
+/** Update one more entities under specific conditions */
+export async function updateUserWhere(
+  updatePayload: Partial<User>,
+  query: (query: knex.QueryBuilder<RawUser, void>) => void | Promise<void>,
+  connection = getDatabaseConnection()
+): Promise<void> {
+  const rawUpdatePayload = userToRawUser(updatePayload);
+  const queryBuilder = RawUsers(connection).update(rawUpdatePayload);
+  await query(queryBuilder);
+  await queryBuilder;
+}
+/** Insert a single UserAccount into the database, returning the inserted entity */
+export async function insertUserAccount(
+  input: Partial<UserAccount>,
+  connection = getDatabaseConnection()
+): Promise<UserAccount> {
+  const rawInput = userAccountToRawUserAccount(input);
+  const result = await RawUserAccounts(connection).insert(rawInput).returning(*);
+  return rawUserAccountToUserAccount(result[0]);
+};
+
+/** Find many UserAccounts in the database by a constraint function */
+export async function findUserAccounts(
+  query: (query: knex.QueryBuilder<RawUserAccount, RawUserAccount[]>) => void | Promise<void>,
+  connection = getDatabaseConnection()
+): Promise<UserAccount[]> {
+  const queryBuilder = RawUserAccounts(connection);
+  await query(queryBuilder);
+  const results = await queryBuilder;
+  return results.map((rawEntity) => rawUserAccountToUserAccount(rawEntity));
+};
+
+/** Find a UserAccount in the database or fail */
+export async function findUserAccountOrFail(
+  query: (query: knex.QueryBuilder<RawUserAccount, RawUserAccount[]>) => void | Promise<void>,
+  connection = getDatabaseConnection()
+): Promise<UserAccount> {
+  const queryBuilder = RawUserAccounts(connection);
+  await query(queryBuilder);
+  queryBuilder.limit(1);
+  const results = await queryBuilder;
+  if(results.length === 0) {
+    throw new Error(\\"Error! Unable to find UserAccount in findUserAccountOrFail call\\");
+  }
+  return rawUserAccountToUserAccount(results[0])
+};
+
+/** Update a single entity */
+export async function updateUserAccount(
+  input: Partial<UserAccount>,
+  connection = getDatabaseConnection()
+): Promise<void> {
+  const {id, ...rawInput} = userAccountToRawUserAccount(input);
+  await RawUserAccounts(connection)
+    .update(rawInput)
+    .where(\\"id\\", \\"=\\", id)
+    .limit(1);
+}
+/** Update one more entities under specific conditions */
+export async function updateUserAccountWhere(
+  updatePayload: Partial<UserAccount>,
+  query: (query: knex.QueryBuilder<RawUserAccount, void>) => void | Promise<void>,
+  connection = getDatabaseConnection()
+): Promise<void> {
+  const rawUpdatePayload = userAccountToRawUserAccount(updatePayload);
+  const queryBuilder = RawUserAccounts(connection).update(rawUpdatePayload);
+  await query(queryBuilder);
+  await queryBuilder;
+}
+"
+`;

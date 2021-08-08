@@ -2,9 +2,12 @@ import { RawSchema } from "./drivers";
 
 export const getMockRawSchema: () => RawSchema = () => ({
   name: "public",
+  flavor: "pg",
   tables: [
     {
       name: "user",
+      primaryKeyColumn: "id",
+      primaryKeyType: "string",
       columns: [
         {
           name: "id",
@@ -36,6 +39,8 @@ export const getMockRawSchema: () => RawSchema = () => ({
     {
       name: "user_account",
       comment: "Singular users can have multiple accounts",
+      primaryKeyColumn: "id",
+      primaryKeyType: "string",
       columns: [
         {
           name: "id",
