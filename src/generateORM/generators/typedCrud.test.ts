@@ -29,6 +29,12 @@ metaData.transformerFunctionNames["UserAccount"] = {};
 metaData.transformerFunctionNames["UserAccount"]["RawUserAccount"] =
   "userAccountToRawUserAccount";
 
+metaData.namedEntityInputTypeName.set("public.user", "UserInput");
+metaData.namedEntityInputTypeName.set(
+  "public.user_account",
+  "UserAccountInput"
+);
+
 it("generates some code: PG flavored", () => {
   expect(
     typedCrud(mockSchema, metaData, {

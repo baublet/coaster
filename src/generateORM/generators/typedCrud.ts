@@ -31,7 +31,6 @@ export const typedCrud = (
     const schemaAndTablePath = getSchemaAndTablePath(schema.name, table.name);
     const entityName = metaData.tableEntityNames.get(schemaAndTablePath);
     const pluralEntityName = generateNames(entityName).pluralPascal;
-    const entityInputType = `Partial<${entityName}>`;
     const rawBaseQueryFunctionName =
       metaData.rawBaseQueryFunctionNames.get(schemaAndTablePath);
     const rawEntityTypeName =
@@ -40,6 +39,8 @@ export const typedCrud = (
       metaData.transformerFunctionNames[rawEntityTypeName][entityName];
     const namedToRawFunctionName =
       metaData.transformerFunctionNames[entityName][rawEntityTypeName];
+    const entityInputType =
+      metaData.namedEntityInputTypeName.get(schemaAndTablePath);
 
     // Create
     code += `/** Insert a single ${entityName} into the database, returning ${

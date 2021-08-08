@@ -3,7 +3,7 @@
 exports[`generates some code: MySQL flavored 1`] = `
 "/** Insert a single User into the database, returning the inserted ID */
 export async function insertUser(
-  input: Partial<User>,
+  input: UserInput,
   connection = getDatabaseConnection()
 ): Promise<string> {
   const result = await RawUsers(connection).insert(input);
@@ -38,7 +38,7 @@ export async function findUserOrFail(
 
 /** Update a single entity */
 export async function updateUser(
-  input: Partial<User>,
+  input: UserInput,
   connection = getDatabaseConnection()
 ): Promise<void> {
   const {id, ...rawInput} = userToRawUser(input);
@@ -50,7 +50,7 @@ export async function updateUser(
 
 /** Update one more entities under specific conditions */
 export async function updateUserWhere(
-  updatePayload: Partial<User>,
+  updatePayload: UserInput,
   query: (query: knex.QueryBuilder<RawUser, number>) => void | Promise<void>,
   connection = getDatabaseConnection()
 ): Promise<void> {
@@ -62,7 +62,7 @@ export async function updateUserWhere(
 
 /** Insert a single UserAccount into the database, returning the inserted ID */
 export async function insertUserAccount(
-  input: Partial<UserAccount>,
+  input: UserAccountInput,
   connection = getDatabaseConnection()
 ): Promise<string> {
   const result = await RawUserAccounts(connection).insert(input);
@@ -97,7 +97,7 @@ export async function findUserAccountOrFail(
 
 /** Update a single entity */
 export async function updateUserAccount(
-  input: Partial<UserAccount>,
+  input: UserAccountInput,
   connection = getDatabaseConnection()
 ): Promise<void> {
   const {id, ...rawInput} = userAccountToRawUserAccount(input);
@@ -109,7 +109,7 @@ export async function updateUserAccount(
 
 /** Update one more entities under specific conditions */
 export async function updateUserAccountWhere(
-  updatePayload: Partial<UserAccount>,
+  updatePayload: UserAccountInput,
   query: (query: knex.QueryBuilder<RawUserAccount, number>) => void | Promise<void>,
   connection = getDatabaseConnection()
 ): Promise<void> {
@@ -125,7 +125,7 @@ export async function updateUserAccountWhere(
 exports[`generates some code: PG flavored 1`] = `
 "/** Insert a single User into the database, returning the inserted entity */
 export async function insertUser(
-  input: Partial<User>,
+  input: UserInput,
   connection = getDatabaseConnection()
 ): Promise<User> {
   const rawInput = userToRawUser(input);
@@ -161,7 +161,7 @@ export async function findUserOrFail(
 
 /** Update a single entity */
 export async function updateUser(
-  input: Partial<User>,
+  input: UserInput,
   connection = getDatabaseConnection()
 ): Promise<void> {
   const {id, ...rawInput} = userToRawUser(input);
@@ -173,7 +173,7 @@ export async function updateUser(
 
 /** Update one more entities under specific conditions */
 export async function updateUserWhere(
-  updatePayload: Partial<User>,
+  updatePayload: UserInput,
   query: (query: knex.QueryBuilder<RawUser, number>) => void | Promise<void>,
   connection = getDatabaseConnection()
 ): Promise<void> {
@@ -185,7 +185,7 @@ export async function updateUserWhere(
 
 /** Insert a single UserAccount into the database, returning the inserted entity */
 export async function insertUserAccount(
-  input: Partial<UserAccount>,
+  input: UserAccountInput,
   connection = getDatabaseConnection()
 ): Promise<UserAccount> {
   const rawInput = userAccountToRawUserAccount(input);
@@ -221,7 +221,7 @@ export async function findUserAccountOrFail(
 
 /** Update a single entity */
 export async function updateUserAccount(
-  input: Partial<UserAccount>,
+  input: UserAccountInput,
   connection = getDatabaseConnection()
 ): Promise<void> {
   const {id, ...rawInput} = userAccountToRawUserAccount(input);
@@ -233,7 +233,7 @@ export async function updateUserAccount(
 
 /** Update one more entities under specific conditions */
 export async function updateUserAccountWhere(
-  updatePayload: Partial<UserAccount>,
+  updatePayload: UserAccountInput,
   query: (query: knex.QueryBuilder<RawUserAccount, number>) => void | Promise<void>,
   connection = getDatabaseConnection()
 ): Promise<void> {

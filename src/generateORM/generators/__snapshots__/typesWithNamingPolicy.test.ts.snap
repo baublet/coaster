@@ -38,6 +38,12 @@ export function userToRawUser<T extends User | Partial<User>>(subject: T): T ext
   return rawSubject as T extends User ? RawUser : Partial<RawUser>;
 }
 
+export type UserInput = {
+id: CHUMBAWUMBA;
+/** Users don't have to provide their name */
+name?: CHUMBAWUMBA;
+data: JSON;}
+
 
 /** Singular users can have multiple accounts */
 export type UserAccount = {
@@ -77,6 +83,13 @@ export function userAccountToRawUserAccount<T extends UserAccount | Partial<User
     if(subject[\\"sourceData\\"] !== undefined) rawSubject[\\"source_data\\"] = subject[\\"sourceData\\"];
   return rawSubject as T extends UserAccount ? RawUserAccount : Partial<RawUserAccount>;
 }
+
+export type UserAccountInput = {
+id: unknown;
+/** Who sent us this users' data? */
+source: CHUMBAWUMBA;
+/** The raw data sent from the source provider */
+sourceData: JSON;}
 
 "
 `;
@@ -119,6 +132,12 @@ export function userToRawUser<T extends User | Partial<User>>(subject: T): T ext
   return rawSubject as T extends User ? RawUser : Partial<RawUser>;
 }
 
+export type UserInput = {
+id: string;
+/** Users don't have to provide their name */
+name?: string;
+data: JSON;}
+
 
 /** Singular users can have multiple accounts */
 export type UserAccount = {
@@ -158,6 +177,13 @@ export function userAccountToRawUserAccount<T extends UserAccount | Partial<User
     if(subject[\\"sourceData\\"] !== undefined) rawSubject[\\"source_data\\"] = subject[\\"sourceData\\"];
   return rawSubject as T extends UserAccount ? RawUserAccount : Partial<RawUserAccount>;
 }
+
+export type UserAccountInput = {
+id: unknown;
+/** Who sent us this users' data? */
+source: string;
+/** The raw data sent from the source provider */
+sourceData: JSON;}
 
 "
 `;
