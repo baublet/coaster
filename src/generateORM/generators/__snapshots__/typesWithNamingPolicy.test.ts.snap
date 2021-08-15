@@ -93,6 +93,7 @@ source: CHUMBAWUMBA;
 sourceData: JSON;
 }
 
+export type UserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
 "
 `;
 
@@ -189,5 +190,6 @@ source: string;
 sourceData: JSON;
 }
 
+export type UserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
 "
 `;

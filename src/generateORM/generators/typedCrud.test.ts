@@ -29,8 +29,8 @@ metaData.transformerFunctionNames["UserAccount"] = {};
 metaData.transformerFunctionNames["UserAccount"]["RawUserAccount"] =
   "userAccountToRawUserAccount";
 
-metaData.namedEntityInputTypeName.set("public.user", "UserInput");
-metaData.namedEntityInputTypeName.set(
+metaData.namedEntityInputTypeNames.set("public.user", "UserInput");
+metaData.namedEntityInputTypeNames.set(
   "public.user_account",
   "UserAccountInput"
 );

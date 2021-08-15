@@ -4,6 +4,12 @@ export interface RawSchema {
   name: string;
   flavor: "mysql" | "pg";
   tables: RawTable[];
+  enums: RawEnum[];
+}
+
+export interface RawEnum {
+  name: string;
+  values: string[];
 }
 
 export interface RawTable {
@@ -16,7 +22,8 @@ export interface RawTable {
 
 export interface RawColumn {
   name: string;
-  type: "number" | "string" | "boolean" | "Date" | "JSON" | "unknown";
+  type: "number" | "string" | "boolean" | "Date" | "JSON" | "unknown" | "enum";
+  enumPath?: string;
   columnType: string;
   comment?: string;
   hasDefault: boolean;

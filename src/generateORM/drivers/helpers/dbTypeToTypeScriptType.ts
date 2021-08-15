@@ -15,6 +15,7 @@ const numbers = [
   "real",
   "money",
 ];
+const enums = ["USER-DEFINED"];
 
 function matches(needles: string[], haystack: string): boolean {
   for (const needle of needles) {
@@ -44,6 +45,10 @@ export function dbTypeToTypeScriptType(dbType: string): RawColumn["type"] {
 
   if (matches(numbers, dbType)) {
     return "number";
+  }
+
+  if (matches(enums, dbType)) {
+    return "enum";
   }
 
   return "unknown";

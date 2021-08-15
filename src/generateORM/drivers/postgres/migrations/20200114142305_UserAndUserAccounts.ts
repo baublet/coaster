@@ -10,7 +10,13 @@ export async function up(knex: Knex): Promise<void> {
     table.unique(["source", "uniqueIdentifier", "userId"]);
     table.text("id").primary();
     table.timestamps(undefined, true);
-    table.text("source").notNullable().index();
+    table
+      .enu("source", ["github", "bitbucket"], {
+        useNative: true,
+        enumName: "source",
+      })
+      .notNullable()
+      .index();
     table.text("uniqueIdentifier").notNullable().index();
     table
       .text("userId")

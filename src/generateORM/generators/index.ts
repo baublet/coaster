@@ -57,8 +57,16 @@ export type MetaData = {
    * Inputs are different -- e.g., both nullable and non-nullable fields with
    * defaults can both allow null values as input. This is how we reference them
    */
-  namedEntityInputTypeName: Map<EntityPath, string>;
-} & Record<string, any>;
+  namedEntityInputTypeNames: Map<EntityPath, string>;
+  /**
+   * Raw database enums stored as Map<`schema.enum`, "RawSchemaEnumEnum">.
+   */
+  rawDatabaseEnumNames: Map<EntityPath, string>;
+  /**
+   * Named database enums stored as Map<`schema.enum`, "SchemaEnumEnum">;
+   */
+  namedDatabaseEnumNames: Map<EntityPath, string>;
+};
 
 /**
  * Named primitives to help understand the above maps

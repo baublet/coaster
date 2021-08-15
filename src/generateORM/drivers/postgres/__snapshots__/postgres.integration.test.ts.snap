@@ -3,6 +3,15 @@
 exports[`excludes things when asked 1`] = `
 Array [
   Object {
+    "enums": Array [
+      Object {
+        "name": "source",
+        "values": Array [
+          "github",
+          "bitbucket",
+        ],
+      },
+    ],
     "flavor": "pg",
     "name": "public",
     "tables": Array [
@@ -10,6 +19,7 @@ Array [
         "columns": Array [
           Object {
             "columnType": "text",
+            "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": false,
             "name": "id",
@@ -19,6 +29,7 @@ Array [
           },
           Object {
             "columnType": "timestamp with time zone",
+            "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": true,
             "name": "created_at",
@@ -28,6 +39,7 @@ Array [
           },
           Object {
             "columnType": "timestamp with time zone",
+            "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": true,
             "name": "updated_at",
@@ -44,6 +56,7 @@ Array [
         "columns": Array [
           Object {
             "columnType": "text",
+            "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": false,
             "name": "id",
@@ -53,6 +66,7 @@ Array [
           },
           Object {
             "columnType": "timestamp with time zone",
+            "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": true,
             "name": "created_at",
@@ -62,6 +76,7 @@ Array [
           },
           Object {
             "columnType": "timestamp with time zone",
+            "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": true,
             "name": "updated_at",
@@ -70,16 +85,18 @@ Array [
             "uniqueConstraints": Array [],
           },
           Object {
-            "columnType": "text",
+            "columnType": "USER-DEFINED",
+            "enumPath": "public.source",
             "foreignKeys": Array [],
             "hasDefault": false,
             "name": "source",
             "nullable": false,
-            "type": "string",
+            "type": "enum",
             "uniqueConstraints": Array [],
           },
           Object {
             "columnType": "text",
+            "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": false,
             "name": "uniqueIdentifier",
@@ -89,6 +106,7 @@ Array [
           },
           Object {
             "columnType": "text",
+            "enumPath": undefined,
             "foreignKeys": Array [
               Object {
                 "column": "id",
@@ -104,6 +122,7 @@ Array [
           },
           Object {
             "columnType": "jsonb",
+            "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": false,
             "name": "rawUserData",
@@ -124,6 +143,15 @@ Array [
 exports[`returns a schema in the right shape 1`] = `
 Array [
   Object {
+    "enums": Array [
+      Object {
+        "name": "source",
+        "values": Array [
+          "github",
+          "bitbucket",
+        ],
+      },
+    ],
     "flavor": "pg",
     "name": "public",
     "tables": Array [
@@ -131,6 +159,7 @@ Array [
         "columns": Array [
           Object {
             "columnType": "integer",
+            "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": true,
             "name": "id",
@@ -140,6 +169,7 @@ Array [
           },
           Object {
             "columnType": "character varying",
+            "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": false,
             "name": "name",
@@ -149,6 +179,7 @@ Array [
           },
           Object {
             "columnType": "integer",
+            "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": false,
             "name": "batch",
@@ -158,6 +189,7 @@ Array [
           },
           Object {
             "columnType": "timestamp with time zone",
+            "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": false,
             "name": "migration_time",
@@ -174,6 +206,7 @@ Array [
         "columns": Array [
           Object {
             "columnType": "integer",
+            "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": true,
             "name": "index",
@@ -183,6 +216,7 @@ Array [
           },
           Object {
             "columnType": "integer",
+            "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": false,
             "name": "is_locked",
@@ -199,6 +233,7 @@ Array [
         "columns": Array [
           Object {
             "columnType": "text",
+            "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": false,
             "name": "id",
@@ -208,6 +243,7 @@ Array [
           },
           Object {
             "columnType": "timestamp with time zone",
+            "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": true,
             "name": "created_at",
@@ -217,6 +253,7 @@ Array [
           },
           Object {
             "columnType": "timestamp with time zone",
+            "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": true,
             "name": "updated_at",
@@ -233,6 +270,7 @@ Array [
         "columns": Array [
           Object {
             "columnType": "text",
+            "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": false,
             "name": "id",
@@ -242,6 +280,7 @@ Array [
           },
           Object {
             "columnType": "timestamp with time zone",
+            "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": true,
             "name": "created_at",
@@ -251,6 +290,7 @@ Array [
           },
           Object {
             "columnType": "timestamp with time zone",
+            "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": true,
             "name": "updated_at",
@@ -259,16 +299,18 @@ Array [
             "uniqueConstraints": Array [],
           },
           Object {
-            "columnType": "text",
+            "columnType": "USER-DEFINED",
+            "enumPath": "public.source",
             "foreignKeys": Array [],
             "hasDefault": false,
             "name": "source",
             "nullable": false,
-            "type": "string",
+            "type": "enum",
             "uniqueConstraints": Array [],
           },
           Object {
             "columnType": "text",
+            "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": false,
             "name": "uniqueIdentifier",
@@ -278,6 +320,7 @@ Array [
           },
           Object {
             "columnType": "text",
+            "enumPath": undefined,
             "foreignKeys": Array [
               Object {
                 "column": "id",
@@ -293,6 +336,7 @@ Array [
           },
           Object {
             "columnType": "jsonb",
+            "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": false,
             "name": "rawUserData",

@@ -31,7 +31,7 @@ export type ConnectionOrTransaction = Connection | Transaction;`
     const namedToRawFunctionName =
       metaData.transformerFunctionNames[entityName][rawEntityTypeName];
     const entityInputType =
-      metaData.namedEntityInputTypeName.get(schemaAndTablePath);
+      metaData.namedEntityInputTypeNames.get(schemaAndTablePath);
 
     // Create
     code += `/**\n`;

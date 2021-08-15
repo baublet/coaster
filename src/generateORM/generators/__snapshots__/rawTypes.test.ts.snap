@@ -1,7 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`interfaces/types spits out interfaces 1`] = `
-"export interface RawUser {
+"export type RawUserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
+export interface RawUser {
 id: string;
 /** Users don't have to provide their name */
 name?: string;
@@ -24,7 +25,7 @@ export function isRawUserLike(subject: any): subject is RawUser {
 export interface RawUserAccount {
 id: unknown;
 /** Who sent us this users' data? */
-source: string;
+source: RawUserAccountSourceEnum;
 /** The raw data sent from the source provider */
 source_data: JSON;
 };
@@ -44,7 +45,8 @@ export function isRawUserAccountLike(subject: any): subject is RawUserAccount {
 `;
 
 exports[`interfaces/types spits out types 1`] = `
-"export type RawUser = {
+"export type RawUserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
+export type RawUser = {
 id: string;
 /** Users don't have to provide their name */
 name?: string;
@@ -67,7 +69,7 @@ export function isRawUserLike(subject: any): subject is RawUser {
 export type RawUserAccount = {
 id: unknown;
 /** Who sent us this users' data? */
-source: string;
+source: RawUserAccountSourceEnum;
 /** The raw data sent from the source provider */
 source_data: JSON;
 };
@@ -87,7 +89,8 @@ export function isRawUserAccountLike(subject: any): subject is RawUserAccount {
 `;
 
 exports[`prefix allows a custom prefix 1`] = `
-"export interface DatabaseUser {
+"export type DatabaseUserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
+export interface DatabaseUser {
 id: string;
 /** Users don't have to provide their name */
 name?: string;
@@ -110,7 +113,7 @@ export function isDatabaseUserLike(subject: any): subject is DatabaseUser {
 export interface DatabaseUserAccount {
 id: unknown;
 /** Who sent us this users' data? */
-source: string;
+source: DatabaseUserAccountSourceEnum;
 /** The raw data sent from the source provider */
 source_data: JSON;
 };

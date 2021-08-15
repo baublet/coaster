@@ -1,4 +1,4 @@
-import { RawSchema, RawTable } from "..";
+import { RawEnum, RawSchema, RawTable } from "..";
 import { shouldExclude, dbTypeToTypeScriptType } from "../helpers";
 import { DatabaseConnection } from "../../";
 
@@ -13,9 +13,6 @@ interface PostgresOptions {
   excludeTables?: string[];
 }
 
-/**
- * TODO: this can almost certainly be optimized to avoid nested loops
- */
 export const pgSchemaFetcher = async (
   connection: DatabaseConnection,
   options: PostgresOptions = {
@@ -55,6 +52,7 @@ export const pgSchemaFetcher = async (
             is_nullable: "YES" | "NO";
             data_type: string;
             is_updatable: "YES" | "NO";
+            udt_name: string;
           }[]
         >()
         .from("information_schema.columns")
@@ -89,6 +87,11 @@ export const pgSchemaFetcher = async (
       };
 
       for (const tableColumn of tableData) {
+        const tsType = dbTypeToTypeScriptType(tableColumn.data_type);
+        const enumPath =
+          tsType === "enum"
+            ? `${schemaName}.${tableColumn.udt_name}`
+            : undefined;
         rawTable.columns.push({
           name: tableColumn.column_name,
           nullable: tableColumn.is_nullable === "YES",
@@ -96,7 +99,8 @@ export const pgSchemaFetcher = async (
           columnType: tableColumn.data_type,
           foreignKeys: [],
           uniqueConstraints: [],
-          type: dbTypeToTypeScriptType(tableColumn.data_type),
+          type: tsType,
+          enumPath,
         });
       }
 
@@ -150,10 +154,39 @@ export const pgSchemaFetcher = async (
       schemaTables.push(rawTable);
     }
 
+    // Enums
+    const enums = await connection.raw<{
+      rows: {
+        enum_name: string;
+        enum_value: string;
+      }[];
+    }>(`SELECT t.typname AS enum_name,
+    e.enumlabel AS enum_value
+  FROM pg_type t 
+    JOIN pg_enum e on t.oid = e.enumtypid  
+    JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace
+  WHERE n.nspname = '${schemaName}'`);
+    const enumsMap = new Map<string, string[]>();
+    for (const { enum_name, enum_value } of enums.rows) {
+      if (!enumsMap.has(enum_name)) {
+        enumsMap.set(enum_name, []);
+      }
+      enumsMap.get(enum_name).push(enum_value);
+    }
+
+    const schemaEnums: RawEnum[] = [];
+    for (const [enumName, enumValues] of enumsMap) {
+      schemaEnums.push({
+        name: enumName,
+        values: enumValues,
+      });
+    }
+
     rawSchema.push({
+      flavor: "pg",
       name: schemaName,
       tables: schemaTables,
-      flavor: "pg",
+      enums: schemaEnums,
     });
   }
 

@@ -3,6 +3,12 @@ import { RawSchema } from "./drivers";
 export const getMockRawSchema: () => RawSchema = () => ({
   name: "public",
   flavor: "pg",
+  enums: [
+    {
+      name: "user_account_source",
+      values: ["github", "bitbucket"],
+    },
+  ],
   tables: [
     {
       name: "user",
@@ -59,10 +65,11 @@ export const getMockRawSchema: () => RawSchema = () => ({
           comment: "Who sent us this users' data?",
           columnType: "columnType",
           nullable: false,
-          type: "string",
+          type: "enum",
           foreignKeys: [],
           uniqueConstraints: [],
           hasDefault: false,
+          enumPath: "public.user_account_source",
         },
         {
           name: "source_data",

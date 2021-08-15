@@ -3,7 +3,8 @@ import { orDefault } from "../../helpers";
 
 import { MetaData, GetTypeName } from ".";
 import { RawSchema } from "../drivers";
-import { getSchemaAndTablePath } from "./helpers";
+import { getSchemaAndTablePath, getName } from "./helpers";
+import { generateNames } from "../../generateNames";
 
 const defaultEntityNamingPolicy = (str: string) => pascalCase(str);
 const defaultPropertyNamingPolicy = (str: string) => camelCase(str);
@@ -18,6 +19,7 @@ export const typesWithNamingPolicy = (
   schema: RawSchema,
   metaData: MetaData,
   options: {
+    enumPrefix?: string;
     typesOrInterfaces: "types" | "interfaces";
     prefixSchemaName?: boolean;
     prefix?: string;
@@ -29,6 +31,7 @@ export const typesWithNamingPolicy = (
       schemaName: string
     ) => string;
   } = {
+    enumPrefix: "Enum",
     typesOrInterfaces: "interfaces",
     getEntityName: defaultEntityNamingPolicy,
     getPropertyName: defaultPropertyNamingPolicy,
@@ -207,12 +210,27 @@ export const typesWithNamingPolicy = (
       if (!column.nullable) {
         requiredColumnNames.push(columnName);
       }
-      metaData.namedEntityInputTypeName.set(
+      metaData.namedEntityInputTypeNames.set(
         schemaAndTablePath,
         `${entityNameWithPrefix}Input`
       );
     }
     code += `\n}\n\n`;
+  }
+
+  const schemaName = options.prefixSchemaName
+    ? generateNames(
+        getName(undefined, undefined, schema.name, options.prefixSchemaName)
+      ).singularPascal
+    : "";
+  const enumPrefix = orDefault([options.enumPrefix], "Enum");
+  for (const { name, values } of schema.enums) {
+    const enumNames = generateNames(name);
+    const enumTypeName = `${prefix}${enumNames.singularPascal}${schemaName}${enumPrefix}`;
+    code += `export type ${enumTypeName} = `;
+    code += '"' + values.join('" | "') + '"';
+    code += `;\n`;
+    metaData.namedDatabaseEnumNames.set(`${schema.name}.${name}`, enumTypeName);
   }
 
   return code;

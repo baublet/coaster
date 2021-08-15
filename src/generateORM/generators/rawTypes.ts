@@ -1,6 +1,8 @@
 import { MetaData, GetTypeName } from ".";
 import { RawSchema } from "../drivers";
 import { getName, getSchemaAndTablePath } from "./helpers";
+import { generateNames } from "../../generateNames";
+import { orDefault } from "helpers";
 
 /**
  * Creates types, guards, and assertions for the shape of data coming out of
@@ -11,10 +13,12 @@ export const rawTypes = (
   metaData: MetaData,
   options: {
     typesOrInterfaces: "types" | "interfaces";
+    enumPrefix?: string;
     prefixSchemaName?: boolean;
     rawPrefix?: string;
     getTypeName?: GetTypeName;
   } = {
+    enumPrefix: "Enum",
     typesOrInterfaces: "interfaces",
     prefixSchemaName: false,
     getTypeName: () => undefined,
@@ -35,6 +39,23 @@ export const rawTypes = (
   let code = "";
   const rawPrefix = options.rawPrefix === undefined ? "Raw" : options.rawPrefix;
 
+  // Enums
+  const schemaName = options.prefixSchemaName
+    ? generateNames(
+        getName(undefined, undefined, schema.name, options.prefixSchemaName)
+      ).singularPascal
+    : "";
+  const enumPrefix = orDefault([options.enumPrefix], "Enum");
+  for (const { name, values } of schema.enums) {
+    const enumNames = generateNames(name);
+    const enumTypeName = `${rawPrefix}${enumNames.singularPascal}${schemaName}${enumPrefix}`;
+    code += `export type ${enumTypeName} = `;
+    code += '"' + values.join('" | "') + '"';
+    code += `;\n`;
+    metaData.rawDatabaseEnumNames.set(`${schema.name}.${name}`, enumTypeName);
+  }
+
+  // Entities
   for (const table of schema.tables) {
     const entityName = getName(
       undefined,
@@ -67,13 +88,32 @@ export const rawTypes = (
       }
       code += `\n${column.name}`;
       code += column.nullable ? "?: " : ": ";
-      code +=
-        options.getTypeName?.(
+
+      if (column.type === "enum") {
+        const userDeclaredColumnTypeName = options.getTypeName?.(
           column.type,
           column.name,
           table.name,
           schema.name
-        ) || column.type;
+        );
+        if (
+          userDeclaredColumnTypeName ||
+          !metaData.rawDatabaseEnumNames.has(column.enumPath)
+        ) {
+          code += userDeclaredColumnTypeName;
+        } else {
+          code += metaData.rawDatabaseEnumNames.get(column.enumPath);
+        }
+      } else {
+        code +=
+          options.getTypeName?.(
+            column.type,
+            column.name,
+            table.name,
+            schema.name
+          ) || column.type;
+      }
+
       code += ";";
       if (!column.nullable) {
         rawRequiredColumnNames.push(column.name);
