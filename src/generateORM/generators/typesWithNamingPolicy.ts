@@ -1,5 +1,5 @@
 import { camelCase, pascalCase } from "change-case";
-import { orDefault } from "helpers";
+import { orDefault } from "../../helpers";
 
 import { MetaData, GetTypeName } from ".";
 import { RawSchema } from "../drivers";

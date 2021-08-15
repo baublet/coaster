@@ -4,4 +4,4 @@ testDatabases/*.sqlite
 src/generateORM/drivers/postgres/data
 tmp/*
 !tmp/.gitkeep
-generated.ts
+src/generateORM/integrationTests/generated.ts
