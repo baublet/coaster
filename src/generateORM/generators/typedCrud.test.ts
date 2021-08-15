@@ -36,16 +36,12 @@ metaData.namedEntityInputTypeName.set(
 );
 
 it("generates some code: PG flavored", () => {
-  expect(
-    typedCrud(mockSchema, metaData, {
-      knexConnectionOptions: {},
-    })
-  ).toMatchSnapshot();
+  expect(typedCrud(mockSchema, metaData)).toMatchSnapshot();
 });
 
 it("generates some code: MySQL flavored", () => {
   const mockSchema = getMockRawSchema();
   mockSchema.flavor = "mysql";
 
-  expect(typedCrud(mockSchema, metaData, {})).toMatchSnapshot();
+  expect(typedCrud(mockSchema, metaData)).toMatchSnapshot();
 });

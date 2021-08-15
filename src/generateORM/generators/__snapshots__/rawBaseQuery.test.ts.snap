@@ -2,13 +2,13 @@
 
 exports[`generates a schema 1`] = `
 "export function <Result = undefined[]>(
-  connection = getDatabaseConnection()
+  connection: ConnectionOrTransaction
 ) {
   return connection<undefined, Result>(\\"user\\");
 };
 
 export function <Result = undefined[]>(
-  connection = getDatabaseConnection()
+  connection: ConnectionOrTransaction
 ) {
   return connection<undefined, Result>(\\"user_account\\");
 };
@@ -18,13 +18,13 @@ export function <Result = undefined[]>(
 
 exports[`generates a schema with default knex options 1`] = `
 "export function <Result = undefined[]>(
-  connection = getDatabaseConnection()
+  connection: ConnectionOrTransaction
 ) {
   return connection<undefined, Result>(\\"user\\");
 };
 
 export function <Result = undefined[]>(
-  connection = getDatabaseConnection()
+  connection: ConnectionOrTransaction
 ) {
   return connection<undefined, Result>(\\"user_account\\");
 };
@@ -34,13 +34,13 @@ export function <Result = undefined[]>(
 
 exports[`generates a schema: custom knex options 1`] = `
 "export function <Result = undefined[]>(
-  connection = getDatabaseConnection()
+  connection: ConnectionOrTransaction
 ) {
   return connection<undefined, Result>(\\"user\\");
 };
 
 export function <Result = undefined[]>(
-  connection = getDatabaseConnection()
+  connection: ConnectionOrTransaction
 ) {
   return connection<undefined, Result>(\\"user_account\\");
 };
