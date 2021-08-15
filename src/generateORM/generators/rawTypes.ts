@@ -1,8 +1,8 @@
 import { MetaData, GetTypeName } from ".";
 import { RawSchema } from "../drivers";
-import { getName, getSchemaAndTablePath } from "./helpers";
+import { getName, getSchemaAndTablePath, getTypeName } from "./helpers";
 import { generateNames } from "../../generateNames";
-import { orDefault } from "../../helpers";
+import { orDefault, ternary } from "../../helpers";
 
 /**
  * Creates types, guards, and assertions for the shape of data coming out of
@@ -37,21 +37,22 @@ export const rawTypes = (
   );
   metaData.setHeader(
     "json-type",
-    `type AnyJson =  boolean | number | string | null | JsonArray | JsonMap;
-interface JsonMap {  [key: string]: AnyJson; }
-interface JsonArray extends Array<AnyJson> {}
-  `
+    `export type AnyJson =  boolean | number | string | null | JsonArray | JsonMap;
+export interface JsonMap {  [key: string]: AnyJson; };
+export interface JsonArray extends Array<AnyJson> {};`
   );
 
   let code = "";
   const rawPrefix = options.rawPrefix === undefined ? "Raw" : options.rawPrefix;
 
   // Enums
-  const schemaName = options.prefixSchemaName
-    ? generateNames(
-        getName(undefined, undefined, schema.name, options.prefixSchemaName)
-      ).singularPascal
-    : "";
+  const schemaName = ternary(
+    options.prefixSchemaName,
+    generateNames(
+      getName(undefined, undefined, schema.name, options.prefixSchemaName)
+    ).singularPascal,
+    ""
+  );
   const enumPrefix = orDefault([options.enumPrefix], "Enum");
   for (const { name, values } of schema.enums) {
     const enumNames = generateNames(name);
@@ -96,33 +97,14 @@ interface JsonArray extends Array<AnyJson> {}
       code += `\n${column.name}`;
       code += column.nullable ? "?: " : ": ";
 
-      if (column.type === "enum") {
-        const userDeclaredColumnTypeName = options.getTypeName?.(
-          column.type,
-          column.name,
-          table.name,
-          schema.name
-        );
-        if (
-          userDeclaredColumnTypeName ||
-          (userDeclaredColumnTypeName &&
-            !metaData.rawDatabaseEnumNames.has(column.enumPath))
-        ) {
-          code += userDeclaredColumnTypeName;
-        } else if (metaData.rawDatabaseEnumNames.has(column.enumPath)) {
-          code += metaData.rawDatabaseEnumNames.get(column.enumPath);
-        } else {
-          code += "string";
-        }
-      } else {
-        code +=
-          options.getTypeName?.(
-            column.type,
-            column.name,
-            table.name,
-            schema.name
-          ) || column.type;
-      }
+      code += getTypeName({
+        column,
+        metaData,
+        schema,
+        table,
+        getTypeName: options.getTypeName,
+        rawOrNamed: "raw",
+      });
 
       code += ";";
       if (!column.nullable) {

@@ -23,3 +23,7 @@ it("returns boolean", () => {
 it("returns unknown", () => {
   expect(dbTypeToTypeScriptType("fdsaasdf")).toEqual("unknown");
 });
+
+it("returns enums", () => {
+  expect(dbTypeToTypeScriptType("USER-DEFINED")).toEqual("enum");
+});

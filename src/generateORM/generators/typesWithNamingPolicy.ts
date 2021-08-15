@@ -1,9 +1,9 @@
 import { camelCase, pascalCase } from "change-case";
-import { orDefault } from "../../helpers";
 
+import { orDefault, ternary } from "../../helpers";
 import { MetaData, GetTypeName } from ".";
 import { RawSchema } from "../drivers";
-import { getSchemaAndTablePath, getName } from "./helpers";
+import { getSchemaAndTablePath, getName, getTypeName } from "./helpers";
 import { generateNames } from "../../generateNames";
 
 const defaultEntityNamingPolicy = (str: string) => pascalCase(str);
@@ -41,11 +41,13 @@ export const typesWithNamingPolicy = (
   const prefix = orDefault([options.prefix], "");
 
   // Enums
-  const schemaName = options.prefixSchemaName
-    ? generateNames(
-        getName(undefined, undefined, schema.name, options.prefixSchemaName)
-      ).singularPascal
-    : "";
+  const schemaName = ternary(
+    options.prefixSchemaName,
+    generateNames(
+      getName(undefined, undefined, schema.name, options.prefixSchemaName)
+    ).singularPascal,
+    ""
+  );
   const enumPrefix = orDefault([options.enumPrefix], "Enum");
   for (const { name, values } of schema.enums) {
     const enumNames = generateNames(name);
@@ -87,37 +89,16 @@ export const typesWithNamingPolicy = (
       }
       code += `\n${columnName}`;
       code += column.nullable ? "?: " : ": ";
-      if (column.type === "enum") {
-        const userDeclaredColumnTypeName = options.getTypeName?.(
-          column.type,
-          column.name,
-          table.name,
-          schema.name
-        );
-        if (
-          userDeclaredColumnTypeName ||
-          (userDeclaredColumnTypeName &&
-            !metaData.rawDatabaseEnumNames.has(column.enumPath))
-        ) {
-          code += userDeclaredColumnTypeName;
-        } else if (metaData.namedDatabaseEnumNames.has(column.enumPath)) {
-          code += metaData.namedDatabaseEnumNames.get(column.enumPath);
-        } else {
-          code += "string";
-        }
-      } else {
-        code += orDefault(
-          [
-            options.getTypeName?.(
-              column.type,
-              column.name,
-              table.name,
-              schema.name
-            ),
-          ],
-          column.type
-        );
-      }
+
+      code += getTypeName({
+        column,
+        metaData,
+        schema,
+        table,
+        getTypeName: options.getTypeName,
+        rawOrNamed: "named",
+      });
+
       code += ";";
       if (!column.nullable) {
         requiredColumnNames.push(columnName);
@@ -232,37 +213,16 @@ export const typesWithNamingPolicy = (
       code += `\n${columnName}`;
       code +=
         column.nullable === true || column.hasDefault === true ? "?: " : ": ";
-      if (column.type === "enum") {
-        const userDeclaredColumnTypeName = options.getTypeName?.(
-          column.type,
-          column.name,
-          table.name,
-          schema.name
-        );
-        if (
-          userDeclaredColumnTypeName ||
-          (userDeclaredColumnTypeName &&
-            !metaData.rawDatabaseEnumNames.has(column.enumPath))
-        ) {
-          code += userDeclaredColumnTypeName;
-        } else if (metaData.namedDatabaseEnumNames.has(column.enumPath)) {
-          code += metaData.namedDatabaseEnumNames.get(column.enumPath);
-        } else {
-          code += "string";
-        }
-      } else {
-        code += orDefault(
-          [
-            options.getTypeName?.(
-              column.type,
-              column.name,
-              table.name,
-              schema.name
-            ),
-          ],
-          column.type
-        );
-      }
+
+      code += getTypeName({
+        column,
+        metaData,
+        schema,
+        table,
+        getTypeName: options.getTypeName,
+        rawOrNamed: "named",
+      });
+
       code += ";";
       if (!column.nullable) {
         requiredColumnNames.push(columnName);
