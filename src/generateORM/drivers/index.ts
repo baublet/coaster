@@ -22,7 +22,14 @@ export interface RawTable {
 
 export interface RawColumn {
   name: string;
-  type: "number" | "string" | "boolean" | "Date" | "JSON" | "unknown" | "enum";
+  type:
+    | "number"
+    | "string"
+    | "boolean"
+    | "Date"
+    | "AnyJson"
+    | "unknown"
+    | "enum";
   enumPath?: string;
   columnType: string;
   comment?: string;

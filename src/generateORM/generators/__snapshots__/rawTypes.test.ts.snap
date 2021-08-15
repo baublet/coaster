@@ -6,7 +6,7 @@ export interface RawUser {
 id: string;
 /** Users don't have to provide their name */
 name?: string;
-data: JSON;
+data: AnyJson;
 };
 export function assertIsRawUserLike(subject: any): asserts subject is RawUser {
   if(typeof subject === \\"object\\") {
@@ -27,7 +27,7 @@ id: unknown;
 /** Who sent us this users' data? */
 source: RawUserAccountSourceEnum;
 /** The raw data sent from the source provider */
-source_data: JSON;
+source_data: AnyJson;
 };
 export function assertIsRawUserAccountLike(subject: any): asserts subject is RawUserAccount {
   if(typeof subject === \\"object\\") {
@@ -50,7 +50,7 @@ export type RawUser = {
 id: string;
 /** Users don't have to provide their name */
 name?: string;
-data: JSON;
+data: AnyJson;
 };
 export function assertIsRawUserLike(subject: any): asserts subject is RawUser {
   if(typeof subject === \\"object\\") {
@@ -71,7 +71,7 @@ id: unknown;
 /** Who sent us this users' data? */
 source: RawUserAccountSourceEnum;
 /** The raw data sent from the source provider */
-source_data: JSON;
+source_data: AnyJson;
 };
 export function assertIsRawUserAccountLike(subject: any): asserts subject is RawUserAccount {
   if(typeof subject === \\"object\\") {
@@ -94,7 +94,7 @@ export interface DatabaseUser {
 id: string;
 /** Users don't have to provide their name */
 name?: string;
-data: JSON;
+data: AnyJson;
 };
 export function assertIsDatabaseUserLike(subject: any): asserts subject is DatabaseUser {
   if(typeof subject === \\"object\\") {
@@ -115,7 +115,7 @@ id: unknown;
 /** Who sent us this users' data? */
 source: DatabaseUserAccountSourceEnum;
 /** The raw data sent from the source provider */
-source_data: JSON;
+source_data: AnyJson;
 };
 export function assertIsDatabaseUserAccountLike(subject: any): asserts subject is DatabaseUserAccount {
   if(typeof subject === \\"object\\") {

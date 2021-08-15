@@ -2,7 +2,7 @@ import { MetaData, GetTypeName } from ".";
 import { RawSchema } from "../drivers";
 import { getName, getSchemaAndTablePath } from "./helpers";
 import { generateNames } from "../../generateNames";
-import { orDefault } from "helpers";
+import { orDefault } from "../../helpers";
 
 /**
  * Creates types, guards, and assertions for the shape of data coming out of
@@ -34,6 +34,13 @@ export const rawTypes = (
   }
   return true;
 }\n`
+  );
+  metaData.setHeader(
+    "json-type",
+    `type AnyJson =  boolean | number | string | null | JsonArray | JsonMap;
+interface JsonMap {  [key: string]: AnyJson; }
+interface JsonArray extends Array<AnyJson> {}
+  `
   );
 
   let code = "";
@@ -98,11 +105,14 @@ export const rawTypes = (
         );
         if (
           userDeclaredColumnTypeName ||
-          !metaData.rawDatabaseEnumNames.has(column.enumPath)
+          (userDeclaredColumnTypeName &&
+            !metaData.rawDatabaseEnumNames.has(column.enumPath))
         ) {
           code += userDeclaredColumnTypeName;
-        } else {
+        } else if (metaData.rawDatabaseEnumNames.has(column.enumPath)) {
           code += metaData.rawDatabaseEnumNames.get(column.enumPath);
+        } else {
+          code += "string";
         }
       } else {
         code +=

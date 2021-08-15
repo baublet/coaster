@@ -1,7 +1,7 @@
 import { dbTypeToTypeScriptType } from "./dbTypeToTypeScriptType";
 
 it("returns JSON", () => {
-  expect(dbTypeToTypeScriptType("jsona")).toEqual("JSON");
+  expect(dbTypeToTypeScriptType("jsona")).toEqual("AnyJson");
 });
 
 it("returns string", () => {

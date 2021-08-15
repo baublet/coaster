@@ -20,7 +20,7 @@ echo "(Re)Creating databases"
 echo "Migrating"
 yarn ts-node node_modules/.bin/knex --knexfile "$SRC_PATH/knexfile.js" --migrations-directory "$SRC_PATH/migrations" migrate:latest || exit_out
 
-if (cd $SRC_PATH; yarn test:integration postgres.integration.test.ts -u); then
+if (cd $SRC_PATH; yarn test:integration postgres.integration.test.ts); then
   (cd $SRC_PATH; docker-compose down)
   exit 0
 else

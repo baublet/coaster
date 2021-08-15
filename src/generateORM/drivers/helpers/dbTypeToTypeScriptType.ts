@@ -28,7 +28,7 @@ function matches(needles: string[], haystack: string): boolean {
 
 export function dbTypeToTypeScriptType(dbType: string): RawColumn["type"] {
   if (matches(jsons, dbType)) {
-    return "JSON";
+    return "AnyJson";
   }
 
   if (matches(booleans, dbType)) {

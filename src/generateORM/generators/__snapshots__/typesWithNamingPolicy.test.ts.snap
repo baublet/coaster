@@ -1,11 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`custom type names: \`string\` to \`CHUMBAWUMBA\` spits out types with the proper naming policy 1`] = `
-"export type User = {
+"export type UserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
+export type User = {
 id: CHUMBAWUMBA;
 /** Users don't have to provide their name */
 name?: CHUMBAWUMBA;
-data: JSON;
+data: AnyJson;
 };
 
 export function assertIsUserLike(subject: any): asserts subject is User {
@@ -42,7 +43,7 @@ export type UserInput = {
 id?: CHUMBAWUMBA;
 /** Users don't have to provide their name */
 name?: CHUMBAWUMBA;
-data: JSON;
+data: AnyJson;
 }
 
 
@@ -50,9 +51,9 @@ data: JSON;
 export type UserAccount = {
 id: unknown;
 /** Who sent us this users' data? */
-source: CHUMBAWUMBA;
+source: UserAccountSourceEnum;
 /** The raw data sent from the source provider */
-sourceData: JSON;
+sourceData: AnyJson;
 };
 
 export function assertIsUserAccountLike(subject: any): asserts subject is UserAccount {
@@ -88,21 +89,21 @@ export function userAccountToRawUserAccount<T extends UserAccount | Partial<User
 export type UserAccountInput = {
 id?: unknown;
 /** Who sent us this users' data? */
-source: CHUMBAWUMBA;
+source: UserAccountSourceEnum;
 /** The raw data sent from the source provider */
-sourceData: JSON;
+sourceData: AnyJson;
 }
 
-export type UserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
 "
 `;
 
 exports[`interfaces/types spits out types with the proper naming policy 1`] = `
-"export type User = {
+"export type UserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
+export type User = {
 id: string;
 /** Users don't have to provide their name */
 name?: string;
-data: JSON;
+data: AnyJson;
 };
 
 export function assertIsUserLike(subject: any): asserts subject is User {
@@ -139,7 +140,7 @@ export type UserInput = {
 id?: string;
 /** Users don't have to provide their name */
 name?: string;
-data: JSON;
+data: AnyJson;
 }
 
 
@@ -147,9 +148,9 @@ data: JSON;
 export type UserAccount = {
 id: unknown;
 /** Who sent us this users' data? */
-source: string;
+source: UserAccountSourceEnum;
 /** The raw data sent from the source provider */
-sourceData: JSON;
+sourceData: AnyJson;
 };
 
 export function assertIsUserAccountLike(subject: any): asserts subject is UserAccount {
@@ -185,11 +186,10 @@ export function userAccountToRawUserAccount<T extends UserAccount | Partial<User
 export type UserAccountInput = {
 id?: unknown;
 /** Who sent us this users' data? */
-source: string;
+source: UserAccountSourceEnum;
 /** The raw data sent from the source provider */
-sourceData: JSON;
+sourceData: AnyJson;
 }
 
-export type UserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
 "
 `;
