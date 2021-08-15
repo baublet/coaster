@@ -11,7 +11,7 @@ import {
   typesWithNamingPolicy,
 } from "../generators";
 
-// This is generated after the first test
+// This is generated after the test has started
 // @ts-expect-error
 import { RawUsers } from "./generated";
 
