@@ -15,6 +15,7 @@ export async function generateORM(
 ): Promise<string> {
   const connection = db(options.connectionOptions);
   const rawSchemas = await options.fetcher(connection);
+  await connection.destroy();
 
   let code = "";
   const headers = new Map<string, string>();

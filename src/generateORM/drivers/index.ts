@@ -44,3 +44,5 @@ export function fetcherWithConfiguration<T extends SchemaFetcher>(
 ): SchemaFetcher {
   return (connection: DatabaseConnection) => f(connection, fetcherOptions);
 }
+
+export { pgSchemaFetcher } from "./postgres";

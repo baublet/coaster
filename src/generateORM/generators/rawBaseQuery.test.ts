@@ -12,19 +12,9 @@ it("generates a schema", () => {
 });
 
 it("generates a schema with default knex options", () => {
-  expect(
-    rawBaseQuery(getMockRawSchema(), metaData, {
-      knexConnectionOptions: undefined,
-    })
-  ).toMatchSnapshot();
+  expect(rawBaseQuery(getMockRawSchema(), metaData)).toMatchSnapshot();
 });
 
 it("generates a schema: custom knex options", () => {
-  expect(
-    rawBaseQuery(getMockRawSchema(), metaData, {
-      knexConnectionOptions: {
-        client: "pg",
-      },
-    })
-  ).toMatchSnapshot();
+  expect(rawBaseQuery(getMockRawSchema(), metaData)).toMatchSnapshot();
 });

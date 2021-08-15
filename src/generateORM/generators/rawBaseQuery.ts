@@ -1,4 +1,3 @@
-import { ConnectionOptions } from "../";
 import { MetaData } from ".";
 import { generateNames } from "../../generateNames";
 import { RawSchema } from "../drivers";
@@ -8,21 +7,13 @@ import { getSchemaAndTablePath } from "./helpers";
  * Generates the lowest-level possible accessor for accessing data in a table
  * using raw database types.
  */
-export const rawBaseQuery = (
-  schema: RawSchema,
-  metaData: MetaData,
-  options: {
-    knexConnectionOptions?: ConnectionOptions;
-  } = { knexConnectionOptions: {} }
-) => {
-  const connectionOptions = options.knexConnectionOptions
-    ? JSON.stringify(options.knexConnectionOptions)
-    : "";
-
-  metaData.setHeader("knex", 'import knex from "knex";');
+export const rawBaseQuery = (schema: RawSchema, metaData: MetaData) => {
   metaData.setHeader(
-    "connection",
-    `export const getDatabaseConnection = () => knex(${connectionOptions});`
+    "knex",
+    `import knex from "knex";
+export type Connection = knex<any, unknown[]>;
+export type Transaction = knex.Transaction<any, any>;
+export type ConnectionOrTransaction = Connection | Transaction;`
   );
 
   let code = "";
@@ -33,7 +24,7 @@ export const rawBaseQuery = (
     );
     const pluralEntityName = generateNames(entityName).pluralPascal;
     code += `export function ${pluralEntityName}<Result = ${entityName}[]>(
-  connection = getDatabaseConnection()
+  connection: ConnectionOrTransaction
 ) {
   return connection<${entityName}, Result>("${table.name}");
 };\n\n`;

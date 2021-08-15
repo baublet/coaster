@@ -1,5 +1,6 @@
-import { SchemaFetcher, RawSchema, RawTable } from "..";
+import { RawSchema, RawTable } from "..";
 import { shouldExclude, dbTypeToTypeScriptType } from "../helpers";
+import { DatabaseConnection } from "../../";
 
 interface PostgresOptions {
   /**
@@ -15,8 +16,8 @@ interface PostgresOptions {
 /**
  * TODO: this can almost certainly be optimized to avoid nested loops
  */
-export const pgSchemaFetcher: SchemaFetcher = async (
-  connection,
+export const pgSchemaFetcher = async (
+  connection: DatabaseConnection,
   options: PostgresOptions = {
     excludeTables: [],
   }

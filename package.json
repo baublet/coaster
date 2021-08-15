@@ -15,7 +15,8 @@
     "coverage:report": "yarn coverage; yarn coverage:view",
     "lint:all": "eslint src/ --ext ts --fix",
     "lint:tsc": "tsc --noEmit",
-    "test:pg:driver": "sh src/generateORM/drivers/postgres/scripts/test.sh"
+    "test:pg:driver": "sh src/generateORM/drivers/postgres/scripts/test.sh",
+    "test:pg:implementation": "sh src/generateORM/integrationTests/scripts/test.sh"
   },
   "dependencies": {
     "@types/uuid": "^8.0.1",
