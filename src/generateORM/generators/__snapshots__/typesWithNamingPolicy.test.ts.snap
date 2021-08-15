@@ -39,7 +39,7 @@ export function userToRawUser<T extends User | Partial<User>>(subject: T): T ext
 }
 
 export type UserInput = {
-id: CHUMBAWUMBA;
+id?: CHUMBAWUMBA;
 /** Users don't have to provide their name */
 name?: CHUMBAWUMBA;
 data: JSON;
@@ -86,7 +86,7 @@ export function userAccountToRawUserAccount<T extends UserAccount | Partial<User
 }
 
 export type UserAccountInput = {
-id: unknown;
+id?: unknown;
 /** Who sent us this users' data? */
 source: CHUMBAWUMBA;
 /** The raw data sent from the source provider */
@@ -135,7 +135,7 @@ export function userToRawUser<T extends User | Partial<User>>(subject: T): T ext
 }
 
 export type UserInput = {
-id: string;
+id?: string;
 /** Users don't have to provide their name */
 name?: string;
 data: JSON;
@@ -182,7 +182,7 @@ export function userAccountToRawUserAccount<T extends UserAccount | Partial<User
 }
 
 export type UserAccountInput = {
-id: unknown;
+id?: unknown;
 /** Who sent us this users' data? */
 source: string;
 /** The raw data sent from the source provider */

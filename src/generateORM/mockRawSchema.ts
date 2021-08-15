@@ -16,6 +16,7 @@ export const getMockRawSchema: () => RawSchema = () => ({
           type: "string",
           foreignKeys: [],
           uniqueConstraints: [],
+          hasDefault: true,
         },
         {
           name: "name",
@@ -25,6 +26,7 @@ export const getMockRawSchema: () => RawSchema = () => ({
           type: "string",
           foreignKeys: [],
           uniqueConstraints: [],
+          hasDefault: false,
         },
         {
           name: "data",
@@ -33,6 +35,7 @@ export const getMockRawSchema: () => RawSchema = () => ({
           type: "JSON",
           foreignKeys: [],
           uniqueConstraints: [],
+          hasDefault: false,
         },
       ],
     },
@@ -49,6 +52,7 @@ export const getMockRawSchema: () => RawSchema = () => ({
           type: "unknown",
           foreignKeys: [],
           uniqueConstraints: [],
+          hasDefault: true,
         },
         {
           name: "source",
@@ -58,6 +62,7 @@ export const getMockRawSchema: () => RawSchema = () => ({
           type: "string",
           foreignKeys: [],
           uniqueConstraints: [],
+          hasDefault: false,
         },
         {
           name: "source_data",
@@ -67,6 +72,7 @@ export const getMockRawSchema: () => RawSchema = () => ({
           type: "JSON",
           foreignKeys: [],
           uniqueConstraints: [],
+          hasDefault: false,
         },
       ],
     },

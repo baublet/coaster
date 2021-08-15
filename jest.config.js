@@ -11,6 +11,7 @@ module.exports = {
     ".+.test.ts",
     // Tested separately
     "/generateORM\\/drivers\\/postgres/",
+    "src\\/generateORM\\/integrationTests",
   ],
   collectCoverageFrom: ["**/helpers/*.ts", "**/*.ts", "!**/node_modules/**"],
   coverageThreshold: {
