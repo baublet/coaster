@@ -5,8 +5,8 @@ import { RawSchema } from "../drivers";
 import { getSchemaAndTablePath } from "./helpers";
 
 /**
- * Generates the lowest-level possible accessor for accessing data in a table
- * using raw database types.
+ * Generates the lowest-level possible accessors and mutators for data in a
+ * table.
  */
 export const typedCrud = (
   schema: RawSchema,
@@ -43,9 +43,11 @@ export const typedCrud = (
       metaData.namedEntityInputTypeName.get(schemaAndTablePath);
 
     // Create
-    code += `/** Insert a single ${entityName} into the database, returning ${
+    code += `/**\n`;
+    code += ` * Insert a single ${entityName} into the database, returning ${
       schema.flavor === "mysql" ? "the inserted ID" : "the inserted entity"
-    } */\n`;
+    }\n`;
+    code += ` */\n`;
     code += `export async function insert${entityName}(\n`;
     code += `  input: ${entityInputType},\n`;
     code += `  connection = getDatabaseConnection()\n`;
@@ -90,20 +92,20 @@ export const typedCrud = (
     code += `};\n\n`;
 
     // Update
-    code += `/** Update a single entity */\n`;
+    code += `/** Update a single ${entityName} */\n`;
     code += `export async function update${entityName}(\n`;
-    code += `  input: ${entityInputType},\n`;
+    code += `  entity: ${entityInputType},\n`;
     code += `  connection = getDatabaseConnection()\n`;
     code += `): Promise<void> {\n`;
-    code += `  const {${table.primaryKeyColumn}, ...rawInput} = ${namedToRawFunctionName}(input);\n`;
+    code += `  const {${table.primaryKeyColumn}, ...rawInput} = ${namedToRawFunctionName}(entity);\n`;
     code += `  await ${rawBaseQueryFunctionName}(connection)\n`;
     code += `    .update(rawInput)\n`;
-    code += `    .where("${table.primaryKeyColumn}", "=", ${table.primaryKeyColumn})\n`;
+    code += `    .where("${table.primaryKeyColumn}", "=", entity.${table.primaryKeyColumn})\n`;
     code += `    .limit(1);\n`;
     code += `}\n\n`;
 
     // Update where
-    code += `/** Update one more entities under specific conditions */\n`;
+    code += `/** Update one or more ${pluralEntityName} under specific conditions */\n`;
     code += `export async function update${entityName}Where(\n`;
     code += `  updatePayload: ${entityInputType},\n`;
     code += `  query: (query: knex.QueryBuilder<${rawEntityTypeName}, number>) => void | Promise<void>,\n`;
@@ -116,6 +118,28 @@ export const typedCrud = (
     code += `}\n\n`;
 
     // Delete
+    code += `/** Deletes a ${entityName} */\n`;
+    code += `export async function delete${entityName}(\n`;
+    code += `  entity: ${entityName},\n`;
+    code += `  connection = getDatabaseConnection()\n`;
+    code += `): Promise<number> {\n`;
+    code += `  return ${rawBaseQueryFunctionName}<number>(connection)\n`;
+    code += `    .where("${table.primaryKeyColumn}", "=", entity.${table.primaryKeyColumn})\n`;
+    code += `    .delete()\n`;
+    code += `    .limit(1);\n`;
+    code += `}\n\n`;
+
+    // Delete where
+    code += `/** Delete one or more ${pluralEntityName} under specific conditions */\n`;
+    code += `export async function delete${entityName}Where(\n`;
+    code += `  query: (query: knex.QueryBuilder<${rawEntityTypeName}, number>) => void | Promise<void>,\n`;
+    code += `  connection = getDatabaseConnection()\n`;
+    code += `): Promise<number> {\n`;
+    code += `  const queryBuilder = ${rawBaseQueryFunctionName}<number>(connection);\n`;
+    code += `  await query(queryBuilder);\n`;
+    code += `  queryBuilder.delete();\n`;
+    code += `  return queryBuilder;\n`;
+    code += `}\n\n`;
   }
 
   return code;

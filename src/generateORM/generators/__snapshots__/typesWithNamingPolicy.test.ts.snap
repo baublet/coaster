@@ -42,7 +42,8 @@ export type UserInput = {
 id: CHUMBAWUMBA;
 /** Users don't have to provide their name */
 name?: CHUMBAWUMBA;
-data: JSON;}
+data: JSON;
+}
 
 
 /** Singular users can have multiple accounts */
@@ -89,7 +90,8 @@ id: unknown;
 /** Who sent us this users' data? */
 source: CHUMBAWUMBA;
 /** The raw data sent from the source provider */
-sourceData: JSON;}
+sourceData: JSON;
+}
 
 "
 `;
@@ -136,7 +138,8 @@ export type UserInput = {
 id: string;
 /** Users don't have to provide their name */
 name?: string;
-data: JSON;}
+data: JSON;
+}
 
 
 /** Singular users can have multiple accounts */
@@ -183,7 +186,8 @@ id: unknown;
 /** Who sent us this users' data? */
 source: string;
 /** The raw data sent from the source provider */
-sourceData: JSON;}
+sourceData: JSON;
+}
 
 "
 `;

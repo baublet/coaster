@@ -1,7 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`generates some code: MySQL flavored 1`] = `
-"/** Insert a single User into the database, returning the inserted ID */
+"/**
+ * Insert a single User into the database, returning the inserted ID
+ */
 export async function insertUser(
   input: UserInput,
   connection = getDatabaseConnection()
@@ -36,19 +38,19 @@ export async function findUserOrFail(
   return rawUserToUser(results[0])
 };
 
-/** Update a single entity */
+/** Update a single User */
 export async function updateUser(
-  input: UserInput,
+  entity: UserInput,
   connection = getDatabaseConnection()
 ): Promise<void> {
-  const {id, ...rawInput} = userToRawUser(input);
+  const {id, ...rawInput} = userToRawUser(entity);
   await RawUsers(connection)
     .update(rawInput)
-    .where(\\"id\\", \\"=\\", id)
+    .where(\\"id\\", \\"=\\", entity.id)
     .limit(1);
 }
 
-/** Update one more entities under specific conditions */
+/** Update one or more Users under specific conditions */
 export async function updateUserWhere(
   updatePayload: UserInput,
   query: (query: knex.QueryBuilder<RawUser, number>) => void | Promise<void>,
@@ -60,7 +62,31 @@ export async function updateUserWhere(
   await queryBuilder;
 }
 
-/** Insert a single UserAccount into the database, returning the inserted ID */
+/** Deletes a User */
+export async function deleteUser(
+  entity: User,
+  connection = getDatabaseConnection()
+): Promise<number> {
+  return RawUsers<number>(connection)
+    .where(\\"id\\", \\"=\\", entity.id)
+    .delete()
+    .limit(1);
+}
+
+/** Delete one or more Users under specific conditions */
+export async function deleteUserWhere(
+  query: (query: knex.QueryBuilder<RawUser, number>) => void | Promise<void>,
+  connection = getDatabaseConnection()
+): Promise<number> {
+  const queryBuilder = RawUsers<number>(connection);
+  await query(queryBuilder);
+  queryBuilder.delete();
+  return queryBuilder;
+}
+
+/**
+ * Insert a single UserAccount into the database, returning the inserted ID
+ */
 export async function insertUserAccount(
   input: UserAccountInput,
   connection = getDatabaseConnection()
@@ -95,19 +121,19 @@ export async function findUserAccountOrFail(
   return rawUserAccountToUserAccount(results[0])
 };
 
-/** Update a single entity */
+/** Update a single UserAccount */
 export async function updateUserAccount(
-  input: UserAccountInput,
+  entity: UserAccountInput,
   connection = getDatabaseConnection()
 ): Promise<void> {
-  const {id, ...rawInput} = userAccountToRawUserAccount(input);
+  const {id, ...rawInput} = userAccountToRawUserAccount(entity);
   await RawUserAccounts(connection)
     .update(rawInput)
-    .where(\\"id\\", \\"=\\", id)
+    .where(\\"id\\", \\"=\\", entity.id)
     .limit(1);
 }
 
-/** Update one more entities under specific conditions */
+/** Update one or more UserAccounts under specific conditions */
 export async function updateUserAccountWhere(
   updatePayload: UserAccountInput,
   query: (query: knex.QueryBuilder<RawUserAccount, number>) => void | Promise<void>,
@@ -119,11 +145,35 @@ export async function updateUserAccountWhere(
   await queryBuilder;
 }
 
+/** Deletes a UserAccount */
+export async function deleteUserAccount(
+  entity: UserAccount,
+  connection = getDatabaseConnection()
+): Promise<number> {
+  return RawUserAccounts<number>(connection)
+    .where(\\"id\\", \\"=\\", entity.id)
+    .delete()
+    .limit(1);
+}
+
+/** Delete one or more UserAccounts under specific conditions */
+export async function deleteUserAccountWhere(
+  query: (query: knex.QueryBuilder<RawUserAccount, number>) => void | Promise<void>,
+  connection = getDatabaseConnection()
+): Promise<number> {
+  const queryBuilder = RawUserAccounts<number>(connection);
+  await query(queryBuilder);
+  queryBuilder.delete();
+  return queryBuilder;
+}
+
 "
 `;
 
 exports[`generates some code: PG flavored 1`] = `
-"/** Insert a single User into the database, returning the inserted entity */
+"/**
+ * Insert a single User into the database, returning the inserted entity
+ */
 export async function insertUser(
   input: UserInput,
   connection = getDatabaseConnection()
@@ -159,19 +209,19 @@ export async function findUserOrFail(
   return rawUserToUser(results[0])
 };
 
-/** Update a single entity */
+/** Update a single User */
 export async function updateUser(
-  input: UserInput,
+  entity: UserInput,
   connection = getDatabaseConnection()
 ): Promise<void> {
-  const {id, ...rawInput} = userToRawUser(input);
+  const {id, ...rawInput} = userToRawUser(entity);
   await RawUsers(connection)
     .update(rawInput)
-    .where(\\"id\\", \\"=\\", id)
+    .where(\\"id\\", \\"=\\", entity.id)
     .limit(1);
 }
 
-/** Update one more entities under specific conditions */
+/** Update one or more Users under specific conditions */
 export async function updateUserWhere(
   updatePayload: UserInput,
   query: (query: knex.QueryBuilder<RawUser, number>) => void | Promise<void>,
@@ -183,7 +233,31 @@ export async function updateUserWhere(
   await queryBuilder;
 }
 
-/** Insert a single UserAccount into the database, returning the inserted entity */
+/** Deletes a User */
+export async function deleteUser(
+  entity: User,
+  connection = getDatabaseConnection()
+): Promise<number> {
+  return RawUsers<number>(connection)
+    .where(\\"id\\", \\"=\\", entity.id)
+    .delete()
+    .limit(1);
+}
+
+/** Delete one or more Users under specific conditions */
+export async function deleteUserWhere(
+  query: (query: knex.QueryBuilder<RawUser, number>) => void | Promise<void>,
+  connection = getDatabaseConnection()
+): Promise<number> {
+  const queryBuilder = RawUsers<number>(connection);
+  await query(queryBuilder);
+  queryBuilder.delete();
+  return queryBuilder;
+}
+
+/**
+ * Insert a single UserAccount into the database, returning the inserted entity
+ */
 export async function insertUserAccount(
   input: UserAccountInput,
   connection = getDatabaseConnection()
@@ -219,19 +293,19 @@ export async function findUserAccountOrFail(
   return rawUserAccountToUserAccount(results[0])
 };
 
-/** Update a single entity */
+/** Update a single UserAccount */
 export async function updateUserAccount(
-  input: UserAccountInput,
+  entity: UserAccountInput,
   connection = getDatabaseConnection()
 ): Promise<void> {
-  const {id, ...rawInput} = userAccountToRawUserAccount(input);
+  const {id, ...rawInput} = userAccountToRawUserAccount(entity);
   await RawUserAccounts(connection)
     .update(rawInput)
-    .where(\\"id\\", \\"=\\", id)
+    .where(\\"id\\", \\"=\\", entity.id)
     .limit(1);
 }
 
-/** Update one more entities under specific conditions */
+/** Update one or more UserAccounts under specific conditions */
 export async function updateUserAccountWhere(
   updatePayload: UserAccountInput,
   query: (query: knex.QueryBuilder<RawUserAccount, number>) => void | Promise<void>,
@@ -241,6 +315,28 @@ export async function updateUserAccountWhere(
   const queryBuilder = RawUserAccounts(connection).update(rawUpdatePayload);
   await query(queryBuilder);
   await queryBuilder;
+}
+
+/** Deletes a UserAccount */
+export async function deleteUserAccount(
+  entity: UserAccount,
+  connection = getDatabaseConnection()
+): Promise<number> {
+  return RawUserAccounts<number>(connection)
+    .where(\\"id\\", \\"=\\", entity.id)
+    .delete()
+    .limit(1);
+}
+
+/** Delete one or more UserAccounts under specific conditions */
+export async function deleteUserAccountWhere(
+  query: (query: knex.QueryBuilder<RawUserAccount, number>) => void | Promise<void>,
+  connection = getDatabaseConnection()
+): Promise<number> {
+  const queryBuilder = RawUserAccounts<number>(connection);
+  await query(queryBuilder);
+  queryBuilder.delete();
+  return queryBuilder;
 }
 
 "

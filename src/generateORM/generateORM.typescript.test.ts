@@ -16,6 +16,7 @@ import {
 
 import { getMockRawSchema } from "./mockRawSchema";
 
+// This test takes a while to run because it calls the TS type checker
 jest.setTimeout(20000);
 
 const mockFetcher = () => [getMockRawSchema()];
@@ -42,7 +43,7 @@ it("returns a string", async () => {
   expect(typeof generatedCode).toEqual("string");
 });
 
-it("creates valid ts", async () => {
+it("creates valid ts: pg flavored", async () => {
   const generatedCode = await generateORM({
     connectionOptions: {
       client: "pg",
@@ -65,9 +66,16 @@ it("creates valid ts", async () => {
       },
       (err, stdout, stderr) => {
         if (err) {
+          console.error("Unexpected error parsing TS: ", {
+            stderr,
+            stdout,
+            message: err.message,
+            error: err.stack,
+          });
           return reject(err);
         }
         if (stderr) {
+          console.error("Error parsing TS:", { stdout, stderr });
           return reject(err);
         }
         resolve();

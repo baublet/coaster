@@ -87,6 +87,7 @@ export const typesWithNamingPolicy = (
     code += `\n};\n\n`;
 
     const columnNamesAsJsonString = JSON.stringify(requiredColumnNames);
+
     // Type assertions
     code += `export function assertIs${entityNameWithPrefix}Like(subject: any): asserts subject is ${entityNameWithPrefix} {\n`;
     code += `  if(typeof subject === "object") {\n`;
@@ -172,8 +173,8 @@ export const typesWithNamingPolicy = (
     metaData.transformerFunctionNames[namedEntityName][rawEntityName] =
       namedToRawFunctionName;
 
-    // Named input type -- all nullable and non-nullable fields
-    // with defaults are partial
+    // Named input type -- all nullable and non-nullable fields with defaults
+    // are partial
     code += `export ${
       options.typesOrInterfaces === "interfaces" ? "interface" : "type"
     } ${entityNameWithPrefix}Input ${
@@ -206,8 +207,12 @@ export const typesWithNamingPolicy = (
       if (!column.nullable) {
         requiredColumnNames.push(columnName);
       }
+      metaData.namedEntityInputTypeName.set(
+        schemaAndTablePath,
+        `${entityNameWithPrefix}Input`
+      );
     }
-    code += `}\n\n`;
+    code += `\n}\n\n`;
   }
 
   return code;
