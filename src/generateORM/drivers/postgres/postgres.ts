@@ -21,9 +21,16 @@ export const pgSchemaFetcher = async (
 ) => {
   const schemas = options.schemas || ["public"];
   const schemaTables: Record<string, string[]> = {};
+  const tableComments: Map<string, string> = new Map();
 
   const queryResults = await connection
-    .select<{ table_name: string; table_schema: string }[]>()
+    .select<
+      { table_name: string; table_schema: string; obj_description: string }[]
+    >(
+      connection.raw(
+        "* , obj_description(('\"' || table_schema || '\"' || '.'|| '\"' || table_name || '\"')::regclass)"
+      )
+    )
     .from("information_schema.tables");
   for (const schema of schemas) {
     schemaTables[schema] = [];
@@ -32,6 +39,10 @@ export const pgSchemaFetcher = async (
     );
     for (const table of resultTables) {
       schemaTables[schema].push(table.table_name);
+      tableComments.set(
+        `${table.table_schema}.${table.table_name}`,
+        table.obj_description
+      );
     }
   }
 
@@ -53,8 +64,13 @@ export const pgSchemaFetcher = async (
             data_type: string;
             is_updatable: "YES" | "NO";
             udt_name: string;
+            col_description: string | null;
           }[]
-        >()
+        >(
+          connection.raw(
+            `*, col_description('"${schemaName}"."${tableName}"'::regclass, ordinal_position)`
+          )
+        )
         .from("information_schema.columns")
         .where("table_schema", "=", schemaName)
         .andWhere("table_name", "=", tableName);
@@ -84,6 +100,7 @@ export const pgSchemaFetcher = async (
         columns: [],
         primaryKeyColumn: primaryKey.attname,
         primaryKeyType: dbTypeToTypeScriptType(primaryKey.format_type),
+        comment: tableComments.get(`${schemaName}.${tableName}`),
       };
 
       for (const tableColumn of tableData) {
@@ -94,6 +111,7 @@ export const pgSchemaFetcher = async (
             : undefined;
         rawTable.columns.push({
           name: tableColumn.column_name,
+          comment: tableColumn.col_description,
           nullable: tableColumn.is_nullable === "YES",
           hasDefault: tableColumn.column_default !== null,
           columnType: tableColumn.data_type,

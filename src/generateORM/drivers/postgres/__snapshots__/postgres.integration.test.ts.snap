@@ -19,6 +19,7 @@ Array [
         "columns": Array [
           Object {
             "columnType": "text",
+            "comment": null,
             "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": false,
@@ -29,6 +30,7 @@ Array [
           },
           Object {
             "columnType": "timestamp with time zone",
+            "comment": null,
             "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": true,
@@ -39,6 +41,7 @@ Array [
           },
           Object {
             "columnType": "timestamp with time zone",
+            "comment": null,
             "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": true,
@@ -48,6 +51,7 @@ Array [
             "uniqueConstraints": Array [],
           },
         ],
+        "comment": "Users can have multiple accounts",
         "name": "users",
         "primaryKeyColumn": "id",
         "primaryKeyType": "string",
@@ -56,6 +60,7 @@ Array [
         "columns": Array [
           Object {
             "columnType": "text",
+            "comment": null,
             "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": false,
@@ -66,6 +71,7 @@ Array [
           },
           Object {
             "columnType": "timestamp with time zone",
+            "comment": null,
             "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": true,
@@ -76,6 +82,7 @@ Array [
           },
           Object {
             "columnType": "timestamp with time zone",
+            "comment": null,
             "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": true,
@@ -86,6 +93,7 @@ Array [
           },
           Object {
             "columnType": "USER-DEFINED",
+            "comment": null,
             "enumPath": "public.source",
             "foreignKeys": Array [],
             "hasDefault": false,
@@ -96,6 +104,7 @@ Array [
           },
           Object {
             "columnType": "text",
+            "comment": null,
             "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": false,
@@ -106,6 +115,7 @@ Array [
           },
           Object {
             "columnType": "text",
+            "comment": "Users can have multiple accounts",
             "enumPath": undefined,
             "foreignKeys": Array [
               Object {
@@ -122,6 +132,7 @@ Array [
           },
           Object {
             "columnType": "jsonb",
+            "comment": null,
             "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": false,
@@ -131,6 +142,7 @@ Array [
             "uniqueConstraints": Array [],
           },
         ],
+        "comment": "UserAccount table comment",
         "name": "userAccounts",
         "primaryKeyColumn": "id",
         "primaryKeyType": "string",
@@ -158,81 +170,8 @@ Array [
       Object {
         "columns": Array [
           Object {
-            "columnType": "integer",
-            "enumPath": undefined,
-            "foreignKeys": Array [],
-            "hasDefault": true,
-            "name": "id",
-            "nullable": false,
-            "type": "number",
-            "uniqueConstraints": Array [],
-          },
-          Object {
-            "columnType": "character varying",
-            "enumPath": undefined,
-            "foreignKeys": Array [],
-            "hasDefault": false,
-            "name": "name",
-            "nullable": true,
-            "type": "string",
-            "uniqueConstraints": Array [],
-          },
-          Object {
-            "columnType": "integer",
-            "enumPath": undefined,
-            "foreignKeys": Array [],
-            "hasDefault": false,
-            "name": "batch",
-            "nullable": true,
-            "type": "number",
-            "uniqueConstraints": Array [],
-          },
-          Object {
-            "columnType": "timestamp with time zone",
-            "enumPath": undefined,
-            "foreignKeys": Array [],
-            "hasDefault": false,
-            "name": "migration_time",
-            "nullable": true,
-            "type": "Date",
-            "uniqueConstraints": Array [],
-          },
-        ],
-        "name": "knex_migrations",
-        "primaryKeyColumn": "id",
-        "primaryKeyType": "number",
-      },
-      Object {
-        "columns": Array [
-          Object {
-            "columnType": "integer",
-            "enumPath": undefined,
-            "foreignKeys": Array [],
-            "hasDefault": true,
-            "name": "index",
-            "nullable": false,
-            "type": "number",
-            "uniqueConstraints": Array [],
-          },
-          Object {
-            "columnType": "integer",
-            "enumPath": undefined,
-            "foreignKeys": Array [],
-            "hasDefault": false,
-            "name": "is_locked",
-            "nullable": true,
-            "type": "number",
-            "uniqueConstraints": Array [],
-          },
-        ],
-        "name": "knex_migrations_lock",
-        "primaryKeyColumn": "index",
-        "primaryKeyType": "number",
-      },
-      Object {
-        "columns": Array [
-          Object {
             "columnType": "text",
+            "comment": null,
             "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": false,
@@ -243,6 +182,7 @@ Array [
           },
           Object {
             "columnType": "timestamp with time zone",
+            "comment": null,
             "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": true,
@@ -253,6 +193,7 @@ Array [
           },
           Object {
             "columnType": "timestamp with time zone",
+            "comment": null,
             "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": true,
@@ -262,6 +203,7 @@ Array [
             "uniqueConstraints": Array [],
           },
         ],
+        "comment": "Users can have multiple accounts",
         "name": "users",
         "primaryKeyColumn": "id",
         "primaryKeyType": "string",
@@ -270,6 +212,7 @@ Array [
         "columns": Array [
           Object {
             "columnType": "text",
+            "comment": null,
             "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": false,
@@ -280,6 +223,7 @@ Array [
           },
           Object {
             "columnType": "timestamp with time zone",
+            "comment": null,
             "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": true,
@@ -290,6 +234,7 @@ Array [
           },
           Object {
             "columnType": "timestamp with time zone",
+            "comment": null,
             "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": true,
@@ -300,6 +245,7 @@ Array [
           },
           Object {
             "columnType": "USER-DEFINED",
+            "comment": null,
             "enumPath": "public.source",
             "foreignKeys": Array [],
             "hasDefault": false,
@@ -310,6 +256,7 @@ Array [
           },
           Object {
             "columnType": "text",
+            "comment": null,
             "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": false,
@@ -320,6 +267,7 @@ Array [
           },
           Object {
             "columnType": "text",
+            "comment": "Users can have multiple accounts",
             "enumPath": undefined,
             "foreignKeys": Array [
               Object {
@@ -336,6 +284,7 @@ Array [
           },
           Object {
             "columnType": "jsonb",
+            "comment": null,
             "enumPath": undefined,
             "foreignKeys": Array [],
             "hasDefault": false,
@@ -345,9 +294,92 @@ Array [
             "uniqueConstraints": Array [],
           },
         ],
+        "comment": "UserAccount table comment",
         "name": "userAccounts",
         "primaryKeyColumn": "id",
         "primaryKeyType": "string",
+      },
+      Object {
+        "columns": Array [
+          Object {
+            "columnType": "integer",
+            "comment": null,
+            "enumPath": undefined,
+            "foreignKeys": Array [],
+            "hasDefault": true,
+            "name": "id",
+            "nullable": false,
+            "type": "number",
+            "uniqueConstraints": Array [],
+          },
+          Object {
+            "columnType": "character varying",
+            "comment": null,
+            "enumPath": undefined,
+            "foreignKeys": Array [],
+            "hasDefault": false,
+            "name": "name",
+            "nullable": true,
+            "type": "string",
+            "uniqueConstraints": Array [],
+          },
+          Object {
+            "columnType": "integer",
+            "comment": null,
+            "enumPath": undefined,
+            "foreignKeys": Array [],
+            "hasDefault": false,
+            "name": "batch",
+            "nullable": true,
+            "type": "number",
+            "uniqueConstraints": Array [],
+          },
+          Object {
+            "columnType": "timestamp with time zone",
+            "comment": null,
+            "enumPath": undefined,
+            "foreignKeys": Array [],
+            "hasDefault": false,
+            "name": "migration_time",
+            "nullable": true,
+            "type": "Date",
+            "uniqueConstraints": Array [],
+          },
+        ],
+        "comment": null,
+        "name": "knex_migrations",
+        "primaryKeyColumn": "id",
+        "primaryKeyType": "number",
+      },
+      Object {
+        "columns": Array [
+          Object {
+            "columnType": "integer",
+            "comment": null,
+            "enumPath": undefined,
+            "foreignKeys": Array [],
+            "hasDefault": true,
+            "name": "index",
+            "nullable": false,
+            "type": "number",
+            "uniqueConstraints": Array [],
+          },
+          Object {
+            "columnType": "integer",
+            "comment": null,
+            "enumPath": undefined,
+            "foreignKeys": Array [],
+            "hasDefault": false,
+            "name": "is_locked",
+            "nullable": true,
+            "type": "number",
+            "uniqueConstraints": Array [],
+          },
+        ],
+        "comment": null,
+        "name": "knex_migrations_lock",
+        "primaryKeyColumn": "index",
+        "primaryKeyType": "number",
       },
     ],
   },
