@@ -23,7 +23,7 @@ yarn ts-node node_modules/.bin/knex --knexfile "$SRC_PATH/knexfile.js" --migrati
 echo "Generating ORM"
 (cd $SRC_PATH; yarn ts-node src/generateORM/integrationTests/generate.ts) || exit_out
 
-if (cd $SRC_PATH; yarn test:integration postgres.orm.integration.test.ts); then
+if (cd $SRC_PATH; yarn test:integration src/generateORM/integrationTests/postgres.orm.integration.test.ts); then
   (cd $SRC_PATH; docker-compose down)
   exit 0
 else
