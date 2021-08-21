@@ -1,4 +1,4 @@
-import { camelCase, pascalCase } from "change-case";
+import { camelCase } from "change-case";
 
 import { orDefault, ternary } from "../../helpers";
 import { MetaData, GetTypeName } from ".";
@@ -6,8 +6,10 @@ import { RawSchema } from "../drivers";
 import { getSchemaAndTablePath, getName, getTypeName } from "./helpers";
 import { generateNames } from "../../generateNames";
 
-const defaultEntityNamingPolicy = (str: string) => pascalCase(str);
-const defaultPropertyNamingPolicy = (str: string) => camelCase(str);
+const defaultEntityNamingPolicy = (str: string) =>
+  generateNames(str).singularPascal;
+const defaultPropertyNamingPolicy = (str: string) =>
+  generateNames(str).rawCamel;
 
 /**
  * JS code often has different name conventions than database names (e.g., your

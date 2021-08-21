@@ -54,10 +54,30 @@ export type ConnectionOrTransaction = Connection | Transaction;`
     }
     code += `};\n\n`;
 
+    code += `/**\n`;
+    code += ` * Inserts one ore more ${pluralEntityName} into the database, returning ${
+      schema.flavor === "mysql" ? "the inserted IDs" : "the inserted entities"
+    }\n`;
+    code += ` */\n`;
+    code += `export async function insert${pluralEntityName}(\n`;
+    code += `  input: ${entityInputType}[],\n`;
+    code += `  connection: ConnectionOrTransaction\n`;
+    if (schema.flavor === "mysql") {
+      code += `): Promise<${table.primaryKeyType}[]> {\n`;
+    } else {
+      code += `): Promise<${entityName}[]> {\n`;
+    }
+    code += `  const rawInput = input.map(input => ${namedToRawFunctionName}(input));\n`;
+    code += `  const results = await ${rawBaseQueryFunctionName}(connection).insert(rawInput)${
+      schema.flavor === "pg" ? '.returning("*")' : ""
+    };\n`;
+    code += `  return results.map(rawEntity => ${rawToNamedFunctionName}(rawEntity));\n`;
+    code += `};\n\n`;
+
     // Read
     code += `/** Find many ${pluralEntityName} in the database by a constraint function */\n`;
     code += `export async function find${pluralEntityName}(\n`;
-    code += `  query: (query: knex.QueryBuilder<${rawEntityTypeName}, ${rawEntityTypeName}[]>) => void | Promise<void>,\n`;
+    code += `  query: (query: knex.QueryBuilder<${rawEntityTypeName}, ${rawEntityTypeName}[]>) => unknown,\n`;
     code += `  connection: ConnectionOrTransaction\n`;
     code += `): Promise<${entityName}[]> {\n`;
     code += `  const queryBuilder = ${rawBaseQueryFunctionName}(connection);\n`;
@@ -69,7 +89,7 @@ export type ConnectionOrTransaction = Connection | Transaction;`
     // Find one where or fail
     code += `/** Find a ${entityName} in the database or fail */\n`;
     code += `export async function find${entityName}OrFail(\n`;
-    code += `  query: (query: knex.QueryBuilder<${rawEntityTypeName}, ${rawEntityTypeName}[]>) => void | Promise<void>,\n`;
+    code += `  query: (query: knex.QueryBuilder<${rawEntityTypeName}, ${rawEntityTypeName}[]>) => unknown,\n`;
     code += `  connection: ConnectionOrTransaction\n`;
     code += `): Promise<${entityName}> {\n`;
     code += `  const queryBuilder = ${rawBaseQueryFunctionName}(connection);\n`;
@@ -99,7 +119,7 @@ export type ConnectionOrTransaction = Connection | Transaction;`
     code += `/** Update one or more ${pluralEntityName} under specific conditions */\n`;
     code += `export async function update${entityName}Where(\n`;
     code += `  updatePayload: ${entityInputType},\n`;
-    code += `  query: (query: knex.QueryBuilder<${rawEntityTypeName}, number>) => void | Promise<void>,\n`;
+    code += `  query: (query: knex.QueryBuilder<${rawEntityTypeName}, number>) => unknown,\n`;
     code += `  connection: ConnectionOrTransaction\n`;
     code += `): Promise<void> {\n`;
     code += `  const rawUpdatePayload = ${namedToRawFunctionName}(updatePayload);\n`;
@@ -123,7 +143,7 @@ export type ConnectionOrTransaction = Connection | Transaction;`
     // Delete where
     code += `/** Delete one or more ${pluralEntityName} under specific conditions */\n`;
     code += `export async function delete${entityName}Where(\n`;
-    code += `  query: (query: knex.QueryBuilder<${rawEntityTypeName}, number>) => void | Promise<void>,\n`;
+    code += `  query: (query: knex.QueryBuilder<${rawEntityTypeName}, number>) => unknown,\n`;
     code += `  connection: ConnectionOrTransaction\n`;
     code += `): Promise<number> {\n`;
     code += `  const queryBuilder = ${rawBaseQueryFunctionName}<number>(connection);\n`;
