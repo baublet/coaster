@@ -118,7 +118,7 @@ export type ConnectionOrTransaction = Connection | Transaction;`
     // Update where
     code += `/** Update one or more ${pluralEntityName} under specific conditions */\n`;
     code += `export async function update${entityName}Where(\n`;
-    code += `  updatePayload: ${entityInputType},\n`;
+    code += `  updatePayload: Partial<${entityInputType}>,\n`;
     code += `  query: (query: knex.QueryBuilder<${rawEntityTypeName}, number>) => unknown,\n`;
     code += `  connection: ConnectionOrTransaction\n`;
     code += `): Promise<void> {\n`;

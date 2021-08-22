@@ -197,7 +197,7 @@ export const typesWithNamingPolicy = (
       namedToRawFunctionName;
 
     // Named input type -- all nullable and non-nullable fields with defaults
-    // are partial
+    // are optional
     code += `export ${
       options.typesOrInterfaces === "interfaces" ? "interface" : "type"
     } ${entityNameWithPrefix}Input ${
