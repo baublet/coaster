@@ -13,7 +13,7 @@ Schema fetchers take a knex connection and returns/resolves an array of `RawSche
 
 ## Generators
 
-Generators take a `RawSchema` and `MetaData` objects and return a string of generated code.
+Generators take a `RawSchema` and `MetaData` objects and returns generated code (in the form of `{ code: string, testCode: string }`).
 
 ## Post-Processors
 

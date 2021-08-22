@@ -1,7 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`custom type names: \`string\` to \`CHUMBAWUMBA\` spits out types with the proper naming policy 1`] = `
-"export type UserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
+exports[`custom type names: \`string\` to \`CHUMBAWUMBA\` generates types with the proper naming policy 1`] = `
+Object {
+  "code": "export type UserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
 export type User = {
 id: CHUMBAWUMBA;
 /** Users don't have to provide their name */
@@ -94,11 +95,208 @@ source: UserAccountSourceEnum;
 sourceData: AnyJson;
 }
 
-"
+",
+  "testCode": "",
+}
+`;
+
+exports[`generates test code 1`] = `
+Object {
+  "code": "export type UserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
+export interface User {
+id: string;
+/** Users don't have to provide their name */
+name?: string;
+data: AnyJson;
+};
+
+export function assertIsUserLike(subject: any): asserts subject is User {
+  if(typeof subject === \\"object\\") {
+    if(objectHasProperties(subject, [\\"id\\",\\"data\\"])) { return; }
+  }
+  throw new Error(\\"Invariance violation! Expected subject to be a User, but it was instead: \\" + JSON.stringify(subject));
+}
+
+export function isUserLike(subject: any): subject is User {
+  if(typeof subject === \\"object\\") {
+    if(objectHasProperties(subject, [\\"id\\",\\"data\\"])) { return true; }
+  }
+  return false;
+}
+
+export function rawUserToUser<T extends RawUser | Partial<RawUser>>(subject: T): T extends RawUser ? User : Partial<User> {
+  const namedSubject: Record<string, any> = {};
+    if(subject[\\"id\\"] !== undefined) namedSubject[\\"id\\"] = subject[\\"id\\"];
+    if(subject[\\"name\\"] !== undefined) namedSubject[\\"name\\"] = subject[\\"name\\"];
+    if(subject[\\"data\\"] !== undefined) namedSubject[\\"data\\"] = subject[\\"data\\"];
+  return namedSubject as T extends RawUser ? User : Partial<User>;
+}
+
+export function userToRawUser<T extends User | Partial<User>>(subject: T): T extends User ? RawUser : Partial<RawUser> {
+  const rawSubject: Record<string, any> = {};
+    if(subject[\\"id\\"] !== undefined) rawSubject[\\"id\\"] = subject[\\"id\\"];
+    if(subject[\\"name\\"] !== undefined) rawSubject[\\"name\\"] = subject[\\"name\\"];
+    if(subject[\\"data\\"] !== undefined) rawSubject[\\"data\\"] = subject[\\"data\\"];
+  return rawSubject as T extends User ? RawUser : Partial<RawUser>;
+}
+
+export interface UserInput {
+id?: string;
+/** Users don't have to provide their name */
+name?: string;
+data: AnyJson;
+}
+
+
+/** Singular users can have multiple accounts */
+export interface UserAccount {
+id: unknown;
+/** Who sent us this users' data? */
+source: UserAccountSourceEnum;
+/** The raw data sent from the source provider */
+sourceData: AnyJson;
+};
+
+export function assertIsUserAccountLike(subject: any): asserts subject is UserAccount {
+  if(typeof subject === \\"object\\") {
+    if(objectHasProperties(subject, [\\"id\\",\\"source\\",\\"sourceData\\"])) { return; }
+  }
+  throw new Error(\\"Invariance violation! Expected subject to be a UserAccount, but it was instead: \\" + JSON.stringify(subject));
+}
+
+export function isUserAccountLike(subject: any): subject is UserAccount {
+  if(typeof subject === \\"object\\") {
+    if(objectHasProperties(subject, [\\"id\\",\\"source\\",\\"sourceData\\"])) { return true; }
+  }
+  return false;
+}
+
+export function rawUserAccountToUserAccount<T extends RawUserAccount | Partial<RawUserAccount>>(subject: T): T extends RawUserAccount ? UserAccount : Partial<UserAccount> {
+  const namedSubject: Record<string, any> = {};
+    if(subject[\\"id\\"] !== undefined) namedSubject[\\"id\\"] = subject[\\"id\\"];
+    if(subject[\\"source\\"] !== undefined) namedSubject[\\"source\\"] = subject[\\"source\\"];
+    if(subject[\\"source_data\\"] !== undefined) namedSubject[\\"sourceData\\"] = subject[\\"source_data\\"];
+  return namedSubject as T extends RawUserAccount ? UserAccount : Partial<UserAccount>;
+}
+
+export function userAccountToRawUserAccount<T extends UserAccount | Partial<UserAccount>>(subject: T): T extends UserAccount ? RawUserAccount : Partial<RawUserAccount> {
+  const rawSubject: Record<string, any> = {};
+    if(subject[\\"id\\"] !== undefined) rawSubject[\\"id\\"] = subject[\\"id\\"];
+    if(subject[\\"source\\"] !== undefined) rawSubject[\\"source\\"] = subject[\\"source\\"];
+    if(subject[\\"sourceData\\"] !== undefined) rawSubject[\\"source_data\\"] = subject[\\"sourceData\\"];
+  return rawSubject as T extends UserAccount ? RawUserAccount : Partial<RawUserAccount>;
+}
+
+export interface UserAccountInput {
+id?: unknown;
+/** Who sent us this users' data? */
+source: UserAccountSourceEnum;
+/** The raw data sent from the source provider */
+sourceData: AnyJson;
+}
+
+",
+  "testCode": "import { assertIsUserLike, User } from \\"./generated.ts\\";
+
+describe(\\"assertIsUserLike\\", () => {
+  it(\\"throws if input is not like a User\\", () => {
+    expect(() => assertIsUserLike(1)).toThrow();
+    expect(() => assertIsUserLike([])).toThrow();
+    expect(() => assertIsUserLike(false)).toThrow();
+    expect(() => assertIsUserLike({})).toThrow();
+  })
+  it(\\"does not throw and asserts properly if input is like a User\\", () => {
+    const UserLike = {
+      id: \\"\\",data: \\"\\"
+    } as unknown;
+    expect(() => assertIsUserLike(UserLike)).not.toThrow();
+
+    // We expect no TS error here
+    assertIsUserLike(UserLike);
+    const actualEntityType: User = UserLike;
+    expect(actualEntityType).toEqual(UserLike);
+  })
+})
+import { isUserLike } from \\"./generated.ts\\";
+
+describe(\\"isUserLike\\", () => {
+  it(\\"returns false if input is not like a User\\", () => {
+    expect(isUserLike(1)).toBe(false);
+    expect(isUserLike([])).toBe(false);
+    expect(isUserLike(false)).toBe(false);
+    expect(isUserLike({})).toBe(false);
+  })
+  it(\\"returns true and asserts properly if input is like a User\\", () => {
+    const UserLike = {
+      id: \\"\\",data: \\"\\"
+    } as unknown;
+    expect(isUserLike(UserLike)).toBe(true);
+    
+    if (isUserLike(UserLike)) {
+      // We expect no TS error here
+      const actualEntityType: User = UserLike;
+      expect(actualEntityType).toEqual(UserLike);
+    } else {
+      // @ts-expect-error
+      const actualEntityType: User = UserLike;
+      expect(actualEntityType).toEqual(UserLike);
+    }
+  })
+})
+import { assertIsUserAccountLike, UserAccount } from \\"./generated.ts\\";
+
+describe(\\"assertIsUserAccountLike\\", () => {
+  it(\\"throws if input is not like a UserAccount\\", () => {
+    expect(() => assertIsUserAccountLike(1)).toThrow();
+    expect(() => assertIsUserAccountLike([])).toThrow();
+    expect(() => assertIsUserAccountLike(false)).toThrow();
+    expect(() => assertIsUserAccountLike({})).toThrow();
+  })
+  it(\\"does not throw and asserts properly if input is like a UserAccount\\", () => {
+    const UserAccountLike = {
+      id: \\"\\",source: \\"\\",sourceData: \\"\\"
+    } as unknown;
+    expect(() => assertIsUserAccountLike(UserAccountLike)).not.toThrow();
+
+    // We expect no TS error here
+    assertIsUserAccountLike(UserAccountLike);
+    const actualEntityType: UserAccount = UserAccountLike;
+    expect(actualEntityType).toEqual(UserAccountLike);
+  })
+})
+import { isUserAccountLike } from \\"./generated.ts\\";
+
+describe(\\"isUserAccountLike\\", () => {
+  it(\\"returns false if input is not like a UserAccount\\", () => {
+    expect(isUserAccountLike(1)).toBe(false);
+    expect(isUserAccountLike([])).toBe(false);
+    expect(isUserAccountLike(false)).toBe(false);
+    expect(isUserAccountLike({})).toBe(false);
+  })
+  it(\\"returns true and asserts properly if input is like a UserAccount\\", () => {
+    const UserAccountLike = {
+      id: \\"\\",source: \\"\\",sourceData: \\"\\"
+    } as unknown;
+    expect(isUserAccountLike(UserAccountLike)).toBe(true);
+    
+    if (isUserAccountLike(UserAccountLike)) {
+      // We expect no TS error here
+      const actualEntityType: UserAccount = UserAccountLike;
+      expect(actualEntityType).toEqual(UserAccountLike);
+    } else {
+      // @ts-expect-error
+      const actualEntityType: UserAccount = UserAccountLike;
+      expect(actualEntityType).toEqual(UserAccountLike);
+    }
+  })
+})
+",
+}
 `;
 
 exports[`interfaces/types spits out types with the proper naming policy 1`] = `
-"export type UserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
+Object {
+  "code": "export type UserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
 export type User = {
 id: string;
 /** Users don't have to provide their name */
@@ -191,5 +389,7 @@ source: UserAccountSourceEnum;
 sourceData: AnyJson;
 }
 
-"
+",
+  "testCode": "",
+}
 `;

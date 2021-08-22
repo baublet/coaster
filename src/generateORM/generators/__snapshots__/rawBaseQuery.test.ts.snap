@@ -1,49 +1,55 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`generates a schema 1`] = `
-"export function <Result = undefined[]>(
+Object {
+  "code": "export function RawUsers<Result = RawUser[]>(
   connection: ConnectionOrTransaction
 ) {
-  return connection<undefined, Result>(\\"user\\");
+  return connection<RawUser, Result>(\\"user\\");
 };
 
-export function <Result = undefined[]>(
+export function RawUserAccounts<Result = RawUserAccount[]>(
   connection: ConnectionOrTransaction
 ) {
-  return connection<undefined, Result>(\\"user_account\\");
+  return connection<RawUserAccount, Result>(\\"user_account\\");
 };
 
-"
+",
+  "testCode": "",
+}
 `;
 
-exports[`generates a schema with default knex options 1`] = `
-"export function <Result = undefined[]>(
+exports[`generates test code 1`] = `
+Object {
+  "code": "export function RawUsers<Result = RawUser[]>(
   connection: ConnectionOrTransaction
 ) {
-  return connection<undefined, Result>(\\"user\\");
+  return connection<RawUser, Result>(\\"user\\");
 };
 
-export function <Result = undefined[]>(
+export function RawUserAccounts<Result = RawUserAccount[]>(
   connection: ConnectionOrTransaction
 ) {
-  return connection<undefined, Result>(\\"user_account\\");
+  return connection<RawUserAccount, Result>(\\"user_account\\");
 };
 
-"
-`;
+",
+  "testCode": "import { RawUsers } from \\"./generated.ts\\"
 
-exports[`generates a schema: custom knex options 1`] = `
-"export function <Result = undefined[]>(
-  connection: ConnectionOrTransaction
-) {
-  return connection<undefined, Result>(\\"user\\");
-};
+describe(\\"RawUsers\\", () => {
+  it(\\"doesn't throw\\", () => {
+    expect(() => RawUsers(connection)).not.toThrow();
+  });
+});
 
-export function <Result = undefined[]>(
-  connection: ConnectionOrTransaction
-) {
-  return connection<undefined, Result>(\\"user_account\\");
-};
+import { RawUserAccounts } from \\"./generated.ts\\"
 
-"
+describe(\\"RawUserAccounts\\", () => {
+  it(\\"doesn't throw\\", () => {
+    expect(() => RawUserAccounts(connection)).not.toThrow();
+  });
+});
+
+",
+}
 `;

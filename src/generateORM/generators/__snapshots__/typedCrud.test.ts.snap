@@ -1,7 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`generates some code: MySQL flavored 1`] = `
-"/**
+Object {
+  "code": "/**
  * Insert a single User into the database, returning the inserted ID
  */
 export async function insertUser(
@@ -64,7 +65,7 @@ export async function updateUser(
 
 /** Update one or more Users under specific conditions */
 export async function updateUserWhere(
-  updatePayload: UserInput,
+  updatePayload: Partial<UserInput>,
   query: (query: knex.QueryBuilder<RawUser, number>) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<void> {
@@ -159,7 +160,7 @@ export async function updateUserAccount(
 
 /** Update one or more UserAccounts under specific conditions */
 export async function updateUserAccountWhere(
-  updatePayload: UserAccountInput,
+  updatePayload: Partial<UserAccountInput>,
   query: (query: knex.QueryBuilder<RawUserAccount, number>) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<void> {
@@ -191,11 +192,14 @@ export async function deleteUserAccountWhere(
   return queryBuilder;
 }
 
-"
+",
+  "testCode": "",
+}
 `;
 
 exports[`generates some code: PG flavored 1`] = `
-"/**
+Object {
+  "code": "/**
  * Insert a single User into the database, returning the inserted entity
  */
 export async function insertUser(
@@ -259,7 +263,7 @@ export async function updateUser(
 
 /** Update one or more Users under specific conditions */
 export async function updateUserWhere(
-  updatePayload: UserInput,
+  updatePayload: Partial<UserInput>,
   query: (query: knex.QueryBuilder<RawUser, number>) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<void> {
@@ -355,7 +359,7 @@ export async function updateUserAccount(
 
 /** Update one or more UserAccounts under specific conditions */
 export async function updateUserAccountWhere(
-  updatePayload: UserAccountInput,
+  updatePayload: Partial<UserAccountInput>,
   query: (query: knex.QueryBuilder<RawUserAccount, number>) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<void> {
@@ -387,5 +391,7 @@ export async function deleteUserAccountWhere(
   return queryBuilder;
 }
 
-"
+",
+  "testCode": "",
+}
 `;

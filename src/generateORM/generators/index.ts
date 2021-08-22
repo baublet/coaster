@@ -1,6 +1,12 @@
 import { RawColumn, RawSchema } from "../drivers";
 
-export type GeneratorResult = Promise<string> | string;
+type GeneratorFinalResult = {
+  code: string;
+  testCode: string;
+};
+export type GeneratorResult =
+  | Promise<GeneratorFinalResult>
+  | GeneratorFinalResult;
 
 export type Generator = (
   rawSchema: RawSchema,
@@ -13,6 +19,9 @@ export type Generator = (
   | Promise<GeneratorResult>;
 
 export type MetaData = {
+  generateTestCode: boolean;
+  codeOutputFullPath: string;
+  testConnectionVariable: string;
   /**
    * Add a header to the generated code. FIFO order. The key is to allow later
    * middleware to modify earlier middleware output, if necessary.

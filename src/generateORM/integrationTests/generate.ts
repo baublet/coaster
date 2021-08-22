@@ -10,7 +10,11 @@ import {
   typesWithNamingPolicy,
 } from "../generators";
 
-const outputFilePath = path.join(__dirname, "generated.ts");
+const outputFilePath = path.resolve(__dirname, "generated.ts");
+const testOutputFilePath = path.resolve(
+  __dirname,
+  "generated.integration.test.ts"
+);
 
 if (fs.existsSync(outputFilePath)) {
   fs.unlinkSync(outputFilePath);
@@ -23,6 +27,15 @@ generateORM({
   }),
   generators: [rawTypes, rawBaseQuery, typesWithNamingPolicy, typedCrud],
   postProcessors: [],
+  generateTestCode: true,
+  testHeaders: `import knex from "knex";
+
+const connection = knex(require("./knexfile.js"));
+
+afterAll(async () => {
+  await connection.destroy();
+});`,
 }).then((generated) => {
-  fs.writeFileSync(outputFilePath, generated);
+  fs.writeFileSync(outputFilePath, generated.code);
+  fs.writeFileSync(testOutputFilePath, generated.testCode);
 });

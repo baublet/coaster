@@ -30,3 +30,9 @@ describe("prefix", () => {
     ).toMatchSnapshot();
   });
 });
+
+it("generates test code properly", () => {
+  const metaData = getMockMetaData();
+  metaData.generateTestCode = true;
+  expect(rawTypes(getMockRawSchema(), metaData)).toMatchSnapshot();
+});

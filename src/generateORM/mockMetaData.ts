@@ -2,6 +2,9 @@ import { MetaData } from "./generators";
 
 export function getMockMetaData(): MetaData {
   return {
+    testConnectionVariable: "connection",
+    codeOutputFullPath: "./generated.ts",
+    generateTestCode: false,
     entityTableNames: new Map(),
     setHeader: jest.fn(),
     tableEntityNames: new Map(),

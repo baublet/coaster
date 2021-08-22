@@ -1,4 +1,4 @@
-import { MetaData, GetTypeName } from ".";
+import { MetaData, GetTypeName, GeneratorResult } from ".";
 import { RawSchema } from "../drivers";
 import { getName, getSchemaAndTablePath, getTypeName } from "./helpers";
 import { generateNames } from "../../generateNames";
@@ -23,7 +23,7 @@ export const rawTypes = (
     prefixSchemaName: false,
     getTypeName: () => undefined,
   }
-) => {
+): GeneratorResult => {
   metaData.setHeader(
     "objectHasProperties",
     `function objectHasProperties(obj: Record<string, any>, properties: string[]): boolean {
@@ -43,6 +43,7 @@ export interface JsonArray extends Array<AnyJson> {};`
   );
 
   let code = "";
+  let testCode = "";
   const rawPrefix = options.rawPrefix === undefined ? "Raw" : options.rawPrefix;
 
   // Enums
@@ -128,6 +129,33 @@ export interface JsonArray extends Array<AnyJson> {};`
       `assertIs${rawPrefix}${entityName}`
     );
 
+    if (metaData.generateTestCode) {
+      testCode += `import { assertIs${rawPrefix}${entityName}Like, ${rawPrefix}${entityName} } from "${
+        metaData.codeOutputFullPath
+      }";
+
+describe("assertIs${rawPrefix}${entityName}Like", () => {
+  it("throws if input is not like a ${rawPrefix}${entityName}", () => {
+    expect(() => assertIs${rawPrefix}${entityName}Like(1)).toThrow();
+    expect(() => assertIs${rawPrefix}${entityName}Like([])).toThrow();
+    expect(() => assertIs${rawPrefix}${entityName}Like(false)).toThrow();
+    expect(() => assertIs${rawPrefix}${entityName}Like({})).toThrow();
+  })
+  it("does not throw and asserts properly if input is like a ${rawPrefix}${entityName}", () => {
+    const ${rawPrefix}${entityName}Like = {
+      ${rawRequiredColumnNames.map((col) => `${col}: ""`).join(",")}
+    } as unknown;
+    expect(() => assertIs${rawPrefix}${entityName}Like(${rawPrefix}${entityName}Like)).not.toThrow();
+
+    // We expect no TS error here
+    assertIs${rawPrefix}${entityName}Like(${rawPrefix}${entityName}Like)
+    const actualEntityType: ${rawPrefix}${entityName} = ${rawPrefix}${entityName}Like;
+    expect(actualEntityType).toEqual(${rawPrefix}${entityName}Like);
+  })
+})
+`;
+    }
+
     // Type guards
     code += `export function is${rawPrefix}${entityName}Like(subject: any): subject is ${rawPrefix}${entityName} {\n`;
     code += `  if(typeof subject === "object") {\n`;
@@ -140,7 +168,42 @@ export interface JsonArray extends Array<AnyJson> {};`
       schemaAndTablePath,
       `is${rawPrefix}${entityName}`
     );
+
+    if (metaData.generateTestCode) {
+      testCode += `import { is${rawPrefix}${entityName}Like } from "${
+        metaData.codeOutputFullPath
+      }";
+
+describe("is${rawPrefix}${entityName}Like", () => {
+  it("returns false if input is not like a ${rawPrefix}${entityName}", () => {
+    expect(is${rawPrefix}${entityName}Like(1)).toBe(false);
+    expect(is${rawPrefix}${entityName}Like([])).toBe(false);
+    expect(is${rawPrefix}${entityName}Like(false)).toBe(false);
+    expect(is${rawPrefix}${entityName}Like({})).toBe(false);
+  })
+  it("returns true and asserts properly if input is like a ${rawPrefix}${entityName}", () => {
+    const ${rawPrefix}${entityName}Like = {
+      ${rawRequiredColumnNames.map((col) => `${col}: ""`).join(",")}
+    } as unknown;
+    expect(is${rawPrefix}${entityName}Like(${rawPrefix}${entityName}Like)).toBe(true);
+    
+    if (is${rawPrefix}${entityName}Like(${rawPrefix}${entityName}Like)) {
+      // We expect no TS error here
+      const actualEntityType: ${rawPrefix}${entityName} = ${rawPrefix}${entityName}Like;
+      expect(actualEntityType).toEqual(${rawPrefix}${entityName}Like);
+    } else {
+      // @ts-expect-error
+      const actualEntityType: ${rawPrefix}${entityName} = ${rawPrefix}${entityName}Like;
+      expect(actualEntityType).toEqual(${rawPrefix}${entityName}Like);
+    }
+  })
+})
+`;
+    }
   }
 
-  return code;
+  return {
+    code,
+    testCode,
+  };
 };

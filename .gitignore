@@ -5,3 +5,4 @@ src/generateORM/drivers/postgres/data
 tmp/*
 !tmp/.gitkeep
 src/generateORM/integrationTests/generated.ts
+generated.*.ts

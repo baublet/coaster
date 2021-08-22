@@ -1,4 +1,4 @@
-import { MetaData } from ".";
+import { MetaData, GeneratorResult } from ".";
 import { generateNames } from "../../generateNames";
 import { RawSchema } from "../drivers";
 import { getSchemaAndTablePath } from "./helpers";
@@ -7,7 +7,10 @@ import { getSchemaAndTablePath } from "./helpers";
  * Generates the lowest-level possible accessor for accessing data in a table
  * using raw database types.
  */
-export const rawBaseQuery = (schema: RawSchema, metaData: MetaData) => {
+export const rawBaseQuery = (
+  schema: RawSchema,
+  metaData: MetaData
+): GeneratorResult => {
   metaData.setHeader(
     "knex",
     `import knex from "knex";
@@ -17,6 +20,7 @@ export type ConnectionOrTransaction = Connection | Transaction;`
   );
 
   let code = "";
+  let testCode = "";
 
   for (const table of schema.tables) {
     const entityName = metaData.tableRawEntityNames.get(
@@ -32,7 +36,21 @@ export type ConnectionOrTransaction = Connection | Transaction;`
       getSchemaAndTablePath(schema.name, table.name),
       pluralEntityName
     );
+
+    if (!metaData.generateTestCode) {
+      continue;
+    }
+    testCode += `import { ${pluralEntityName} } from "${metaData.codeOutputFullPath}"
+
+describe("${pluralEntityName}", () => {
+  it("doesn't throw", () => {
+    expect(() => ${pluralEntityName}(${metaData.testConnectionVariable})).not.toThrow();
+  });
+});\n\n`;
   }
 
-  return code;
+  return {
+    code,
+    testCode,
+  };
 };

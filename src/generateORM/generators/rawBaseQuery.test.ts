@@ -4,17 +4,14 @@ import { getMockMetaData } from "../mockMetaData";
 
 const metaData = getMockMetaData();
 
-metaData.tableEntityNames.set("public.user", "RawUser");
-metaData.tableEntityNames.set("public.user_account", "RawUserAccount");
+metaData.tableRawEntityNames.set("public.user", "RawUser");
+metaData.tableRawEntityNames.set("public.user_account", "RawUserAccount");
 
 it("generates a schema", () => {
   expect(rawBaseQuery(getMockRawSchema(), metaData)).toMatchSnapshot();
 });
 
-it("generates a schema with default knex options", () => {
-  expect(rawBaseQuery(getMockRawSchema(), metaData)).toMatchSnapshot();
-});
-
-it("generates a schema: custom knex options", () => {
+it("generates test code", () => {
+  metaData.generateTestCode = true;
   expect(rawBaseQuery(getMockRawSchema(), metaData)).toMatchSnapshot();
 });

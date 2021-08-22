@@ -23,7 +23,7 @@ yarn ts-node node_modules/.bin/knex --knexfile "$SRC_PATH/knexfile.js" --migrati
 echo "Generating ORM"
 (cd $SRC_PATH; yarn ts-node src/generateORM/integrationTests/generate.ts) || exit_out
 
-if (cd $SRC_PATH; yarn jest -c="{\"preset\": \"ts-jest\"}" --coverage --testPathPattern="src/generateORM/integrationTests/postgres.orm.integration.test.ts" --collectCoverageFrom="src/generateORM/integrationTests/generated.ts"); then
+if (cd $SRC_PATH; yarn jest -c="{\"preset\": \"ts-jest\"}" --coverage --testPathPattern="src/generateORM/integrationTests/generated.integration.test.ts" --collectCoverageFrom="src/generateORM/integrationTests/generated.ts"); then
   (cd $SRC_PATH; docker-compose down)
   exit 0
 else

@@ -4,22 +4,33 @@ import { Generator, MetaData } from "./generators";
 import { PostProcessor } from "./postProcessors";
 
 interface GenerateORMOptions {
+  generateTestCode?: boolean;
+  testConnectionVariable?: string;
+  testHeaders?: string;
+  codeOutputFullPath?: string;
   connectionOptions: ConnectionOptions;
   fetcher: SchemaFetcher;
   generators: Generator[];
   postProcessors: PostProcessor[];
 }
 
-export async function generateORM(
-  options: GenerateORMOptions
-): Promise<string> {
+export async function generateORM(options: GenerateORMOptions): Promise<{
+  code: string;
+  testCode: string;
+}> {
   const connection = db(options.connectionOptions);
   const rawSchemas = await options.fetcher(connection);
   await connection.destroy();
+  const codeOutputFullPath = options.codeOutputFullPath || "./generated";
 
   let code = "";
+  let testCode = options.testHeaders ? options.testHeaders + "\n" : "";
+
   const headers = new Map<string, string>();
   const metaData: MetaData = {
+    testConnectionVariable: options.testConnectionVariable || "connection",
+    codeOutputFullPath,
+    generateTestCode: Boolean(options.generateTestCode),
     setHeader: (key: string, value: string) => headers.set(key, value),
     entityTableNames: new Map(),
     rawBaseQueryFunctionNames: new Map(),
@@ -40,7 +51,8 @@ export async function generateORM(
       while (typeof generatorResult === "function") {
         generatorResult = await generatorResult(rawSchema, metaData);
       }
-      code += generatorResult;
+      code += generatorResult.code;
+      testCode += generatorResult.testCode;
     }
   }
 
@@ -48,5 +60,8 @@ export async function generateORM(
     code = header + "\n" + code;
   }
 
-  return code;
+  return {
+    code,
+    testCode,
+  };
 }

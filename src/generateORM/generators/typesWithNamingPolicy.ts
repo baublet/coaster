@@ -1,7 +1,7 @@
 import { camelCase } from "change-case";
 
 import { orDefault, ternary } from "../../helpers";
-import { MetaData, GetTypeName } from ".";
+import { MetaData, GetTypeName, GeneratorResult } from ".";
 import { RawSchema } from "../drivers";
 import { getSchemaAndTablePath, getName, getTypeName } from "./helpers";
 import { generateNames } from "../../generateNames";
@@ -38,8 +38,9 @@ export const typesWithNamingPolicy = (
     getEntityName: defaultEntityNamingPolicy,
     getPropertyName: defaultPropertyNamingPolicy,
   }
-) => {
+): GeneratorResult => {
   let code = "";
+  let testCode = "";
   const prefix = orDefault([options.prefix], "");
 
   // Enums
@@ -124,6 +125,34 @@ export const typesWithNamingPolicy = (
       `assertIs${prefix}${entityName}Like`
     );
 
+    if (metaData.generateTestCode) {
+      const functionName = `assertIs${entityNameWithPrefix}Like`;
+      testCode += `\n\nimport { ${functionName}, ${entityNameWithPrefix} } from "${
+        metaData.codeOutputFullPath
+      }";
+
+describe("assertIs${entityNameWithPrefix}Like", () => {
+  it("throws if input is not like a ${entityNameWithPrefix}", () => {
+    expect(() => ${functionName}(1)).toThrow();
+    expect(() => ${functionName}([])).toThrow();
+    expect(() => ${functionName}(false)).toThrow();
+    expect(() => ${functionName}({})).toThrow();
+  })
+  it("does not throw and asserts properly if input is like a ${entityNameWithPrefix}", () => {
+    const ${entityNameWithPrefix}Like = {
+      ${requiredColumnNames.map((col) => `${col}: ""`).join(",")}
+    } as unknown;
+    expect(() => ${functionName}(${entityNameWithPrefix}Like)).not.toThrow();
+
+    // We expect no TS error here
+    ${functionName}(${entityNameWithPrefix}Like);
+    const actualEntityType: ${entityNameWithPrefix} = ${entityNameWithPrefix}Like;
+    expect(actualEntityType).toEqual(${entityNameWithPrefix}Like);
+  })
+})
+`;
+    }
+
     // Type guards
     code += `export function is${entityNameWithPrefix}Like(subject: any): subject is ${entityNameWithPrefix} {\n`;
     code += `  if(typeof subject === "object") {\n`;
@@ -136,6 +165,40 @@ export const typesWithNamingPolicy = (
       schemaAndTablePath,
       `is${entityNameWithPrefix}Like`
     );
+
+    if (metaData.generateTestCode) {
+      const functionName = `is${entityNameWithPrefix}Like`;
+
+      testCode += `\n\nimport { ${functionName} } from "${
+        metaData.codeOutputFullPath
+      }";
+
+describe("${functionName}", () => {
+  it("returns false if input is not like a ${entityNameWithPrefix}", () => {
+    expect(${functionName}(1)).toBe(false);
+    expect(${functionName}([])).toBe(false);
+    expect(${functionName}(false)).toBe(false);
+    expect(${functionName}({})).toBe(false);
+  })
+  it("returns true and asserts properly if input is like a ${entityNameWithPrefix}", () => {
+    const ${entityNameWithPrefix}Like = {
+      ${requiredColumnNames.map((col) => `${col}: ""`).join(",")}
+    } as unknown;
+    expect(${functionName}(${entityNameWithPrefix}Like)).toBe(true);
+    
+    if (${functionName}(${entityNameWithPrefix}Like)) {
+      // We expect no TS error here
+      const actualEntityType: ${entityNameWithPrefix} = ${entityNameWithPrefix}Like;
+      expect(actualEntityType).toEqual(${entityNameWithPrefix}Like);
+    } else {
+      // @ts-expect-error
+      const actualEntityType: ${entityNameWithPrefix} = ${entityNameWithPrefix}Like;
+      expect(actualEntityType).toEqual(${entityNameWithPrefix}Like);
+    }
+  })
+})
+`;
+    }
 
     // Transformers
     const rawEntityName = metaData.tableRawEntityNames.get(schemaAndTablePath);
@@ -171,6 +234,33 @@ export const typesWithNamingPolicy = (
     metaData.transformerFunctionNames[rawEntityName][namedEntityName] =
       rawToNamedFunctionName;
 
+    if (metaData.generateTestCode) {
+      testCode += `\n\nimport { ${rawToNamedFunctionName} } from "${
+        metaData.codeOutputFullPath
+      }";
+
+describe("${rawToNamedFunctionName}", () => {
+  const ${rawEntityName}Full: ${rawEntityName} = {
+    ${Object.values(table.columns)
+      .map((col) => `${col.name}: "" as any`)
+      .join(",")}
+  };
+  const ${namedEntityName}Full: ${namedEntityName} = {
+    ${Object.values(table.columns)
+      .map(
+        (col) =>
+          `${metaData.namedEntityColumnNames.get(
+            `${schemaAndTablePath}.${col.name}`
+          )}: "" as any`
+      )
+      .join(",")}
+  };
+  it("converts a ${rawEntityName} to a ${namedEntityName}", () => {
+    expect(${rawToNamedFunctionName}(${rawEntityName}Full)).toEqual(${namedEntityName}Full);
+  });
+});`;
+    }
+
     // Named to raw
     const namedToRawFunctionName = camelCase(
       `${namedEntityName}To${rawEntityName}`
@@ -195,6 +285,33 @@ export const typesWithNamingPolicy = (
       metaData.transformerFunctionNames[namedEntityName] || {};
     metaData.transformerFunctionNames[namedEntityName][rawEntityName] =
       namedToRawFunctionName;
+
+    if (metaData.generateTestCode) {
+      testCode += `\n\nimport { ${namedToRawFunctionName} } from "${
+        metaData.codeOutputFullPath
+      }";
+  
+describe("${namedToRawFunctionName}", () => {
+  const ${namedEntityName}Full: ${namedEntityName} = {
+    ${Object.values(table.columns)
+      .map(
+        (col) =>
+          `${metaData.namedEntityColumnNames.get(
+            `${schemaAndTablePath}.${col.name}`
+          )}: "" as any`
+      )
+      .join(",")}
+  };
+  const ${rawEntityName}Full: ${rawEntityName} = {
+    ${Object.values(table.columns)
+      .map((col) => `${col.name}: "" as any`)
+      .join(",")}
+  };
+  it("converts a ${namedEntityName} to a ${rawEntityName}", () => {
+    expect(${namedToRawFunctionName}(${namedEntityName}Full)).toEqual(${rawEntityName}Full);
+  });
+});`;
+    }
 
     // Named input type -- all nullable and non-nullable fields with defaults
     // are optional
@@ -237,5 +354,8 @@ export const typesWithNamingPolicy = (
     code += `\n}\n\n`;
   }
 
-  return code;
+  return {
+    code,
+    testCode,
+  };
 };

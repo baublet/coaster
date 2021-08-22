@@ -23,7 +23,7 @@ const mockFetcher = () => [getMockRawSchema()];
 
 // Testing our ability to resolve async, nested generators
 const customDummyGenerator: Generator = () => () =>
-  Promise.resolve(() => () => "");
+  Promise.resolve(() => () => ({ code: "", testCode: "" }));
 
 it("returns a string", async () => {
   const generatedCode = await generateORM({
@@ -40,10 +40,18 @@ it("returns a string", async () => {
     postProcessors: [],
   });
 
-  expect(typeof generatedCode).toEqual("string");
+  expect(generatedCode).toEqual({
+    code: expect.any(String),
+    testCode: expect.any(String),
+  });
 });
 
 it("creates valid ts: pg flavored", async () => {
+  const fileName = `${Date.now()}.generateORM.ts`;
+  const filePath = resolve(process.cwd(), "tmp", fileName);
+  const testFileName = `${Date.now()}.generateORM.test.ts`;
+  const testFilePath = resolve(process.cwd(), "tmp", testFileName);
+
   const generatedCode = await generateORM({
     connectionOptions: {
       client: "pg",
@@ -51,15 +59,17 @@ it("creates valid ts: pg flavored", async () => {
     fetcher: mockFetcher,
     generators: [rawTypes, rawBaseQuery, typesWithNamingPolicy, typedCrud],
     postProcessors: [],
+    generateTestCode: true,
+    codeOutputFullPath: filePath.replace(".ts", ""),
+    testHeaders: "const connection: any = {};", // `connection` has to be defined somewhere
   });
 
-  const fileName = `${Date.now()}.generateORM.test.ts`;
-  const filePath = resolve(process.cwd(), "tmp", fileName);
-  writeFileSync(filePath, generatedCode);
+  writeFileSync(filePath, generatedCode.code);
+  writeFileSync(testFilePath, generatedCode.testCode);
 
   await new Promise<void>((resolve, reject) => {
     exec(
-      `node ./node_modules/typescript/bin/tsc ${filePath} --noEmit --esModuleInterop`,
+      `node ./node_modules/typescript/bin/tsc ${filePath} ${testFilePath} --noEmit --esModuleInterop`,
       {
         cwd: process.cwd(),
         env: process.env,

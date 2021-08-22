@@ -24,7 +24,7 @@ describe("interfaces/types", () => {
 });
 
 describe("custom type names: `string` to `CHUMBAWUMBA`", () => {
-  it("spits out types with the proper naming policy", () => {
+  it("generates types with the proper naming policy", () => {
     expect(
       typesWithNamingPolicy(getMockRawSchema(), mockMetaData, {
         typesOrInterfaces: "types",
@@ -38,4 +38,11 @@ describe("custom type names: `string` to `CHUMBAWUMBA`", () => {
       })
     ).toMatchSnapshot();
   });
+});
+
+it("generates test code", () => {
+  mockMetaData.generateTestCode = true;
+  expect(
+    typesWithNamingPolicy(getMockRawSchema(), mockMetaData)
+  ).toMatchSnapshot();
 });

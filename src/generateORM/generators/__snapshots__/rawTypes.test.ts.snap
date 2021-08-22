@@ -1,7 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`interfaces/types spits out interfaces 1`] = `
-"export type RawUserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
+exports[`generates test code properly 1`] = `
+Object {
+  "code": "export type RawUserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
 export interface RawUser {
 id: string;
 /** Users don't have to provide their name */
@@ -41,11 +42,155 @@ export function isRawUserAccountLike(subject: any): subject is RawUserAccount {
   }
   return false;
 }
-"
+",
+  "testCode": "import { assertIsRawUserLike, RawUser } from \\"./generated.ts\\";
+
+describe(\\"assertIsRawUserLike\\", () => {
+  it(\\"throws if input is not like a RawUser\\", () => {
+    expect(() => assertIsRawUserLike(1)).toThrow();
+    expect(() => assertIsRawUserLike([])).toThrow();
+    expect(() => assertIsRawUserLike(false)).toThrow();
+    expect(() => assertIsRawUserLike({})).toThrow();
+  })
+  it(\\"does not throw and asserts properly if input is like a RawUser\\", () => {
+    const RawUserLike = {
+      id: \\"\\",data: \\"\\"
+    } as unknown;
+    expect(() => assertIsRawUserLike(RawUserLike)).not.toThrow();
+
+    // We expect no TS error here
+    assertIsRawUserLike(RawUserLike)
+    const actualEntityType: RawUser = RawUserLike;
+    expect(actualEntityType).toEqual(RawUserLike);
+  })
+})
+import { isRawUserLike } from \\"./generated.ts\\";
+
+describe(\\"isRawUserLike\\", () => {
+  it(\\"returns false if input is not like a RawUser\\", () => {
+    expect(isRawUserLike(1)).toBe(false);
+    expect(isRawUserLike([])).toBe(false);
+    expect(isRawUserLike(false)).toBe(false);
+    expect(isRawUserLike({})).toBe(false);
+  })
+  it(\\"returns true and asserts properly if input is like a RawUser\\", () => {
+    const RawUserLike = {
+      id: \\"\\",data: \\"\\"
+    } as unknown;
+    expect(isRawUserLike(RawUserLike)).toBe(true);
+    
+    if (isRawUserLike(RawUserLike)) {
+      // We expect no TS error here
+      const actualEntityType: RawUser = RawUserLike;
+      expect(actualEntityType).toEqual(RawUserLike);
+    } else {
+      // @ts-expect-error
+      const actualEntityType: RawUser = RawUserLike;
+      expect(actualEntityType).toEqual(RawUserLike);
+    }
+  })
+})
+import { assertIsRawUserAccountLike, RawUserAccount } from \\"./generated.ts\\";
+
+describe(\\"assertIsRawUserAccountLike\\", () => {
+  it(\\"throws if input is not like a RawUserAccount\\", () => {
+    expect(() => assertIsRawUserAccountLike(1)).toThrow();
+    expect(() => assertIsRawUserAccountLike([])).toThrow();
+    expect(() => assertIsRawUserAccountLike(false)).toThrow();
+    expect(() => assertIsRawUserAccountLike({})).toThrow();
+  })
+  it(\\"does not throw and asserts properly if input is like a RawUserAccount\\", () => {
+    const RawUserAccountLike = {
+      id: \\"\\",source: \\"\\",source_data: \\"\\"
+    } as unknown;
+    expect(() => assertIsRawUserAccountLike(RawUserAccountLike)).not.toThrow();
+
+    // We expect no TS error here
+    assertIsRawUserAccountLike(RawUserAccountLike)
+    const actualEntityType: RawUserAccount = RawUserAccountLike;
+    expect(actualEntityType).toEqual(RawUserAccountLike);
+  })
+})
+import { isRawUserAccountLike } from \\"./generated.ts\\";
+
+describe(\\"isRawUserAccountLike\\", () => {
+  it(\\"returns false if input is not like a RawUserAccount\\", () => {
+    expect(isRawUserAccountLike(1)).toBe(false);
+    expect(isRawUserAccountLike([])).toBe(false);
+    expect(isRawUserAccountLike(false)).toBe(false);
+    expect(isRawUserAccountLike({})).toBe(false);
+  })
+  it(\\"returns true and asserts properly if input is like a RawUserAccount\\", () => {
+    const RawUserAccountLike = {
+      id: \\"\\",source: \\"\\",source_data: \\"\\"
+    } as unknown;
+    expect(isRawUserAccountLike(RawUserAccountLike)).toBe(true);
+    
+    if (isRawUserAccountLike(RawUserAccountLike)) {
+      // We expect no TS error here
+      const actualEntityType: RawUserAccount = RawUserAccountLike;
+      expect(actualEntityType).toEqual(RawUserAccountLike);
+    } else {
+      // @ts-expect-error
+      const actualEntityType: RawUserAccount = RawUserAccountLike;
+      expect(actualEntityType).toEqual(RawUserAccountLike);
+    }
+  })
+})
+",
+}
+`;
+
+exports[`interfaces/types spits out interfaces 1`] = `
+Object {
+  "code": "export type RawUserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
+export interface RawUser {
+id: string;
+/** Users don't have to provide their name */
+name?: string;
+data: AnyJson;
+};
+export function assertIsRawUserLike(subject: any): asserts subject is RawUser {
+  if(typeof subject === \\"object\\") {
+    if(objectHasProperties(subject, [\\"id\\",\\"data\\"])) { return; }
+  }
+  throw new Error(\\"Invariance violation! Expected subject to be a RawUser, but it was instead: \\" + JSON.stringify(subject));
+}
+export function isRawUserLike(subject: any): subject is RawUser {
+  if(typeof subject === \\"object\\") {
+    if(objectHasProperties(subject, [\\"id\\",\\"data\\"])) { return true; }
+  }
+  return false;
+}
+
+/** Singular users can have multiple accounts */
+export interface RawUserAccount {
+id: unknown;
+/** Who sent us this users' data? */
+source: RawUserAccountSourceEnum;
+/** The raw data sent from the source provider */
+source_data: AnyJson;
+};
+export function assertIsRawUserAccountLike(subject: any): asserts subject is RawUserAccount {
+  if(typeof subject === \\"object\\") {
+    if(objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) { return; }
+  }
+  throw new Error(\\"Invariance violation! Expected subject to be a RawUserAccount, but it was instead: \\" + JSON.stringify(subject));
+}
+export function isRawUserAccountLike(subject: any): subject is RawUserAccount {
+  if(typeof subject === \\"object\\") {
+    if(objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) { return true; }
+  }
+  return false;
+}
+",
+  "testCode": "",
+}
 `;
 
 exports[`interfaces/types spits out types 1`] = `
-"export type RawUserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
+Object {
+  "code": "export type RawUserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
 export type RawUser = {
 id: string;
 /** Users don't have to provide their name */
@@ -85,11 +230,14 @@ export function isRawUserAccountLike(subject: any): subject is RawUserAccount {
   }
   return false;
 }
-"
+",
+  "testCode": "",
+}
 `;
 
 exports[`prefix allows a custom prefix 1`] = `
-"export type DatabaseUserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
+Object {
+  "code": "export type DatabaseUserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
 export interface DatabaseUser {
 id: string;
 /** Users don't have to provide their name */
@@ -129,5 +277,7 @@ export function isDatabaseUserAccountLike(subject: any): subject is DatabaseUser
   }
   return false;
 }
-"
+",
+  "testCode": "",
+}
 `;
