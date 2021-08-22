@@ -209,8 +209,8 @@ describe("is${rawPrefix}${entityName}Like", () => {
 
     // Test Fixtures
     if (metaData.generateTestCode) {
-      const functionName = `createTest${rawPrefix}${entityName}`;
-      testCode += `\n\nexport function ${functionName}(defaults: Partial<${rawPrefix}${entityName}> = {}): ${rawPrefix}${entityName} {
+      const functionName = `createMock${rawPrefix}${entityName}`;
+      testCode += `\n\nfunction ${functionName}(defaults: Partial<${rawPrefix}${entityName}> = {}): ${rawPrefix}${entityName} {
   const test${rawPrefix}${entityName}: ${rawPrefix}${entityName} = {
     ${table.columns
       .map(

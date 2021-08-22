@@ -196,7 +196,9 @@ sourceData: AnyJson;
 }
 
 ",
-  "testCode": "import { assertIsUserLike, User } from \\"./generated.ts\\";
+  "testCode": "
+
+import { assertIsUserLike, User } from \\"./generated.ts\\";
 
 describe(\\"assertIsUserLike\\", () => {
   it(\\"throws if input is not like a User\\", () => {
@@ -217,6 +219,8 @@ describe(\\"assertIsUserLike\\", () => {
     expect(actualEntityType).toEqual(UserLike);
   })
 })
+
+
 import { isUserLike } from \\"./generated.ts\\";
 
 describe(\\"isUserLike\\", () => {
@@ -243,6 +247,36 @@ describe(\\"isUserLike\\", () => {
     }
   })
 })
+
+
+import { rawUserToUser } from \\"./generated.ts\\";
+
+describe(\\"rawUserToUser\\", () => {
+  const RawUserFull: RawUser = {
+    id: \\"\\" as any,name: \\"\\" as any,data: \\"\\" as any
+  };
+  const UserFull: User = {
+    id: \\"\\" as any,name: \\"\\" as any,data: \\"\\" as any
+  };
+  it(\\"converts a RawUser to a User\\", () => {
+    expect(rawUserToUser(RawUserFull)).toEqual(UserFull);
+  });
+});
+
+import { userToRawUser } from \\"./generated.ts\\";
+  
+describe(\\"userToRawUser\\", () => {
+  const UserFull: User = {
+    id: \\"\\" as any,name: \\"\\" as any,data: \\"\\" as any
+  };
+  const RawUserFull: RawUser = {
+    id: \\"\\" as any,name: \\"\\" as any,data: \\"\\" as any
+  };
+  it(\\"converts a User to a RawUser\\", () => {
+    expect(userToRawUser(UserFull)).toEqual(RawUserFull);
+  });
+});
+
 import { assertIsUserAccountLike, UserAccount } from \\"./generated.ts\\";
 
 describe(\\"assertIsUserAccountLike\\", () => {
@@ -264,6 +298,8 @@ describe(\\"assertIsUserAccountLike\\", () => {
     expect(actualEntityType).toEqual(UserAccountLike);
   })
 })
+
+
 import { isUserAccountLike } from \\"./generated.ts\\";
 
 describe(\\"isUserAccountLike\\", () => {
@@ -290,7 +326,35 @@ describe(\\"isUserAccountLike\\", () => {
     }
   })
 })
-",
+
+
+import { rawUserAccountToUserAccount } from \\"./generated.ts\\";
+
+describe(\\"rawUserAccountToUserAccount\\", () => {
+  const RawUserAccountFull: RawUserAccount = {
+    id: \\"\\" as any,source: \\"\\" as any,source_data: \\"\\" as any
+  };
+  const UserAccountFull: UserAccount = {
+    id: \\"\\" as any,source: \\"\\" as any,sourceData: \\"\\" as any
+  };
+  it(\\"converts a RawUserAccount to a UserAccount\\", () => {
+    expect(rawUserAccountToUserAccount(RawUserAccountFull)).toEqual(UserAccountFull);
+  });
+});
+
+import { userAccountToRawUserAccount } from \\"./generated.ts\\";
+  
+describe(\\"userAccountToRawUserAccount\\", () => {
+  const UserAccountFull: UserAccount = {
+    id: \\"\\" as any,source: \\"\\" as any,sourceData: \\"\\" as any
+  };
+  const RawUserAccountFull: RawUserAccount = {
+    id: \\"\\" as any,source: \\"\\" as any,source_data: \\"\\" as any
+  };
+  it(\\"converts a UserAccount to a RawUserAccount\\", () => {
+    expect(userAccountToRawUserAccount(UserAccountFull)).toEqual(RawUserAccountFull);
+  });
+});",
 }
 `;
 

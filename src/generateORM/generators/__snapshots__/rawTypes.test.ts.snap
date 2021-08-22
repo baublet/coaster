@@ -98,7 +98,7 @@ describe(\\"isRawUserLike\\", () => {
 });
 
 
-export function createTestRawUser(defaults: Partial<RawUser> = {}): RawUser {
+function createMockRawUser(defaults: Partial<RawUser> = {}): RawUser {
   const testRawUser: RawUser = {
     id: \\"id\\",
     name: \\"name\\",
@@ -163,10 +163,10 @@ describe(\\"isRawUserAccountLike\\", () => {
 });
 
 
-export function createTestRawUserAccount(defaults: Partial<RawUserAccount> = {}): RawUserAccount {
+function createMockRawUserAccount(defaults: Partial<RawUserAccount> = {}): RawUserAccount {
   const testRawUserAccount: RawUserAccount = {
     id: 1,
-    source: \\"github\\" as RawUserAccountSourceEnum,
+    source: \\"github\\",
     source_data: {},
     ...defaults
   }
