@@ -20,7 +20,7 @@ export type ConnectionOrTransaction = Connection | Transaction;`
   );
 
   let code = "";
-  let testCode = "";
+  const testCode = "";
 
   for (const table of schema.tables) {
     const schemaAndTablePath = getSchemaAndTablePath(schema.name, table.name);
