@@ -20,6 +20,7 @@ export function getDefaultJavascriptForColumnType(
       return "{}";
     case "enum": {
       const values = metaData.rawEnumValues.get(column.enumPath);
+      // The first enum value is fine here
       return `"${values[0]}"`;
     }
   }
