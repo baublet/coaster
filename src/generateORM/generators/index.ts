@@ -75,6 +75,18 @@ export type MetaData = {
    * Named database enums stored as Map<`schema.enum`, "SchemaEnumEnum">;
    */
   namedDatabaseEnumNames: Map<EntityPath, string>;
+  /**
+   * Raw test entity creation function names stored as Map<`schema.table`, "createRawTestSchemaTable">
+   */
+  rawCreateTestEntityFunctionNames: Map<EntityPath, string>;
+  /**
+   * Named test entity creation function names stored as Map<`schema.table`, "createTestSchemaTable">
+   */
+  namedCreateTestEntityFunctionNames: Map<EntityPath, string>;
+  /**
+   * An array of enum values stored as Map<`schema.enum`, string[]>
+   */
+  rawEnumValues: Map<EntityPath, string[]>;
 };
 
 /**

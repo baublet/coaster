@@ -17,5 +17,8 @@ export function getMockMetaData(): MetaData {
     namedEntityInputTypeNames: new Map(),
     namedDatabaseEnumNames: new Map(),
     rawDatabaseEnumNames: new Map(),
+    namedCreateTestEntityFunctionNames: new Map(),
+    rawCreateTestEntityFunctionNames: new Map(),
+    rawEnumValues: new Map(),
   };
 }

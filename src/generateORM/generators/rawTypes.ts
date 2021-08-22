@@ -1,6 +1,11 @@
 import { MetaData, GetTypeName, GeneratorResult } from ".";
 import { RawSchema } from "../drivers";
-import { getName, getSchemaAndTablePath, getTypeName } from "./helpers";
+import {
+  getDefaultJavascriptForColumnType,
+  getName,
+  getSchemaAndTablePath,
+  getTypeName,
+} from "./helpers";
 import { generateNames } from "../../generateNames";
 import { orDefault, ternary } from "../../helpers";
 
@@ -62,6 +67,7 @@ export interface JsonArray extends Array<AnyJson> {};`
     code += '"' + values.join('" | "') + '"';
     code += `;\n`;
     metaData.rawDatabaseEnumNames.set(`${schema.name}.${name}`, enumTypeName);
+    metaData.rawEnumValues.set(`${schema.name}.${name}`, values);
   }
 
   // Entities
@@ -130,7 +136,7 @@ export interface JsonArray extends Array<AnyJson> {};`
     );
 
     if (metaData.generateTestCode) {
-      testCode += `import { assertIs${rawPrefix}${entityName}Like, ${rawPrefix}${entityName} } from "${
+      testCode += `\n\nimport { assertIs${rawPrefix}${entityName}Like, ${rawPrefix}${entityName} } from "${
         metaData.codeOutputFullPath
       }";
 
@@ -140,10 +146,10 @@ describe("assertIs${rawPrefix}${entityName}Like", () => {
     expect(() => assertIs${rawPrefix}${entityName}Like([])).toThrow();
     expect(() => assertIs${rawPrefix}${entityName}Like(false)).toThrow();
     expect(() => assertIs${rawPrefix}${entityName}Like({})).toThrow();
-  })
+  });
   it("does not throw and asserts properly if input is like a ${rawPrefix}${entityName}", () => {
     const ${rawPrefix}${entityName}Like = {
-      ${rawRequiredColumnNames.map((col) => `${col}: ""`).join(",")}
+      ${rawRequiredColumnNames.map((col) => `${col}: ""`).join(",\n      ")}
     } as unknown;
     expect(() => assertIs${rawPrefix}${entityName}Like(${rawPrefix}${entityName}Like)).not.toThrow();
 
@@ -151,8 +157,8 @@ describe("assertIs${rawPrefix}${entityName}Like", () => {
     assertIs${rawPrefix}${entityName}Like(${rawPrefix}${entityName}Like)
     const actualEntityType: ${rawPrefix}${entityName} = ${rawPrefix}${entityName}Like;
     expect(actualEntityType).toEqual(${rawPrefix}${entityName}Like);
-  })
-})
+  });
+});
 `;
     }
 
@@ -170,7 +176,7 @@ describe("assertIs${rawPrefix}${entityName}Like", () => {
     );
 
     if (metaData.generateTestCode) {
-      testCode += `import { is${rawPrefix}${entityName}Like } from "${
+      testCode += `\n\nimport { is${rawPrefix}${entityName}Like } from "${
         metaData.codeOutputFullPath
       }";
 
@@ -180,10 +186,10 @@ describe("is${rawPrefix}${entityName}Like", () => {
     expect(is${rawPrefix}${entityName}Like([])).toBe(false);
     expect(is${rawPrefix}${entityName}Like(false)).toBe(false);
     expect(is${rawPrefix}${entityName}Like({})).toBe(false);
-  })
+  });
   it("returns true and asserts properly if input is like a ${rawPrefix}${entityName}", () => {
     const ${rawPrefix}${entityName}Like = {
-      ${rawRequiredColumnNames.map((col) => `${col}: ""`).join(",")}
+      ${rawRequiredColumnNames.map((col) => `${col}: ""`).join(",\n      ")}
     } as unknown;
     expect(is${rawPrefix}${entityName}Like(${rawPrefix}${entityName}Like)).toBe(true);
     
@@ -196,9 +202,26 @@ describe("is${rawPrefix}${entityName}Like", () => {
       const actualEntityType: ${rawPrefix}${entityName} = ${rawPrefix}${entityName}Like;
       expect(actualEntityType).toEqual(${rawPrefix}${entityName}Like);
     }
-  })
-})
+  });
+});
 `;
+    }
+
+    // Test Fixtures
+    if (metaData.generateTestCode) {
+      const functionName = `createTest${rawPrefix}${entityName}`;
+      testCode += `\n\nexport function ${functionName}(defaults: Partial<${rawPrefix}${entityName}> = {}): ${rawPrefix}${entityName} {
+  const test${rawPrefix}${entityName}: ${rawPrefix}${entityName} = {
+    ${table.columns
+      .map(
+        (col) =>
+          `${col.name}: ${getDefaultJavascriptForColumnType(col, metaData)}`
+      )
+      .join(",\n    ")},
+    ...defaults
+  }
+  return test${rawPrefix}${entityName};
+}`;
     }
   }
 

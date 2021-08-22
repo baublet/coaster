@@ -43,6 +43,9 @@ export async function generateORM(options: GenerateORMOptions): Promise<{
     namedEntityInputTypeNames: new Map(),
     namedDatabaseEnumNames: new Map(),
     rawDatabaseEnumNames: new Map(),
+    namedCreateTestEntityFunctionNames: new Map(),
+    rawCreateTestEntityFunctionNames: new Map(),
+    rawEnumValues: new Map(),
   };
 
   for (const generator of options.generators) {
