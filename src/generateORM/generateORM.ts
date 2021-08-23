@@ -1,6 +1,7 @@
 import { db, ConnectionOptions } from "./";
 import { SchemaFetcher } from "./drivers";
 import { Generator, MetaData } from "./generators";
+import { getTemplateManager } from "./generators/helpers";
 import { PostProcessor } from "./postProcessors";
 
 interface GenerateORMOptions {
@@ -46,6 +47,7 @@ export async function generateORM(options: GenerateORMOptions): Promise<{
     namedCreateTestEntityFunctionNames: new Map(),
     rawCreateTestEntityFunctionNames: new Map(),
     rawEnumValues: new Map(),
+    templateManager: getTemplateManager(),
   };
 
   for (const generator of options.generators) {
