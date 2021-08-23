@@ -3,12 +3,7 @@ import fs from "fs";
 
 import { generateORM } from "../generateORM";
 import { pgSchemaFetcher, fetcherWithConfiguration } from "../drivers";
-import {
-  rawBaseQuery,
-  rawTypes,
-  typedCrud,
-  typesWithNamingPolicy,
-} from "../generators";
+import { rawBaseQuery, rawTypes, typesWithNamingPolicy } from "../generators";
 
 const outputFilePath = path.resolve(__dirname, "generated.ts");
 const testOutputFilePath = path.resolve(
@@ -25,7 +20,12 @@ generateORM({
   fetcher: fetcherWithConfiguration(pgSchemaFetcher, {
     excludeTables: ["knex_*"],
   }),
-  generators: [rawTypes, rawBaseQuery, typesWithNamingPolicy, typedCrud],
+  generators: [
+    rawTypes,
+    rawBaseQuery,
+    typesWithNamingPolicy,
+    // typedCrud
+  ],
   postProcessors: [],
   generateTestCode: true,
   testHeaders: `import knex from "knex";
