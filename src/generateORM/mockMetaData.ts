@@ -1,4 +1,5 @@
 import { MetaData } from "./generators";
+import { getTemplateManager } from "../generateORM/generators/helpers";
 
 export function getMockMetaData(): MetaData {
   return {
@@ -20,5 +21,6 @@ export function getMockMetaData(): MetaData {
     namedCreateTestEntityFunctionNames: new Map(),
     rawCreateTestEntityFunctionNames: new Map(),
     rawEnumValues: new Map(),
+    templateManager: getTemplateManager(),
   };
 }

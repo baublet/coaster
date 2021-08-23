@@ -1,4 +1,5 @@
 import { RawColumn, RawSchema } from "../drivers";
+import { TemplateManager } from "./helpers";
 
 type GeneratorFinalResult = {
   code: string;
@@ -22,6 +23,7 @@ export type MetaData = {
   generateTestCode: boolean;
   codeOutputFullPath: string;
   testConnectionVariable: string;
+  templateManager: TemplateManager<any>;
   /**
    * Add a header to the generated code. FIFO order. The key is to allow later
    * middleware to modify earlier middleware output, if necessary.
