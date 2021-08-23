@@ -258,8 +258,13 @@ describe(\\"rawUserToUser\\", () => {
   const UserFull: User = {
     id: \\"\\" as any,name: \\"\\" as any,data: \\"\\" as any
   };
-  it(\\"converts a RawUser to a User\\", () => {
+  const RawUserPartial: Partial<RawUser> = {};
+  const UserPartial: Partial<User> = {};
+  it(\\"converts a full RawUser to a full User\\", () => {
     expect(rawUserToUser(RawUserFull)).toEqual(UserFull);
+  });
+  it(\\"converts a partial RawUser to a partial User\\", () => {
+    expect(rawUserToUser(RawUserPartial)).toEqual(UserPartial);
   });
 });
 
@@ -272,8 +277,13 @@ describe(\\"userToRawUser\\", () => {
   const RawUserFull: RawUser = {
     id: \\"\\" as any,name: \\"\\" as any,data: \\"\\" as any
   };
-  it(\\"converts a User to a RawUser\\", () => {
+  const RawUserPartial: Partial<RawUser> = {};
+  const UserPartial: Partial<User> = {};
+  it(\\"converts a full User to a full RawUser\\", () => {
     expect(userToRawUser(UserFull)).toEqual(RawUserFull);
+  });
+  it(\\"converts a partial User to a partial RawUser\\", () => {
+    expect(userToRawUser(UserPartial)).toEqual(RawUserPartial);
   });
 });
 
@@ -337,8 +347,13 @@ describe(\\"rawUserAccountToUserAccount\\", () => {
   const UserAccountFull: UserAccount = {
     id: \\"\\" as any,source: \\"\\" as any,sourceData: \\"\\" as any
   };
-  it(\\"converts a RawUserAccount to a UserAccount\\", () => {
+  const RawUserAccountPartial: Partial<RawUserAccount> = {};
+  const UserAccountPartial: Partial<UserAccount> = {};
+  it(\\"converts a full RawUserAccount to a full UserAccount\\", () => {
     expect(rawUserAccountToUserAccount(RawUserAccountFull)).toEqual(UserAccountFull);
+  });
+  it(\\"converts a partial RawUserAccount to a partial UserAccount\\", () => {
+    expect(rawUserAccountToUserAccount(RawUserAccountPartial)).toEqual(UserAccountPartial);
   });
 });
 
@@ -351,8 +366,13 @@ describe(\\"userAccountToRawUserAccount\\", () => {
   const RawUserAccountFull: RawUserAccount = {
     id: \\"\\" as any,source: \\"\\" as any,source_data: \\"\\" as any
   };
-  it(\\"converts a UserAccount to a RawUserAccount\\", () => {
+  const RawUserAccountPartial: Partial<RawUserAccount> = {};
+  const UserAccountPartial: Partial<UserAccount> = {};
+  it(\\"converts a full UserAccount to a full RawUserAccount\\", () => {
     expect(userAccountToRawUserAccount(UserAccountFull)).toEqual(RawUserAccountFull);
+  });
+  it(\\"converts a partial UserAccount to a partial RawUserAccount\\", () => {
+    expect(userAccountToRawUserAccount(UserAccountPartial)).toEqual(RawUserAccountPartial);
   });
 });",
 }

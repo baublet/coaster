@@ -255,8 +255,13 @@ describe("${rawToNamedFunctionName}", () => {
       )
       .join(",")}
   };
-  it("converts a ${rawEntityName} to a ${namedEntityName}", () => {
+  const ${rawEntityName}Partial: Partial<${rawEntityName}> = {};
+  const ${namedEntityName}Partial: Partial<${namedEntityName}> = {};
+  it("converts a full ${rawEntityName} to a full ${namedEntityName}", () => {
     expect(${rawToNamedFunctionName}(${rawEntityName}Full)).toEqual(${namedEntityName}Full);
+  });
+  it("converts a partial ${rawEntityName} to a partial ${namedEntityName}", () => {
+    expect(${rawToNamedFunctionName}(${rawEntityName}Partial)).toEqual(${namedEntityName}Partial);
   });
 });`;
     }
@@ -307,8 +312,13 @@ describe("${namedToRawFunctionName}", () => {
       .map((col) => `${col.name}: "" as any`)
       .join(",")}
   };
-  it("converts a ${namedEntityName} to a ${rawEntityName}", () => {
+  const ${rawEntityName}Partial: Partial<${rawEntityName}> = {};
+  const ${namedEntityName}Partial: Partial<${namedEntityName}> = {};
+  it("converts a full ${namedEntityName} to a full ${rawEntityName}", () => {
     expect(${namedToRawFunctionName}(${namedEntityName}Full)).toEqual(${rawEntityName}Full);
+  });
+  it("converts a partial ${namedEntityName} to a partial ${rawEntityName}", () => {
+    expect(${namedToRawFunctionName}(${namedEntityName}Partial)).toEqual(${rawEntityName}Partial);
   });
 });`;
     }
