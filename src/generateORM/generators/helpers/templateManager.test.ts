@@ -12,8 +12,6 @@ describe("TemplateManager", () => {
       manager.render({
         // @ts-expect-error
         template: "unknown-template",
-        // @ts-expect-error
-        variables: {},
       })
     ).toThrowErrorMatchingInlineSnapshot(
       `"templateTransformers.get(...) is not a function"`
@@ -48,7 +46,6 @@ describe("TemplateManager", () => {
         const result = await rawBaseQueryFunctionName(connection).insert(rawInput).returning(\\"*\\");
         return rawToNamedFunctionName(result[0]);
       };
-
 
       /**
        * Inserts one ore more PluralEntityName into the database, returning the inserted entities

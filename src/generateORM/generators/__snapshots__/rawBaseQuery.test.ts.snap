@@ -7,13 +7,11 @@ Object {
 ) {
   return connection<RawUser, Result>(\\"user\\");
 };
-
 export function RawUserAccounts<Result = RawUserAccount[]>(
   connection: ConnectionOrTransaction
 ) {
   return connection<RawUserAccount, Result>(\\"user_account\\");
 };
-
 ",
   "testCode": "",
 }
@@ -26,13 +24,11 @@ Object {
 ) {
   return connection<RawUser, Result>(\\"user\\");
 };
-
 export function RawUserAccounts<Result = RawUserAccount[]>(
   connection: ConnectionOrTransaction
 ) {
   return connection<RawUserAccount, Result>(\\"user_account\\");
 };
-
 ",
   "testCode": "import { RawUsers } from \\"./generated.ts\\"
 
@@ -41,7 +37,6 @@ describe(\\"RawUsers\\", () => {
     expect(() => RawUsers(connection)).not.toThrow();
   });
 });
-
 import { RawUserAccounts } from \\"./generated.ts\\"
 
 describe(\\"RawUserAccounts\\", () => {
@@ -49,7 +44,6 @@ describe(\\"RawUserAccounts\\", () => {
     expect(() => RawUserAccounts(connection)).not.toThrow();
   });
 });
-
 ",
 }
 `;

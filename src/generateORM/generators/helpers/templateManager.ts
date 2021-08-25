@@ -4,6 +4,33 @@ import mkdirp from "mkdirp";
 
 export function getTemplateManager() {
   return getManager({
+    "rawBaseQuery/query.test": [
+      "pluralEntityName",
+      "codeOutputFullPath",
+      "testConnectionVariable",
+    ] as const,
+    "rawBaseQuery/query": [
+      "pluralEntityName",
+      "entityName",
+      "tableName",
+    ] as const,
+    "rawBaseQuery/knex": [] as const,
+    "rawBaseQuery/objectHasProperties": [] as const,
+    "rawBaseQuery/enum": ["enumTypeName", "values"] as const,
+    "rawBaseQuery/jsonType": [] as const,
+    "rawBaseQuery/entity": [
+      "comment",
+      "interfaceOrType",
+      "entityName",
+      "typeEqualsSign",
+      "columns",
+    ] as const,
+    "rawBaseQuery/entityProperty": [
+      "comment",
+      "columnName",
+      "propertyNameTerminator",
+      "columnTypeName",
+    ] as const,
     "crud/insert.pg": [
       "connection",
       "entityInputType",
@@ -25,7 +52,7 @@ export interface TemplateManager<T extends Record<string, Template>> {
     args: {
       [K in keyof T]: {
         template: K;
-        variables: { [key in T[K][number]]: string | number };
+        variables?: { [key in T[K][number]]: string | number };
       };
     }[keyof T]
   ) => string;
@@ -34,7 +61,7 @@ export interface TemplateManager<T extends Record<string, Template>> {
 type Template = readonly string[];
 
 function getPathToTemplate(key: string): string {
-  return path.resolve(templatesPath, `${key}.tpl`);
+  return path.resolve(templatesPath, `${key}.tpl.ts`);
 }
 
 function getManager<T extends Record<string, Template>>(
@@ -48,7 +75,7 @@ function getManager<T extends Record<string, Template>>(
 
   for (const key of Object.keys(templates)) {
     for (const variableKey of templates[key]) {
-      regexList[variableKey] = new RegExp(`%${variableKey}%`, "g");
+      regexList[variableKey] = new RegExp("\\$\\$" + variableKey, "g");
     }
 
     const absolutePath = getPathToTemplate(key);
@@ -59,10 +86,10 @@ function getManager<T extends Record<string, Template>>(
     }
 
     const rawTemplate = fs.readFileSync(absolutePath).toString();
-    templateTransformers.set(key, (args?: Record<string, any>) => {
+    templateTransformers.set(key, (args: Record<string, any> = {}) => {
       let newTemplate = rawTemplate;
       for (const [key, value] of Object.entries(args)) {
-        newTemplate = newTemplate.replace(regexList[key], value);
+        newTemplate = newTemplate.replace(regexList[key], value || "");
       }
       return newTemplate;
     });

@@ -1,5 +1,10 @@
 [![CI](https://github.com/baublet/coaster/actions/workflows/continuous-testing.yml/badge.svg)](https://github.com/baublet/coaster/actions/workflows/continuous-testing.yml)
 
+- [ ] replace inline-templates with the template system
+- [ ] 100% coverage for postgres
+- [ ] mysql driver
+- [ ] relational CRUD
+
 # Coaster
 
 A library for generating light-weight Object-Relational Mappers using Knex and TypeScript.

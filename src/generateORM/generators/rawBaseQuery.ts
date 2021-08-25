@@ -13,10 +13,9 @@ export const rawBaseQuery = (
 ): GeneratorResult => {
   metaData.setHeader(
     "knex",
-    `import knex from "knex";
-export type Connection = knex<any, unknown[]>;
-export type Transaction = knex.Transaction<any, any>;
-export type ConnectionOrTransaction = Connection | Transaction;`
+    metaData.templateManager.render({
+      template: "rawBaseQuery/knex",
+    })
   );
 
   let code = "";
@@ -27,11 +26,14 @@ export type ConnectionOrTransaction = Connection | Transaction;`
       getSchemaAndTablePath(schema.name, table.name)
     );
     const pluralEntityName = generateNames(entityName).pluralPascal;
-    code += `export function ${pluralEntityName}<Result = ${entityName}[]>(
-  connection: ConnectionOrTransaction
-) {
-  return connection<${entityName}, Result>("${table.name}");
-};\n\n`;
+    code += metaData.templateManager.render({
+      template: "rawBaseQuery/query",
+      variables: {
+        entityName,
+        pluralEntityName,
+        tableName: table.name,
+      },
+    });
     metaData.rawBaseQueryFunctionNames.set(
       getSchemaAndTablePath(schema.name, table.name),
       pluralEntityName
@@ -40,13 +42,16 @@ export type ConnectionOrTransaction = Connection | Transaction;`
     if (!metaData.generateTestCode) {
       continue;
     }
-    testCode += `import { ${pluralEntityName} } from "${metaData.codeOutputFullPath}"
-
-describe("${pluralEntityName}", () => {
-  it("doesn't throw", () => {
-    expect(() => ${pluralEntityName}(${metaData.testConnectionVariable})).not.toThrow();
-  });
-});\n\n`;
+    testCode += metaData.templateManager.render({
+      template: "rawBaseQuery/query.test",
+      variables: {
+        pluralEntityName,
+        codeOutputFullPath: metaData.codeOutputFullPath,
+        testConnectionVariable: metaData.testConnectionVariable,
+        // @ts-expect-error
+        what: "the",
+      },
+    });
   }
 
   return {

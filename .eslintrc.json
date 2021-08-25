@@ -18,6 +18,10 @@
       "rules": {
         "@typescript-eslint/no-unused-vars": "off"
       }
+    },
+    {
+      "files": ["*.tpl.ts"],
+      "rules": {}
     }
   ]
 }

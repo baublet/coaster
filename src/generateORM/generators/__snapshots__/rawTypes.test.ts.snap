@@ -3,11 +3,15 @@
 exports[`generates test code properly 1`] = `
 Object {
   "code": "export type RawUserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
+
 export interface RawUser {
-id: string;
+
+id:  string;
 /** Users don't have to provide their name */
-name?: string;
-data: AnyJson;
+name?:  string;
+
+data:  AnyJson;
+
 };
 export function assertIsRawUserLike(subject: any): asserts subject is RawUser {
   if(typeof subject === \\"object\\") {
@@ -21,14 +25,15 @@ export function isRawUserLike(subject: any): subject is RawUser {
   }
   return false;
 }
-
 /** Singular users can have multiple accounts */
 export interface RawUserAccount {
-id: unknown;
+
+id:  unknown;
 /** Who sent us this users' data? */
-source: RawUserAccountSourceEnum;
+source:  RawUserAccountSourceEnum;
 /** The raw data sent from the source provider */
-source_data: AnyJson;
+source_data:  AnyJson;
+
 };
 export function assertIsRawUserAccountLike(subject: any): asserts subject is RawUserAccount {
   if(typeof subject === \\"object\\") {
@@ -178,11 +183,15 @@ function createMockRawUserAccount(defaults: Partial<RawUserAccount> = {}): RawUs
 exports[`interfaces/types spits out interfaces 1`] = `
 Object {
   "code": "export type RawUserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
+
 export interface RawUser {
-id: string;
+
+id:  string;
 /** Users don't have to provide their name */
-name?: string;
-data: AnyJson;
+name?:  string;
+
+data:  AnyJson;
+
 };
 export function assertIsRawUserLike(subject: any): asserts subject is RawUser {
   if(typeof subject === \\"object\\") {
@@ -196,14 +205,15 @@ export function isRawUserLike(subject: any): subject is RawUser {
   }
   return false;
 }
-
 /** Singular users can have multiple accounts */
 export interface RawUserAccount {
-id: unknown;
+
+id:  unknown;
 /** Who sent us this users' data? */
-source: RawUserAccountSourceEnum;
+source:  RawUserAccountSourceEnum;
 /** The raw data sent from the source provider */
-source_data: AnyJson;
+source_data:  AnyJson;
+
 };
 export function assertIsRawUserAccountLike(subject: any): asserts subject is RawUserAccount {
   if(typeof subject === \\"object\\") {
@@ -225,11 +235,15 @@ export function isRawUserAccountLike(subject: any): subject is RawUserAccount {
 exports[`interfaces/types spits out types 1`] = `
 Object {
   "code": "export type RawUserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
+
 export type RawUser = {
-id: string;
+
+id:  string;
 /** Users don't have to provide their name */
-name?: string;
-data: AnyJson;
+name?:  string;
+
+data:  AnyJson;
+
 };
 export function assertIsRawUserLike(subject: any): asserts subject is RawUser {
   if(typeof subject === \\"object\\") {
@@ -243,14 +257,15 @@ export function isRawUserLike(subject: any): subject is RawUser {
   }
   return false;
 }
-
 /** Singular users can have multiple accounts */
 export type RawUserAccount = {
-id: unknown;
+
+id:  unknown;
 /** Who sent us this users' data? */
-source: RawUserAccountSourceEnum;
+source:  RawUserAccountSourceEnum;
 /** The raw data sent from the source provider */
-source_data: AnyJson;
+source_data:  AnyJson;
+
 };
 export function assertIsRawUserAccountLike(subject: any): asserts subject is RawUserAccount {
   if(typeof subject === \\"object\\") {
@@ -272,11 +287,15 @@ export function isRawUserAccountLike(subject: any): subject is RawUserAccount {
 exports[`prefix allows a custom prefix 1`] = `
 Object {
   "code": "export type DatabaseUserAccountSourceEnum = \\"github\\" | \\"bitbucket\\";
+
 export interface DatabaseUser {
-id: string;
+
+id:  string;
 /** Users don't have to provide their name */
-name?: string;
-data: AnyJson;
+name?:  string;
+
+data:  AnyJson;
+
 };
 export function assertIsDatabaseUserLike(subject: any): asserts subject is DatabaseUser {
   if(typeof subject === \\"object\\") {
@@ -290,14 +309,15 @@ export function isDatabaseUserLike(subject: any): subject is DatabaseUser {
   }
   return false;
 }
-
 /** Singular users can have multiple accounts */
 export interface DatabaseUserAccount {
-id: unknown;
+
+id:  unknown;
 /** Who sent us this users' data? */
-source: DatabaseUserAccountSourceEnum;
+source:  DatabaseUserAccountSourceEnum;
 /** The raw data sent from the source provider */
-source_data: AnyJson;
+source_data:  AnyJson;
+
 };
 export function assertIsDatabaseUserAccountLike(subject: any): asserts subject is DatabaseUserAccount {
   if(typeof subject === \\"object\\") {

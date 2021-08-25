@@ -31,20 +31,13 @@ export const rawTypes = (
 ): GeneratorResult => {
   metaData.setHeader(
     "objectHasProperties",
-    `function objectHasProperties(obj: Record<string, any>, properties: string[]): boolean {
-  for(const property of properties) {
-    if(!obj.hasOwnProperty(property)) {
-      return false;
-    }
-  }
-  return true;
-}\n`
+    metaData.templateManager.render({
+      template: "rawBaseQuery/objectHasProperties",
+    })
   );
   metaData.setHeader(
     "json-type",
-    `export type AnyJson =  boolean | number | string | null | JsonArray | JsonMap;
-export interface JsonMap {  [key: string]: AnyJson; };
-export interface JsonArray extends Array<AnyJson> {};`
+    metaData.templateManager.render({ template: "rawBaseQuery/jsonType" })
   );
 
   let code = "";
@@ -63,9 +56,13 @@ export interface JsonArray extends Array<AnyJson> {};`
   for (const { name, values } of schema.enums) {
     const enumNames = generateNames(name);
     const enumTypeName = `${rawPrefix}${enumNames.singularPascal}${schemaName}${enumPrefix}`;
-    code += `export type ${enumTypeName} = `;
-    code += '"' + values.join('" | "') + '"';
-    code += `;\n`;
+    code += metaData.templateManager.render({
+      template: "rawBaseQuery/enum",
+      variables: {
+        enumTypeName,
+        values: '"' + values.join('" | "') + '"',
+      },
+    });
     metaData.rawDatabaseEnumNames.set(`${schema.name}.${name}`, enumTypeName);
     metaData.rawEnumValues.set(`${schema.name}.${name}`, values);
   }
@@ -78,92 +75,91 @@ export interface JsonArray extends Array<AnyJson> {};`
       schema.name,
       options.prefixSchemaName
     );
+    const prefixedEntityName = rawPrefix + entityName;
 
     const schemaAndTablePath = getSchemaAndTablePath(schema.name, table.name);
-    metaData.tableRawEntityNames.set(
-      schemaAndTablePath,
-      rawPrefix + entityName
-    );
-    metaData.entityTableNames.set(rawPrefix + entityName, schemaAndTablePath);
-
-    if (table.comment) {
-      code += `\n/** ${table.comment} */\n`;
-    }
-
-    code += `export ${
-      options.typesOrInterfaces === "interfaces" ? "interface" : "type"
-    } ${rawPrefix}${entityName} ${
-      options.typesOrInterfaces === "interfaces" ? "" : "= "
-    }{`;
+    metaData.tableRawEntityNames.set(schemaAndTablePath, prefixedEntityName);
+    metaData.entityTableNames.set(prefixedEntityName, schemaAndTablePath);
 
     const rawRequiredColumnNames: string[] = [];
+    let columnsCode = "";
     for (const column of table.columns) {
-      if (column.comment) {
-        code += `\n/** ${column.comment} */`;
-      }
-      code += `\n${column.name}`;
-      code += column.nullable ? "?: " : ": ";
-
-      code += getTypeName({
-        column,
-        metaData,
-        schema,
-        table,
-        getTypeName: options.getTypeName,
-        rawOrNamed: "raw",
+      columnsCode += metaData.templateManager.render({
+        template: "rawBaseQuery/entityProperty",
+        variables: {
+          columnName: column.name,
+          propertyNameTerminator: column.nullable ? "?: " : ": ",
+          columnTypeName: getTypeName({
+            column,
+            metaData,
+            schema,
+            table,
+            getTypeName: options.getTypeName,
+            rawOrNamed: "raw",
+          }),
+          comment: column.comment ? `/** ${column.comment} */` : "",
+        },
       });
-
-      code += ";";
       if (!column.nullable) {
         rawRequiredColumnNames.push(column.name);
       }
     }
 
-    code += `\n};\n`;
+    code += metaData.templateManager.render({
+      template: "rawBaseQuery/entity",
+      variables: {
+        columns: columnsCode,
+        comment: table.comment ? `/** ${table.comment} */` : "",
+        entityName: prefixedEntityName,
+        interfaceOrType:
+          options.typesOrInterfaces === "interfaces" ? "interface" : "type",
+        typeEqualsSign: options.typesOrInterfaces === "interfaces" ? "" : "= ",
+      },
+    });
 
     const columnNamesAsJsonString = JSON.stringify(rawRequiredColumnNames);
     // Type assertions
-    code += `export function assertIs${rawPrefix}${entityName}Like(subject: any): asserts subject is ${rawPrefix}${entityName} {\n`;
+    code += `export function assertIs${prefixedEntityName}Like(subject: any): asserts subject is ${prefixedEntityName} {\n`;
     code += `  if(typeof subject === "object") {\n`;
     code += `    if(objectHasProperties(subject, ${columnNamesAsJsonString})) { return; }\n`;
     code += `  }\n`;
-    code += `  throw new Error("Invariance violation! Expected subject to be a ${rawPrefix}${entityName}, but it was instead: " + JSON.stringify(subject));\n`;
+    code += `  throw new Error("Invariance violation! Expected subject to be a ${prefixedEntityName}, but it was instead: " + JSON.stringify(subject));\n`;
     code += `}\n`;
 
     metaData.typeAssertionFunctionNames.set(
       schemaAndTablePath,
-      `assertIs${rawPrefix}${entityName}`
+      `assertIs${prefixedEntityName}`
     );
 
     if (metaData.generateTestCode) {
-      testCode += `\n\nimport { assertIs${rawPrefix}${entityName}Like, ${rawPrefix}${entityName} } from "${
+      testCode += `\n\nimport { assertIs${prefixedEntityName}Like, ${prefixedEntityName} } from "${
         metaData.codeOutputFullPath
       }";
 
-describe("assertIs${rawPrefix}${entityName}Like", () => {
-  it("throws if input is not like a ${rawPrefix}${entityName}", () => {
-    expect(() => assertIs${rawPrefix}${entityName}Like(1)).toThrow();
-    expect(() => assertIs${rawPrefix}${entityName}Like([])).toThrow();
-    expect(() => assertIs${rawPrefix}${entityName}Like(false)).toThrow();
-    expect(() => assertIs${rawPrefix}${entityName}Like({})).toThrow();
+describe("assertIs${prefixedEntityName}Like", () => {
+  it("throws if input is not like a ${prefixedEntityName}", () => {
+    expect(() => assertIs${prefixedEntityName}Like(1)).toThrow();
+    expect(() => assertIs${prefixedEntityName}Like([])).toThrow();
+    expect(() => assertIs${prefixedEntityName}Like(false)).toThrow();
+    expect(() => assertIs${prefixedEntityName}Like({})).toThrow();
   });
-  it("does not throw and asserts properly if input is like a ${rawPrefix}${entityName}", () => {
-    const ${rawPrefix}${entityName}Like = {
+  it("does not throw and asserts properly if input is like a ${prefixedEntityName}", () => {
+    const ${prefixedEntityName}Like = {
       ${rawRequiredColumnNames.map((col) => `${col}: ""`).join(",\n      ")}
     } as unknown;
-    expect(() => assertIs${rawPrefix}${entityName}Like(${rawPrefix}${entityName}Like)).not.toThrow();
+    expect(() => assertIs${prefixedEntityName}Like(${prefixedEntityName}Like)).not.toThrow();
 
     // We expect no TS error here
-    assertIs${rawPrefix}${entityName}Like(${rawPrefix}${entityName}Like)
-    const actualEntityType: ${rawPrefix}${entityName} = ${rawPrefix}${entityName}Like;
-    expect(actualEntityType).toEqual(${rawPrefix}${entityName}Like);
+    assertIs${prefixedEntityName}Like(${prefixedEntityName}Like)
+    const actualEntityType: ${prefixedEntityName} = ${prefixedEntityName}Like;
+    expect(actualEntityType).toEqual(${prefixedEntityName}Like);
   });
 });
 `;
     }
 
     // Type guards
-    code += `export function is${rawPrefix}${entityName}Like(subject: any): subject is ${rawPrefix}${entityName} {\n`;
+    code += `export function is${prefixedEntityName}Like(subject: any): subject is ${prefixedEntityName} {\n`;
     code += `  if(typeof subject === "object") {\n`;
     code += `    if(objectHasProperties(subject, ${columnNamesAsJsonString})) { return true; }\n`;
     code += `  }\n`;
@@ -172,35 +168,35 @@ describe("assertIs${rawPrefix}${entityName}Like", () => {
 
     metaData.typeGuardFunctionNames.set(
       schemaAndTablePath,
-      `is${rawPrefix}${entityName}`
+      `is${prefixedEntityName}`
     );
 
     if (metaData.generateTestCode) {
-      testCode += `\n\nimport { is${rawPrefix}${entityName}Like } from "${
+      testCode += `\n\nimport { is${prefixedEntityName}Like } from "${
         metaData.codeOutputFullPath
       }";
 
-describe("is${rawPrefix}${entityName}Like", () => {
-  it("returns false if input is not like a ${rawPrefix}${entityName}", () => {
-    expect(is${rawPrefix}${entityName}Like(1)).toBe(false);
-    expect(is${rawPrefix}${entityName}Like([])).toBe(false);
-    expect(is${rawPrefix}${entityName}Like(false)).toBe(false);
-    expect(is${rawPrefix}${entityName}Like({})).toBe(false);
+describe("is${prefixedEntityName}Like", () => {
+  it("returns false if input is not like a ${prefixedEntityName}", () => {
+    expect(is${prefixedEntityName}Like(1)).toBe(false);
+    expect(is${prefixedEntityName}Like([])).toBe(false);
+    expect(is${prefixedEntityName}Like(false)).toBe(false);
+    expect(is${prefixedEntityName}Like({})).toBe(false);
   });
-  it("returns true and asserts properly if input is like a ${rawPrefix}${entityName}", () => {
-    const ${rawPrefix}${entityName}Like = {
+  it("returns true and asserts properly if input is like a ${prefixedEntityName}", () => {
+    const ${prefixedEntityName}Like = {
       ${rawRequiredColumnNames.map((col) => `${col}: ""`).join(",\n      ")}
     } as unknown;
-    expect(is${rawPrefix}${entityName}Like(${rawPrefix}${entityName}Like)).toBe(true);
+    expect(is${prefixedEntityName}Like(${prefixedEntityName}Like)).toBe(true);
     
-    if (is${rawPrefix}${entityName}Like(${rawPrefix}${entityName}Like)) {
+    if (is${prefixedEntityName}Like(${prefixedEntityName}Like)) {
       // We expect no TS error here
-      const actualEntityType: ${rawPrefix}${entityName} = ${rawPrefix}${entityName}Like;
-      expect(actualEntityType).toEqual(${rawPrefix}${entityName}Like);
+      const actualEntityType: ${prefixedEntityName} = ${prefixedEntityName}Like;
+      expect(actualEntityType).toEqual(${prefixedEntityName}Like);
     } else {
       // @ts-expect-error
-      const actualEntityType: ${rawPrefix}${entityName} = ${rawPrefix}${entityName}Like;
-      expect(actualEntityType).toEqual(${rawPrefix}${entityName}Like);
+      const actualEntityType: ${prefixedEntityName} = ${prefixedEntityName}Like;
+      expect(actualEntityType).toEqual(${prefixedEntityName}Like);
     }
   });
 });
@@ -209,9 +205,9 @@ describe("is${rawPrefix}${entityName}Like", () => {
 
     // Test Fixtures
     if (metaData.generateTestCode) {
-      const functionName = `createMock${rawPrefix}${entityName}`;
-      testCode += `\n\nfunction ${functionName}(defaults: Partial<${rawPrefix}${entityName}> = {}): ${rawPrefix}${entityName} {
-  const test${rawPrefix}${entityName}: ${rawPrefix}${entityName} = {
+      const functionName = `createMock${prefixedEntityName}`;
+      testCode += `\n\nfunction ${functionName}(defaults: Partial<${prefixedEntityName}> = {}): ${prefixedEntityName} {
+  const test${prefixedEntityName}: ${prefixedEntityName} = {
     ${table.columns
       .map(
         (col) =>
@@ -220,7 +216,7 @@ describe("is${rawPrefix}${entityName}Like", () => {
       .join(",\n    ")},
     ...defaults
   }
-  return test${rawPrefix}${entityName};
+  return test${prefixedEntityName};
 }`;
     }
   }
