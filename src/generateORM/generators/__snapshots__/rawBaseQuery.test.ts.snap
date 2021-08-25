@@ -6,12 +6,12 @@ Object {
   connection: ConnectionOrTransaction
 ) {
   return connection<RawUser, Result>(\\"user\\");
-};
+}
 export function RawUserAccounts<Result = RawUserAccount[]>(
   connection: ConnectionOrTransaction
 ) {
   return connection<RawUserAccount, Result>(\\"user_account\\");
-};
+}
 ",
   "testCode": "",
 }
@@ -23,12 +23,12 @@ Object {
   connection: ConnectionOrTransaction
 ) {
   return connection<RawUser, Result>(\\"user\\");
-};
+}
 export function RawUserAccounts<Result = RawUserAccount[]>(
   connection: ConnectionOrTransaction
 ) {
   return connection<RawUserAccount, Result>(\\"user_account\\");
-};
+}
 ",
   "testCode": "import { RawUsers } from \\"./generated.ts\\"
 

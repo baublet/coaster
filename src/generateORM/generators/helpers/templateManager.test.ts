@@ -43,9 +43,11 @@ describe("TemplateManager", () => {
         connection: connection
       ): Promise<EntityName> {
         const rawInput = namedToRawFunctionName(input);
-        const result = await rawBaseQueryFunctionName(connection).insert(rawInput).returning(\\"*\\");
+        const result = await rawBaseQueryFunctionName(connection)
+          .insert(rawInput)
+          .returning(\\"*\\");
         return rawToNamedFunctionName(result[0]);
-      };
+      }
 
       /**
        * Inserts one ore more PluralEntityName into the database, returning the inserted entities
@@ -54,10 +56,12 @@ describe("TemplateManager", () => {
         input: EntityInputType[],
         connection: connection
       ): Promise<EntityName[]> {
-        const rawInput = input.map(input => namedToRawFunctionName(input));
-        const results = await rawBaseQueryFunctionName(connection).insert(rawInput).returning(\\"*\\");
-        return results.map(rawEntity => rawToNamedFunctionName(rawEntity));
-      };
+        const rawInput = input.map((input) => namedToRawFunctionName(input));
+        const results = await rawBaseQueryFunctionName(connection)
+          .insert(rawInput)
+          .returning(\\"*\\");
+        return results.map((rawEntity) => rawToNamedFunctionName(rawEntity));
+      }
       "
     `);
   });
