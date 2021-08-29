@@ -52,6 +52,7 @@ export function getTemplateManager() {
       "prefixedEntityName",
       "codeOutputFullPath",
       "requiredColumns",
+      "columnNamesAsJsonString",
     ] as const,
     "rawTypes/isEntityLike.test": [
       "functionName",

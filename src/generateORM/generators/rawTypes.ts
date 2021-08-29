@@ -158,6 +158,7 @@ export const rawTypes = (
         functionName: guardFunctionName,
         prefixedEntityName,
         requiredColumns: columnNamesAsJsonString,
+        columnNamesAsJsonString,
       },
     });
 
