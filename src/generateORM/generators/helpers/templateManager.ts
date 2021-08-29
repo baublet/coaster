@@ -93,6 +93,14 @@ export function getTemplateManager() {
       "rawEntityTypeName",
       "pluralEntityName",
     ] as const,
+    "typedCrud/delete": [
+      "entityName",
+      "rawBaseQueryFunctionName",
+      "tablePrimaryKeyColumn",
+      "rawEntityTypeName",
+      "rawBaseQueryFunctionName",
+      "pluralEntityName",
+    ] as const,
   });
 }
 

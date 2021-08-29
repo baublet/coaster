@@ -88,28 +88,16 @@ export const typedCrud = (
     });
 
     // Delete
-    code += `/** Deletes a ${entityName} */\n`;
-    code += `export async function delete${entityName}(\n`;
-    code += `  entity: ${entityName},\n`;
-    code += `  connection: ConnectionOrTransaction\n`;
-    code += `): Promise<number> {\n`;
-    code += `  return ${rawBaseQueryFunctionName}<number>(connection)\n`;
-    code += `    .where("${table.primaryKeyColumn}", "=", entity.${table.primaryKeyColumn})\n`;
-    code += `    .delete()\n`;
-    code += `    .limit(1);\n`;
-    code += `}\n\n`;
-
-    // Delete where
-    code += `/** Delete one or more ${pluralEntityName} under specific conditions */\n`;
-    code += `export async function delete${entityName}Where(\n`;
-    code += `  query: (query: knex.QueryBuilder<${rawEntityTypeName}, number>) => unknown,\n`;
-    code += `  connection: ConnectionOrTransaction\n`;
-    code += `): Promise<number> {\n`;
-    code += `  const queryBuilder = ${rawBaseQueryFunctionName}<number>(connection);\n`;
-    code += `  await query(queryBuilder);\n`;
-    code += `  queryBuilder.delete();\n`;
-    code += `  return queryBuilder;\n`;
-    code += `}\n\n`;
+    code += metaData.templateManager.render({
+      template: "typedCrud/delete",
+      variables: {
+        entityName,
+        rawBaseQueryFunctionName,
+        rawEntityTypeName,
+        tablePrimaryKeyColumn: table.primaryKeyColumn,
+        pluralEntityName,
+      },
+    });
   }
 
   return {
