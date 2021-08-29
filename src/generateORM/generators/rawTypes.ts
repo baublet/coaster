@@ -57,7 +57,7 @@ export const rawTypes = (
     const enumNames = generateNames(name);
     const enumTypeName = `${rawPrefix}${enumNames.singularPascal}${schemaName}${enumPrefix}`;
     code += metaData.templateManager.render({
-      template: "rawBaseQuery/enum",
+      template: "rawTypes/enum",
       variables: {
         enumTypeName,
         values: '"' + values.join('" | "') + '"',
@@ -85,7 +85,7 @@ export const rawTypes = (
     let columnsCode = "";
     for (const column of table.columns) {
       columnsCode += metaData.templateManager.render({
-        template: "rawBaseQuery/entityProperty",
+        template: "rawTypes/entityProperty",
         variables: {
           columnName: column.name,
           propertyNameTerminator: column.nullable ? "?: " : ": ",
@@ -106,7 +106,7 @@ export const rawTypes = (
     }
 
     code += metaData.templateManager.render({
-      template: "rawBaseQuery/entity",
+      template: "rawTypes/entity",
       variables: {
         columns: columnsCode,
         comment: table.comment ? `/** ${table.comment} */` : "",
@@ -118,53 +118,48 @@ export const rawTypes = (
     });
 
     const columnNamesAsJsonString = JSON.stringify(rawRequiredColumnNames);
+
     // Type assertions
-    code += `export function assertIs${prefixedEntityName}Like(subject: any): asserts subject is ${prefixedEntityName} {\n`;
-    code += `  if(typeof subject === "object") {\n`;
-    code += `    if(objectHasProperties(subject, ${columnNamesAsJsonString})) { return; }\n`;
-    code += `  }\n`;
-    code += `  throw new Error("Invariance violation! Expected subject to be a ${prefixedEntityName}, but it was instead: " + JSON.stringify(subject));\n`;
-    code += `}\n`;
+    const assertionFunctionName = `assertIs${prefixedEntityName}Like`;
+    code += metaData.templateManager.render({
+      template: "rawTypes/assertIsEntityLike",
+      variables: {
+        columnNamesAsJsonString,
+        prefixedEntityName,
+        functionName: assertionFunctionName,
+      },
+    });
 
     metaData.typeAssertionFunctionNames.set(
       schemaAndTablePath,
-      `assertIs${prefixedEntityName}`
+      assertionFunctionName
     );
 
     if (metaData.generateTestCode) {
-      testCode += `\n\nimport { assertIs${prefixedEntityName}Like, ${prefixedEntityName} } from "${
-        metaData.codeOutputFullPath
-      }";
-
-describe("assertIs${prefixedEntityName}Like", () => {
-  it("throws if input is not like a ${prefixedEntityName}", () => {
-    expect(() => assertIs${prefixedEntityName}Like(1)).toThrow();
-    expect(() => assertIs${prefixedEntityName}Like([])).toThrow();
-    expect(() => assertIs${prefixedEntityName}Like(false)).toThrow();
-    expect(() => assertIs${prefixedEntityName}Like({})).toThrow();
-  });
-  it("does not throw and asserts properly if input is like a ${prefixedEntityName}", () => {
-    const ${prefixedEntityName}Like = {
-      ${rawRequiredColumnNames.map((col) => `${col}: ""`).join(",\n      ")}
-    } as unknown;
-    expect(() => assertIs${prefixedEntityName}Like(${prefixedEntityName}Like)).not.toThrow();
-
-    // We expect no TS error here
-    assertIs${prefixedEntityName}Like(${prefixedEntityName}Like)
-    const actualEntityType: ${prefixedEntityName} = ${prefixedEntityName}Like;
-    expect(actualEntityType).toEqual(${prefixedEntityName}Like);
-  });
-});
-`;
+      testCode += metaData.templateManager.render({
+        template: "rawTypes/assertIsEntityLike.test",
+        variables: {
+          codeOutputFullPath: metaData.codeOutputFullPath,
+          functionName: assertionFunctionName,
+          prefixedEntityName,
+          requiredColumns: rawRequiredColumnNames
+            .map((col) => `${col}: ""`)
+            .join(",\n      "),
+        },
+      });
     }
 
     // Type guards
-    code += `export function is${prefixedEntityName}Like(subject: any): subject is ${prefixedEntityName} {\n`;
-    code += `  if(typeof subject === "object") {\n`;
-    code += `    if(objectHasProperties(subject, ${columnNamesAsJsonString})) { return true; }\n`;
-    code += `  }\n`;
-    code += `  return false;\n`;
-    code += `}\n`;
+    const guardFunctionName = `is${prefixedEntityName}Like`;
+    code += metaData.templateManager.render({
+      template: "rawTypes/isEntityLike",
+      variables: {
+        codeOutputFullPath: metaData.codeOutputFullPath,
+        functionName: guardFunctionName,
+        prefixedEntityName,
+        requiredColumns: columnNamesAsJsonString,
+      },
+    });
 
     metaData.typeGuardFunctionNames.set(
       schemaAndTablePath,
@@ -172,52 +167,37 @@ describe("assertIs${prefixedEntityName}Like", () => {
     );
 
     if (metaData.generateTestCode) {
-      testCode += `\n\nimport { is${prefixedEntityName}Like } from "${
-        metaData.codeOutputFullPath
-      }";
-
-describe("is${prefixedEntityName}Like", () => {
-  it("returns false if input is not like a ${prefixedEntityName}", () => {
-    expect(is${prefixedEntityName}Like(1)).toBe(false);
-    expect(is${prefixedEntityName}Like([])).toBe(false);
-    expect(is${prefixedEntityName}Like(false)).toBe(false);
-    expect(is${prefixedEntityName}Like({})).toBe(false);
-  });
-  it("returns true and asserts properly if input is like a ${prefixedEntityName}", () => {
-    const ${prefixedEntityName}Like = {
-      ${rawRequiredColumnNames.map((col) => `${col}: ""`).join(",\n      ")}
-    } as unknown;
-    expect(is${prefixedEntityName}Like(${prefixedEntityName}Like)).toBe(true);
-    
-    if (is${prefixedEntityName}Like(${prefixedEntityName}Like)) {
-      // We expect no TS error here
-      const actualEntityType: ${prefixedEntityName} = ${prefixedEntityName}Like;
-      expect(actualEntityType).toEqual(${prefixedEntityName}Like);
-    } else {
-      // @ts-expect-error
-      const actualEntityType: ${prefixedEntityName} = ${prefixedEntityName}Like;
-      expect(actualEntityType).toEqual(${prefixedEntityName}Like);
-    }
-  });
-});
-`;
+      testCode += metaData.templateManager.render({
+        template: "rawTypes/isEntityLike.test",
+        variables: {
+          codeOutputFullPath: metaData.codeOutputFullPath,
+          functionName: guardFunctionName,
+          prefixedEntityName,
+          requiredColumns: rawRequiredColumnNames
+            .map((col) => `${col}: ""`)
+            .join(",\n      "),
+        },
+      });
     }
 
     // Test Fixtures
     if (metaData.generateTestCode) {
-      const functionName = `createMock${prefixedEntityName}`;
-      testCode += `\n\nfunction ${functionName}(defaults: Partial<${prefixedEntityName}> = {}): ${prefixedEntityName} {
-  const test${prefixedEntityName}: ${prefixedEntityName} = {
-    ${table.columns
-      .map(
-        (col) =>
-          `${col.name}: ${getDefaultJavascriptForColumnType(col, metaData)}`
-      )
-      .join(",\n    ")},
-    ...defaults
-  }
-  return test${prefixedEntityName};
-}`;
+      testCode += metaData.templateManager.render({
+        template: "rawTypes/createMockEntity",
+        variables: {
+          functionName: `createMock${prefixedEntityName}`,
+          prefixedEntityName,
+          columnDefaults: table.columns
+            .map(
+              (col) =>
+                `${col.name}: ${getDefaultJavascriptForColumnType(
+                  col,
+                  metaData
+                )}`
+            )
+            .join(",\n    "),
+        },
+      });
     }
   }
 

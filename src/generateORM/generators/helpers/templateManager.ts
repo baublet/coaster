@@ -16,20 +16,48 @@ export function getTemplateManager() {
     ] as const,
     "rawBaseQuery/knex": [] as const,
     "rawBaseQuery/objectHasProperties": [] as const,
-    "rawBaseQuery/enum": ["enumTypeName", "values"] as const,
     "rawBaseQuery/jsonType": [] as const,
-    "rawBaseQuery/entity": [
+    "rawTypes/assertIsEntityLike": [
+      "prefixedEntityName",
+      "functionName",
+      "columnNamesAsJsonString",
+    ] as const,
+    "rawTypes/assertIsEntityLike.test": [
+      "functionName",
+      "prefixedEntityName",
+      "codeOutputFullPath",
+      "requiredColumns",
+    ] as const,
+    "rawTypes/createMockEntity": [
+      "functionName",
+      "prefixedEntityName",
+      "columnDefaults",
+    ] as const,
+    "rawTypes/enum": ["enumTypeName", "values"] as const,
+    "rawTypes/entity": [
       "comment",
       "interfaceOrType",
       "entityName",
       "typeEqualsSign",
       "columns",
     ] as const,
-    "rawBaseQuery/entityProperty": [
+    "rawTypes/entityProperty": [
       "comment",
       "columnName",
       "propertyNameTerminator",
       "columnTypeName",
+    ] as const,
+    "rawTypes/isEntityLike": [
+      "functionName",
+      "prefixedEntityName",
+      "codeOutputFullPath",
+      "requiredColumns",
+    ] as const,
+    "rawTypes/isEntityLike.test": [
+      "functionName",
+      "codeOutputFullPath",
+      "requiredColumns",
+      "prefixedEntityName",
     ] as const,
     "crud/insert.pg": [
       "connection",

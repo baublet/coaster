@@ -13,15 +13,24 @@ name?:  string;
 data:  AnyJson;
 
 };
-export function assertIsRawUserLike(subject: any): asserts subject is RawUser {
-  if(typeof subject === \\"object\\") {
-    if(objectHasProperties(subject, [\\"id\\",\\"data\\"])) { return; }
+export function assertIsRawUserLike(
+  subject: any
+): asserts subject is RawUser {
+  if (typeof subject === \\"object\\") {
+    if (objectHasProperties(subject, [\\"id\\",\\"data\\"])) {
+      return;
+    }
   }
-  throw new Error(\\"Invariance violation! Expected subject to be a RawUser, but it was instead: \\" + JSON.stringify(subject));
+  throw new Error(
+    \\"Invariance violation! Expected subject to be a RawUser, but it was instead: \\" +
+      JSON.stringify(subject)
+  );
 }
 export function isRawUserLike(subject: any): subject is RawUser {
-  if(typeof subject === \\"object\\") {
-    if(objectHasProperties(subject, [\\"id\\",\\"data\\"])) { return true; }
+  if (typeof subject === \\"object\\") {
+    if (objectHasProperties(subject, $$columnNamesAsJsonString)) {
+      return true;
+    }
   }
   return false;
 }
@@ -35,22 +44,29 @@ source:  RawUserAccountSourceEnum;
 source_data:  AnyJson;
 
 };
-export function assertIsRawUserAccountLike(subject: any): asserts subject is RawUserAccount {
-  if(typeof subject === \\"object\\") {
-    if(objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) { return; }
+export function assertIsRawUserAccountLike(
+  subject: any
+): asserts subject is RawUserAccount {
+  if (typeof subject === \\"object\\") {
+    if (objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) {
+      return;
+    }
   }
-  throw new Error(\\"Invariance violation! Expected subject to be a RawUserAccount, but it was instead: \\" + JSON.stringify(subject));
+  throw new Error(
+    \\"Invariance violation! Expected subject to be a RawUserAccount, but it was instead: \\" +
+      JSON.stringify(subject)
+  );
 }
 export function isRawUserAccountLike(subject: any): subject is RawUserAccount {
-  if(typeof subject === \\"object\\") {
-    if(objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) { return true; }
+  if (typeof subject === \\"object\\") {
+    if (objectHasProperties(subject, $$columnNamesAsJsonString)) {
+      return true;
+    }
   }
   return false;
 }
 ",
-  "testCode": "
-
-import { assertIsRawUserLike, RawUser } from \\"./generated.ts\\";
+  "testCode": "import { assertIsRawUserLike, RawUser } from \\"./generated.ts\\";
 
 describe(\\"assertIsRawUserLike\\", () => {
   it(\\"throws if input is not like a RawUser\\", () => {
@@ -59,21 +75,20 @@ describe(\\"assertIsRawUserLike\\", () => {
     expect(() => assertIsRawUserLike(false)).toThrow();
     expect(() => assertIsRawUserLike({})).toThrow();
   });
+
   it(\\"does not throw and asserts properly if input is like a RawUser\\", () => {
-    const RawUserLike = {
+    const likeARawUser = {
       id: \\"\\",
-      data: \\"\\"
+      data: \\"\\",
     } as unknown;
-    expect(() => assertIsRawUserLike(RawUserLike)).not.toThrow();
+    expect(() => assertIsRawUserLike(likeARawUser)).not.toThrow();
 
     // We expect no TS error here
-    assertIsRawUserLike(RawUserLike)
-    const actualEntityType: RawUser = RawUserLike;
-    expect(actualEntityType).toEqual(RawUserLike);
+    assertIsRawUserLike(likeARawUser);
+    const actualEntityType: RawUser = likeARawUser;
+    expect(actualEntityType).toEqual(likeARawUser);
   });
 });
-
-
 import { isRawUserLike } from \\"./generated.ts\\";
 
 describe(\\"isRawUserLike\\", () => {
@@ -83,36 +98,36 @@ describe(\\"isRawUserLike\\", () => {
     expect(isRawUserLike(false)).toBe(false);
     expect(isRawUserLike({})).toBe(false);
   });
+
   it(\\"returns true and asserts properly if input is like a RawUser\\", () => {
-    const RawUserLike = {
+    const likeARawUser = {
       id: \\"\\",
-      data: \\"\\"
+      data: \\"\\",
     } as unknown;
-    expect(isRawUserLike(RawUserLike)).toBe(true);
-    
-    if (isRawUserLike(RawUserLike)) {
+    expect(isRawUserLike(likeARawUser)).toBe(true);
+
+    if (isRawUserLike(likeARawUser)) {
       // We expect no TS error here
-      const actualEntityType: RawUser = RawUserLike;
-      expect(actualEntityType).toEqual(RawUserLike);
+      const actualEntityType: RawUser = likeARawUser;
+      expect(actualEntityType).toEqual(likeARawUser);
     } else {
       // @ts-expect-error
-      const actualEntityType: RawUser = RawUserLike;
-      expect(actualEntityType).toEqual(RawUserLike);
+      const actualEntityType: RawUser = likeARawUser;
+      expect(actualEntityType).toEqual(likeARawUser);
     }
   });
 });
-
-
-function createMockRawUser(defaults: Partial<RawUser> = {}): RawUser {
+function createMockRawUser(
+  defaults: Partial<RawUser> = {}
+): RawUser {
   const testRawUser: RawUser = {
     id: \\"id\\",
     name: \\"name\\",
     data: {},
-    ...defaults
-  }
+    ...defaults,
+  };
   return testRawUser;
 }
-
 import { assertIsRawUserAccountLike, RawUserAccount } from \\"./generated.ts\\";
 
 describe(\\"assertIsRawUserAccountLike\\", () => {
@@ -122,22 +137,21 @@ describe(\\"assertIsRawUserAccountLike\\", () => {
     expect(() => assertIsRawUserAccountLike(false)).toThrow();
     expect(() => assertIsRawUserAccountLike({})).toThrow();
   });
+
   it(\\"does not throw and asserts properly if input is like a RawUserAccount\\", () => {
-    const RawUserAccountLike = {
+    const likeARawUserAccount = {
       id: \\"\\",
       source: \\"\\",
-      source_data: \\"\\"
+      source_data: \\"\\",
     } as unknown;
-    expect(() => assertIsRawUserAccountLike(RawUserAccountLike)).not.toThrow();
+    expect(() => assertIsRawUserAccountLike(likeARawUserAccount)).not.toThrow();
 
     // We expect no TS error here
-    assertIsRawUserAccountLike(RawUserAccountLike)
-    const actualEntityType: RawUserAccount = RawUserAccountLike;
-    expect(actualEntityType).toEqual(RawUserAccountLike);
+    assertIsRawUserAccountLike(likeARawUserAccount);
+    const actualEntityType: RawUserAccount = likeARawUserAccount;
+    expect(actualEntityType).toEqual(likeARawUserAccount);
   });
 });
-
-
 import { isRawUserAccountLike } from \\"./generated.ts\\";
 
 describe(\\"isRawUserAccountLike\\", () => {
@@ -147,36 +161,38 @@ describe(\\"isRawUserAccountLike\\", () => {
     expect(isRawUserAccountLike(false)).toBe(false);
     expect(isRawUserAccountLike({})).toBe(false);
   });
+
   it(\\"returns true and asserts properly if input is like a RawUserAccount\\", () => {
-    const RawUserAccountLike = {
+    const likeARawUserAccount = {
       id: \\"\\",
       source: \\"\\",
-      source_data: \\"\\"
+      source_data: \\"\\",
     } as unknown;
-    expect(isRawUserAccountLike(RawUserAccountLike)).toBe(true);
-    
-    if (isRawUserAccountLike(RawUserAccountLike)) {
+    expect(isRawUserAccountLike(likeARawUserAccount)).toBe(true);
+
+    if (isRawUserAccountLike(likeARawUserAccount)) {
       // We expect no TS error here
-      const actualEntityType: RawUserAccount = RawUserAccountLike;
-      expect(actualEntityType).toEqual(RawUserAccountLike);
+      const actualEntityType: RawUserAccount = likeARawUserAccount;
+      expect(actualEntityType).toEqual(likeARawUserAccount);
     } else {
       // @ts-expect-error
-      const actualEntityType: RawUserAccount = RawUserAccountLike;
-      expect(actualEntityType).toEqual(RawUserAccountLike);
+      const actualEntityType: RawUserAccount = likeARawUserAccount;
+      expect(actualEntityType).toEqual(likeARawUserAccount);
     }
   });
 });
-
-
-function createMockRawUserAccount(defaults: Partial<RawUserAccount> = {}): RawUserAccount {
+function createMockRawUserAccount(
+  defaults: Partial<RawUserAccount> = {}
+): RawUserAccount {
   const testRawUserAccount: RawUserAccount = {
     id: 1,
     source: \\"github\\",
     source_data: {},
-    ...defaults
-  }
+    ...defaults,
+  };
   return testRawUserAccount;
-}",
+}
+",
 }
 `;
 
@@ -193,15 +209,24 @@ name?:  string;
 data:  AnyJson;
 
 };
-export function assertIsRawUserLike(subject: any): asserts subject is RawUser {
-  if(typeof subject === \\"object\\") {
-    if(objectHasProperties(subject, [\\"id\\",\\"data\\"])) { return; }
+export function assertIsRawUserLike(
+  subject: any
+): asserts subject is RawUser {
+  if (typeof subject === \\"object\\") {
+    if (objectHasProperties(subject, [\\"id\\",\\"data\\"])) {
+      return;
+    }
   }
-  throw new Error(\\"Invariance violation! Expected subject to be a RawUser, but it was instead: \\" + JSON.stringify(subject));
+  throw new Error(
+    \\"Invariance violation! Expected subject to be a RawUser, but it was instead: \\" +
+      JSON.stringify(subject)
+  );
 }
 export function isRawUserLike(subject: any): subject is RawUser {
-  if(typeof subject === \\"object\\") {
-    if(objectHasProperties(subject, [\\"id\\",\\"data\\"])) { return true; }
+  if (typeof subject === \\"object\\") {
+    if (objectHasProperties(subject, $$columnNamesAsJsonString)) {
+      return true;
+    }
   }
   return false;
 }
@@ -215,15 +240,24 @@ source:  RawUserAccountSourceEnum;
 source_data:  AnyJson;
 
 };
-export function assertIsRawUserAccountLike(subject: any): asserts subject is RawUserAccount {
-  if(typeof subject === \\"object\\") {
-    if(objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) { return; }
+export function assertIsRawUserAccountLike(
+  subject: any
+): asserts subject is RawUserAccount {
+  if (typeof subject === \\"object\\") {
+    if (objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) {
+      return;
+    }
   }
-  throw new Error(\\"Invariance violation! Expected subject to be a RawUserAccount, but it was instead: \\" + JSON.stringify(subject));
+  throw new Error(
+    \\"Invariance violation! Expected subject to be a RawUserAccount, but it was instead: \\" +
+      JSON.stringify(subject)
+  );
 }
 export function isRawUserAccountLike(subject: any): subject is RawUserAccount {
-  if(typeof subject === \\"object\\") {
-    if(objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) { return true; }
+  if (typeof subject === \\"object\\") {
+    if (objectHasProperties(subject, $$columnNamesAsJsonString)) {
+      return true;
+    }
   }
   return false;
 }
@@ -245,15 +279,24 @@ name?:  string;
 data:  AnyJson;
 
 };
-export function assertIsRawUserLike(subject: any): asserts subject is RawUser {
-  if(typeof subject === \\"object\\") {
-    if(objectHasProperties(subject, [\\"id\\",\\"data\\"])) { return; }
+export function assertIsRawUserLike(
+  subject: any
+): asserts subject is RawUser {
+  if (typeof subject === \\"object\\") {
+    if (objectHasProperties(subject, [\\"id\\",\\"data\\"])) {
+      return;
+    }
   }
-  throw new Error(\\"Invariance violation! Expected subject to be a RawUser, but it was instead: \\" + JSON.stringify(subject));
+  throw new Error(
+    \\"Invariance violation! Expected subject to be a RawUser, but it was instead: \\" +
+      JSON.stringify(subject)
+  );
 }
 export function isRawUserLike(subject: any): subject is RawUser {
-  if(typeof subject === \\"object\\") {
-    if(objectHasProperties(subject, [\\"id\\",\\"data\\"])) { return true; }
+  if (typeof subject === \\"object\\") {
+    if (objectHasProperties(subject, $$columnNamesAsJsonString)) {
+      return true;
+    }
   }
   return false;
 }
@@ -267,15 +310,24 @@ source:  RawUserAccountSourceEnum;
 source_data:  AnyJson;
 
 };
-export function assertIsRawUserAccountLike(subject: any): asserts subject is RawUserAccount {
-  if(typeof subject === \\"object\\") {
-    if(objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) { return; }
+export function assertIsRawUserAccountLike(
+  subject: any
+): asserts subject is RawUserAccount {
+  if (typeof subject === \\"object\\") {
+    if (objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) {
+      return;
+    }
   }
-  throw new Error(\\"Invariance violation! Expected subject to be a RawUserAccount, but it was instead: \\" + JSON.stringify(subject));
+  throw new Error(
+    \\"Invariance violation! Expected subject to be a RawUserAccount, but it was instead: \\" +
+      JSON.stringify(subject)
+  );
 }
 export function isRawUserAccountLike(subject: any): subject is RawUserAccount {
-  if(typeof subject === \\"object\\") {
-    if(objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) { return true; }
+  if (typeof subject === \\"object\\") {
+    if (objectHasProperties(subject, $$columnNamesAsJsonString)) {
+      return true;
+    }
   }
   return false;
 }
@@ -297,15 +349,24 @@ name?:  string;
 data:  AnyJson;
 
 };
-export function assertIsDatabaseUserLike(subject: any): asserts subject is DatabaseUser {
-  if(typeof subject === \\"object\\") {
-    if(objectHasProperties(subject, [\\"id\\",\\"data\\"])) { return; }
+export function assertIsDatabaseUserLike(
+  subject: any
+): asserts subject is DatabaseUser {
+  if (typeof subject === \\"object\\") {
+    if (objectHasProperties(subject, [\\"id\\",\\"data\\"])) {
+      return;
+    }
   }
-  throw new Error(\\"Invariance violation! Expected subject to be a DatabaseUser, but it was instead: \\" + JSON.stringify(subject));
+  throw new Error(
+    \\"Invariance violation! Expected subject to be a DatabaseUser, but it was instead: \\" +
+      JSON.stringify(subject)
+  );
 }
 export function isDatabaseUserLike(subject: any): subject is DatabaseUser {
-  if(typeof subject === \\"object\\") {
-    if(objectHasProperties(subject, [\\"id\\",\\"data\\"])) { return true; }
+  if (typeof subject === \\"object\\") {
+    if (objectHasProperties(subject, $$columnNamesAsJsonString)) {
+      return true;
+    }
   }
   return false;
 }
@@ -319,15 +380,24 @@ source:  DatabaseUserAccountSourceEnum;
 source_data:  AnyJson;
 
 };
-export function assertIsDatabaseUserAccountLike(subject: any): asserts subject is DatabaseUserAccount {
-  if(typeof subject === \\"object\\") {
-    if(objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) { return; }
+export function assertIsDatabaseUserAccountLike(
+  subject: any
+): asserts subject is DatabaseUserAccount {
+  if (typeof subject === \\"object\\") {
+    if (objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) {
+      return;
+    }
   }
-  throw new Error(\\"Invariance violation! Expected subject to be a DatabaseUserAccount, but it was instead: \\" + JSON.stringify(subject));
+  throw new Error(
+    \\"Invariance violation! Expected subject to be a DatabaseUserAccount, but it was instead: \\" +
+      JSON.stringify(subject)
+  );
 }
 export function isDatabaseUserAccountLike(subject: any): subject is DatabaseUserAccount {
-  if(typeof subject === \\"object\\") {
-    if(objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) { return true; }
+  if (typeof subject === \\"object\\") {
+    if (objectHasProperties(subject, $$columnNamesAsJsonString)) {
+      return true;
+    }
   }
   return false;
 }
