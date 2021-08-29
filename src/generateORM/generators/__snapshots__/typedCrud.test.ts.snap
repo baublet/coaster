@@ -9,9 +9,10 @@ export async function insertUser(
   input: UserInput,
   connection: ConnectionOrTransaction
 ): Promise<string> {
-  const result = await RawUsers(connection).insert(input);
-  return result[0];
-};
+  const rawInput = $$namedToRawFunctionName(input);
+  const result = await RawUsers(connection).insert(rawInput);
+  return rawUserToUser(result[0]);
+}
 
 /**
  * Inserts one ore more Users into the database, returning the inserted IDs
@@ -20,46 +21,51 @@ export async function insertUsers(
   input: UserInput[],
   connection: ConnectionOrTransaction
 ): Promise<string[]> {
-  const rawInput = input.map(input => userToRawUser(input));
+  const rawInput = input.map((input) => $$namedToRawFunctionName(input));
   const results = await RawUsers(connection).insert(rawInput);
-  return results.map(rawEntity => rawUserToUser(rawEntity));
-};
-
+  return results.map((rawEntity) => rawUserToUser(rawEntity));
+}
 /** Find many Users in the database by a constraint function */
 export async function findUsers(
-  query: (query: knex.QueryBuilder<RawUser, RawUser[]>) => unknown,
+  query: (
+    query: knex.QueryBuilder<RawUser, RawUser[]>
+  ) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<User[]> {
   const queryBuilder = RawUsers(connection);
   await query(queryBuilder);
   const results = await queryBuilder;
   return results.map((rawEntity) => rawUserToUser(rawEntity));
-};
+}
 
 /** Find a User in the database or fail */
 export async function findUserOrFail(
-  query: (query: knex.QueryBuilder<RawUser, RawUser[]>) => unknown,
+  query: (
+    query: knex.QueryBuilder<RawUser, RawUser[]>
+  ) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<User> {
   const queryBuilder = RawUsers(connection);
   await query(queryBuilder);
   queryBuilder.limit(1);
   const results = await queryBuilder;
-  if(results.length === 0) {
-    throw new Error(\\"Error! Unable to find User in findUserOrFail call\\");
+  if (results.length === 0) {
+    throw new Error(
+      \\"Error! Unable to find User in findUserOrFail call\\"
+    );
   }
-  return rawUserToUser(results[0])
-};
-
+  return rawUserToUser(results[0]);
+}
 /** Update a single User */
 export async function updateUser(
   entity: UserInput,
   connection: ConnectionOrTransaction
 ): Promise<void> {
-  const {id, ...rawInput} = userToRawUser(entity);
+  const { string, ...rawInput } =
+    userToRawUser(entity);
   await RawUsers(connection)
     .update(rawInput)
-    .where(\\"id\\", \\"=\\", entity.id)
+    .where(\\"string\\", \\"=\\", entity.string)
     .limit(1);
 }
 
@@ -70,11 +76,11 @@ export async function updateUserWhere(
   connection: ConnectionOrTransaction
 ): Promise<void> {
   const rawUpdatePayload = userToRawUser(updatePayload);
-  const queryBuilder = RawUsers(connection).update(rawUpdatePayload);
+  const queryBuilder =
+    RawUsers(connection).update(rawUpdatePayload);
   await query(queryBuilder);
   await queryBuilder;
 }
-
 /** Deletes a User */
 export async function deleteUser(
   entity: User,
@@ -104,9 +110,10 @@ export async function insertUserAccount(
   input: UserAccountInput,
   connection: ConnectionOrTransaction
 ): Promise<string> {
-  const result = await RawUserAccounts(connection).insert(input);
-  return result[0];
-};
+  const rawInput = $$namedToRawFunctionName(input);
+  const result = await RawUserAccounts(connection).insert(rawInput);
+  return rawUserAccountToUserAccount(result[0]);
+}
 
 /**
  * Inserts one ore more UserAccounts into the database, returning the inserted IDs
@@ -115,46 +122,51 @@ export async function insertUserAccounts(
   input: UserAccountInput[],
   connection: ConnectionOrTransaction
 ): Promise<string[]> {
-  const rawInput = input.map(input => userAccountToRawUserAccount(input));
+  const rawInput = input.map((input) => $$namedToRawFunctionName(input));
   const results = await RawUserAccounts(connection).insert(rawInput);
-  return results.map(rawEntity => rawUserAccountToUserAccount(rawEntity));
-};
-
+  return results.map((rawEntity) => rawUserAccountToUserAccount(rawEntity));
+}
 /** Find many UserAccounts in the database by a constraint function */
 export async function findUserAccounts(
-  query: (query: knex.QueryBuilder<RawUserAccount, RawUserAccount[]>) => unknown,
+  query: (
+    query: knex.QueryBuilder<RawUserAccount, RawUserAccount[]>
+  ) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<UserAccount[]> {
   const queryBuilder = RawUserAccounts(connection);
   await query(queryBuilder);
   const results = await queryBuilder;
   return results.map((rawEntity) => rawUserAccountToUserAccount(rawEntity));
-};
+}
 
 /** Find a UserAccount in the database or fail */
 export async function findUserAccountOrFail(
-  query: (query: knex.QueryBuilder<RawUserAccount, RawUserAccount[]>) => unknown,
+  query: (
+    query: knex.QueryBuilder<RawUserAccount, RawUserAccount[]>
+  ) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<UserAccount> {
   const queryBuilder = RawUserAccounts(connection);
   await query(queryBuilder);
   queryBuilder.limit(1);
   const results = await queryBuilder;
-  if(results.length === 0) {
-    throw new Error(\\"Error! Unable to find UserAccount in findUserAccountOrFail call\\");
+  if (results.length === 0) {
+    throw new Error(
+      \\"Error! Unable to find UserAccount in findUserAccountOrFail call\\"
+    );
   }
-  return rawUserAccountToUserAccount(results[0])
-};
-
+  return rawUserAccountToUserAccount(results[0]);
+}
 /** Update a single UserAccount */
 export async function updateUserAccount(
   entity: UserAccountInput,
   connection: ConnectionOrTransaction
 ): Promise<void> {
-  const {id, ...rawInput} = userAccountToRawUserAccount(entity);
+  const { string, ...rawInput } =
+    userAccountToRawUserAccount(entity);
   await RawUserAccounts(connection)
     .update(rawInput)
-    .where(\\"id\\", \\"=\\", entity.id)
+    .where(\\"string\\", \\"=\\", entity.string)
     .limit(1);
 }
 
@@ -165,11 +177,11 @@ export async function updateUserAccountWhere(
   connection: ConnectionOrTransaction
 ): Promise<void> {
   const rawUpdatePayload = userAccountToRawUserAccount(updatePayload);
-  const queryBuilder = RawUserAccounts(connection).update(rawUpdatePayload);
+  const queryBuilder =
+    RawUserAccounts(connection).update(rawUpdatePayload);
   await query(queryBuilder);
   await queryBuilder;
 }
-
 /** Deletes a UserAccount */
 export async function deleteUserAccount(
   entity: UserAccount,
@@ -206,10 +218,12 @@ export async function insertUser(
   input: UserInput,
   connection: ConnectionOrTransaction
 ): Promise<User> {
-  const rawInput = userToRawUser(input);
-  const result = await RawUsers(connection).insert(rawInput).returning(\\"*\\");
+  const rawInput = $$namedToRawFunctionName(input);
+  const result = await RawUsers(connection)
+    .insert(rawInput)
+    .returning(\\"*\\");
   return rawUserToUser(result[0]);
-};
+}
 
 /**
  * Inserts one ore more Users into the database, returning the inserted entities
@@ -218,46 +232,53 @@ export async function insertUsers(
   input: UserInput[],
   connection: ConnectionOrTransaction
 ): Promise<User[]> {
-  const rawInput = input.map(input => userToRawUser(input));
-  const results = await RawUsers(connection).insert(rawInput).returning(\\"*\\");
-  return results.map(rawEntity => rawUserToUser(rawEntity));
-};
-
+  const rawInput = input.map((input) => $$namedToRawFunctionName(input));
+  const results = await RawUsers(connection)
+    .insert(rawInput)
+    .returning(\\"*\\");
+  return results.map((rawEntity) => rawUserToUser(rawEntity));
+}
 /** Find many Users in the database by a constraint function */
 export async function findUsers(
-  query: (query: knex.QueryBuilder<RawUser, RawUser[]>) => unknown,
+  query: (
+    query: knex.QueryBuilder<RawUser, RawUser[]>
+  ) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<User[]> {
   const queryBuilder = RawUsers(connection);
   await query(queryBuilder);
   const results = await queryBuilder;
   return results.map((rawEntity) => rawUserToUser(rawEntity));
-};
+}
 
 /** Find a User in the database or fail */
 export async function findUserOrFail(
-  query: (query: knex.QueryBuilder<RawUser, RawUser[]>) => unknown,
+  query: (
+    query: knex.QueryBuilder<RawUser, RawUser[]>
+  ) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<User> {
   const queryBuilder = RawUsers(connection);
   await query(queryBuilder);
   queryBuilder.limit(1);
   const results = await queryBuilder;
-  if(results.length === 0) {
-    throw new Error(\\"Error! Unable to find User in findUserOrFail call\\");
+  if (results.length === 0) {
+    throw new Error(
+      \\"Error! Unable to find User in findUserOrFail call\\"
+    );
   }
-  return rawUserToUser(results[0])
-};
-
+  return rawUserToUser(results[0]);
+}
 /** Update a single User */
 export async function updateUser(
   entity: UserInput,
   connection: ConnectionOrTransaction
 ): Promise<void> {
-  const {id, ...rawInput} = userToRawUser(entity);
+  const { string, ...rawInput } =
+    userToRawUser(entity);
   await RawUsers(connection)
     .update(rawInput)
-    .where(\\"id\\", \\"=\\", entity.id)
+    .where(\\"string\\", \\"=\\", entity.string)
     .limit(1);
 }
 
@@ -268,11 +289,11 @@ export async function updateUserWhere(
   connection: ConnectionOrTransaction
 ): Promise<void> {
   const rawUpdatePayload = userToRawUser(updatePayload);
-  const queryBuilder = RawUsers(connection).update(rawUpdatePayload);
+  const queryBuilder =
+    RawUsers(connection).update(rawUpdatePayload);
   await query(queryBuilder);
   await queryBuilder;
 }
-
 /** Deletes a User */
 export async function deleteUser(
   entity: User,
@@ -302,10 +323,12 @@ export async function insertUserAccount(
   input: UserAccountInput,
   connection: ConnectionOrTransaction
 ): Promise<UserAccount> {
-  const rawInput = userAccountToRawUserAccount(input);
-  const result = await RawUserAccounts(connection).insert(rawInput).returning(\\"*\\");
+  const rawInput = $$namedToRawFunctionName(input);
+  const result = await RawUserAccounts(connection)
+    .insert(rawInput)
+    .returning(\\"*\\");
   return rawUserAccountToUserAccount(result[0]);
-};
+}
 
 /**
  * Inserts one ore more UserAccounts into the database, returning the inserted entities
@@ -314,46 +337,53 @@ export async function insertUserAccounts(
   input: UserAccountInput[],
   connection: ConnectionOrTransaction
 ): Promise<UserAccount[]> {
-  const rawInput = input.map(input => userAccountToRawUserAccount(input));
-  const results = await RawUserAccounts(connection).insert(rawInput).returning(\\"*\\");
-  return results.map(rawEntity => rawUserAccountToUserAccount(rawEntity));
-};
-
+  const rawInput = input.map((input) => $$namedToRawFunctionName(input));
+  const results = await RawUserAccounts(connection)
+    .insert(rawInput)
+    .returning(\\"*\\");
+  return results.map((rawEntity) => rawUserAccountToUserAccount(rawEntity));
+}
 /** Find many UserAccounts in the database by a constraint function */
 export async function findUserAccounts(
-  query: (query: knex.QueryBuilder<RawUserAccount, RawUserAccount[]>) => unknown,
+  query: (
+    query: knex.QueryBuilder<RawUserAccount, RawUserAccount[]>
+  ) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<UserAccount[]> {
   const queryBuilder = RawUserAccounts(connection);
   await query(queryBuilder);
   const results = await queryBuilder;
   return results.map((rawEntity) => rawUserAccountToUserAccount(rawEntity));
-};
+}
 
 /** Find a UserAccount in the database or fail */
 export async function findUserAccountOrFail(
-  query: (query: knex.QueryBuilder<RawUserAccount, RawUserAccount[]>) => unknown,
+  query: (
+    query: knex.QueryBuilder<RawUserAccount, RawUserAccount[]>
+  ) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<UserAccount> {
   const queryBuilder = RawUserAccounts(connection);
   await query(queryBuilder);
   queryBuilder.limit(1);
   const results = await queryBuilder;
-  if(results.length === 0) {
-    throw new Error(\\"Error! Unable to find UserAccount in findUserAccountOrFail call\\");
+  if (results.length === 0) {
+    throw new Error(
+      \\"Error! Unable to find UserAccount in findUserAccountOrFail call\\"
+    );
   }
-  return rawUserAccountToUserAccount(results[0])
-};
-
+  return rawUserAccountToUserAccount(results[0]);
+}
 /** Update a single UserAccount */
 export async function updateUserAccount(
   entity: UserAccountInput,
   connection: ConnectionOrTransaction
 ): Promise<void> {
-  const {id, ...rawInput} = userAccountToRawUserAccount(entity);
+  const { string, ...rawInput } =
+    userAccountToRawUserAccount(entity);
   await RawUserAccounts(connection)
     .update(rawInput)
-    .where(\\"id\\", \\"=\\", entity.id)
+    .where(\\"string\\", \\"=\\", entity.string)
     .limit(1);
 }
 
@@ -364,11 +394,11 @@ export async function updateUserAccountWhere(
   connection: ConnectionOrTransaction
 ): Promise<void> {
   const rawUpdatePayload = userAccountToRawUserAccount(updatePayload);
-  const queryBuilder = RawUserAccounts(connection).update(rawUpdatePayload);
+  const queryBuilder =
+    RawUserAccounts(connection).update(rawUpdatePayload);
   await query(queryBuilder);
   await queryBuilder;
 }
-
 /** Deletes a UserAccount */
 export async function deleteUserAccount(
   entity: UserAccount,

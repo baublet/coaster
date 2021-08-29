@@ -60,14 +60,38 @@ export function getTemplateManager() {
       "requiredColumns",
       "prefixedEntityName",
     ] as const,
-    "crud/insert.pg": [
-      "connection",
+    "typedCrud/insert.pg": [
+      "entityName",
       "entityInputType",
       "entityName",
-      "namedToRawFunctionName",
+      "rawToNamedFunctionName",
       "pluralEntityName",
       "rawBaseQueryFunctionName",
+    ] as const,
+    "typedCrud/insert.mysql": [
+      "entityName",
+      "entityInputType",
+      "entityName",
       "rawToNamedFunctionName",
+      "pluralEntityName",
+      "returnType",
+      "rawBaseQueryFunctionName",
+    ] as const,
+    "typedCrud/find": [
+      "pluralEntityName",
+      "rawEntityTypeName",
+      "entityName",
+      "rawBaseQueryFunctionName",
+      "rawToNamedFunctionName",
+    ] as const,
+    "typedCrud/update": [
+      "entityName",
+      "entityInputType",
+      "namedToRawFunctionName",
+      "rawBaseQueryFunctionName",
+      "tablePrimaryKeyColumn",
+      "rawEntityTypeName",
+      "pluralEntityName",
     ] as const,
   });
 }

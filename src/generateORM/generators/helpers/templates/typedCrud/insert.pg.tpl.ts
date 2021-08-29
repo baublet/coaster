@@ -3,7 +3,7 @@
  */
 export async function insert$$entityName(
   input: $$entityInputType,
-  connection: $$connection
+  connection: ConnectionOrTransaction
 ): Promise<$$entityName> {
   const rawInput = $$namedToRawFunctionName(input);
   const result = await $$rawBaseQueryFunctionName(connection)
@@ -17,7 +17,7 @@ export async function insert$$entityName(
  */
 export async function insert$$pluralEntityName(
   input: $$entityInputType[],
-  connection: $$connection
+  connection: ConnectionOrTransaction
 ): Promise<$$entityName[]> {
   const rawInput = input.map((input) => $$namedToRawFunctionName(input));
   const results = await $$rawBaseQueryFunctionName(connection)
