@@ -9,6 +9,7 @@ module.exports = {
     "/scripts/.+.ts",
     "/migrations/.+.ts",
     ".+.test.ts",
+    ".+.tpl.ts",
     // Tested separately
     "/generateORM\\/drivers\\/postgres/",
     "src\\/generateORM\\/integrationTests",
