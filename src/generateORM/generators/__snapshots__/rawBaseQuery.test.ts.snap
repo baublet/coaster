@@ -44,19 +44,21 @@ describe(\\"RawUserAccounts\\", () => {
     expect(() => RawUserAccounts(connection)).not.toThrow();
   });
 });
-export function getMigrationsForPublic(knex: ConnectionOrTransaction) {
-  knex.schema.createTable('user', (table) => {
+export async function applyMigrationsToPublic(knex: ConnectionOrTransaction) {
+  await knex.schema.createTable('user', (table) => {
     table.text(\\"id\\").notNullable();
     table.primary([\\"id\\"]);
     table.text(\\"name\\").nullable();
     table.jsonb(\\"data\\").notNullable();
   });
-  knex.schema.createTable('user_account', (table) => {
+  await knex.schema.createTable('user_account', (table) => {
     table.text(\\"id\\").notNullable();
     table.primary([\\"id\\"]);
     table.text(\\"source\\").notNullable();
     table.jsonb(\\"source_data\\").notNullable();
   });
-}",
+}
+
+testMigrations.push(applyMigrationsToPublic);",
 }
 `;

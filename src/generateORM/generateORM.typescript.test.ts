@@ -61,7 +61,6 @@ it("creates valid ts: pg flavored", async () => {
     postProcessors: [],
     generateTestCode: true,
     codeOutputFullPath: filePath.replace(".ts", ""),
-    testHeaders: "const connection: any = {};", // `connection` has to be defined somewhere
   });
 
   writeFileSync(filePath, generatedCode.code);
