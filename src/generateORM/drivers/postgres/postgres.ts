@@ -101,6 +101,7 @@ export const pgSchemaFetcher = async (
         primaryKeyColumn: primaryKey.attname,
         primaryKeyType: dbTypeToTypeScriptType(primaryKey.format_type),
         comment: tableComments.get(`${schemaName}.${tableName}`),
+        uniqueConstraints: [],
       };
 
       for (const tableColumn of tableData) {
@@ -119,7 +120,6 @@ export const pgSchemaFetcher = async (
           defaultTo: tableColumn.column_default,
           columnType: tableColumn.data_type,
           foreignKeys: [],
-          uniqueConstraints: [],
           type: tsType,
           enumPath,
         });

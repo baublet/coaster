@@ -18,6 +18,7 @@ export interface RawTable {
   primaryKeyColumn: string;
   primaryKeyType: RawColumn["type"];
   columns: RawColumn[];
+  uniqueConstraints: RawUniqueConstraint[];
 }
 
 export interface RawColumn {
@@ -36,7 +37,6 @@ export interface RawColumn {
   hasDefault: boolean;
   defaultTo?: string;
   nullable: boolean;
-  uniqueConstraints: RawUniqueConstraint[];
   foreignKeys: RawForeignKey[];
 }
 

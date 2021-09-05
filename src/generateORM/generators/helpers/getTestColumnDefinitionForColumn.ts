@@ -3,38 +3,38 @@ import { RawColumn, RawTable } from "../../drivers";
 
 export function getTestColumnDefinitionForColumn(
   column: RawColumn,
-  table: RawTable,
+  table: Pick<RawTable, "primaryKeyColumn" | "uniqueConstraints">,
   knexObjectName: string = "table"
 ): string {
-  let tableDefinition = "";
+  let columnDefinition = "";
 
   const type = getTestColumnTypeForSchemaColumn(column);
-  tableDefinition += `    ${knexObjectName}.${type}("${column.name}")`;
+  columnDefinition += `    ${knexObjectName}.${type}("${column.name}")`;
 
   if (column.nullable) {
-    tableDefinition += `.nullable()`;
+    columnDefinition += `.nullable()`;
   } else {
-    tableDefinition += `.notNullable()`;
+    columnDefinition += `.notNullable()`;
   }
 
   if (column.defaultTo) {
-    tableDefinition += `.defaultTo("${column.defaultTo}")`;
+    columnDefinition += `.defaultTo("${column.defaultTo}")`;
   }
 
-  for (const unique of column.uniqueConstraints) {
-    if (unique.length === 1) {
-      tableDefinition += `.unique("${unique[0]}")`;
-    } else {
-      tableDefinition += `.unique(["${unique.join(`", "`)}"])`;
-    }
+  if (
+    table.uniqueConstraints.some(
+      (constraint) => constraint.length === 1 && constraint[0] === column.name
+    )
+  ) {
+    columnDefinition += ".unique()";
   }
 
-  tableDefinition += ";\n";
+  columnDefinition += ";\n";
 
   const isPrimary = table.primaryKeyColumn === column.name;
   if (isPrimary) {
-    tableDefinition += `    ${knexObjectName}.primary(["${column.name}"]);\n`;
+    columnDefinition += `    ${knexObjectName}.primary(["${column.name}"]);\n`;
   }
 
-  return tableDefinition;
+  return columnDefinition;
 }
