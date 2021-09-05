@@ -1,8 +1,15 @@
 import { RawColumn } from "../../drivers";
 
+export type TestColumnType =
+  | "integer"
+  | "text"
+  | "boolean"
+  | "datetime"
+  | "jsonb";
+
 export function getTestColumnTypeForSchemaColumn(
-  column: RawColumn
-): "integer" | "text" | "boolean" | "datetime" | "jsonb" {
+  column: Pick<RawColumn, "type">
+): TestColumnType {
   switch (column.type) {
     case "number":
       return "integer";
