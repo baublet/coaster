@@ -44,16 +44,16 @@ describe(\\"RawUserAccounts\\", () => {
     expect(() => RawUserAccounts(connection)).not.toThrow();
   });
 });
-export function getMigrationsForpublic(knex: ConnectionOrTransaction) {
+export function getMigrationsForPublic(knex: ConnectionOrTransaction) {
   knex.schema.createTable('user', (table) => {
     table.text(\\"id\\").notNullable();
-    table.primary(\\"id\\");
+    table.primary([\\"id\\"]);
     table.text(\\"name\\").nullable();
     table.jsonb(\\"data\\").notNullable();
   });
   knex.schema.createTable('user_account', (table) => {
     table.text(\\"id\\").notNullable();
-    table.primary(\\"id\\");
+    table.primary([\\"id\\"]);
     table.text(\\"source\\").notNullable();
     table.jsonb(\\"source_data\\").notNullable();
   });

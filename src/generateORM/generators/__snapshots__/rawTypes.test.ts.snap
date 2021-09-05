@@ -28,7 +28,7 @@ export function assertIsRawUserLike(
 }
 export function isRawUserLike(subject: any): subject is RawUser {
   if (typeof subject === \\"object\\") {
-    if (objectHasProperties(subject, $$columnNamesAsJsonString)) {
+    if (objectHasProperties(subject, [\\"id\\",\\"data\\"])) {
       return true;
     }
   }
@@ -59,7 +59,7 @@ export function assertIsRawUserAccountLike(
 }
 export function isRawUserAccountLike(subject: any): subject is RawUserAccount {
   if (typeof subject === \\"object\\") {
-    if (objectHasProperties(subject, $$columnNamesAsJsonString)) {
+    if (objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) {
       return true;
     }
   }
@@ -224,7 +224,7 @@ export function assertIsRawUserLike(
 }
 export function isRawUserLike(subject: any): subject is RawUser {
   if (typeof subject === \\"object\\") {
-    if (objectHasProperties(subject, $$columnNamesAsJsonString)) {
+    if (objectHasProperties(subject, [\\"id\\",\\"data\\"])) {
       return true;
     }
   }
@@ -255,7 +255,7 @@ export function assertIsRawUserAccountLike(
 }
 export function isRawUserAccountLike(subject: any): subject is RawUserAccount {
   if (typeof subject === \\"object\\") {
-    if (objectHasProperties(subject, $$columnNamesAsJsonString)) {
+    if (objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) {
       return true;
     }
   }
@@ -294,7 +294,7 @@ export function assertIsRawUserLike(
 }
 export function isRawUserLike(subject: any): subject is RawUser {
   if (typeof subject === \\"object\\") {
-    if (objectHasProperties(subject, $$columnNamesAsJsonString)) {
+    if (objectHasProperties(subject, [\\"id\\",\\"data\\"])) {
       return true;
     }
   }
@@ -325,7 +325,7 @@ export function assertIsRawUserAccountLike(
 }
 export function isRawUserAccountLike(subject: any): subject is RawUserAccount {
   if (typeof subject === \\"object\\") {
-    if (objectHasProperties(subject, $$columnNamesAsJsonString)) {
+    if (objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) {
       return true;
     }
   }
@@ -364,7 +364,7 @@ export function assertIsDatabaseUserLike(
 }
 export function isDatabaseUserLike(subject: any): subject is DatabaseUser {
   if (typeof subject === \\"object\\") {
-    if (objectHasProperties(subject, $$columnNamesAsJsonString)) {
+    if (objectHasProperties(subject, [\\"id\\",\\"data\\"])) {
       return true;
     }
   }
@@ -395,7 +395,7 @@ export function assertIsDatabaseUserAccountLike(
 }
 export function isDatabaseUserAccountLike(subject: any): subject is DatabaseUserAccount {
   if (typeof subject === \\"object\\") {
-    if (objectHasProperties(subject, $$columnNamesAsJsonString)) {
+    if (objectHasProperties(subject, [\\"id\\",\\"source\\",\\"source_data\\"])) {
       return true;
     }
   }

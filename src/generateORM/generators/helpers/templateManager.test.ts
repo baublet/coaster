@@ -21,7 +21,7 @@ describe("TemplateManager", () => {
   it("is properly typed and returns a valid template", () => {
     expect(
       manager.render({
-        template: "crud/insert.pg",
+        template: "typedCrud/insert.pg",
         variables: {
           // @ts-expect-error
           test: "nobody-home",
@@ -40,7 +40,7 @@ describe("TemplateManager", () => {
        */
       export async function insertEntityName(
         input: EntityInputType,
-        connection: connection
+        connection: ConnectionOrTransaction
       ): Promise<EntityName> {
         const rawInput = namedToRawFunctionName(input);
         const result = await rawBaseQueryFunctionName(connection)
@@ -54,7 +54,7 @@ describe("TemplateManager", () => {
        */
       export async function insertPluralEntityName(
         input: EntityInputType[],
-        connection: connection
+        connection: ConnectionOrTransaction
       ): Promise<EntityName[]> {
         const rawInput = input.map((input) => namedToRawFunctionName(input));
         const results = await rawBaseQueryFunctionName(connection)

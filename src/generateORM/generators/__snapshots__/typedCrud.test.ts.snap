@@ -9,7 +9,7 @@ export async function insertUser(
   input: UserInput,
   connection: ConnectionOrTransaction
 ): Promise<string> {
-  const rawInput = $$namedToRawFunctionName(input);
+  const rawInput = userToRawUser(input);
   const result = await RawUsers(connection).insert(rawInput);
   return rawUserToUser(result[0]);
 }
@@ -21,7 +21,7 @@ export async function insertUsers(
   input: UserInput[],
   connection: ConnectionOrTransaction
 ): Promise<string[]> {
-  const rawInput = input.map((input) => $$namedToRawFunctionName(input));
+  const rawInput = input.map((input) => userToRawUser(input));
   const results = await RawUsers(connection).insert(rawInput);
   return results.map((rawEntity) => rawUserToUser(rawEntity));
 }
@@ -61,11 +61,11 @@ export async function updateUser(
   entity: UserInput,
   connection: ConnectionOrTransaction
 ): Promise<void> {
-  const { string, ...rawInput } =
+  const { id, ...rawInput } =
     userToRawUser(entity);
   await RawUsers(connection)
     .update(rawInput)
-    .where(\\"string\\", \\"=\\", entity.string)
+    .where(\\"id\\", \\"=\\", entity.id)
     .limit(1);
 }
 
@@ -109,7 +109,7 @@ export async function insertUserAccount(
   input: UserAccountInput,
   connection: ConnectionOrTransaction
 ): Promise<string> {
-  const rawInput = $$namedToRawFunctionName(input);
+  const rawInput = userAccountToRawUserAccount(input);
   const result = await RawUserAccounts(connection).insert(rawInput);
   return rawUserAccountToUserAccount(result[0]);
 }
@@ -121,7 +121,7 @@ export async function insertUserAccounts(
   input: UserAccountInput[],
   connection: ConnectionOrTransaction
 ): Promise<string[]> {
-  const rawInput = input.map((input) => $$namedToRawFunctionName(input));
+  const rawInput = input.map((input) => userAccountToRawUserAccount(input));
   const results = await RawUserAccounts(connection).insert(rawInput);
   return results.map((rawEntity) => rawUserAccountToUserAccount(rawEntity));
 }
@@ -161,11 +161,11 @@ export async function updateUserAccount(
   entity: UserAccountInput,
   connection: ConnectionOrTransaction
 ): Promise<void> {
-  const { string, ...rawInput } =
+  const { id, ...rawInput } =
     userAccountToRawUserAccount(entity);
   await RawUserAccounts(connection)
     .update(rawInput)
-    .where(\\"string\\", \\"=\\", entity.string)
+    .where(\\"id\\", \\"=\\", entity.id)
     .limit(1);
 }
 
@@ -216,7 +216,7 @@ export async function insertUser(
   input: UserInput,
   connection: ConnectionOrTransaction
 ): Promise<User> {
-  const rawInput = $$namedToRawFunctionName(input);
+  const rawInput = userToRawUser(input);
   const result = await RawUsers(connection)
     .insert(rawInput)
     .returning(\\"*\\");
@@ -230,7 +230,7 @@ export async function insertUsers(
   input: UserInput[],
   connection: ConnectionOrTransaction
 ): Promise<User[]> {
-  const rawInput = input.map((input) => $$namedToRawFunctionName(input));
+  const rawInput = input.map((input) => userToRawUser(input));
   const results = await RawUsers(connection)
     .insert(rawInput)
     .returning(\\"*\\");
@@ -272,11 +272,11 @@ export async function updateUser(
   entity: UserInput,
   connection: ConnectionOrTransaction
 ): Promise<void> {
-  const { string, ...rawInput } =
+  const { id, ...rawInput } =
     userToRawUser(entity);
   await RawUsers(connection)
     .update(rawInput)
-    .where(\\"string\\", \\"=\\", entity.string)
+    .where(\\"id\\", \\"=\\", entity.id)
     .limit(1);
 }
 
@@ -320,7 +320,7 @@ export async function insertUserAccount(
   input: UserAccountInput,
   connection: ConnectionOrTransaction
 ): Promise<UserAccount> {
-  const rawInput = $$namedToRawFunctionName(input);
+  const rawInput = userAccountToRawUserAccount(input);
   const result = await RawUserAccounts(connection)
     .insert(rawInput)
     .returning(\\"*\\");
@@ -334,7 +334,7 @@ export async function insertUserAccounts(
   input: UserAccountInput[],
   connection: ConnectionOrTransaction
 ): Promise<UserAccount[]> {
-  const rawInput = input.map((input) => $$namedToRawFunctionName(input));
+  const rawInput = input.map((input) => userAccountToRawUserAccount(input));
   const results = await RawUserAccounts(connection)
     .insert(rawInput)
     .returning(\\"*\\");
@@ -376,11 +376,11 @@ export async function updateUserAccount(
   entity: UserAccountInput,
   connection: ConnectionOrTransaction
 ): Promise<void> {
-  const { string, ...rawInput } =
+  const { id, ...rawInput } =
     userAccountToRawUserAccount(entity);
   await RawUserAccounts(connection)
     .update(rawInput)
-    .where(\\"string\\", \\"=\\", entity.string)
+    .where(\\"id\\", \\"=\\", entity.id)
     .limit(1);
 }
 
