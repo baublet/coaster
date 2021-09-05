@@ -30,6 +30,11 @@ export type MetaData = {
    */
   setHeader: (key: string, value: string) => void;
   /**
+   * Add a header to the generated test code. FIFO order. The key is to allow later
+   * middleware to modify earlier middleware output, if necessary.
+   */
+  setTestHeader: (key: string, value: string) => void;
+  /**
    * Map<table_name, TableName> - for mapping table names to their entities.
    */
   tableEntityNames: Map<EntityPath, EntityName>;

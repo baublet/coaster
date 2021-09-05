@@ -33,7 +33,7 @@ export function getTestColumnDefinitionForColumn(
 
   const isPrimary = table.primaryKeyColumn === column.name;
   if (isPrimary) {
-    tableDefinition += `    ${knexObjectName}.primary("${column.name}");\n`;
+    tableDefinition += `    ${knexObjectName}.primary(["${column.name}"]);\n`;
   }
 
   return tableDefinition;

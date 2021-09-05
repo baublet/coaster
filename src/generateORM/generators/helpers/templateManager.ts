@@ -67,6 +67,7 @@ export function getTemplateManager() {
       "rawToNamedFunctionName",
       "pluralEntityName",
       "rawBaseQueryFunctionName",
+      "namedToRawFunctionName",
     ] as const,
     "typedCrud/insert.mysql": [
       "entityName",
@@ -76,6 +77,7 @@ export function getTemplateManager() {
       "pluralEntityName",
       "returnType",
       "rawBaseQueryFunctionName",
+      "namedToRawFunctionName",
     ] as const,
     "typedCrud/find": [
       "pluralEntityName",

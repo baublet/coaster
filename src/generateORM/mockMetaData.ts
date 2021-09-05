@@ -8,6 +8,7 @@ export function getMockMetaData(): MetaData {
     generateTestCode: false,
     entityTableNames: new Map(),
     setHeader: jest.fn(),
+    setTestHeader: jest.fn(),
     tableEntityNames: new Map(),
     rawBaseQueryFunctionNames: new Map(),
     transformerFunctionNames: {},

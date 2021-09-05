@@ -21,8 +21,18 @@ export const rawBaseQuery = (
     })
   );
 
+  if (metaData.generateTestCode) {
+    metaData.setTestHeader(
+      "knex",
+      metaData.templateManager.render({
+        template: "rawBaseQuery/knex",
+      })
+    );
+  }
+
   let code = "";
   let testCode = "";
+  const schemaNames = generateNames(schema.name);
 
   for (const table of schema.tables) {
     const entityName = metaData.tableRawEntityNames.get(
@@ -57,7 +67,7 @@ export const rawBaseQuery = (
 
   // If necessary, build the basic, least-testable-unit migration for the schema
   if (metaData.generateTestCode) {
-    const functionName = `getMigrationsFor${schema.name}`;
+    const functionName = `getMigrationsFor${schemaNames.rawPascal}`;
     let tables = "";
     // First, make all of the necessary tables
     for (const table of schema.tables) {

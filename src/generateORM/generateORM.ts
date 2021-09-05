@@ -28,11 +28,13 @@ export async function generateORM(options: GenerateORMOptions): Promise<{
   let testCode = options.testHeaders ? options.testHeaders + "\n" : "";
 
   const headers = new Map<string, string>();
+  const testHeaders = new Map<string, string>();
   const metaData: MetaData = {
     testConnectionVariable: options.testConnectionVariable || "connection",
     codeOutputFullPath,
     generateTestCode: Boolean(options.generateTestCode),
     setHeader: (key: string, value: string) => headers.set(key, value),
+    setTestHeader: (key: string, value: string) => testHeaders.set(key, value),
     entityTableNames: new Map(),
     rawBaseQueryFunctionNames: new Map(),
     tableEntityNames: new Map(),
@@ -61,8 +63,13 @@ export async function generateORM(options: GenerateORMOptions): Promise<{
     }
   }
 
-  for (const header of headers.values()) {
-    code = header + "\n" + code;
+  for (const [headerName, header] of headers.entries()) {
+    code = `// Header: ${headerName}` + "\n" + header + "\n" + code;
+  }
+
+  for (const [headerName, header] of testHeaders.entries()) {
+    testCode =
+      `// Test header: ${headerName}` + "\n" + header + "\n" + testCode;
   }
 
   return {

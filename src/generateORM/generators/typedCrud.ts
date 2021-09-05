@@ -46,6 +46,7 @@ export const typedCrud = (
           returnType: table.primaryKeyType,
           rawToNamedFunctionName,
           rawBaseQueryFunctionName,
+          namedToRawFunctionName,
         },
       });
     } else {
@@ -57,6 +58,7 @@ export const typedCrud = (
           pluralEntityName,
           rawToNamedFunctionName,
           rawBaseQueryFunctionName,
+          namedToRawFunctionName,
         },
       });
     }
@@ -81,7 +83,7 @@ export const typedCrud = (
         namedToRawFunctionName,
         rawBaseQueryFunctionName,
         rawEntityTypeName,
-        tablePrimaryKeyColumn: table.primaryKeyType,
+        tablePrimaryKeyColumn: table.primaryKeyColumn,
         pluralEntityName,
         entityName,
       },
