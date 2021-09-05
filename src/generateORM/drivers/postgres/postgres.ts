@@ -59,7 +59,7 @@ export const pgSchemaFetcher = async (
         .select<
           {
             column_name: string;
-            column_default: string;
+            column_default?: string | null;
             is_nullable: "YES" | "NO";
             data_type: string;
             is_updatable: "YES" | "NO";
@@ -113,7 +113,10 @@ export const pgSchemaFetcher = async (
           name: tableColumn.column_name,
           comment: tableColumn.col_description,
           nullable: tableColumn.is_nullable === "YES",
-          hasDefault: tableColumn.column_default !== null,
+          hasDefault:
+            tableColumn.column_default !== null ||
+            tableColumn.column_default !== undefined,
+          defaultTo: tableColumn.column_default,
           columnType: tableColumn.data_type,
           foreignKeys: [],
           uniqueConstraints: [],
@@ -135,7 +138,7 @@ export const pgSchemaFetcher = async (
           tc.table_schema, 
           tc.constraint_name, 
           tc.table_name, 
-          kcu.column_name, 
+          kcu.column_name,
           ccu.table_schema AS foreign_table_schema,
           ccu.table_name AS foreign_table_name,
           ccu.column_name AS foreign_column_name 

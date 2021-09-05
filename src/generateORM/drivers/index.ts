@@ -34,6 +34,7 @@ export interface RawColumn {
   columnType: string;
   comment?: string;
   hasDefault: boolean;
+  defaultTo?: string;
   nullable: boolean;
   uniqueConstraints: RawUniqueConstraint[];
   foreignKeys: RawForeignKey[];

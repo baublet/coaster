@@ -1,7 +1,10 @@
 import { MetaData, GeneratorResult } from ".";
 import { generateNames } from "../../generateNames";
 import { RawSchema } from "../drivers";
-import { getSchemaAndTablePath } from "./helpers";
+import {
+  getSchemaAndTablePath,
+  getTestColumnDefinitionForColumn,
+} from "./helpers";
 
 /**
  * Generates the lowest-level possible accessor for accessing data in a table
@@ -48,10 +51,26 @@ export const rawBaseQuery = (
         pluralEntityName,
         codeOutputFullPath: metaData.codeOutputFullPath,
         testConnectionVariable: metaData.testConnectionVariable,
-        // @ts-expect-error
-        what: "the",
       },
     });
+  }
+
+  // If necessary, build the basic, least-testable-unit migration for the schema
+  if (metaData.generateTestCode) {
+    const functionName = `getMigrationsFor${schema.name}`;
+    let tables = "";
+    // First, make all of the necessary tables
+    for (const table of schema.tables) {
+      tables += `  knex.schema.createTable('${table.name}', (table) => {\n`;
+      tables += table.columns
+        .map((column) => getTestColumnDefinitionForColumn(column, table))
+        .join("");
+      tables += `  });\n`;
+    }
+
+    testCode += `export function ${functionName}(knex: ConnectionOrTransaction) {\n${tables}}`;
+
+    // TODO: impose all of the constraints
   }
 
   return {
