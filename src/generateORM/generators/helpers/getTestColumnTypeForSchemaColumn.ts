@@ -4,7 +4,7 @@ export type TestColumnType =
   | "integer"
   | "text"
   | "boolean"
-  | "datetime"
+  | "dateTime"
   | "jsonb";
 
 export function getTestColumnTypeForSchemaColumn(
@@ -16,7 +16,7 @@ export function getTestColumnTypeForSchemaColumn(
     case "boolean":
       return "boolean";
     case "Date":
-      return "datetime";
+      return "dateTime";
     case "AnyJson":
       return "jsonb";
   }

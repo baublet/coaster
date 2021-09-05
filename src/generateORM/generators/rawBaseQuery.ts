@@ -23,6 +23,12 @@ export const rawBaseQuery = (
 
   if (metaData.generateTestCode) {
     metaData.setTestHeader(
+      "knex-connection",
+      metaData.templateManager.render({
+        template: "typedCrud/testConnection",
+      })
+    );
+    metaData.setTestHeader(
       "knex",
       metaData.templateManager.render({
         template: "rawBaseQuery/knex",
@@ -67,18 +73,21 @@ export const rawBaseQuery = (
 
   // If necessary, build the basic, least-testable-unit migration for the schema
   if (metaData.generateTestCode) {
-    const functionName = `getMigrationsFor${schemaNames.rawPascal}`;
+    const functionName = `applyMigrationsTo${schemaNames.rawPascal}`;
     let tables = "";
     // First, make all of the necessary tables
     for (const table of schema.tables) {
-      tables += `  knex.schema.createTable('${table.name}', (table) => {\n`;
+      tables += `  await knex.schema.createTable('${table.name}', (table) => {\n`;
       tables += table.columns
         .map((column) => getTestColumnDefinitionForColumn(column, table))
         .join("");
       tables += `  });\n`;
     }
 
-    testCode += `export function ${functionName}(knex: ConnectionOrTransaction) {\n${tables}}`;
+    testCode += `export async function ${functionName}(knex: ConnectionOrTransaction) {
+${tables}}
+
+testMigrations.push(${functionName});`;
 
     // TODO: impose all of the constraints
   }

@@ -6,7 +6,7 @@ import { RawColumn } from "../../drivers";
 
 const testCases: [RawColumn["type"], TestColumnType][] = [
   ["AnyJson", "jsonb"],
-  ["Date", "datetime"],
+  ["Date", "dateTime"],
   ["boolean", "boolean"],
   ["enum", "text"],
   ["number", "integer"],

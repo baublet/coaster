@@ -14,6 +14,7 @@ export const getMockRawSchema: () => RawSchema = () => ({
       name: "user",
       primaryKeyColumn: "id",
       primaryKeyType: "string",
+      uniqueConstraints: [],
       columns: [
         {
           name: "id",
@@ -21,7 +22,6 @@ export const getMockRawSchema: () => RawSchema = () => ({
           nullable: false,
           type: "string",
           foreignKeys: [],
-          uniqueConstraints: [],
           hasDefault: true,
         },
         {
@@ -31,7 +31,6 @@ export const getMockRawSchema: () => RawSchema = () => ({
           nullable: true,
           type: "string",
           foreignKeys: [],
-          uniqueConstraints: [],
           hasDefault: false,
         },
         {
@@ -40,7 +39,6 @@ export const getMockRawSchema: () => RawSchema = () => ({
           nullable: false,
           type: "AnyJson",
           foreignKeys: [],
-          uniqueConstraints: [],
           hasDefault: false,
         },
       ],
@@ -50,6 +48,7 @@ export const getMockRawSchema: () => RawSchema = () => ({
       comment: "Singular users can have multiple accounts",
       primaryKeyColumn: "id",
       primaryKeyType: "string",
+      uniqueConstraints: [],
       columns: [
         {
           name: "id",
@@ -57,7 +56,6 @@ export const getMockRawSchema: () => RawSchema = () => ({
           nullable: false,
           type: "unknown",
           foreignKeys: [],
-          uniqueConstraints: [],
           hasDefault: true,
         },
         {
@@ -67,7 +65,6 @@ export const getMockRawSchema: () => RawSchema = () => ({
           nullable: false,
           type: "enum",
           foreignKeys: [],
-          uniqueConstraints: [],
           hasDefault: false,
           enumPath: "public.user_account_source",
         },
@@ -78,7 +75,6 @@ export const getMockRawSchema: () => RawSchema = () => ({
           nullable: false,
           type: "AnyJson",
           foreignKeys: [],
-          uniqueConstraints: [],
           hasDefault: false,
         },
       ],

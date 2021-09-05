@@ -103,6 +103,7 @@ export function getTemplateManager() {
       "rawBaseQueryFunctionName",
       "pluralEntityName",
     ] as const,
+    "typedCrud/testConnection": [] as const,
   });
 }
 

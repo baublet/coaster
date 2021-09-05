@@ -28,13 +28,6 @@ generateORM({
   ],
   postProcessors: [],
   generateTestCode: true,
-  testHeaders: `import knex from "knex";
-
-const connection = knex(require("./knexfile.js"));
-
-afterAll(async () => {
-  await connection.destroy();
-});`,
 }).then((generated) => {
   fs.writeFileSync(outputFilePath, generated.code);
   fs.writeFileSync(testOutputFilePath, generated.testCode);
