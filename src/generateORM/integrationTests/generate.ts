@@ -7,7 +7,7 @@ import {
   rawBaseQuery,
   rawTypes,
   typesWithNamingPolicy,
-  typedCrud,
+  // typedCrud,
 } from "../generators";
 
 const outputFilePath = path.resolve(__dirname, "generated.ts");
@@ -25,7 +25,12 @@ generateORM({
   fetcher: fetcherWithConfiguration(pgSchemaFetcher, {
     excludeTables: ["knex_*"],
   }),
-  generators: [rawTypes, rawBaseQuery, typesWithNamingPolicy, typedCrud],
+  generators: [
+    rawTypes,
+    rawBaseQuery,
+    typesWithNamingPolicy,
+    // typedCrud
+  ],
   postProcessors: [],
   generateTestCode: true,
 }).then((generated) => {
