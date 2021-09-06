@@ -23,5 +23,7 @@ export function getMockMetaData(): MetaData {
     rawCreateTestEntityFunctionNames: new Map(),
     rawEnumValues: new Map(),
     templateManager: getTemplateManager(),
+    namedMockEntityFunctionNames: new Map(),
+    rawMockEntityFunctionNames: new Map(),
   };
 }

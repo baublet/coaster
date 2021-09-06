@@ -1,7 +1,7 @@
 /**
  * Insert a single $$entityName into the database, returning the inserted entity
  */
-export async function insert$$entityName(
+export async function $$insertSingleFunctionName(
   input: $$entityInputType,
   connection: ConnectionOrTransaction
 ): Promise<$$entityName> {
@@ -15,7 +15,7 @@ export async function insert$$entityName(
 /**
  * Inserts one ore more $$pluralEntityName into the database, returning the inserted entities
  */
-export async function insert$$pluralEntityName(
+export async function $$insertPluralFunctionName(
   input: $$entityInputType[],
   connection: ConnectionOrTransaction
 ): Promise<$$entityName[]> {

@@ -17,7 +17,7 @@ export const typedCrud = (
   );
 
   let code = "";
-  const testCode = "";
+  let testCode = "";
 
   for (const table of schema.tables) {
     const schemaAndTablePath = getSchemaAndTablePath(schema.name, table.name);
@@ -34,6 +34,9 @@ export const typedCrud = (
     const entityInputType =
       metaData.namedEntityInputTypeNames.get(schemaAndTablePath);
 
+    const insertSingleFunctionName = `insert${entityName}`;
+    const insertPluralFunctionName = `insert${pluralEntityName}`;
+
     // Create
 
     if (schema.flavor === "mysql") {
@@ -47,6 +50,8 @@ export const typedCrud = (
           rawToNamedFunctionName,
           rawBaseQueryFunctionName,
           namedToRawFunctionName,
+          insertPluralFunctionName,
+          insertSingleFunctionName,
         },
       });
     } else {
@@ -59,6 +64,22 @@ export const typedCrud = (
           rawToNamedFunctionName,
           rawBaseQueryFunctionName,
           namedToRawFunctionName,
+          insertPluralFunctionName,
+          insertSingleFunctionName,
+        },
+      });
+    }
+
+    if (metaData.generateTestCode) {
+      testCode += metaData.templateManager.render({
+        template: "typedCrud/insert.test.pg",
+        variables: {
+          codeOutputFullPath: metaData.codeOutputFullPath,
+          entityName,
+          expectedOutput: "",
+          insertInput: "",
+          insertPluralFunctionName,
+          insertSingleFunctionName,
         },
       });
     }

@@ -1,10 +1,9 @@
-import { $$insertSingleFunctionName } from "$$codeOutputFullPath";
+import { $$insertSingleFunctionName, $$insertPluralFunctionName } from "$$codeOutputFullPath";
 
 describe("insert $$entityName", () => {
-  it("$$insertSingleFunctionName", () => {
-    const mockInsert = jest.fn();
-    const mockReturning = jest.fn();
-    const mockConnection = jest.fn().mockReturnValue(mockInsert);
-    
+  it("$$insertSingleFunctionName", async () => {
+    await expect(
+      $$insertSingleFunctionName($$insertInput, connection)
+    ).resolves.toEqual($$expectedOutput);
   });
 });

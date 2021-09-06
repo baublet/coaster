@@ -50,6 +50,8 @@ export async function generateORM(options: GenerateORMOptions): Promise<{
     rawCreateTestEntityFunctionNames: new Map(),
     rawEnumValues: new Map(),
     templateManager: getTemplateManager(),
+    namedMockEntityFunctionNames: new Map(),
+    rawMockEntityFunctionNames: new Map(),
   };
 
   for (const generator of options.generators) {

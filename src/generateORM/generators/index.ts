@@ -94,6 +94,14 @@ export type MetaData = {
    * An array of enum values stored as Map<`schema.enum`, string[]>
    */
   rawEnumValues: Map<EntityPath, string[]>;
+  /**
+   * A map of raw mock functions stored as Map<`schema.table`, string>
+   */
+  rawMockEntityFunctionNames: Map<EntityPath, string>;
+  /**
+   * A map of named mock functions stored as Map<`schema.table`, string>
+   */
+  namedMockEntityFunctionNames: Map<EntityPath, string>;
 };
 
 /**

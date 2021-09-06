@@ -64,170 +64,160 @@ export const typesWithNamingPolicy = (
   // Entities
   for (const table of schema.tables) {
     const entityName = options.getEntityName(table.name, schema.name);
-    const entityNameWithPrefix = prefix + entityName;
+    const prefixedEntityName = prefix + entityName;
 
     const schemaAndTablePath = getSchemaAndTablePath(schema.name, table.name);
-    metaData.entityTableNames.set(entityNameWithPrefix, schemaAndTablePath);
-    metaData.tableEntityNames.set(schemaAndTablePath, entityNameWithPrefix);
-
-    if (table.comment) {
-      code += `\n/** ${table.comment} */\n`;
-    }
-
-    code += `export ${
-      options.typesOrInterfaces === "interfaces" ? "interface" : "type"
-    } ${entityNameWithPrefix} ${
-      options.typesOrInterfaces === "interfaces" ? "" : "= "
-    }{`;
+    metaData.entityTableNames.set(prefixedEntityName, schemaAndTablePath);
+    metaData.tableEntityNames.set(schemaAndTablePath, prefixedEntityName);
 
     const requiredColumnNames: string[] = [];
+
+    let columnsCode = "";
     for (const column of table.columns) {
       const columnName = options.getPropertyName(
         column.name,
         table.name,
         schema.name
       );
-      if (column.comment) {
-        code += `\n/** ${column.comment} */`;
-      }
-      code += `\n${columnName}`;
-      code += column.nullable ? "?: " : ": ";
 
-      code += getTypeName({
-        column,
-        metaData,
-        schema,
-        table,
-        getTypeName: options.getTypeName,
-        rawOrNamed: "named",
+      columnsCode += metaData.templateManager.render({
+        template: "typesWithNamingPolicy/entityProperty",
+        variables: {
+          columnName,
+          columnTypeName: getTypeName({
+            column,
+            metaData,
+            schema,
+            table,
+            getTypeName: options.getTypeName,
+            rawOrNamed: "named",
+          }),
+          comment: column.comment ? `\n/** ${column.comment} */` : "",
+          propertyNameTerminator: column.nullable ? "?: " : ": ",
+        },
       });
 
-      code += ";";
       if (!column.nullable) {
         requiredColumnNames.push(columnName);
       }
     }
 
-    code += `\n};\n\n`;
+    code += metaData.templateManager.render({
+      template: "typesWithNamingPolicy/entity",
+      variables: {
+        columns: columnsCode,
+        comment: table.comment ? `/** ${table.comment} */` : "",
+        entityName: prefixedEntityName,
+        interfaceOrType:
+          options.typesOrInterfaces === "interfaces" ? "interface" : "type",
+        typeEqualsSign: options.typesOrInterfaces === "interfaces" ? "" : "= ",
+      },
+    });
 
     const columnNamesAsJsonString = JSON.stringify(requiredColumnNames);
 
     // Type assertions
-    code += `export function assertIs${entityNameWithPrefix}Like(subject: any): asserts subject is ${entityNameWithPrefix} {\n`;
-    code += `  if(typeof subject === "object") {\n`;
-    code += `    if(objectHasProperties(subject, ${columnNamesAsJsonString})) { return; }\n`;
-    code += `  }\n`;
-    code += `  throw new Error("Invariance violation! Expected subject to be a ${entityNameWithPrefix}, but it was instead: " + JSON.stringify(subject));\n`;
-    code += `}\n\n`;
+    const assertionFunctionName = `assertIs${prefix}${entityName}Like`;
+    code += metaData.templateManager.render({
+      template: "typesWithNamingPolicy/typeAssertion",
+      variables: {
+        assertionFunctionName,
+        prefixedEntityName,
+        columnNamesAsJsonString,
+      },
+    });
 
     metaData.typeAssertionFunctionNames.set(
       schemaAndTablePath,
-      `assertIs${prefix}${entityName}Like`
+      assertionFunctionName
     );
 
     if (metaData.generateTestCode) {
-      const functionName = `assertIs${entityNameWithPrefix}Like`;
-      testCode += `\n\nimport { ${functionName}, ${entityNameWithPrefix} } from "${
-        metaData.codeOutputFullPath
-      }";
-
-describe("assertIs${entityNameWithPrefix}Like", () => {
-  it("throws if input is not like a ${entityNameWithPrefix}", () => {
-    expect(() => ${functionName}(1)).toThrow();
-    expect(() => ${functionName}([])).toThrow();
-    expect(() => ${functionName}(false)).toThrow();
-    expect(() => ${functionName}({})).toThrow();
-  })
-  it("does not throw and asserts properly if input is like a ${entityNameWithPrefix}", () => {
-    const ${entityNameWithPrefix}Like = {
-      ${requiredColumnNames.map((col) => `${col}: ""`).join(",")}
-    } as unknown;
-    expect(() => ${functionName}(${entityNameWithPrefix}Like)).not.toThrow();
-
-    // We expect no TS error here
-    ${functionName}(${entityNameWithPrefix}Like);
-    const actualEntityType: ${entityNameWithPrefix} = ${entityNameWithPrefix}Like;
-    expect(actualEntityType).toEqual(${entityNameWithPrefix}Like);
-  })
-})
-`;
+      testCode += metaData.templateManager.render({
+        template: "typesWithNamingPolicy/typeAssertion.test",
+        variables: {
+          assertionFunctionName,
+          codeOutputFullPath: metaData.codeOutputFullPath,
+          entityLikeAsJsonString: `{${requiredColumnNames
+            .map((col) => `${col}: ""`)
+            .join(",")}}`,
+          prefixedEntityName,
+        },
+      });
     }
 
     // Type guards
-    code += `export function is${entityNameWithPrefix}Like(subject: any): subject is ${entityNameWithPrefix} {\n`;
-    code += `  if(typeof subject === "object") {\n`;
-    code += `    if(objectHasProperties(subject, ${columnNamesAsJsonString})) { return true; }\n`;
-    code += `  }\n`;
-    code += `  return false;\n`;
-    code += `}\n\n`;
+    const typeGuardFunctionName = `is${prefixedEntityName}Like`;
+
+    code += metaData.templateManager.render({
+      template: "typesWithNamingPolicy/typeGuard",
+      variables: {
+        columnNamesAsJsonString,
+        prefixedEntityName,
+        typeGuardFunctionName,
+      },
+    });
 
     metaData.typeGuardFunctionNames.set(
       schemaAndTablePath,
-      `is${entityNameWithPrefix}Like`
+      typeGuardFunctionName
     );
 
     if (metaData.generateTestCode) {
-      const functionName = `is${entityNameWithPrefix}Like`;
-
-      testCode += `\n\nimport { ${functionName} } from "${
-        metaData.codeOutputFullPath
-      }";
-
-describe("${functionName}", () => {
-  it("returns false if input is not like a ${entityNameWithPrefix}", () => {
-    expect(${functionName}(1)).toBe(false);
-    expect(${functionName}([])).toBe(false);
-    expect(${functionName}(false)).toBe(false);
-    expect(${functionName}({})).toBe(false);
-  })
-  it("returns true and asserts properly if input is like a ${entityNameWithPrefix}", () => {
-    const ${entityNameWithPrefix}Like = {
-      ${requiredColumnNames.map((col) => `${col}: ""`).join(",")}
-    } as unknown;
-    expect(${functionName}(${entityNameWithPrefix}Like)).toBe(true);
-    
-    if (${functionName}(${entityNameWithPrefix}Like)) {
-      // We expect no TS error here
-      const actualEntityType: ${entityNameWithPrefix} = ${entityNameWithPrefix}Like;
-      expect(actualEntityType).toEqual(${entityNameWithPrefix}Like);
-    } else {
-      // @ts-expect-error
-      const actualEntityType: ${entityNameWithPrefix} = ${entityNameWithPrefix}Like;
-      expect(actualEntityType).toEqual(${entityNameWithPrefix}Like);
-    }
-  })
-})
-`;
+      testCode += metaData.templateManager.render({
+        template: "typesWithNamingPolicy/typeGuard.test",
+        variables: {
+          codeOutputFullPath: metaData.codeOutputFullPath,
+          entityLikeAsJsonString: `{${requiredColumnNames
+            .map((col) => `${col}: ""`)
+            .join(",")}}`,
+          typeGuardFunctionName,
+          prefixedEntityName,
+        },
+      });
     }
 
     // Transformers
     const rawEntityName = metaData.tableRawEntityNames.get(schemaAndTablePath);
-    const namedEntityName = entityNameWithPrefix;
+    const namedEntityName = prefixedEntityName;
 
     // Raw to named
     const rawToNamedFunctionName = camelCase(
       `${rawEntityName}To${namedEntityName}`
     );
 
-    const rawToNamedReturnTypeSignature = `T extends ${rawEntityName} ? ${namedEntityName} : Partial<${namedEntityName}>`;
-    code += `export function ${rawToNamedFunctionName}`;
-    code += `<T extends ${rawEntityName} | Partial<${rawEntityName}>>(subject: T): ${rawToNamedReturnTypeSignature} {\n`;
-    code += `  const namedSubject: Record<string, any> = {};\n`;
-    for (const column of table.columns) {
-      const columnName = options.getPropertyName(
-        column.name,
-        table.name,
-        schema.name
-      );
-      code += `    if(subject["${column.name}"] !== undefined) namedSubject["${columnName}"] = subject["${column.name}"];\n`;
+    const rawToNamedPropertyAssignments = table.columns
+      .map((column) => {
+        const namedColumnName = options.getPropertyName(
+          column.name,
+          table.name,
+          schema.name
+        );
 
-      metaData.namedEntityColumnNames.set(
-        `${schemaAndTablePath}.${column.name}`,
-        columnName
-      );
-    }
-    code += `  return namedSubject as ${rawToNamedReturnTypeSignature};\n`;
-    code += `}\n\n`;
+        metaData.namedEntityColumnNames.set(
+          `${schemaAndTablePath}.${column.name}`,
+          namedColumnName
+        );
+
+        return metaData.templateManager.render({
+          template: "typesWithNamingPolicy/rawToNamedAssignment",
+          variables: {
+            namedColumnName: namedColumnName,
+            rawColumnName: column.name,
+          },
+        });
+      })
+      .join("");
+
+    code += metaData.templateManager.render({
+      template: "typesWithNamingPolicy/rawToNamed",
+      variables: {
+        rawEntityName,
+        rawToNamedFunctionName,
+        rawToNamedPropertyAssignments,
+        rawToNamedReturnTypeSignature: `T extends ${rawEntityName} ? ${namedEntityName} : Partial<${namedEntityName}>`,
+      },
+    });
 
     metaData.transformerFunctionNames[rawEntityName] =
       metaData.transformerFunctionNames[rawEntityName] || {};
@@ -235,35 +225,26 @@ describe("${functionName}", () => {
       rawToNamedFunctionName;
 
     if (metaData.generateTestCode) {
-      testCode += `\n\nimport { ${rawToNamedFunctionName} } from "${
-        metaData.codeOutputFullPath
-      }";
-
-describe("${rawToNamedFunctionName}", () => {
-  const ${rawEntityName}Full: ${rawEntityName} = {
-    ${Object.values(table.columns)
-      .map((col) => `${col.name}: "" as any`)
-      .join(",")}
-  };
-  const ${namedEntityName}Full: ${namedEntityName} = {
-    ${Object.values(table.columns)
-      .map(
-        (col) =>
-          `${metaData.namedEntityColumnNames.get(
-            `${schemaAndTablePath}.${col.name}`
-          )}: "" as any`
-      )
-      .join(",")}
-  };
-  const ${rawEntityName}Partial: Partial<${rawEntityName}> = {};
-  const ${namedEntityName}Partial: Partial<${namedEntityName}> = {};
-  it("converts a full ${rawEntityName} to a full ${namedEntityName}", () => {
-    expect(${rawToNamedFunctionName}(${rawEntityName}Full)).toEqual(${namedEntityName}Full);
-  });
-  it("converts a partial ${rawEntityName} to a partial ${namedEntityName}", () => {
-    expect(${rawToNamedFunctionName}(${rawEntityName}Partial)).toEqual(${namedEntityName}Partial);
-  });
-});`;
+      testCode += metaData.templateManager.render({
+        template: "typesWithNamingPolicy/rawToNamed.test",
+        variables: {
+          codeOutputFullPath: metaData.codeOutputFullPath,
+          namedEntityName,
+          namedFullTestSubject: `{${Object.values(table.columns)
+            .map(
+              (col) =>
+                `${metaData.namedEntityColumnNames.get(
+                  `${schemaAndTablePath}.${col.name}`
+                )}: "" as any`
+            )
+            .join(",")}}`,
+          rawEntityName,
+          rawFullTestSubject: `{${Object.values(table.columns)
+            .map((col) => `${col.name}: "" as any`)
+            .join(",")}}`,
+          rawToNamedFunctionName,
+        },
+      });
     }
 
     // Named to raw
@@ -327,7 +308,7 @@ describe("${namedToRawFunctionName}", () => {
     // are optional
     code += `export ${
       options.typesOrInterfaces === "interfaces" ? "interface" : "type"
-    } ${entityNameWithPrefix}Input ${
+    } ${prefixedEntityName}Input ${
       options.typesOrInterfaces === "interfaces" ? "" : "= "
     }{`;
     for (const column of table.columns) {
@@ -358,7 +339,7 @@ describe("${namedToRawFunctionName}", () => {
       }
       metaData.namedEntityInputTypeNames.set(
         schemaAndTablePath,
-        `${entityNameWithPrefix}Input`
+        `${prefixedEntityName}Input`
       );
     }
     code += `\n}\n\n`;

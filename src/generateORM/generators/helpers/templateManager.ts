@@ -68,6 +68,17 @@ export function getTemplateManager() {
       "pluralEntityName",
       "rawBaseQueryFunctionName",
       "namedToRawFunctionName",
+      "insertSingleFunctionName",
+      "insertPluralFunctionName",
+    ] as const,
+    "typedCrud/insert.test.pg": [
+      "insertSingleFunctionName",
+      "codeOutputFullPath",
+      "entityName",
+      "insertInput",
+      "expectedOutput",
+      "insertPluralFunctionName",
+      "createMockEntityFunctionName",
     ] as const,
     "typedCrud/insert.mysql": [
       "entityName",
@@ -78,6 +89,8 @@ export function getTemplateManager() {
       "returnType",
       "rawBaseQueryFunctionName",
       "namedToRawFunctionName",
+      "insertSingleFunctionName",
+      "insertPluralFunctionName",
     ] as const,
     "typedCrud/find": [
       "pluralEntityName",
@@ -104,6 +117,61 @@ export function getTemplateManager() {
       "pluralEntityName",
     ] as const,
     "typedCrud/testConnection": [] as const,
+    "typesWithNamingPolicy/typeAssertion": [
+      "assertionFunctionName",
+      "prefixedEntityName",
+      "columnNamesAsJsonString",
+    ] as const,
+    "typesWithNamingPolicy/typeAssertion.test": [
+      "assertionFunctionName",
+      "prefixedEntityName",
+      "assertionFunctionName",
+      "entityLikeAsJsonString",
+      "codeOutputFullPath",
+    ] as const,
+    "typesWithNamingPolicy/entity": [
+      "comment",
+      "interfaceOrType",
+      "entityName",
+      "typeEqualsSign",
+      "columns",
+    ] as const,
+    "typesWithNamingPolicy/entityProperty": [
+      "comment",
+      "columnName",
+      "propertyNameTerminator",
+      "columnTypeName",
+    ] as const,
+    "typesWithNamingPolicy/typeGuard": [
+      "typeGuardFunctionName",
+      "prefixedEntityName",
+      "columnNamesAsJsonString",
+    ] as const,
+    "typesWithNamingPolicy/typeGuard.test": [
+      "typeGuardFunctionName",
+      "codeOutputFullPath",
+      "prefixedEntityName",
+      "entityLikeAsJsonString",
+    ] as const,
+    "typesWithNamingPolicy/rawToNamed": [
+      "rawToNamedFunctionName",
+      "rawEntityName",
+      "rawToNamedReturnTypeSignature",
+      "rawToNamedPropertyAssignments",
+      "rawToNamedReturnTypeSignature",
+    ] as const,
+    "typesWithNamingPolicy/rawToNamedAssignment": [
+      "rawColumnName",
+      "namedColumnName",
+    ] as const,
+    "typesWithNamingPolicy/rawToNamed.test": [
+      "rawToNamedFunctionName",
+      "codeOutputFullPath",
+      "rawEntityName",
+      "rawFullTestSubject",
+      "namedEntityName",
+      "namedFullTestSubject",
+    ] as const,
   });
 }
 
