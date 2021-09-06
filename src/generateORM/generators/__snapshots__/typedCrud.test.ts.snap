@@ -28,7 +28,7 @@ export async function insertUsers(
 /** Find many Users in the database by a constraint function */
 export async function findUsers(
   query: (
-    query: knex.QueryBuilder<RawUser, RawUser[]>
+    query: Knex.QueryBuilder<RawUser, RawUser[]>
   ) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<User[]> {
@@ -41,7 +41,7 @@ export async function findUsers(
 /** Find a User in the database or fail */
 export async function findUserOrFail(
   query: (
-    query: knex.QueryBuilder<RawUser, RawUser[]>
+    query: Knex.QueryBuilder<RawUser, RawUser[]>
   ) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<User> {
@@ -72,7 +72,7 @@ export async function updateUser(
 /** Update one or more Users under specific conditions */
 export async function updateUserWhere(
   updatePayload: Partial<UserInput>,
-  query: (query: knex.QueryBuilder<RawUser, number>) => unknown,
+  query: (query: Knex.QueryBuilder<RawUser, number>) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<void> {
   const rawUpdatePayload = userToRawUser(updatePayload);
@@ -94,7 +94,7 @@ export async function deleteUser(
 
 /** Delete one or more Users under specific conditions */
 export async function deleteUserWhere(
-  query: (query: knex.QueryBuilder<RawUser, number>) => unknown,
+  query: (query: Knex.QueryBuilder<RawUser, number>) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<number> {
   const queryBuilder = RawUsers<number>(connection);
@@ -128,7 +128,7 @@ export async function insertUserAccounts(
 /** Find many UserAccounts in the database by a constraint function */
 export async function findUserAccounts(
   query: (
-    query: knex.QueryBuilder<RawUserAccount, RawUserAccount[]>
+    query: Knex.QueryBuilder<RawUserAccount, RawUserAccount[]>
   ) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<UserAccount[]> {
@@ -141,7 +141,7 @@ export async function findUserAccounts(
 /** Find a UserAccount in the database or fail */
 export async function findUserAccountOrFail(
   query: (
-    query: knex.QueryBuilder<RawUserAccount, RawUserAccount[]>
+    query: Knex.QueryBuilder<RawUserAccount, RawUserAccount[]>
   ) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<UserAccount> {
@@ -172,7 +172,7 @@ export async function updateUserAccount(
 /** Update one or more UserAccounts under specific conditions */
 export async function updateUserAccountWhere(
   updatePayload: Partial<UserAccountInput>,
-  query: (query: knex.QueryBuilder<RawUserAccount, number>) => unknown,
+  query: (query: Knex.QueryBuilder<RawUserAccount, number>) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<void> {
   const rawUpdatePayload = userAccountToRawUserAccount(updatePayload);
@@ -194,7 +194,7 @@ export async function deleteUserAccount(
 
 /** Delete one or more UserAccounts under specific conditions */
 export async function deleteUserAccountWhere(
-  query: (query: knex.QueryBuilder<RawUserAccount, number>) => unknown,
+  query: (query: Knex.QueryBuilder<RawUserAccount, number>) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<number> {
   const queryBuilder = RawUserAccounts<number>(connection);
@@ -239,7 +239,7 @@ export async function insertUsers(
 /** Find many Users in the database by a constraint function */
 export async function findUsers(
   query: (
-    query: knex.QueryBuilder<RawUser, RawUser[]>
+    query: Knex.QueryBuilder<RawUser, RawUser[]>
   ) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<User[]> {
@@ -252,7 +252,7 @@ export async function findUsers(
 /** Find a User in the database or fail */
 export async function findUserOrFail(
   query: (
-    query: knex.QueryBuilder<RawUser, RawUser[]>
+    query: Knex.QueryBuilder<RawUser, RawUser[]>
   ) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<User> {
@@ -283,7 +283,7 @@ export async function updateUser(
 /** Update one or more Users under specific conditions */
 export async function updateUserWhere(
   updatePayload: Partial<UserInput>,
-  query: (query: knex.QueryBuilder<RawUser, number>) => unknown,
+  query: (query: Knex.QueryBuilder<RawUser, number>) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<void> {
   const rawUpdatePayload = userToRawUser(updatePayload);
@@ -305,7 +305,7 @@ export async function deleteUser(
 
 /** Delete one or more Users under specific conditions */
 export async function deleteUserWhere(
-  query: (query: knex.QueryBuilder<RawUser, number>) => unknown,
+  query: (query: Knex.QueryBuilder<RawUser, number>) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<number> {
   const queryBuilder = RawUsers<number>(connection);
@@ -343,7 +343,7 @@ export async function insertUserAccounts(
 /** Find many UserAccounts in the database by a constraint function */
 export async function findUserAccounts(
   query: (
-    query: knex.QueryBuilder<RawUserAccount, RawUserAccount[]>
+    query: Knex.QueryBuilder<RawUserAccount, RawUserAccount[]>
   ) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<UserAccount[]> {
@@ -356,7 +356,7 @@ export async function findUserAccounts(
 /** Find a UserAccount in the database or fail */
 export async function findUserAccountOrFail(
   query: (
-    query: knex.QueryBuilder<RawUserAccount, RawUserAccount[]>
+    query: Knex.QueryBuilder<RawUserAccount, RawUserAccount[]>
   ) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<UserAccount> {
@@ -387,7 +387,7 @@ export async function updateUserAccount(
 /** Update one or more UserAccounts under specific conditions */
 export async function updateUserAccountWhere(
   updatePayload: Partial<UserAccountInput>,
-  query: (query: knex.QueryBuilder<RawUserAccount, number>) => unknown,
+  query: (query: Knex.QueryBuilder<RawUserAccount, number>) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<void> {
   const rawUpdatePayload = userAccountToRawUserAccount(updatePayload);
@@ -409,7 +409,7 @@ export async function deleteUserAccount(
 
 /** Delete one or more UserAccounts under specific conditions */
 export async function deleteUserAccountWhere(
-  query: (query: knex.QueryBuilder<RawUserAccount, number>) => unknown,
+  query: (query: Knex.QueryBuilder<RawUserAccount, number>) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<number> {
   const queryBuilder = RawUserAccounts<number>(connection);
