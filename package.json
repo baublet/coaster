@@ -24,7 +24,7 @@
     "dataloader": "^2.0.0",
     "didyoumean": "^1.2.1",
     "glob": "^7.1.6",
-    "knex": "^0.21.3",
+    "knex": "^0.95",
     "lodash.clonedeep": "^4.5.0",
     "lodash.get": "^4.4.2",
     "lodash.intersectionwith": "^4.4.0",
@@ -51,11 +51,11 @@
     "lint-staged": "^9.2.5",
     "prettier": "^2.0.5",
     "pretty-quick": "^2.0.1",
-    "sqlite3": "^4.1.1",
+    "sqlite3": "^5",
     "ts-jest": "^26.4.3"
   },
   "lint-staged": {
-    "*.ts": "eslint --fix --max-warnings 0"
+    "!(*tpl).ts": "eslint --fix --max-warnings 0"
   },
   "husky": {
     "hooks": {

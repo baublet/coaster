@@ -14,7 +14,7 @@ export async function update$$entityName(
 /** Update one or more $$pluralEntityName under specific conditions */
 export async function update$$entityNameWhere(
   updatePayload: Partial<$$entityInputType>,
-  query: (query: knex.QueryBuilder<$$rawEntityTypeName, number>) => unknown,
+  query: (query: Knex.QueryBuilder<$$rawEntityTypeName, number>) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<void> {
   const rawUpdatePayload = $$namedToRawFunctionName(updatePayload);

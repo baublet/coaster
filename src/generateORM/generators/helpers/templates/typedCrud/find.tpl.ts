@@ -1,7 +1,7 @@
 /** Find many $$pluralEntityName in the database by a constraint function */
 export async function find$$pluralEntityName(
   query: (
-    query: knex.QueryBuilder<$$rawEntityTypeName, $$rawEntityTypeName[]>
+    query: Knex.QueryBuilder<$$rawEntityTypeName, $$rawEntityTypeName[]>
   ) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<$$entityName[]> {
@@ -14,7 +14,7 @@ export async function find$$pluralEntityName(
 /** Find a $$entityName in the database or fail */
 export async function find$$entityNameOrFail(
   query: (
-    query: knex.QueryBuilder<$$rawEntityTypeName, $$rawEntityTypeName[]>
+    query: Knex.QueryBuilder<$$rawEntityTypeName, $$rawEntityTypeName[]>
   ) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<$$entityName> {

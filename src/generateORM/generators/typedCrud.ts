@@ -36,6 +36,8 @@ export const typedCrud = (
 
     const insertSingleFunctionName = `insert${entityName}`;
     const insertPluralFunctionName = `insert${pluralEntityName}`;
+    const createMockEntityFunctionName =
+      metaData.namedCreateTestEntityFunctionNames.get(`${schemaAndTablePath}`);
 
     // Create
 
@@ -76,10 +78,10 @@ export const typedCrud = (
         variables: {
           codeOutputFullPath: metaData.codeOutputFullPath,
           entityName,
-          expectedOutput: "",
-          insertInput: "",
+          expectedOutput: "1",
           insertPluralFunctionName,
           insertSingleFunctionName,
+          createMockEntityFunctionName,
         },
       });
     }

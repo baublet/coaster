@@ -89,7 +89,7 @@ ${tables}}
 
 testMigrations.push(${functionName});`;
 
-    // TODO: impose all of the constraints
+    // TODO: impose all of the constraints? If necessary
   }
 
   return {

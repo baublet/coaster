@@ -11,7 +11,7 @@ export async function delete$$entityName(
 
 /** Delete one or more $$pluralEntityName under specific conditions */
 export async function delete$$entityNameWhere(
-  query: (query: knex.QueryBuilder<$$rawEntityTypeName, number>) => unknown,
+  query: (query: Knex.QueryBuilder<$$rawEntityTypeName, number>) => unknown,
   connection: ConnectionOrTransaction
 ): Promise<number> {
   const queryBuilder = $$rawBaseQueryFunctionName<number>(connection);

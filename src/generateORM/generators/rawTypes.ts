@@ -183,10 +183,11 @@ export const rawTypes = (
 
     // Test Fixtures
     if (metaData.generateTestCode) {
+      const functionName = `createMock${prefixedEntityName}`;
       testCode += metaData.templateManager.render({
         template: "rawTypes/createMockEntity",
         variables: {
-          functionName: `createMock${prefixedEntityName}`,
+          functionName,
           prefixedEntityName,
           columnDefaults: table.columns
             .map(
@@ -199,6 +200,10 @@ export const rawTypes = (
             .join(",\n    "),
         },
       });
+      metaData.rawCreateTestEntityFunctionNames.set(
+        schemaAndTablePath,
+        functionName
+      );
     }
   }
 

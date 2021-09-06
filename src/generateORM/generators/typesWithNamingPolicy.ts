@@ -3,7 +3,12 @@ import { camelCase } from "change-case";
 import { orDefault, ternary } from "../../helpers";
 import { MetaData, GetTypeName, GeneratorResult } from ".";
 import { RawSchema } from "../drivers";
-import { getSchemaAndTablePath, getName, getTypeName } from "./helpers";
+import {
+  getSchemaAndTablePath,
+  getName,
+  getTypeName,
+  getDefaultJavascriptForColumnType,
+} from "./helpers";
 import { generateNames } from "../../generateNames";
 
 const defaultEntityNamingPolicy = (str: string) =>
@@ -252,20 +257,34 @@ export const typesWithNamingPolicy = (
       `${namedEntityName}To${rawEntityName}`
     );
 
+    const namedToRawPropertyAssignments = table.columns
+      .map((column) => {
+        const namedColumnName = options.getPropertyName(
+          column.name,
+          table.name,
+          schema.name
+        );
+        return metaData.templateManager.render({
+          template: "typesWithNamingPolicy/namedToRawAssignment",
+          variables: {
+            namedColumnName,
+            rawColumnName: column.name,
+          },
+        });
+      })
+      .join("");
+
     const namedToRawReturnTypeSignature = `T extends ${entityName} ? ${rawEntityName} : Partial<${rawEntityName}>`;
-    code += `export function ${namedToRawFunctionName}`;
-    code += `<T extends ${namedEntityName} | Partial<${namedEntityName}>>(subject: T): ${namedToRawReturnTypeSignature} {\n`;
-    code += `  const rawSubject: Record<string, any> = {};\n`;
-    for (const column of table.columns) {
-      const columnName = options.getPropertyName(
-        column.name,
-        table.name,
-        schema.name
-      );
-      code += `    if(subject["${columnName}"] !== undefined) rawSubject["${column.name}"] = subject["${columnName}"];\n`;
-    }
-    code += `  return rawSubject as ${namedToRawReturnTypeSignature};\n`;
-    code += `}\n\n`;
+
+    code += metaData.templateManager.render({
+      template: "typesWithNamingPolicy/namedToRaw",
+      variables: {
+        namedToRawReturnTypeSignature,
+        namedEntityName,
+        namedToRawFunctionName,
+        namedToRawPropertyAssignments,
+      },
+    });
 
     metaData.transformerFunctionNames[namedEntityName] =
       metaData.transformerFunctionNames[namedEntityName] || {};
@@ -273,35 +292,26 @@ export const typesWithNamingPolicy = (
       namedToRawFunctionName;
 
     if (metaData.generateTestCode) {
-      testCode += `\n\nimport { ${namedToRawFunctionName} } from "${
-        metaData.codeOutputFullPath
-      }";
-  
-describe("${namedToRawFunctionName}", () => {
-  const ${namedEntityName}Full: ${namedEntityName} = {
-    ${Object.values(table.columns)
-      .map(
-        (col) =>
-          `${metaData.namedEntityColumnNames.get(
-            `${schemaAndTablePath}.${col.name}`
-          )}: "" as any`
-      )
-      .join(",")}
-  };
-  const ${rawEntityName}Full: ${rawEntityName} = {
-    ${Object.values(table.columns)
-      .map((col) => `${col.name}: "" as any`)
-      .join(",")}
-  };
-  const ${rawEntityName}Partial: Partial<${rawEntityName}> = {};
-  const ${namedEntityName}Partial: Partial<${namedEntityName}> = {};
-  it("converts a full ${namedEntityName} to a full ${rawEntityName}", () => {
-    expect(${namedToRawFunctionName}(${namedEntityName}Full)).toEqual(${rawEntityName}Full);
-  });
-  it("converts a partial ${namedEntityName} to a partial ${rawEntityName}", () => {
-    expect(${namedToRawFunctionName}(${namedEntityName}Partial)).toEqual(${rawEntityName}Partial);
-  });
-});`;
+      testCode += metaData.templateManager.render({
+        template: "typesWithNamingPolicy/namedToRaw.test",
+        variables: {
+          codeOutputFullPath: metaData.codeOutputFullPath,
+          namedToRawFunctionName,
+          namedEntityName,
+          namedTestSubject: `{${Object.values(table.columns)
+            .map(
+              (col) =>
+                `${metaData.namedEntityColumnNames.get(
+                  `${schemaAndTablePath}.${col.name}`
+                )}: "" as any`
+            )
+            .join(",")}}`,
+          rawEntityName,
+          rawTestSubject: `{${Object.values(table.columns)
+            .map((col) => `${col.name}: "" as any`)
+            .join(",")}}`,
+        },
+      });
     }
 
     // Named input type -- all nullable and non-nullable fields with defaults
@@ -343,6 +353,29 @@ describe("${namedToRawFunctionName}", () => {
       );
     }
     code += `\n}\n\n`;
+
+    if (metaData.generateTestCode) {
+      const functionName = `createMock${prefixedEntityName}`;
+      testCode += metaData.templateManager.render({
+        template: "typesWithNamingPolicy/createMockEntity",
+        variables: {
+          functionName,
+          columnDefaults: table.columns
+            .map(
+              (col) =>
+                `${metaData.namedEntityColumnNames.get(
+                  `${schemaAndTablePath}.${col.name}`
+                )}: ${getDefaultJavascriptForColumnType(col, metaData)}`
+            )
+            .join(",\n    "),
+          prefixedEntityName,
+        },
+      });
+      metaData.namedCreateTestEntityFunctionNames.set(
+        schemaAndTablePath,
+        functionName
+      );
+    }
   }
 
   return {

@@ -1,4 +1,4 @@
-import { ${functionName}, ${prefixedEntityName} } from "$$codeOutputFullPath"
+import { $$assertionFunctionName, $$prefixedEntityName } from "$$codeOutputFullPath"
 
 describe("$$assertionFunctionName", () => {
   it("throws if input is not like a $$prefixedEntityName", () => {
@@ -6,7 +6,7 @@ describe("$$assertionFunctionName", () => {
     expect(() => $$assertionFunctionName([])).toThrow();
     expect(() => $$assertionFunctionName(false)).toThrow();
     expect(() => $$assertionFunctionName({})).toThrow();
-  })
+  });
   it("does not throw and asserts properly if input is like a $$prefixedEntityName", () => {
     const $$prefixedEntityNameLike = $$entityLikeAsJsonString as unknown;
     expect(() => $$assertionFunctionName($$prefixedEntityNameLike)).not.toThrow();
@@ -16,4 +16,4 @@ describe("$$assertionFunctionName", () => {
     const actualEntityType: $$prefixedEntityName = $$prefixedEntityNameLike;
     expect(actualEntityType).toEqual($$prefixedEntityNameLike);
   })
-})
+});

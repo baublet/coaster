@@ -32,13 +32,15 @@ describe("TemplateManager", () => {
           rawToNamedFunctionName: "rawToNamedFunctionName",
           pluralEntityName: "PluralEntityName",
           rawBaseQueryFunctionName: "rawBaseQueryFunctionName",
+          insertPluralFunctionName: "insertPluralFunctionName",
+          insertSingleFunctionName: "insertSingleFunctionName",
         },
       })
     ).toMatchInlineSnapshot(`
       "/**
        * Insert a single EntityName into the database, returning the inserted entity
        */
-      export async function insertEntityName(
+      export async function insertSingleFunctionName(
         input: EntityInputType,
         connection: ConnectionOrTransaction
       ): Promise<EntityName> {
@@ -52,7 +54,7 @@ describe("TemplateManager", () => {
       /**
        * Inserts one ore more PluralEntityName into the database, returning the inserted entities
        */
-      export async function insertPluralEntityName(
+      export async function insertPluralFunctionName(
         input: EntityInputType[],
         connection: ConnectionOrTransaction
       ): Promise<EntityName[]> {

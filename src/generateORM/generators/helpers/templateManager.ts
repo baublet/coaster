@@ -75,7 +75,6 @@ export function getTemplateManager() {
       "insertSingleFunctionName",
       "codeOutputFullPath",
       "entityName",
-      "insertInput",
       "expectedOutput",
       "insertPluralFunctionName",
       "createMockEntityFunctionName",
@@ -171,6 +170,29 @@ export function getTemplateManager() {
       "rawFullTestSubject",
       "namedEntityName",
       "namedFullTestSubject",
+    ] as const,
+    "typesWithNamingPolicy/namedToRaw": [
+      "namedToRawFunctionName",
+      "namedEntityName",
+      "namedToRawReturnTypeSignature",
+      "namedToRawPropertyAssignments",
+    ] as const,
+    "typesWithNamingPolicy/namedToRawAssignment": [
+      "namedColumnName",
+      "rawColumnName",
+    ] as const,
+    "typesWithNamingPolicy/namedToRaw.test": [
+      "codeOutputFullPath",
+      "namedToRawFunctionName",
+      "namedEntityName",
+      "namedTestSubject",
+      "rawEntityName",
+      "rawTestSubject",
+    ] as const,
+    "typesWithNamingPolicy/createMockEntity": [
+      "functionName",
+      "prefixedEntityName",
+      "columnDefaults",
     ] as const,
   });
 }

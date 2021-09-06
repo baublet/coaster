@@ -1,9 +1,12 @@
-import { $$insertSingleFunctionName, $$insertPluralFunctionName } from "$$codeOutputFullPath";
+import {
+  $$insertSingleFunctionName,
+  $$insertPluralFunctionName,
+} from "$$codeOutputFullPath";
 
 describe("insert $$entityName", () => {
   it("$$insertSingleFunctionName", async () => {
     await expect(
-      $$insertSingleFunctionName($$insertInput, connection)
+      $$insertSingleFunctionName($$createMockEntityFunctionName(), connection)
     ).resolves.toEqual($$expectedOutput);
   });
 });

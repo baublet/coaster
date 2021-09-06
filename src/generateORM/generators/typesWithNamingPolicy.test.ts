@@ -10,6 +10,7 @@ const propertyNamingPolicy = (str: string) => camelCase(str);
 const mockMetaData = getMockMetaData();
 mockMetaData.tableRawEntityNames.set("public.user", "RawUser");
 mockMetaData.tableRawEntityNames.set("public.user_account", "RawUserAccount");
+mockMetaData.rawEnumValues.set("public.user_account_source", ["github"]);
 
 describe("interfaces/types", () => {
   it("spits out types with the proper naming policy", () => {

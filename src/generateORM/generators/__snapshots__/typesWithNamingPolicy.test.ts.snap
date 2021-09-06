@@ -53,14 +53,22 @@ export function rawUserToUser<
 
   return namedSubject as T extends RawUser ? User : Partial<User>;
 }
-export function userToRawUser<T extends User | Partial<User>>(subject: T): T extends User ? RawUser : Partial<RawUser> {
+export function userToRawUser<
+  T extends User | Partial<User>
+>(subject: T): T extends User ? RawUser : Partial<RawUser> {
   const rawSubject: Record<string, any> = {};
-    if(subject[\\"id\\"] !== undefined) rawSubject[\\"id\\"] = subject[\\"id\\"];
-    if(subject[\\"name\\"] !== undefined) rawSubject[\\"name\\"] = subject[\\"name\\"];
-    if(subject[\\"data\\"] !== undefined) rawSubject[\\"data\\"] = subject[\\"data\\"];
+    if (subject[\\"id\\"] !== undefined){
+    rawSubject[\\"id\\"] = subject[\\"id\\"];
+  }
+  if (subject[\\"name\\"] !== undefined){
+    rawSubject[\\"name\\"] = subject[\\"name\\"];
+  }
+  if (subject[\\"data\\"] !== undefined){
+    rawSubject[\\"data\\"] = subject[\\"data\\"];
+  }
+;
   return rawSubject as T extends User ? RawUser : Partial<RawUser>;
 }
-
 export type UserInput = {
 id?: CHUMBAWUMBA;
 /** Users don't have to provide their name */
@@ -119,14 +127,22 @@ export function rawUserAccountToUserAccount<
 
   return namedSubject as T extends RawUserAccount ? UserAccount : Partial<UserAccount>;
 }
-export function userAccountToRawUserAccount<T extends UserAccount | Partial<UserAccount>>(subject: T): T extends UserAccount ? RawUserAccount : Partial<RawUserAccount> {
+export function userAccountToRawUserAccount<
+  T extends UserAccount | Partial<UserAccount>
+>(subject: T): T extends UserAccount ? RawUserAccount : Partial<RawUserAccount> {
   const rawSubject: Record<string, any> = {};
-    if(subject[\\"id\\"] !== undefined) rawSubject[\\"id\\"] = subject[\\"id\\"];
-    if(subject[\\"source\\"] !== undefined) rawSubject[\\"source\\"] = subject[\\"source\\"];
-    if(subject[\\"sourceData\\"] !== undefined) rawSubject[\\"source_data\\"] = subject[\\"sourceData\\"];
+    if (subject[\\"id\\"] !== undefined){
+    rawSubject[\\"id\\"] = subject[\\"id\\"];
+  }
+  if (subject[\\"source\\"] !== undefined){
+    rawSubject[\\"source\\"] = subject[\\"source\\"];
+  }
+  if (subject[\\"sourceData\\"] !== undefined){
+    rawSubject[\\"source_data\\"] = subject[\\"sourceData\\"];
+  }
+;
   return rawSubject as T extends UserAccount ? RawUserAccount : Partial<RawUserAccount>;
 }
-
 export type UserAccountInput = {
 id?: unknown;
 /** Who sent us this users' data? */
@@ -193,14 +209,22 @@ export function rawUserToUser<
 
   return namedSubject as T extends RawUser ? User : Partial<User>;
 }
-export function userToRawUser<T extends User | Partial<User>>(subject: T): T extends User ? RawUser : Partial<RawUser> {
+export function userToRawUser<
+  T extends User | Partial<User>
+>(subject: T): T extends User ? RawUser : Partial<RawUser> {
   const rawSubject: Record<string, any> = {};
-    if(subject[\\"id\\"] !== undefined) rawSubject[\\"id\\"] = subject[\\"id\\"];
-    if(subject[\\"name\\"] !== undefined) rawSubject[\\"name\\"] = subject[\\"name\\"];
-    if(subject[\\"data\\"] !== undefined) rawSubject[\\"data\\"] = subject[\\"data\\"];
+    if (subject[\\"id\\"] !== undefined){
+    rawSubject[\\"id\\"] = subject[\\"id\\"];
+  }
+  if (subject[\\"name\\"] !== undefined){
+    rawSubject[\\"name\\"] = subject[\\"name\\"];
+  }
+  if (subject[\\"data\\"] !== undefined){
+    rawSubject[\\"data\\"] = subject[\\"data\\"];
+  }
+;
   return rawSubject as T extends User ? RawUser : Partial<RawUser>;
 }
-
 export interface UserInput {
 id?: string;
 /** Users don't have to provide their name */
@@ -259,14 +283,22 @@ export function rawUserAccountToUserAccount<
 
   return namedSubject as T extends RawUserAccount ? UserAccount : Partial<UserAccount>;
 }
-export function userAccountToRawUserAccount<T extends UserAccount | Partial<UserAccount>>(subject: T): T extends UserAccount ? RawUserAccount : Partial<RawUserAccount> {
+export function userAccountToRawUserAccount<
+  T extends UserAccount | Partial<UserAccount>
+>(subject: T): T extends UserAccount ? RawUserAccount : Partial<RawUserAccount> {
   const rawSubject: Record<string, any> = {};
-    if(subject[\\"id\\"] !== undefined) rawSubject[\\"id\\"] = subject[\\"id\\"];
-    if(subject[\\"source\\"] !== undefined) rawSubject[\\"source\\"] = subject[\\"source\\"];
-    if(subject[\\"sourceData\\"] !== undefined) rawSubject[\\"source_data\\"] = subject[\\"sourceData\\"];
+    if (subject[\\"id\\"] !== undefined){
+    rawSubject[\\"id\\"] = subject[\\"id\\"];
+  }
+  if (subject[\\"source\\"] !== undefined){
+    rawSubject[\\"source\\"] = subject[\\"source\\"];
+  }
+  if (subject[\\"sourceData\\"] !== undefined){
+    rawSubject[\\"source_data\\"] = subject[\\"sourceData\\"];
+  }
+;
   return rawSubject as T extends UserAccount ? RawUserAccount : Partial<RawUserAccount>;
 }
-
 export interface UserAccountInput {
 id?: unknown;
 /** Who sent us this users' data? */
@@ -276,7 +308,7 @@ sourceData: AnyJson;
 }
 
 ",
-  "testCode": "import { \${functionName}, \${prefixedEntityName} } from \\"./generated.ts\\"
+  "testCode": "import { assertIsUserLike, User } from \\"./generated.ts\\"
 
 describe(\\"assertIsUserLike\\", () => {
   it(\\"throws if input is not like a User\\", () => {
@@ -284,7 +316,7 @@ describe(\\"assertIsUserLike\\", () => {
     expect(() => assertIsUserLike([])).toThrow();
     expect(() => assertIsUserLike(false)).toThrow();
     expect(() => assertIsUserLike({})).toThrow();
-  })
+  });
   it(\\"does not throw and asserts properly if input is like a User\\", () => {
     const UserLike = {id: \\"\\",data: \\"\\"} as unknown;
     expect(() => assertIsUserLike(UserLike)).not.toThrow();
@@ -294,7 +326,8 @@ describe(\\"assertIsUserLike\\", () => {
     const actualEntityType: User = UserLike;
     expect(actualEntityType).toEqual(UserLike);
   })
-})import { isUserLike } from \\"./generated.ts\\";
+});
+import { isUserLike } from \\"./generated.ts\\";
 
 describe(\\"isUserLike\\", () => {
   it(\\"returns false if input is not like a User\\", () => {
@@ -331,26 +364,36 @@ describe(\\"rawUserToUser\\", () => {
   it(\\"converts a partial RawUser to a partial User\\", () => {
     expect(rawUserToUser(RawUserPartial)).toEqual(UserPartial);
   });
-});
+});import { userToRawUser } from \\"./generated.ts\\";
 
-import { userToRawUser } from \\"./generated.ts\\";
-  
 describe(\\"userToRawUser\\", () => {
-  const UserFull: User = {
-    id: \\"\\" as any,name: \\"\\" as any,data: \\"\\" as any
-  };
-  const RawUserFull: RawUser = {
-    id: \\"\\" as any,name: \\"\\" as any,data: \\"\\" as any
-  };
+  const UserFull: User = {id: \\"\\" as any,name: \\"\\" as any,data: \\"\\" as any};
+  const RawUserFull: RawUser = {id: \\"\\" as any,name: \\"\\" as any,data: \\"\\" as any};
   const RawUserPartial: Partial<RawUser> = {};
   const UserPartial: Partial<User> = {};
   it(\\"converts a full User to a full RawUser\\", () => {
-    expect(userToRawUser(UserFull)).toEqual(RawUserFull);
+    expect(userToRawUser(UserFull)).toEqual(
+      RawUserFull
+    );
   });
   it(\\"converts a partial User to a partial RawUser\\", () => {
-    expect(userToRawUser(UserPartial)).toEqual(RawUserPartial);
+    expect(userToRawUser(UserPartial)).toEqual(
+      RawUserPartial
+    );
   });
-});import { \${functionName}, \${prefixedEntityName} } from \\"./generated.ts\\"
+});
+function createMockUser(
+  defaults: Partial<User> = {}
+): User {
+  const testUser: User = {
+    id: \\"id\\",
+    name: \\"name\\",
+    data: {},
+    ...defaults,
+  };
+  return testUser;
+}
+import { assertIsUserAccountLike, UserAccount } from \\"./generated.ts\\"
 
 describe(\\"assertIsUserAccountLike\\", () => {
   it(\\"throws if input is not like a UserAccount\\", () => {
@@ -358,7 +401,7 @@ describe(\\"assertIsUserAccountLike\\", () => {
     expect(() => assertIsUserAccountLike([])).toThrow();
     expect(() => assertIsUserAccountLike(false)).toThrow();
     expect(() => assertIsUserAccountLike({})).toThrow();
-  })
+  });
   it(\\"does not throw and asserts properly if input is like a UserAccount\\", () => {
     const UserAccountLike = {id: \\"\\",source: \\"\\",sourceData: \\"\\"} as unknown;
     expect(() => assertIsUserAccountLike(UserAccountLike)).not.toThrow();
@@ -368,7 +411,8 @@ describe(\\"assertIsUserAccountLike\\", () => {
     const actualEntityType: UserAccount = UserAccountLike;
     expect(actualEntityType).toEqual(UserAccountLike);
   })
-})import { isUserAccountLike } from \\"./generated.ts\\";
+});
+import { isUserAccountLike } from \\"./generated.ts\\";
 
 describe(\\"isUserAccountLike\\", () => {
   it(\\"returns false if input is not like a UserAccount\\", () => {
@@ -405,26 +449,36 @@ describe(\\"rawUserAccountToUserAccount\\", () => {
   it(\\"converts a partial RawUserAccount to a partial UserAccount\\", () => {
     expect(rawUserAccountToUserAccount(RawUserAccountPartial)).toEqual(UserAccountPartial);
   });
-});
+});import { userAccountToRawUserAccount } from \\"./generated.ts\\";
 
-import { userAccountToRawUserAccount } from \\"./generated.ts\\";
-  
 describe(\\"userAccountToRawUserAccount\\", () => {
-  const UserAccountFull: UserAccount = {
-    id: \\"\\" as any,source: \\"\\" as any,sourceData: \\"\\" as any
-  };
-  const RawUserAccountFull: RawUserAccount = {
-    id: \\"\\" as any,source: \\"\\" as any,source_data: \\"\\" as any
-  };
+  const UserAccountFull: UserAccount = {id: \\"\\" as any,source: \\"\\" as any,sourceData: \\"\\" as any};
+  const RawUserAccountFull: RawUserAccount = {id: \\"\\" as any,source: \\"\\" as any,source_data: \\"\\" as any};
   const RawUserAccountPartial: Partial<RawUserAccount> = {};
   const UserAccountPartial: Partial<UserAccount> = {};
   it(\\"converts a full UserAccount to a full RawUserAccount\\", () => {
-    expect(userAccountToRawUserAccount(UserAccountFull)).toEqual(RawUserAccountFull);
+    expect(userAccountToRawUserAccount(UserAccountFull)).toEqual(
+      RawUserAccountFull
+    );
   });
   it(\\"converts a partial UserAccount to a partial RawUserAccount\\", () => {
-    expect(userAccountToRawUserAccount(UserAccountPartial)).toEqual(RawUserAccountPartial);
+    expect(userAccountToRawUserAccount(UserAccountPartial)).toEqual(
+      RawUserAccountPartial
+    );
   });
-});",
+});
+function createMockUserAccount(
+  defaults: Partial<UserAccount> = {}
+): UserAccount {
+  const testUserAccount: UserAccount = {
+    id: 1,
+    source: \\"github\\",
+    sourceData: {},
+    ...defaults,
+  };
+  return testUserAccount;
+}
+",
 }
 `;
 
@@ -481,14 +535,22 @@ export function rawUserToUser<
 
   return namedSubject as T extends RawUser ? User : Partial<User>;
 }
-export function userToRawUser<T extends User | Partial<User>>(subject: T): T extends User ? RawUser : Partial<RawUser> {
+export function userToRawUser<
+  T extends User | Partial<User>
+>(subject: T): T extends User ? RawUser : Partial<RawUser> {
   const rawSubject: Record<string, any> = {};
-    if(subject[\\"id\\"] !== undefined) rawSubject[\\"id\\"] = subject[\\"id\\"];
-    if(subject[\\"name\\"] !== undefined) rawSubject[\\"name\\"] = subject[\\"name\\"];
-    if(subject[\\"data\\"] !== undefined) rawSubject[\\"data\\"] = subject[\\"data\\"];
+    if (subject[\\"id\\"] !== undefined){
+    rawSubject[\\"id\\"] = subject[\\"id\\"];
+  }
+  if (subject[\\"name\\"] !== undefined){
+    rawSubject[\\"name\\"] = subject[\\"name\\"];
+  }
+  if (subject[\\"data\\"] !== undefined){
+    rawSubject[\\"data\\"] = subject[\\"data\\"];
+  }
+;
   return rawSubject as T extends User ? RawUser : Partial<RawUser>;
 }
-
 export type UserInput = {
 id?: string;
 /** Users don't have to provide their name */
@@ -547,14 +609,22 @@ export function rawUserAccountToUserAccount<
 
   return namedSubject as T extends RawUserAccount ? UserAccount : Partial<UserAccount>;
 }
-export function userAccountToRawUserAccount<T extends UserAccount | Partial<UserAccount>>(subject: T): T extends UserAccount ? RawUserAccount : Partial<RawUserAccount> {
+export function userAccountToRawUserAccount<
+  T extends UserAccount | Partial<UserAccount>
+>(subject: T): T extends UserAccount ? RawUserAccount : Partial<RawUserAccount> {
   const rawSubject: Record<string, any> = {};
-    if(subject[\\"id\\"] !== undefined) rawSubject[\\"id\\"] = subject[\\"id\\"];
-    if(subject[\\"source\\"] !== undefined) rawSubject[\\"source\\"] = subject[\\"source\\"];
-    if(subject[\\"sourceData\\"] !== undefined) rawSubject[\\"source_data\\"] = subject[\\"sourceData\\"];
+    if (subject[\\"id\\"] !== undefined){
+    rawSubject[\\"id\\"] = subject[\\"id\\"];
+  }
+  if (subject[\\"source\\"] !== undefined){
+    rawSubject[\\"source\\"] = subject[\\"source\\"];
+  }
+  if (subject[\\"sourceData\\"] !== undefined){
+    rawSubject[\\"source_data\\"] = subject[\\"sourceData\\"];
+  }
+;
   return rawSubject as T extends UserAccount ? RawUserAccount : Partial<RawUserAccount>;
 }
-
 export type UserAccountInput = {
 id?: unknown;
 /** Who sent us this users' data? */
