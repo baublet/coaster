@@ -115,7 +115,7 @@ export function getTemplateManager() {
       "rawBaseQueryFunctionName",
       "pluralEntityName",
     ] as const,
-    "typedCrud/testConnection": [] as const,
+    "typedCrud/testConnection": ["testConnectionString"] as const,
     "typesWithNamingPolicy/typeAssertion": [
       "assertionFunctionName",
       "prefixedEntityName",

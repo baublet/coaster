@@ -21,8 +21,10 @@ export type Generator = (
 
 export type MetaData = {
   generateTestCode: boolean;
+  generateTestDbMigrations?: boolean;
   codeOutputFullPath: string;
   testConnectionVariable: string;
+  testConnectionString: string;
   templateManager: ReturnType<typeof getTemplateManager>;
   /**
    * Add a header to the generated code. FIFO order. The key is to allow later

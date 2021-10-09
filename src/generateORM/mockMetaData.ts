@@ -4,6 +4,11 @@ import { getTemplateManager } from "../generateORM/generators/helpers";
 export function getMockMetaData(): MetaData {
   return {
     testConnectionVariable: "connection",
+    testConnectionString: JSON.stringify({
+      client: "sqlite3",
+      connection: ":memory:",
+      useNullAsDefault: true,
+    }),
     codeOutputFullPath: "./generated.ts",
     generateTestCode: false,
     entityTableNames: new Map(),

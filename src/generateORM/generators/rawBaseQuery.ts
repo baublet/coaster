@@ -26,6 +26,9 @@ export const rawBaseQuery = (
       "knex-connection",
       metaData.templateManager.render({
         template: "typedCrud/testConnection",
+        variables: {
+          testConnectionString: metaData.testConnectionString,
+        },
       })
     );
     metaData.setTestHeader(
@@ -72,7 +75,7 @@ export const rawBaseQuery = (
   }
 
   // If necessary, build the basic, least-testable-unit migration for the schema
-  if (metaData.generateTestCode) {
+  if (metaData.generateTestCode && metaData.generateTestDbMigrations === true) {
     const functionName = `applyMigrationsTo${schemaNames.rawPascal}`;
     let tables = "";
     // First, make all of the necessary tables

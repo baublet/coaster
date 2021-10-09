@@ -22,6 +22,7 @@ if (fs.existsSync(outputFilePath)) {
 
 generateORM({
   connectionOptions: require("./knexfile.js"),
+  generateTestDbMigrations: false,
   fetcher: fetcherWithConfiguration(pgSchemaFetcher, {
     excludeTables: ["knex_*"],
   }),
@@ -33,6 +34,7 @@ generateORM({
   ],
   postProcessors: [],
   generateTestCode: true,
+  testConnectionString: JSON.stringify(require("./knexfile.js")),
 }).then((generated) => {
   fs.writeFileSync(outputFilePath, generated.code);
   fs.writeFileSync(testOutputFilePath, generated.testCode);

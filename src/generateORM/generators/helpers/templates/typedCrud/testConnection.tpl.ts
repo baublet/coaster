@@ -1,8 +1,4 @@
-const connection = knex({
-  client: 'sqlite3',
-  connection: ':memory:',
-  useNullAsDefault: true
-});
+const connection = knex($$testConnectionString);
 
 const testMigrations: ((...args: any[]) => Promise<void>)[] = [];
 

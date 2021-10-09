@@ -6,7 +6,9 @@ import { PostProcessor } from "./postProcessors";
 
 interface GenerateORMOptions {
   generateTestCode?: boolean;
+  generateTestDbMigrations?: boolean;
   testConnectionVariable?: string;
+  testConnectionString?: string;
   testHeaders?: string;
   codeOutputFullPath?: string;
   connectionOptions: ConnectionOptions;
@@ -31,6 +33,13 @@ export async function generateORM(options: GenerateORMOptions): Promise<{
   const testHeaders = new Map<string, string>();
   const metaData: MetaData = {
     testConnectionVariable: options.testConnectionVariable || "connection",
+    testConnectionString:
+      options.testConnectionString ||
+      JSON.stringify({
+        client: "sqlite3",
+        connection: ":memory:",
+        useNullAsDefault: true,
+      }),
     codeOutputFullPath,
     generateTestCode: Boolean(options.generateTestCode),
     setHeader: (key: string, value: string) => headers.set(key, value),
