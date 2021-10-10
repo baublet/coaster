@@ -75,7 +75,7 @@ export const rawBaseQuery = (
   }
 
   // If necessary, build the basic, least-testable-unit migration for the schema
-  if (metaData.generateTestCode && metaData.generateTestDbMigrations === true) {
+  if (metaData.generateTestDbMigrations === true) {
     const functionName = `applyMigrationsTo${schemaNames.rawPascal}`;
     let tables = "";
     // First, make all of the necessary tables
@@ -87,12 +87,15 @@ export const rawBaseQuery = (
       tables += `  });\n`;
     }
 
-    testCode += `export async function ${functionName}(knex: ConnectionOrTransaction) {
-${tables}}
-
-testMigrations.push(${functionName});`;
-
-    // TODO: impose all of the constraints? If necessary
+    code += `export async function ${functionName}(knex: ConnectionOrTransaction) {
+${tables}}`;
+    testCode += metaData.templateManager.render({
+      template: "rawBaseQuery/importMigrations",
+      variables: {
+        codeOutputFullPath: metaData.codeOutputFullPath,
+        migrationApplicationFunction: functionName,
+      },
+    });
   }
 
   return {

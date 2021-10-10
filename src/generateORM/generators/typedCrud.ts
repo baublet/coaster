@@ -2,6 +2,7 @@ import { MetaData, GeneratorResult } from ".";
 import { generateNames } from "../../generateNames";
 import { RawSchema } from "../drivers";
 import { getSchemaAndTablePath } from "./helpers";
+import { getExpectedTestValueForColumn } from "./helpers/getExpectedTestValueForColumn";
 
 /**
  * Generates the lowest-level possible accessors and mutators for data in a
@@ -73,12 +74,22 @@ export const typedCrud = (
     }
 
     if (metaData.generateTestCode) {
+      let insertSingleExpectedOutput = "expect.objectContaining({";
+      for (const column of table.columns) {
+        const columnPath = schemaAndTablePath + `.${column.name}`;
+        const columnName = metaData.namedEntityColumnNames.get(columnPath);
+        insertSingleExpectedOutput += `"${columnName}": ${getExpectedTestValueForColumn(
+          column
+        )},`;
+      }
+      insertSingleExpectedOutput += "})";
+
       testCode += metaData.templateManager.render({
         template: "typedCrud/insert.test.pg",
         variables: {
           codeOutputFullPath: metaData.codeOutputFullPath,
           entityName,
-          expectedOutput: "1",
+          insertSingleExpectedOutput,
           insertPluralFunctionName,
           insertSingleFunctionName,
           createMockEntityFunctionName,

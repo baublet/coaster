@@ -356,6 +356,7 @@ export const typesWithNamingPolicy = (
 
     if (metaData.generateTestCode) {
       const functionName = `createMock${prefixedEntityName}`;
+      metaData.setTestHeader("import-v4", `import { v4 } from "uuid";`);
       testCode += metaData.templateManager.render({
         template: "typesWithNamingPolicy/createMockEntity",
         variables: {

@@ -7,7 +7,7 @@ export function getDefaultJavascriptForColumnType(
 ): string {
   switch (column.type) {
     case "string":
-      return `"${column.name}"`;
+      return `v4() + "-${column.name}"`;
     case "number":
       return "1";
     case "boolean":
