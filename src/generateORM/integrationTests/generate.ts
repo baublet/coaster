@@ -22,7 +22,7 @@ if (fs.existsSync(outputFilePath)) {
 
 generateORM({
   connectionOptions: require("./knexfile.js"),
-  generateTestDbMigrations: false,
+  generateTestDbMigrations: true,
   fetcher: fetcherWithConfiguration(pgSchemaFetcher, {
     excludeTables: ["knex_*"],
   }),

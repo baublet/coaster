@@ -13,7 +13,7 @@ echo "Starting PG"
 echo "Waiting for PG to start"
 while ! nc -z 127.0.0.1 54311; do sleep 1; done;
 
-echo "(Re)Creating databases"
+echo "Creating databases"
 (cd $SRC_PATH; yarn ts-node src/generateORM/integrationTests/scripts/dropDatabase.ts) || exit_out
 (cd $SRC_PATH; yarn ts-node src/generateORM/integrationTests/scripts/createDatabase.ts) || exit_out
 
@@ -22,6 +22,10 @@ yarn ts-node node_modules/.bin/knex --knexfile "$SRC_PATH/knexfile.js" --migrati
 
 echo "Generating ORM"
 (cd $SRC_PATH; yarn ts-node src/generateORM/integrationTests/generate.ts) || exit_out
+
+echo "Recreating databases"
+(cd $SRC_PATH; yarn ts-node src/generateORM/integrationTests/scripts/dropDatabase.ts) || exit_out
+(cd $SRC_PATH; yarn ts-node src/generateORM/integrationTests/scripts/createDatabase.ts) || exit_out
 
 if (cd $SRC_PATH; yarn jest -c="{\"preset\": \"ts-jest\"}" --coverage --testPathPattern="src/generateORM/integrationTests/generated.integration.test.ts" --collectCoverageFrom="src/generateORM/integrationTests/generated.ts"); then
   (cd $SRC_PATH; docker-compose down)

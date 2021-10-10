@@ -18,6 +18,9 @@ export function getTestColumnDefinitionForColumn(
   }
 
   if (column.defaultTo) {
+    if (column.type === "Date" && column.defaultTo === "CURRENT_TIMESTAMP") {
+      column.defaultTo = "now()";
+    }
     columnDefinition += `.defaultTo("${column.defaultTo}")`;
   }
 
