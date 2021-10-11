@@ -7,7 +7,7 @@ describe("insert $$entityName", () => {
   it("$$insertSingleFunctionName", async () => {
     await expect(
       $$insertSingleFunctionName($$createMockEntityFunctionName(), connection)
-    ).resolves.toEqual($$insertSingleExpectedOutput);
+    ).resolves.toEqual($$expectedOutputShape);
   });
 
   it("$$insertPluralFunctionName", async () => {
@@ -17,8 +17,8 @@ describe("insert $$entityName", () => {
         connection
       )
     ).resolves.toEqual([
-      $$insertSingleExpectedOutput,
-      $$insertSingleExpectedOutput,
+      $$expectedOutputShape,
+      $$expectedOutputShape,
     ]);
   });
 });

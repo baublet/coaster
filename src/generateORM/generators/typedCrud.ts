@@ -73,23 +73,26 @@ export const typedCrud = (
       });
     }
 
-    if (metaData.generateTestCode) {
-      let insertSingleExpectedOutput = "expect.objectContaining({";
-      for (const column of table.columns) {
-        const columnPath = schemaAndTablePath + `.${column.name}`;
-        const columnName = metaData.namedEntityColumnNames.get(columnPath);
-        insertSingleExpectedOutput += `"${columnName}": ${getExpectedTestValueForColumn(
-          column
-        )},`;
-      }
-      insertSingleExpectedOutput += "})";
+    let expectedOutputShape = "expect.objectContaining({";
+    for (const column of table.columns) {
+      const columnPath = schemaAndTablePath + `.${column.name}`;
+      const columnName = metaData.namedEntityColumnNames.get(columnPath);
+      expectedOutputShape += `"${columnName}": ${getExpectedTestValueForColumn(
+        column
+      )},`;
+    }
+    expectedOutputShape += "})";
 
+    const rawToPluralFunctionName =
+      metaData.transformerFunctionNames[rawEntityTypeName][entityName];
+
+    if (metaData.generateTestCode) {
       testCode += metaData.templateManager.render({
         template: "typedCrud/insert.test.pg",
         variables: {
           codeOutputFullPath: metaData.codeOutputFullPath,
           entityName,
-          insertSingleExpectedOutput,
+          expectedOutputShape,
           insertPluralFunctionName,
           insertSingleFunctionName,
           createMockEntityFunctionName,
@@ -110,6 +113,9 @@ export const typedCrud = (
     });
 
     // Update
+    const updateSingleFunctionName = `update${entityName}`;
+    const updatePluralFunctionName = `update${entityName}Where`;
+
     code += metaData.templateManager.render({
       template: "typedCrud/update",
       variables: {
@@ -120,8 +126,33 @@ export const typedCrud = (
         tablePrimaryKeyColumn: table.primaryKeyColumn,
         pluralEntityName,
         entityName,
+        updatePluralFunctionName,
+        updateSingleFunctionName,
+        rawToPluralFunctionName,
       },
     });
+
+    if (metaData.generateTestCode) {
+      testCode += metaData.templateManager.render({
+        template: "typedCrud/update.test",
+        variables: {
+          codeOutputFullPath: metaData.codeOutputFullPath,
+          createMockEntityFunctionName,
+          entityInputType,
+          entityName,
+          expectedOutputShape,
+          insertSingleFunctionName,
+          namedToRawFunctionName,
+          pluralEntityName,
+          rawBaseQueryFunctionName,
+          rawEntityTypeName,
+          rawToPluralFunctionName,
+          updatePluralFunctionName,
+          updateSingleFunctionName,
+          tablePrimaryKeyColumn: table.primaryKeyColumn,
+        },
+      });
+    }
 
     // Delete
     code += metaData.templateManager.render({
