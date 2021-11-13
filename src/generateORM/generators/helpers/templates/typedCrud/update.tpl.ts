@@ -21,5 +21,5 @@ export async function $$updatePluralFunctionName(
   const queryBuilder =
     $$rawBaseQueryFunctionName(connection).update(rawUpdatePayload);
   await query(queryBuilder);
-  return await queryBuilder.clone();
+  return queryBuilder;
 }
