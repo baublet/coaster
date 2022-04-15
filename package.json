@@ -7,16 +7,11 @@
   },
   "license": "MIT",
   "scripts": {
-    "coaster": "yarn ts-node src/scripts/coaster.ts",
-    "test": "jest",
-    "test:integration": "jest --testPathIgnorePatterns=\"/node_modules/\" --testPathPattern=--",
-    "coverage": "jest --coverage --silent",
+    "test": "vitest",
     "coverage:view": "open coverage/lcov-report/index.html",
     "coverage:report": "yarn coverage; yarn coverage:view",
     "lint:all": "eslint src/ --ext ts --fix",
-    "lint:tsc": "tsc --noEmit",
-    "test:pg:driver": "sh src/generateORM/drivers/postgres/scripts/test.sh",
-    "test:pg:implementation": "sh src/generateORM/integrationTests/scripts/test.sh"
+    "lint:tsc": "tsc --noEmit"
   },
   "dependencies": {
     "@types/uuid": "^8.0.1",
@@ -30,6 +25,7 @@
     "lodash.intersectionwith": "^4.4.0",
     "lodash.memoize": "^4.1.2",
     "lodash.orderby": "^4.6.0",
+    "lru_map": "^0.4.1",
     "mkdirp": "^1.0.4",
     "pg": "^8.7.1",
     "pluralize": "^8.0.0",
@@ -45,14 +41,14 @@
     "@types/yargs": "^15.0.11",
     "@typescript-eslint/eslint-plugin": "^4",
     "@typescript-eslint/parser": "^4",
+    "c8": "^7.11.0",
     "eslint": "^6.3.0",
     "husky": "^3.0.5",
-    "jest": "26.*.*",
     "lint-staged": "^9.2.5",
     "prettier": "^2.0.5",
     "pretty-quick": "^2.0.1",
     "sqlite3": "^5",
-    "ts-jest": "^26.4.3"
+    "vitest": "^0.9.3"
   },
   "lint-staged": {
     "!(*tpl).ts": "eslint --fix --max-warnings 0"

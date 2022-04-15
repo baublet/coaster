@@ -1,1 +1,0 @@
-export { pgSchemaFetcher } from "./postgres";

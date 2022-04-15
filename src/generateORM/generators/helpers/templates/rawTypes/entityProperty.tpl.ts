@@ -1,2 +1,0 @@
-$$comment
-$$columnName$$propertyNameTerminator $$columnTypeName;

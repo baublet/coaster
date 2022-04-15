@@ -1,1 +1,0 @@
-export { generateNames } from "./generateNames";
