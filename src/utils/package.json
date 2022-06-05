@@ -12,8 +12,8 @@
   "scripts": {
     "test": "unit-test"
   },
-  "dependencies": {},
-  "devDependencies": {
+  "dependencies": {
     "@baublet/coaster-unit-test": "0.0.1"
-  }
+  },
+  "devDependencies": {}
 }

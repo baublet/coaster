@@ -2,9 +2,9 @@
   "name": "@baublet/coaster-unit-test",
   "description": "For unit-testing Coaster applications",
   "version": "0.0.1",
-  "main": "index.ts",
+  "main": "src/index.ts",
   "bin": {
-    "unit-test": "./dist/unit-test.js"
+    "unit-test": "./unit-test.js"
   },
   "author": {
     "email": "baublet@gmail.com",
