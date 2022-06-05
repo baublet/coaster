@@ -1,4 +1,5 @@
 import type { Resolvable } from "@baublet/coaster-utils";
+
 import type { RequestContext } from "../context";
 
 export type ResolvedEndPoint = {

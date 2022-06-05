@@ -1,7 +1,7 @@
 {
   "name": "@baublet/coaster-fs",
   "version": "0.0.1",
-  "main": "index.ts",
+  "main": "src/index.ts",
   "author": {
     "email": "baublet@gmail.com",
     "name": "Ryan Poe",
