@@ -9,7 +9,11 @@
     "url": "https://www.ryanmpoe.com"
   },
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "test": "unit-test"
+  },
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "@baublet/coaster-unit-test": "0.0.1"
+  }
 }

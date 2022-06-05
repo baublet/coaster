@@ -6,3 +6,4 @@ tmp/*
 !tmp/.gitkeep
 src/generateORM/integrationTests/generated.ts
 generated.*.ts
+dist

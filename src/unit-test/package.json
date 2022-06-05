@@ -1,0 +1,23 @@
+{
+  "name": "@baublet/coaster-unit-test",
+  "description": "For unit-testing Coaster applications",
+  "version": "0.0.1",
+  "main": "index.ts",
+  "bin": {
+    "unit-test": "./dist/unit-test.js"
+  },
+  "author": {
+    "email": "baublet@gmail.com",
+    "name": "Ryan Poe",
+    "url": "https://www.ryanmpoe.com"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "esbuild --bundle --platform=node --target=node10.4 --outfile=dist/unit-test.js src/unit-test.ts"
+  },
+  "dependencies": {
+    "esbuild": "latest",
+    "vitest": "^0.9.3"
+  },
+  "devDependencies": {}
+}

@@ -9,4 +9,7 @@ export type CoasterError = {
   };
 };
 
-export type ErrorDetails = Record<string, string | number | boolean>;
+export type ErrorDetails = Record<
+  string,
+  string | number | boolean | undefined | null
+>;

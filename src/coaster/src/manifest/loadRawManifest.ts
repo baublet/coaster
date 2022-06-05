@@ -3,12 +3,18 @@ import JSON5 from "json5";
 import { readFile } from "@baublet/coaster-fs";
 
 import { Manifest } from "./types";
+import { CoasterError, isCoasterError } from "@baublet/coaster-utils";
 
 export async function loadRawManifest(
   path: string,
   options: Parameters<typeof readFile>[1]
-): Promise<Manifest> {
+): Promise<Manifest | CoasterError> {
   const manifestString = await readFile(path, options);
+
+  if (isCoasterError(manifestString)) {
+    return manifestString;
+  }
+
   const manifest: unknown = JSON5.parse(manifestString);
   const castedValue: any = rawManifestSchema.cast(manifest);
 

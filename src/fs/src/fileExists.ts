@@ -1,5 +1,6 @@
 import fs from "fs";
-import { CoasterError } from "@baublet/coaster-utils";
+
+import { CoasterError, createCoasterError } from "@baublet/coaster-utils";
 
 export function fileExists(
   fileFullPath: string
@@ -11,10 +12,12 @@ export function fileExists(
       } else if (err.code === "ENOENT") {
         return resolve(false);
       } else {
-        resolve({
-          code: "existsSync",
-          message: "Unexpected error accessing filesystem: " + err.message,
-        });
+        resolve(
+          createCoasterError({
+            code: "existsSync",
+            message: "Unexpected error accessing filesystem: " + err.message,
+          })
+        );
       }
     });
   });

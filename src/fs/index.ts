@@ -1,2 +1,2 @@
-export { readFile } from "./readFile";
-export { fileExists } from "./fileExists";
+export { readFile } from "./src/readFile";
+export { fileExists } from "./src/fileExists";
