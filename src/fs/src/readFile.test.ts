@@ -1,9 +1,9 @@
-import { vi, it, expect } from "vitest";
+import { coasterTest, it, expect } from "@baublet/coaster-unit-test";
 import fs from "fs";
 
 import { readFile } from "./readFile";
 
-const fsSpy = vi.spyOn(fs, "readFile");
+const fsSpy = coasterTest.spyOn(fs, "readFile");
 
 it("reads a file from disk", async () => {
   await expect(readFile(__dirname + "/readFile.test.ts")).resolves.toBeTruthy();

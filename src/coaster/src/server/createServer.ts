@@ -51,6 +51,7 @@ export async function createServer(
       });
     }
 
+    // Register the endpoint with express
     methodRegistrar(endpoint.endpoint, endpoint.handler);
   }
 
