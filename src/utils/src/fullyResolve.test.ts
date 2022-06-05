@@ -8,6 +8,7 @@ it.each([
     123,
     Promise.resolve(123),
     Promise.resolve(() => 123),
+    Promise.resolve(() => () => Promise.resolve(123)),
     () => Promise.resolve(123),
     () => () => Promise.resolve(123),
     () => () => 123,
