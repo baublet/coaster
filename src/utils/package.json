@@ -1,0 +1,15 @@
+{
+  "name": "@baublet/coaster-utils",
+  "description": "Isomorphic, side-effect-free utilities for working with Coaster.",
+  "version": "0.0.1",
+  "main": "index.ts",
+  "author": {
+    "email": "baublet@gmail.com",
+    "name": "Ryan Poe",
+    "url": "https://www.ryanmpoe.com"
+  },
+  "license": "MIT",
+  "scripts": {},
+  "dependencies": {},
+  "devDependencies": {}
+}

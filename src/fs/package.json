@@ -1,0 +1,17 @@
+{
+  "name": "@baublet/coaster-fs",
+  "version": "0.0.1",
+  "main": "index.ts",
+  "author": {
+    "email": "baublet@gmail.com",
+    "name": "Ryan Poe",
+    "url": "https://www.ryanmpoe.com"
+  },
+  "license": "MIT",
+  "scripts": {},
+  "dependencies": {
+    "@baublet/coaster-utils": "0.0.1",
+    "lru_map": "^0.4.1"
+  },
+  "devDependencies": {}
+}
