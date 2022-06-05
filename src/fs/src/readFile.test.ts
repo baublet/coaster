@@ -1,5 +1,6 @@
-import { coasterTest, it, expect } from "@baublet/coaster-unit-test";
 import fs from "fs";
+
+import { coasterTest, it, expect } from "@baublet/coaster-unit-test";
 
 import { readFile } from "./readFile";
 
