@@ -1,5 +1,6 @@
 export interface Manifest {
   name: string;
+  port: string;
   /**
    * An internal key used to identify this manifest. This should never change.
    * This is useful for orchestrating application-to-application communication.

@@ -1,3 +1,2 @@
-export type { EndPoint, EndPointHandler } from "./endPoints";
-export type { Manifest } from "./manifest";
-export { loadRawManifest } from "./manifest";
+export type { EndPoint, EndPointHandler } from "./endPoints/types";
+export type { Manifest } from "./manifest/types";

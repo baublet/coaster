@@ -9,13 +9,14 @@ import { base64encode } from "./base64encode";
  * @param error Error code and message
  * @returns CoasterError
  */
-export function createError(error: {
+export function createCoasterError(error: {
   code: string;
   message: string;
   details?: ErrorDetails;
   error?: Error;
 }): CoasterError {
   return {
+    __isCoasterError: true,
     code: base64encode(error.code),
     message: error.message,
   };

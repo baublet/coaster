@@ -22,6 +22,7 @@ const fileDescriptorSchema = object({
 
 export const rawManifestSchema = object({
   name: string().required(),
+  port: string().required(),
   key: string(),
 
   schema: fileDescriptorSchema,
