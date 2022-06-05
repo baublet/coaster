@@ -10,7 +10,9 @@ export async function loadRawManifest(
 ): Promise<Manifest> {
   const manifestString = await readFile(path, options);
   const manifest: unknown = JSON5.parse(manifestString);
-  return rawManifestSchema.cast(manifest);
+  const castedValue: any = rawManifestSchema.cast(manifest);
+
+  return castedValue;
 }
 
 const fileDescriptorSchema = object({

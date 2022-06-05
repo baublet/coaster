@@ -1,5 +1,5 @@
 {
-  "include": ["coaster", "fs", "utils", "test/*"],
+  "include": ["src/**/*"],
   "compilerOptions": {
     "lib": ["es2020"],
     "module": "commonjs",

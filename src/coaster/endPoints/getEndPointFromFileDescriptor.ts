@@ -2,17 +2,12 @@ import {
   CoasterError,
   assertIsError,
   createError,
-  Resolvable,
   fullyResolve,
 } from "@baublet/coaster-utils";
-import { readFile, fileExists } from "@baublet/coaster-fs";
+import { fileExists } from "@baublet/coaster-fs";
 
 import { FileDescriptor } from "../manifest";
 import { EndPoint } from "./types";
-
-function a(): number {
-  return "a";
-}
 
 export async function getEndPointFromFileDescriptor(
   descriptor: FileDescriptor
@@ -32,7 +27,7 @@ export async function getEndPointFromFileDescriptor(
     const importedModule = importedFile[importName];
 
     const fullyResolvedEndpoint = await fullyResolve<EndPoint>(importedModule);
-    return 1;
+
     return fullyResolvedEndpoint;
   } catch (error) {
     assertIsError(error);
