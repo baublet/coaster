@@ -8,11 +8,15 @@
   "license": "MIT",
   "version": "0.0.1",
   "main": "src/index.ts",
-  "scripts": {},
+  "scripts": {
+    "test": "unit-test",
+    "test:watch": "unit-test-watch"
+  },
   "dependencies": {
     "@baublet/service-container": "^0.6.0",
     "@baublet/coaster-fs": "0.0.1",
     "@baublet/coaster-utils": "0.0.1",
+    "@baublet/coaster-unit-test": "0.0.1",
     "@types/uuid": "^8.0.1",
     "express": "^4.18.1",
     "json5": "^2.2.1",

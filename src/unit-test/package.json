@@ -13,7 +13,9 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "esbuild --bundle --platform=node --target=node10.4 --outfile=dist/unit-test.js src/unit-test.ts"
+    "build:unit-test": "yarn compile --outfile=dist/unit-test.js src/unit-test.ts",
+    "compile": "esbuild --bundle --platform=node --target=node10.4",
+    "build": "yarn build:unit-test"
   },
   "dependencies": {
     "esbuild": "latest",

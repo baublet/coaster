@@ -1,2 +1,2 @@
-export type { EndPoint, EndPointHandler } from "./endPoints/types";
+export type { EndPoint, EndPointHandler } from "./endpoints/types";
 export type { Manifest } from "./manifest/types";

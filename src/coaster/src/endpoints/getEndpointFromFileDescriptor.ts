@@ -6,17 +6,17 @@ import {
 } from "@baublet/coaster-utils";
 import { fileExists } from "@baublet/coaster-fs";
 
-import { FileDescriptor } from "../manifest/types";
 import { EndPoint } from "./types";
+import { FileDescriptor } from "../manifest/types";
 
-export async function getEndPointFromFileDescriptor(
+export async function getEndpointFromFileDescriptor(
   descriptor: FileDescriptor
 ): Promise<EndPoint | CoasterError> {
   const filePath = descriptor.file;
   const descriptorFileExists = await fileExists(descriptor.file);
   if (!descriptorFileExists) {
     return createCoasterError({
-      code: "getEndPointFromFileDescriptor-fileNotFound",
+      code: "getEndpointFromFileDescriptor-fileNotFound",
       message: `File not found: ${descriptor.file}. Search path: ${filePath}`,
     });
   }

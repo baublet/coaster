@@ -1,6 +1,6 @@
 export interface Manifest {
   name: string;
-  port: string;
+  port?: string;
   /**
    * An internal key used to identify this manifest. This should never change.
    * This is useful for orchestrating application-to-application communication.
@@ -10,18 +10,24 @@ export interface Manifest {
   /**
    * Your application's schema or schemas.
    */
-  schema?: FileDescriptor;
-  schemas?: FileDescriptor[];
+  schemas?: string | string[] | FileDescriptor | FileDescriptor[];
   /**
    * Your application's component or components.
    */
-  component?: FileDescriptor;
-  components?: FileDescriptor[];
+  components?: string | string[] | FileDescriptor | FileDescriptor[];
   /**
-   * Your application's endpoint or endpoints.
+   * Your application's Endpoint or Endpoints.
    */
-  endPoint?: FileDescriptor;
-  endPoints?: FileDescriptor[];
+  endpoints?: string | string[] | FileDescriptor | FileDescriptor[];
+}
+
+export interface NormalizedManifest {
+  name: string;
+  port: string;
+  key: string;
+  schemas: FileDescriptor[];
+  components: FileDescriptor[];
+  endpoints: FileDescriptor[];
 }
 
 /**
@@ -32,4 +38,9 @@ export interface Manifest {
 export interface FileDescriptor {
   file: string;
   exportName?: string;
+}
+
+export interface NormalizedFileDescriptor {
+  file: string;
+  exportName: string;
 }

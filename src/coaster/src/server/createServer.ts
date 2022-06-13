@@ -2,52 +2,53 @@ import express from "express";
 import http from "http";
 
 import {
-  collate,
   asyncMap,
   createCoasterError,
-  assertIsNotCoasterError,
   fullyResolve,
   CoasterError,
   isCoasterError,
 } from "@baublet/coaster-utils";
 
-import { getEndPointFromFileDescriptor } from "../endPoints/getEndPointFromFileDescriptor";
-import { ResolvedEndPoint } from "../endPoints/types";
-import { Manifest } from "../manifest/types";
+import { getEndpointFromFileDescriptor } from "../endpoints/getEndpointFromFileDescriptor";
+import { normalizeEndpoint } from "../endpoints/normalizeEndpoint";
+import { ResolvedEndPoint } from "../endpoints/types";
+import { NormalizedManifest } from "../manifest/types";
 import { Server } from "./types";
 
 export async function createServer(
-  manifest: Manifest
+  manifest: NormalizedManifest
 ): Promise<Server | CoasterError> {
-  const allEndpointDescriptors = collate(manifest.endPoint, manifest.endPoints);
+  const allEndpointDescriptors = manifest.endpoints;
 
   const endpoints = await asyncMap(allEndpointDescriptors, async (subject) => {
-    const unresolvedEndpoint = await getEndPointFromFileDescriptor(subject);
+    const unresolvedEndpoint = await getEndpointFromFileDescriptor(subject);
     const fullyResolved = await fullyResolve<CoasterError | ResolvedEndPoint>(
       unresolvedEndpoint
     );
     return fullyResolved;
   });
 
+  const app = express();
+
   for (const endpoint of endpoints) {
     if (isCoasterError(endpoint)) {
       return endpoint;
     }
-  }
 
-  const app = express();
-
-  for (const endpoint of endpoints) {
-    assertIsNotCoasterError(endpoint);
-    const method = endpoint.method || "all";
-    const methodRegistrar = (app as any)[method];
-    if (!methodRegistrar) {
+    const normalizedEndpoint = normalizeEndpoint(endpoint);
+    if (isCoasterError(normalizedEndpoint)) {
       return createCoasterError({
-        code: "createServer-invalidMethod",
-        message: `Invalid end point method: ${method}`,
-        details: {
-          endpoint: endpoint.endpoint,
-        },
+        code: "createServer-endpoint-declaration-error",
+        message: `Error normalizing endpoint declaration`,
+        error: normalizedEndpoint,
+      });
+    }
+
+    const methodRegistrar = (app as any)[normalizedEndpoint.method];
+    if (methodRegistrar === undefined) {
+      return createCoasterError({
+        code: "createServer-endpoint-method-not-supported",
+        message: `Endpoint method ${normalizedEndpoint.method} not supported`,
       });
     }
 
