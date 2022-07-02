@@ -8,26 +8,22 @@ export interface Manifest {
    */
   key?: string;
   /**
-   * Your application's schema or schemas.
-   */
-  schemas?: string | string[] | FileDescriptor | FileDescriptor[];
-  /**
-   * Your application's component or components.
-   */
-  components?: string | string[] | FileDescriptor | FileDescriptor[];
-  /**
    * Your application's Endpoint or Endpoints.
    */
   endpoints?: string | string[] | FileDescriptor | FileDescriptor[];
+  /**
+   * If you want Coaster to manage your deployments, use these to define your
+   * deployment pipelines.
+   */
+  deployments?: string | string[] | FileDescriptor | FileDescriptor[];
 }
 
 export interface NormalizedManifest {
   name: string;
   port: string;
   key: string;
-  schemas: FileDescriptor[];
-  components: FileDescriptor[];
   endpoints: FileDescriptor[];
+  deployments: FileDescriptor[];
 }
 
 /**
