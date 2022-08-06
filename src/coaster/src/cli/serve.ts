@@ -18,8 +18,6 @@ export function serve(program: Program) {
     )
     .action(async (manifestFile = "./manifest.ts") => {
       const manifest = path.resolve(process.cwd(), manifestFile);
-
-      console.log("Loading manifest file:", manifest);
       const loadedManifest = await loadRawManifest(manifest);
 
       if (isCoasterError(loadedManifest)) {
@@ -27,8 +25,25 @@ export function serve(program: Program) {
         process.exit(1);
       }
 
-      console.log("Loading server");
-      const server = await createServer(loadedManifest);
+      const server = await createServer(loadedManifest, {
+        afterEndpointsLoaded: async (endpoints) => {
+          // Loop through them twice: once to see if we should exit,
+          // then exit if there are errors. If there are no errors,
+          // tell the user which endpoints are loaded.
+          if (endpoints.some((error) => isCoasterError(error))) {
+            return endpoints;
+          }
+          for (const endpoint of endpoints) {
+            if (isCoasterError(endpoint)) {
+              // NOOP: here for type safety
+              continue;
+            }
+            console.log(`Loaded endpoint: ${endpoint?.endpoint}`);
+          }
+
+          return endpoints;
+        },
+      });
 
       if (isCoasterError(server)) {
         logCoasterError(server);

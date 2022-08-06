@@ -15,7 +15,7 @@ export type HttpMethod = typeof HTTP_METHODS[number];
 
 export interface NormalizedEndpoint {
   endpoint: string;
-  method: string;
+  method: string[];
   handler: EndPointHandler;
 }
 

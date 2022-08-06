@@ -10,6 +10,8 @@ import { NormalizedEndpoint } from "./types";
 export function normalizeEndpoint(
   endpoint: unknown
 ): NormalizedEndpoint | CoasterError {
+  console.log({ endpoint });
+
   const endpointAsRecord = asTypeOrError("object", endpoint);
   if (isCoasterError(endpointAsRecord)) {
     return createCoasterError({
@@ -19,7 +21,7 @@ export function normalizeEndpoint(
     });
   }
 
-  const route = asTypeOrError("string", endpointAsRecord.route);
+  const route = asTypeOrError("string", endpointAsRecord.endpoint);
   if (isCoasterError(route)) {
     return createCoasterError({
       code: "normalizeEndpoint-route-not-string",
@@ -28,13 +30,34 @@ export function normalizeEndpoint(
     });
   }
 
-  const method = asTypeOrError("string", endpointAsRecord.method);
+  const method = (() => {
+    if (Array.isArray(endpointAsRecord.method)) {
+      const methods: string[] = [];
+      for (const subjectMethod of endpointAsRecord.method) {
+        const method = asTypeOrError("string", subjectMethod);
+        if (isCoasterError(method)) {
+          return createCoasterError({
+            code: "normalizeEndpoint-method-not-string",
+            message: `Expected endpoint method to be a string, but instead received a ${typeof endpointAsRecord.method}`,
+            error: method,
+          });
+        }
+        methods.push(method);
+      }
+      return methods;
+    }
+    const method = asTypeOrError("string", endpointAsRecord.method);
+    if (isCoasterError(method)) {
+      return createCoasterError({
+        code: "normalizeEndpoint-method-not-string",
+        message: `Expected endpoint method to be a string, but instead received a ${typeof endpointAsRecord.method}`,
+        error: method,
+      });
+    }
+    return [method];
+  })();
   if (isCoasterError(method)) {
-    return createCoasterError({
-      code: "normalizeEndpoint-method-not-string",
-      message: `Expected endpoint method to be a string, but instead received a ${typeof endpointAsRecord.method}`,
-      error: method,
-    });
+    return method;
   }
 
   const handler = asTypeOrError("function", endpointAsRecord.handler);

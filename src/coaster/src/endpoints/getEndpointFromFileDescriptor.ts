@@ -2,15 +2,18 @@ import {
   CoasterError,
   createCoasterError,
   arrayIncludes,
+  fullyResolve,
+  perform,
+  isCoasterError,
 } from "@baublet/coaster-utils";
 import { fileExists } from "@baublet/coaster-fs";
 
 import { FileDescriptor } from "../manifest/types";
-import { EndPoint, HTTP_METHODS, HttpMethod } from "./types";
+import { HTTP_METHODS, HttpMethod, ResolvedEndPoint } from "./types";
 
 export async function getEndpointFromFileDescriptor(
   fileDescriptor: FileDescriptor
-): Promise<CoasterError | EndPoint> {
+): Promise<CoasterError | ResolvedEndPoint> {
   const file = fileDescriptor.file;
   const exportName = fileDescriptor.exportName || "default";
 
@@ -23,15 +26,25 @@ export async function getEndpointFromFileDescriptor(
   }
 
   const fileImport = await import(file);
-  const exportExists = "exportName" in fileImport;
+  const exportExists = exportName in fileImport;
   if (!exportExists) {
     return createCoasterError({
       code: "getEndpointFromFileDescriptor-export-not-found",
-      message: `Endpoint descriptor file ${file} does not export ${exportName}`,
+      message: `Endpoint descriptor file ${file} does not export "${exportName}"`,
     });
   }
 
-  const declaredMethods = fileImport[exportName] || "get";
+  const fullyResolvedExport = await perform(async () => {
+    const resolvedExport = await fullyResolve<Partial<ResolvedEndPoint>>(
+      fileImport[exportName]
+    );
+    return resolvedExport;
+  });
+  if (isCoasterError(fullyResolvedExport)) {
+    return fullyResolvedExport;
+  }
+
+  const declaredMethods = fullyResolvedExport.method || "get";
   const methods: HttpMethod[] = [];
   if (Array.isArray(declaredMethods)) {
     for (const method of declaredMethods) {
@@ -41,6 +54,7 @@ export async function getEndpointFromFileDescriptor(
           message: `Endpoint descriptor file ${file} method names must be strings or arrays of strings. Instead, received a ${typeof method}`,
         });
       }
+      console.log({ method });
       const lowercaseMethod = method.toLowerCase();
 
       // Already in the methods? Duplicate, so we don't add it again
@@ -72,15 +86,15 @@ export async function getEndpointFromFileDescriptor(
     methods.push(lowercaseMethod);
   }
 
-  const endpointExists = "endpoint" in fileImport[exportName];
+  const endpointExists = "endpoint" in fullyResolvedExport;
   if (!endpointExists) {
     return createCoasterError({
       code: "getEndpointFromFileDescriptor-export-not-endpoint",
-      message: `Endpoint descriptor file ${file} does not export an endpoint`,
+      message: `Endpoint descriptor file ${file} does not export an endpoint descriptor (e.g., "/api")`,
     });
   }
 
-  const endpoint = fileImport[exportName].endpoint;
+  const endpoint = fullyResolvedExport.endpoint;
   if (typeof endpoint !== "string") {
     return createCoasterError({
       code: "getEndpointFromFileDescriptor-export-not-string",
@@ -88,7 +102,7 @@ export async function getEndpointFromFileDescriptor(
     });
   }
 
-  const handlerExists = "handler" in fileImport[exportName];
+  const handlerExists = "handler" in fullyResolvedExport;
   if (!handlerExists) {
     return createCoasterError({
       code: "getEndpointFromFileDescriptor-export-not-handler",
@@ -96,7 +110,7 @@ export async function getEndpointFromFileDescriptor(
     });
   }
 
-  const handler = fileImport[exportName].handler;
+  const handler = fullyResolvedExport.handler;
   if (typeof handler !== "function") {
     return createCoasterError({
       code: "getEndpointFromFileDescriptor-export-not-function",

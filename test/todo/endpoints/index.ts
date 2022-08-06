@@ -1,6 +1,6 @@
 import { EndPoint } from "@baublet/coaster";
 
-export const todoIndex: EndPoint = () => {
+const todoIndex: EndPoint = () => {
   return {
     endpoint: "/",
     handler: async (context) => {
@@ -8,3 +8,5 @@ export const todoIndex: EndPoint = () => {
     },
   };
 };
+
+export default todoIndex;

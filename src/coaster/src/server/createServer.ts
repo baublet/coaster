@@ -1,10 +1,10 @@
 import express from "express";
 import http from "http";
+import path from "path";
 
 import {
   asyncMap,
   createCoasterError,
-  fullyResolve,
   CoasterError,
   isCoasterError,
   withWrappedHook,
@@ -27,21 +27,24 @@ export async function createServer(
     ) => Promise<(CoasterError | ResolvedEndPoint)[]>;
   } = {}
 ): Promise<Server | CoasterError> {
+  // console.log({ manifest });
+
   const allEndpointDescriptors = await withWrappedHook(
     options.beforeEndpointsLoaded,
     manifest.endpoints
   );
+  // console.log({ allEndpointDescriptors });
 
   const resolvedEndpoints = await asyncMap(
     allEndpointDescriptors,
     async (subject) => {
-      const unresolvedEndpoint = await getEndpointFromFileDescriptor(subject);
-      const fullyResolved = await fullyResolve<CoasterError | ResolvedEndPoint>(
-        unresolvedEndpoint
-      );
-      return fullyResolved;
+      subject.file = path.resolve(process.cwd(), subject.file);
+      return await getEndpointFromFileDescriptor(subject);
     }
   );
+
+  console.log({ resolvedEndpoints });
+
   const endpoints = await withWrappedHook(
     options.afterEndpointsLoaded,
     resolvedEndpoints
@@ -54,6 +57,7 @@ export async function createServer(
       return endpoint;
     }
 
+    console.log({ endpoints });
     const normalizedEndpoint = normalizeEndpoint(endpoint);
     if (isCoasterError(normalizedEndpoint)) {
       return createCoasterError({

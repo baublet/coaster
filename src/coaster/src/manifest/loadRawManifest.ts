@@ -24,6 +24,11 @@ export async function loadRawManifest(
   if (path.endsWith(".ts")) {
     const importedFile = await import(path);
 
+    console.log({
+      importedFile: Object.keys(importedFile),
+      manifest: JSON.stringify(importedFile.manifest),
+    });
+
     const manifestDeclarationExists = "manifest" in importedFile;
     if (!manifestDeclarationExists) {
       return createCoasterError({
@@ -50,9 +55,7 @@ export async function loadRawManifest(
 
   try {
     const manifest: unknown = JSON5.parse(manifestString);
-    const castedValue = await parseManifest(manifest);
-
-    return castedValue;
+    return await parseManifest(manifest);
   } catch (error) {
     assertIsError(error);
     return createCoasterError({
@@ -122,25 +125,7 @@ async function parseManifest(
     });
   }
 
-  const components = normalizeFileDescriptor(rootNode.components);
-  if (isCoasterError(components)) {
-    const stringifiedComponents = jsonStringify(rootNode.components);
-    if (isCoasterError(stringifiedComponents)) {
-      return createCoasterError({
-        code: `parseManifest-components-stringify`,
-        message: `Unexpected error inspecting manifest components`,
-        error: stringifiedComponents,
-      });
-    }
-    return createCoasterError({
-      code: `parseManifest-components`,
-      message: `One or more of the components are invalid`,
-      error: components,
-      details: { components: stringifiedComponents },
-    });
-  }
-
-  const endpoints = normalizeFileDescriptor(rootNode.components);
+  const endpoints = normalizeFileDescriptor(rootNode.endpoints);
   if (isCoasterError(endpoints)) {
     const stringifiedEndpoints = jsonStringify(rootNode.endpoints);
     if (isCoasterError(stringifiedEndpoints)) {
@@ -155,24 +140,6 @@ async function parseManifest(
       message: `One or more of the components are invalid`,
       error: endpoints,
       details: { components: stringifiedEndpoints },
-    });
-  }
-
-  const schemas = normalizeFileDescriptor(rootNode.schemas);
-  if (isCoasterError(schemas)) {
-    const stringifiedSchema = jsonStringify(rootNode.schemas);
-    if (isCoasterError(stringifiedSchema)) {
-      return createCoasterError({
-        code: `parseManifest-schema-stringify`,
-        message: `Unexpected error inspecting manifest schemas`,
-        error: stringifiedSchema,
-      });
-    }
-    return createCoasterError({
-      code: `parseManifest-schemas`,
-      message: `One or more of the schema are invalid`,
-      error: schemas,
-      details: { components: stringifiedSchema },
     });
   }
 
