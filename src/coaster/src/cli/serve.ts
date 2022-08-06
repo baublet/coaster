@@ -1,7 +1,7 @@
 import { Command as Program } from "commander";
 import path from "path";
 
-import { createServer } from "../server/createServer";
+import { createExpressServer } from "../server/createExpressServer";
 import { loadRawManifest } from "../manifest/loadRawManifest";
 import { isCoasterError } from "@baublet/coaster-utils";
 import { logCoasterError } from "./utils/logCoasterError";
@@ -25,7 +25,7 @@ export function serve(program: Program) {
         process.exit(1);
       }
 
-      const server = await createServer(loadedManifest, {
+      const server = await createExpressServer(loadedManifest, {
         afterEndpointsLoaded: async (endpoints) => {
           // Loop through them twice: once to see if we should exit,
           // then exit if there are errors. If there are no errors,
@@ -42,6 +42,9 @@ export function serve(program: Program) {
           }
 
           return endpoints;
+        },
+        afterServerStart: async ({ port }) => {
+          console.log(`Server started on port ${port} 🚂`);
         },
       });
 

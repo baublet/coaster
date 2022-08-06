@@ -5,6 +5,7 @@ import { createServiceContainer } from "@baublet/service-container";
 import { createResponseHeadersSentError } from "./createResponseHeadersSentError";
 import { RequestContext, CoasterCookieOptions } from "./request";
 import { getContextLogProperties } from "./getContextLogProperties";
+import { HttpMethod } from "../endpoints/types";
 
 export async function createExpressRequestContext({
   request,
@@ -38,7 +39,7 @@ export async function createExpressRequestContext({
     request: {
       cookies: request.cookies,
       headers: requestHeadersMap,
-      method: request.method,
+      method: request.method as HttpMethod,
       body: request.body,
     },
     services: serviceContainer,
@@ -118,7 +119,7 @@ export async function createExpressRequestContext({
             });
           }
         }
-        response.send(responseBuffer);
+        response.send(...responseBuffer);
       },
     },
   };

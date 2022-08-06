@@ -54,7 +54,6 @@ export async function getEndpointFromFileDescriptor(
           message: `Endpoint descriptor file ${file} method names must be strings or arrays of strings. Instead, received a ${typeof method}`,
         });
       }
-      console.log({ method });
       const lowercaseMethod = method.toLowerCase();
 
       // Already in the methods? Duplicate, so we don't add it again

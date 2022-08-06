@@ -10,8 +10,6 @@ import { NormalizedEndpoint } from "./types";
 export function normalizeEndpoint(
   endpoint: unknown
 ): NormalizedEndpoint | CoasterError {
-  console.log({ endpoint });
-
   const endpointAsRecord = asTypeOrError("object", endpoint);
   if (isCoasterError(endpointAsRecord)) {
     return createCoasterError({

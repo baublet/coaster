@@ -1,4 +1,4 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import http from "http";
 import path from "path";
 
@@ -12,11 +12,12 @@ import {
 
 import { getEndpointFromFileDescriptor } from "../endpoints/getEndpointFromFileDescriptor";
 import { normalizeEndpoint } from "../endpoints/normalizeEndpoint";
-import { ResolvedEndPoint } from "../endpoints/types";
+import { EndPointHandler, ResolvedEndPoint } from "../endpoints/types";
 import { FileDescriptor, NormalizedManifest } from "../manifest/types";
 import { Server } from "./types";
+import { createExpressRequestContext } from "../context/createExpressRequestContext";
 
-export async function createServer(
+export async function createExpressServer(
   manifest: NormalizedManifest,
   options: {
     beforeEndpointsLoaded?: (
@@ -25,15 +26,23 @@ export async function createServer(
     afterEndpointsLoaded?: (
       endPoints: (CoasterError | ResolvedEndPoint)[]
     ) => Promise<(CoasterError | ResolvedEndPoint)[]>;
+    afterExpressLoaded?: (app: express.Express) => Promise<express.Express>;
+    afterServerStart?: (args: {
+      port: string | number;
+      application: express.Express;
+      server: http.Server;
+    }) => Promise<void>;
+    afterServerStop?: (args: {
+      port: string | number;
+      application: express.Express;
+      server: http.Server;
+    }) => Promise<void>;
   } = {}
 ): Promise<Server | CoasterError> {
-  // console.log({ manifest });
-
   const allEndpointDescriptors = await withWrappedHook(
     options.beforeEndpointsLoaded,
     manifest.endpoints
   );
-  // console.log({ allEndpointDescriptors });
 
   const resolvedEndpoints = await asyncMap(
     allEndpointDescriptors,
@@ -42,22 +51,18 @@ export async function createServer(
       return await getEndpointFromFileDescriptor(subject);
     }
   );
-
-  console.log({ resolvedEndpoints });
-
   const endpoints = await withWrappedHook(
     options.afterEndpointsLoaded,
     resolvedEndpoints
   );
 
-  const app = express();
+  const app = await withWrappedHook(options.afterExpressLoaded, express());
 
   for (const endpoint of endpoints) {
     if (isCoasterError(endpoint)) {
       return endpoint;
     }
 
-    console.log({ endpoints });
     const normalizedEndpoint = normalizeEndpoint(endpoint);
     if (isCoasterError(normalizedEndpoint)) {
       return createCoasterError({
@@ -68,7 +73,8 @@ export async function createServer(
     }
 
     for (const method of normalizedEndpoint.method) {
-      const methodRegistrar = (app as any)[method];
+      const methodRegistrar = (endpoint: string, handler: Function) =>
+        (app as any)[method](endpoint, handler);
       if (methodRegistrar === undefined) {
         return createCoasterError({
           code: "createServer-endpoint-method-not-supported",
@@ -76,27 +82,77 @@ export async function createServer(
         });
       }
       // Register the endpoint with express
-      methodRegistrar(endpoint.endpoint, endpoint.handler);
+      methodRegistrar(
+        endpoint.endpoint,
+        (request: Request, response: Response, next: NextFunction) =>
+          handleExpressMethodWithHandler({
+            request,
+            response,
+            next,
+            handler: endpoint.handler,
+          })
+      );
     }
   }
 
   let server: http.Server;
+  const port = manifest.port || 3000;
 
   return {
     start: () => {
       return new Promise((resolve) => {
-        const port = manifest.port || 3000;
-        server = app.listen(port, () => {
-          resolve();
+        server = app.listen(port, async () => {
+          options
+            .afterServerStart?.({ port, application: app, server })
+            .then(() => {
+              resolve();
+            })
+            .catch((error) => {
+              console.error(error);
+              resolve(error);
+            });
         });
       });
     },
     stop: () => {
       return new Promise((resolve) => {
         server?.close(() => {
-          resolve();
+          options
+            .afterServerStop?.({ port, application: app, server })
+            .then(() => {
+              resolve();
+            })
+            .catch((error) => {
+              console.error(error);
+              resolve(error);
+            });
         });
       });
     },
   };
+}
+
+async function handleExpressMethodWithHandler({
+  request,
+  response,
+  next,
+  handler,
+}: {
+  request: Request;
+  response: Response;
+  next: NextFunction;
+  handler: EndPointHandler;
+}): Promise<void> {
+  try {
+    const context = await createExpressRequestContext({
+      request,
+      response,
+    });
+    await handler(context);
+    await context.response.flushData();
+  } catch {
+    // TODO: handle errors
+  } finally {
+    next();
+  }
 }

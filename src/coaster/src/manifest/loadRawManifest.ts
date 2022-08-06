@@ -24,11 +24,6 @@ export async function loadRawManifest(
   if (path.endsWith(".ts")) {
     const importedFile = await import(path);
 
-    console.log({
-      importedFile: Object.keys(importedFile),
-      manifest: JSON.stringify(importedFile.manifest),
-    });
-
     const manifestDeclarationExists = "manifest" in importedFile;
     if (!manifestDeclarationExists) {
       return createCoasterError({
