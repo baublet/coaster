@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@baublet/coaster-log-service": "0.0.1",
-    "@baublet/service-container": "^0.6.0",
+    "@baublet/service-container": "^0.7.0",
     "@baublet/coaster-fs": "0.0.1",
     "@baublet/coaster-utils": "0.0.1",
     "@baublet/coaster-unit-test": "0.0.1",
