@@ -7,6 +7,7 @@ import {
   fullyResolve,
   CoasterError,
   isCoasterError,
+  withWrappedHook,
 } from "@baublet/coaster-utils";
 
 import { getEndpointFromFileDescriptor } from "../endpoints/getEndpointFromFileDescriptor";
@@ -26,11 +27,12 @@ export async function createServer(
     ) => Promise<(CoasterError | ResolvedEndPoint)[]>;
   } = {}
 ): Promise<Server | CoasterError> {
-  const allEndpointDescriptors = options.beforeEndpointsLoaded
-    ? await options.beforeEndpointsLoaded(manifest.endpoints)
-    : manifest.endpoints;
+  const allEndpointDescriptors = await withWrappedHook(
+    options.beforeEndpointsLoaded,
+    manifest.endpoints
+  );
 
-  const loadedEndpoints = await asyncMap(
+  const resolvedEndpoints = await asyncMap(
     allEndpointDescriptors,
     async (subject) => {
       const unresolvedEndpoint = await getEndpointFromFileDescriptor(subject);
@@ -40,9 +42,10 @@ export async function createServer(
       return fullyResolved;
     }
   );
-  const endpoints = options.afterEndpointsLoaded
-    ? await options.afterEndpointsLoaded(loadedEndpoints)
-    : loadedEndpoints;
+  const endpoints = await withWrappedHook(
+    options.afterEndpointsLoaded,
+    resolvedEndpoints
+  );
 
   const app = express();
 

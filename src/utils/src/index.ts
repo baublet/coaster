@@ -15,3 +15,4 @@ export { fullyResolve } from "./fullyResolve";
 export { isCoasterError } from "./isCoasterError";
 export { jsonParse } from "./jsonParse";
 export { jsonStringify } from "./jsonStringify";
+export { withWrappedHook } from "./withWrappedHook";

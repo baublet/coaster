@@ -15,6 +15,10 @@ if (!process.argv.includes("--watch")) {
   additionalArguments.push("run");
 }
 
+if (!process.argv.includes("--coverage")) {
+  additionalArguments.push("--coverage");
+}
+
 execa("node", [testRunnerPath, ...additionalArguments], {
   all: true,
   cwd: process.cwd(),
