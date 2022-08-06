@@ -8,6 +8,7 @@ import {
   isCoasterError,
   asTypeOrError,
   jsonStringify,
+  fullyResolve,
 } from "@baublet/coaster-utils";
 
 import { NormalizedManifest } from "./types";
@@ -19,6 +20,28 @@ export async function loadRawManifest(
   path: string,
   options: Parameters<typeof readFile>[1] = {}
 ): Promise<NormalizedManifest | CoasterError> {
+  // If it's a .ts file, just import it!
+  if (path.endsWith(".ts")) {
+    const importedFile = await import(path);
+
+    const manifestDeclarationExists = "manifest" in importedFile;
+    if (!manifestDeclarationExists) {
+      return createCoasterError({
+        code: `loadRawManifest-noManifest`,
+        message: `Expected manifest to be exported as an object or function called "manifest". But there was no such export in ${path}`,
+      });
+    }
+
+    const manifestNode = importedFile.manifest;
+
+    if (typeof manifestNode === "function") {
+      const resolvedManifestNode = await fullyResolve(manifestNode);
+      return parseManifest(resolvedManifestNode);
+    }
+
+    return parseManifest(manifestNode);
+  }
+
   const manifestString = await readFile(path, options);
 
   if (isCoasterError(manifestString)) {
@@ -157,8 +180,7 @@ async function parseManifest(
     name,
     port: port,
     key,
-    components,
     endpoints,
-    schemas,
+    deployments: [],
   };
 }

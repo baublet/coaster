@@ -19,7 +19,8 @@
   },
   "private": true,
   "workspaces": [
-    "src/*"
+    "src/*",
+    "test/*"
   ],
   "dependencies": {
     "turbo": "^1.2.16",

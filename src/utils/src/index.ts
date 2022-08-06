@@ -1,6 +1,7 @@
 export type { CoasterError } from "./error";
 export type { Resolvable } from "./resolvable";
 
+export { arrayIncludes } from "./arrayIncludes";
 export { assertIsError } from "./assertIsError";
 export { assertIsNotCoasterError } from "./assertIsNotCoasterError";
 export { asTypeOrError } from "./asTypeOrError";

@@ -18,6 +18,7 @@
     "build": "yarn build:unit-test"
   },
   "dependencies": {
+    "execa": "6.1.0",
     "esbuild": "latest",
     "vitest": "^0.9.3"
   },

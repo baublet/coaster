@@ -2,7 +2,16 @@ import type { Resolvable } from "@baublet/coaster-utils";
 
 import type { RequestContext } from "../context/request";
 
-export type HttpMethod = "get" | "post" | "put" | "delete" | "patch" | string;
+export const HTTP_METHODS = [
+  "get",
+  "post",
+  "put",
+  "delete",
+  "patch",
+  "options",
+  "head",
+] as const;
+export type HttpMethod = typeof HTTP_METHODS[number];
 
 export interface NormalizedEndpoint {
   endpoint: string;

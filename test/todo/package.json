@@ -2,9 +2,7 @@
   "name": "todo-test",
   "license": "MIT",
   "version": "0.0.1",
-  "bin": "",
   "dependencies": {
-    "@baublet/service-container": "^0.7.0",
     "@baublet/coaster": "0.0.1"
   }
 }

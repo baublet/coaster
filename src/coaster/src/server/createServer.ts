@@ -16,17 +16,28 @@ import { NormalizedManifest } from "../manifest/types";
 import { Server } from "./types";
 
 export async function createServer(
-  manifest: NormalizedManifest
+  manifest: NormalizedManifest,
+  options: {
+    afterEndpointsLoaded?: (
+      endPoints: (CoasterError | ResolvedEndPoint)[]
+    ) => Promise<(CoasterError | ResolvedEndPoint)[]>;
+  } = {}
 ): Promise<Server | CoasterError> {
   const allEndpointDescriptors = manifest.endpoints;
 
-  const endpoints = await asyncMap(allEndpointDescriptors, async (subject) => {
-    const unresolvedEndpoint = await getEndpointFromFileDescriptor(subject);
-    const fullyResolved = await fullyResolve<CoasterError | ResolvedEndPoint>(
-      unresolvedEndpoint
-    );
-    return fullyResolved;
-  });
+  const loadedEndpoints = await asyncMap(
+    allEndpointDescriptors,
+    async (subject) => {
+      const unresolvedEndpoint = await getEndpointFromFileDescriptor(subject);
+      const fullyResolved = await fullyResolve<CoasterError | ResolvedEndPoint>(
+        unresolvedEndpoint
+      );
+      return fullyResolved;
+    }
+  );
+  const endpoints = options.afterEndpointsLoaded
+    ? await options.afterEndpointsLoaded(loadedEndpoints)
+    : loadedEndpoints;
 
   const app = express();
 

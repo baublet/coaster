@@ -1,7 +1,5 @@
 import path from "path";
-import { spawn } from "child_process";
-
-const start = process.hrtime();
+import { execa } from "execa";
 
 const testRunnerPath = path.resolve(
   __dirname,
@@ -11,22 +9,16 @@ const testRunnerPath = path.resolve(
   "vitest"
 );
 
-const command = spawn("node", [testRunnerPath, "run"], {
+const additionalArguments: string[] = [];
+
+if (!process.argv.includes("--watch")) {
+  additionalArguments.push("run");
+}
+
+execa("node", [testRunnerPath, ...additionalArguments], {
+  all: true,
   cwd: process.cwd(),
   env: process.env,
   argv0: process.argv0,
-});
-
-command.stdout.on("data", (data) => {
-  process.stdout.write(data);
-});
-
-command.stderr.on("data", (data) => {
-  process.stderr.write(data);
-});
-
-command.on("close", (code) => {
-  const stop = process.hrtime(start);
-  console.log(`${(stop[0] * 1e9 + stop[1]) / 1e9}s`);
-  process.exit(code);
+  stdio: "inherit",
 });
