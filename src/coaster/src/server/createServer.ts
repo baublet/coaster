@@ -67,16 +67,17 @@ export async function createServer(
       });
     }
 
-    const methodRegistrar = (app as any)[normalizedEndpoint.method];
-    if (methodRegistrar === undefined) {
-      return createCoasterError({
-        code: "createServer-endpoint-method-not-supported",
-        message: `Endpoint method ${normalizedEndpoint.method} not supported`,
-      });
+    for (const method of normalizedEndpoint.method) {
+      const methodRegistrar = (app as any)[method];
+      if (methodRegistrar === undefined) {
+        return createCoasterError({
+          code: "createServer-endpoint-method-not-supported",
+          message: `Endpoint method ${normalizedEndpoint.method} not supported`,
+        });
+      }
+      // Register the endpoint with express
+      methodRegistrar(endpoint.endpoint, endpoint.handler);
     }
-
-    // Register the endpoint with express
-    methodRegistrar(endpoint.endpoint, endpoint.handler);
   }
 
   let server: http.Server;
