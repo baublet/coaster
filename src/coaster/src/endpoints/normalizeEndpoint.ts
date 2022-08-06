@@ -14,7 +14,7 @@ export function normalizeEndpoint(
   if (isCoasterError(endpointAsRecord)) {
     return createCoasterError({
       code: "normalizeEndpoint-endpoint-not-object",
-      message: `Expected endpoint to be an object, but got a ${typeof endpoint}`,
+      message: `Expected endpoint to be an object, but instead received a ${typeof endpoint}`,
       error: endpointAsRecord,
     });
   }
@@ -23,7 +23,7 @@ export function normalizeEndpoint(
   if (isCoasterError(route)) {
     return createCoasterError({
       code: "normalizeEndpoint-route-not-string",
-      message: `Expected endpoint route to be a string, but got a ${typeof endpointAsRecord.route}`,
+      message: `Expected endpoint route to be a string, but instead received a ${typeof endpointAsRecord.route}`,
       error: route,
     });
   }
@@ -32,7 +32,7 @@ export function normalizeEndpoint(
   if (isCoasterError(method)) {
     return createCoasterError({
       code: "normalizeEndpoint-method-not-string",
-      message: `Expected endpoint method to be a string, but got a ${typeof endpointAsRecord.method}`,
+      message: `Expected endpoint method to be a string, but instead received a ${typeof endpointAsRecord.method}`,
       error: method,
     });
   }
@@ -41,7 +41,7 @@ export function normalizeEndpoint(
   if (isCoasterError(handler)) {
     return createCoasterError({
       code: "normalizeEndpoint-handler-not-function",
-      message: `Expected endpoint handler to be a function, but got a ${typeof endpointAsRecord.handler}`,
+      message: `Expected endpoint handler to be a function, but instead received a ${typeof endpointAsRecord.handler}`,
       error: handler,
     });
   }

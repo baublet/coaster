@@ -43,7 +43,7 @@ export interface NormalizedDeploymentCommand extends NormalizedDeploymentBase {
   shouldRun?: (args: {
     context: CoasterDeploymentContext;
     dependency: NormalizedDeploymentCommand;
-  }) => Promise<{ shouldRun: boolean; reason: string } | CoasterError>;
+  }) => Promise<{ shouldRun: boolean; reason?: string } | CoasterError>;
 }
 
 export interface NormalizedDeploymentFunction extends NormalizedDeploymentBase {

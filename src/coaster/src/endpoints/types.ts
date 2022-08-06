@@ -1,22 +1,24 @@
 import type { Resolvable } from "@baublet/coaster-utils";
 
-import type { RequestContext } from "../context";
+import type { RequestContext } from "../context/request";
 
-export type NormalizedEndpoint = {
+export type HttpMethod = "get" | "post" | "put" | "delete" | "patch" | string;
+
+export interface NormalizedEndpoint {
   endpoint: string;
   method: string;
   handler: EndPointHandler;
-};
+}
 
-export type ResolvedEndPoint = {
+export interface ResolvedEndPoint {
   endpoint: string;
-  method?: "get" | "post" | "put" | "delete" | "patch" | string;
+  method?: HttpMethod | HttpMethod[];
   handler: EndPointHandler;
-};
+}
 
 export type EndPoint = Resolvable<{
   endpoint: string;
-  method?: "get" | "post" | "put" | "delete" | "patch" | string;
+  method?: HttpMethod | HttpMethod[];
   handler: EndPointHandler;
 }>;
 
