@@ -13,11 +13,13 @@
     "test:watch": "unit-test-watch"
   },
   "dependencies": {
+    "@baublet/coaster-log-service": "0.0.1",
     "@baublet/service-container": "^0.6.0",
     "@baublet/coaster-fs": "0.0.1",
     "@baublet/coaster-utils": "0.0.1",
     "@baublet/coaster-unit-test": "0.0.1",
     "@types/uuid": "^8.0.1",
+    "cookie-parser": "1.4.6",
     "express": "^4.18.1",
     "json5": "^2.2.1",
     "uuid": "7",
@@ -26,6 +28,7 @@
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.100",
+    "@types/cookie-parser": "1.4.3",
     "@types/express": "^4.17.13",
     "@types/node": "^12.7.2",
     "@types/yargs": "^15.0.11"

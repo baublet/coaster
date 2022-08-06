@@ -13,7 +13,10 @@
     "test": "unit-test"
   },
   "dependencies": {
-    "@baublet/coaster-unit-test": "0.0.1"
+    "safe-json-stringify": "1.2.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@baublet/coaster-unit-test": "0.0.1",
+    "@types/safe-json-stringify": "*"
+  }
 }

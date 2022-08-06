@@ -1,3 +1,4 @@
+import "cookie-parser";
 import { CoasterError } from "@baublet/coaster-utils";
 
 import { HttpMethod } from "../endpoints/types";
@@ -13,7 +14,7 @@ export interface CoasterCookieOptions {
 export interface RequestContext extends Context {
   request: {
     cookies: Map<string, string>;
-    headers: Map<string, string>;
+    headers: Map<string, string | string[] | undefined>;
     method: HttpMethod;
     body?: any;
   };

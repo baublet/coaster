@@ -1,0 +1,18 @@
+{
+  "name": "@baublet/coaster-log-service",
+  "author": {
+    "email": "baublet@gmail.com",
+    "name": "Ryan Poe",
+    "url": "https://www.ryanmpoe.com"
+  },
+  "license": "MIT",
+  "version": "0.0.1",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "unit-test",
+    "test:watch": "unit-test-watch"
+  },
+  "dependencies": {
+    "@baublet/service-container": "^0.6.0"
+  }
+}
