@@ -12,18 +12,23 @@ import {
 import { getEndpointFromFileDescriptor } from "../endpoints/getEndpointFromFileDescriptor";
 import { normalizeEndpoint } from "../endpoints/normalizeEndpoint";
 import { ResolvedEndPoint } from "../endpoints/types";
-import { NormalizedManifest } from "../manifest/types";
+import { FileDescriptor, NormalizedManifest } from "../manifest/types";
 import { Server } from "./types";
 
 export async function createServer(
   manifest: NormalizedManifest,
   options: {
+    beforeEndpointsLoaded?: (
+      endpoints: FileDescriptor[]
+    ) => Promise<FileDescriptor[]>;
     afterEndpointsLoaded?: (
       endPoints: (CoasterError | ResolvedEndPoint)[]
     ) => Promise<(CoasterError | ResolvedEndPoint)[]>;
   } = {}
 ): Promise<Server | CoasterError> {
-  const allEndpointDescriptors = manifest.endpoints;
+  const allEndpointDescriptors = options.beforeEndpointsLoaded
+    ? await options.beforeEndpointsLoaded(manifest.endpoints)
+    : manifest.endpoints;
 
   const loadedEndpoints = await asyncMap(
     allEndpointDescriptors,
