@@ -30,10 +30,10 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
-"@baublet/service-container@^0.6.0":
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/@baublet/service-container/-/service-container-0.6.0.tgz#1427cf1e02c7cfb51a058eb5adcc2515dc90420e"
-  integrity sha512-pRC04LEjF4mVX1lV5X5Gg55PkkEoDqJU5bZdgf9XHel8CQrfbBXAK6lg+oX57awnRwY/KcDi4RKRMN0ngmHZvw==
+"@baublet/service-container@^0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@baublet/service-container/-/service-container-0.7.0.tgz#b52bc4e5ff2c56948614ecd98b39769a8482ca04"
+  integrity sha512-j0QyhcbQkrcYEkzVNoohTY35bUCZ0dYhjCzJWeguG/u6dcSPqsMR3P/hLbC11fpfQ+wkOyrJ8po+ZIcLjHRQKw==
 
 "@bcoe/v8-coverage@^0.2.3":
   version "0.2.3"

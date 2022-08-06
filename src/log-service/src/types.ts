@@ -10,4 +10,4 @@ export interface LogProvider {
 }
 
 export const LOG_LEVELS = ["debug", "log", "warn", "error"] as const;
-export type LogLevel = typeof LOG_LEVELS;
+export type LogLevel = typeof LOG_LEVELS[number];
