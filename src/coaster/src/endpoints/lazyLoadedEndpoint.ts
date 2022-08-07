@@ -12,11 +12,10 @@ export function lazyLoadedEndpoint<TModule extends () => Promise<any>>(
   } = {}
 ): ResolvedEndpoint["handler"] {
   let handlerPromise: Promise<ResolvedEndpoint["handler"]>;
-
   return async (context) => {
     if (!handlerPromise) {
-      handlerPromise = new Promise<ResolvedEndpoint["handler"]>(
-        (resolve) => async () => {
+      handlerPromise = new Promise<ResolvedEndpoint["handler"]>((resolve) =>
+        (async () => {
           try {
             const importedFile = await module();
 
@@ -33,14 +32,20 @@ export function lazyLoadedEndpoint<TModule extends () => Promise<any>>(
             }
 
             resolve(async (context) => {
-              await importedFile[moduleProperty](context);
-              await context.response.flushData();
+              try {
+                await importedFile[moduleProperty](context);
+              } catch (error) {
+                context.response.setStatus(500);
+                await onUnexpectedError?.({ error, context });
+              } finally {
+                context.response.flushData();
+              }
             });
           } catch (error) {
             resolve(getErrorLoadingImportHandler("Unexpected error", error));
             await onUnexpectedError?.({ error, context });
           }
-        }
+        })()
       );
     }
 

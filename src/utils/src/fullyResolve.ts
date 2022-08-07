@@ -6,16 +6,10 @@
  * @returns The fully resolved resolvable subject
  */
 export async function fullyResolve<T>(resolvable: unknown): Promise<T> {
-  let resolvedValue: any;
+  let resolvedValue: any = await resolvable;
 
-  for (let i = 256; i > 0; i--) {
-    if (typeof resolvable === "function") {
-      resolvedValue = resolvable();
-    }
-
-    if (resolvable instanceof Promise) {
-      resolvedValue = resolvedValue(await resolvable);
-    }
+  if (typeof resolvedValue === "function") {
+    resolvedValue = await resolvedValue();
   }
 
   return resolvedValue;

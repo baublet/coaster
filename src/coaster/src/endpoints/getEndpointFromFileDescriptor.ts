@@ -35,7 +35,7 @@ export async function getEndpointFromFileDescriptor(
   }
 
   const fullyResolvedExport = await perform(async () => {
-    const resolvedExport = await fullyResolve<Partial<ResolvedEndpoint>>(
+    const resolvedExport: Partial<ResolvedEndpoint> = await fullyResolve(
       fileImport[exportName]
     );
     return resolvedExport;
