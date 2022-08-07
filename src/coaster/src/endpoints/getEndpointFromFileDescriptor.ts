@@ -9,11 +9,11 @@ import {
 import { fileExists } from "@baublet/coaster-fs";
 
 import { FileDescriptor } from "../manifest/types";
-import { HTTP_METHODS, HttpMethod, ResolvedEndPoint } from "./types";
+import { HTTP_METHODS, HttpMethod, ResolvedEndpoint } from "./types";
 
 export async function getEndpointFromFileDescriptor(
   fileDescriptor: FileDescriptor
-): Promise<CoasterError | ResolvedEndPoint> {
+): Promise<CoasterError | ResolvedEndpoint> {
   const file = fileDescriptor.file;
   const exportName = fileDescriptor.exportName || "default";
 
@@ -35,7 +35,7 @@ export async function getEndpointFromFileDescriptor(
   }
 
   const fullyResolvedExport = await perform(async () => {
-    const resolvedExport = await fullyResolve<Partial<ResolvedEndPoint>>(
+    const resolvedExport = await fullyResolve<Partial<ResolvedEndpoint>>(
       fileImport[exportName]
     );
     return resolvedExport;

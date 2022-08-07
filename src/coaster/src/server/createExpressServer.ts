@@ -12,7 +12,7 @@ import {
 
 import { getEndpointFromFileDescriptor } from "../endpoints/getEndpointFromFileDescriptor";
 import { normalizeEndpoint } from "../endpoints/normalizeEndpoint";
-import { EndPointHandler, ResolvedEndPoint } from "../endpoints/types";
+import { EndpointHandler, ResolvedEndpoint } from "../endpoints/types";
 import { FileDescriptor, NormalizedManifest } from "../manifest/types";
 import { Server } from "./types";
 import { createExpressRequestContext } from "../context/createExpressRequestContext";
@@ -25,8 +25,8 @@ export async function createExpressServer(
       endpoints: FileDescriptor[]
     ) => Promise<FileDescriptor[]>;
     afterEndpointsLoaded?: (
-      endPoints: (CoasterError | ResolvedEndPoint)[]
-    ) => Promise<(CoasterError | ResolvedEndPoint)[]>;
+      endPoints: (CoasterError | ResolvedEndpoint)[]
+    ) => Promise<(CoasterError | ResolvedEndpoint)[]>;
     afterExpressLoaded?: (app: express.Express) => Promise<express.Express>;
     afterServerStart?: (args: {
       port: string | number;
@@ -144,7 +144,7 @@ async function handleExpressMethodWithHandler({
   request: Request;
   response: Response;
   next: NextFunction;
-  handler: EndPointHandler;
+  handler: EndpointHandler;
 }): Promise<void> {
   try {
     const context = await createExpressRequestContext({

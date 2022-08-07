@@ -1,6 +1,6 @@
-import { EndPoint } from "@baublet/coaster";
+import { Endpoint } from "@baublet/coaster";
 
-const todoIndex: EndPoint = () => {
+const todoIndex: Endpoint = () => {
   return {
     endpoint: "/",
     handler: async (context) => {

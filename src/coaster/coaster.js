@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 
 const { register } = require("esbuild-register/dist/node");
-register();
+register({
+  target: "node10",
+});
 
 /**
  * This file exists to ensure all of our scripts are properly linked by Yarn

@@ -1,9 +1,10 @@
 import { Command as Program } from "commander";
 import path from "path";
 
+import { isCoasterError } from "@baublet/coaster-utils";
+
 import { createExpressServer } from "../server/createExpressServer";
 import { loadRawManifest } from "../manifest/loadRawManifest";
-import { isCoasterError } from "@baublet/coaster-utils";
 import { logCoasterError } from "./utils/logCoasterError";
 
 export function serve(program: Program) {

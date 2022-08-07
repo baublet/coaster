@@ -20,6 +20,10 @@ export interface RequestContext extends Context {
   };
   response: {
     /**
+     * Returns true if the response for this request has been flushed.
+     */
+    hasFlushed: () => boolean;
+    /**
      * Sets the status of the request. Returns a CoasterError if we have already
      * sent data (like the status, headers, or any data) to the client. (We have
      * to set the status and headers early in the request. HTTP requires us to

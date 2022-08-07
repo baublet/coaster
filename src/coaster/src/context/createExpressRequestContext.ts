@@ -29,6 +29,7 @@ export async function createExpressRequestContext({
 
   let responseHeadersSent = false;
   let responseStatus = 200;
+  let hasFlushed = false;
 
   for (const [key, value] of Object.entries(request.headers)) {
     requestHeadersMap.set(key, value);
@@ -44,6 +45,7 @@ export async function createExpressRequestContext({
     },
     services: serviceContainer,
     response: {
+      hasFlushed: () => hasFlushed,
       appendData: (data) => {
         if (responseHeadersSent) {
           return createResponseHeadersSentError();
@@ -119,7 +121,9 @@ export async function createExpressRequestContext({
             });
           }
         }
-        response.send(...responseBuffer);
+        const bufferToFlush = responseBuffer.splice(0, responseBuffer.length);
+        response.send(...bufferToFlush);
+        hasFlushed = true;
       },
     },
   };
