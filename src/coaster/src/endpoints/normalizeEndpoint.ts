@@ -54,6 +54,7 @@ export function normalizeEndpoint(
     }
     return [method];
   })();
+
   if (isCoasterError(method)) {
     return method;
   }

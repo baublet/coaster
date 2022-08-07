@@ -20,6 +20,7 @@ import { createExpressRequestContext } from "../context/createExpressRequestCont
 export async function createExpressServer(
   manifest: NormalizedManifest,
   options: {
+    routeLoadingMode?: "lazy" | "eager";
     beforeEndpointsLoaded?: (
       endpoints: FileDescriptor[]
     ) => Promise<FileDescriptor[]>;
@@ -53,7 +54,9 @@ export async function createExpressServer(
   );
   const endpoints = await withWrappedHook(
     options.afterEndpointsLoaded,
-    resolvedEndpoints
+    resolvedEndpoints.filter(
+      (endPointOrLazyLoad) => typeof endPointOrLazyLoad !== "function"
+    )
   );
 
   const app = await withWrappedHook(options.afterExpressLoaded, express());

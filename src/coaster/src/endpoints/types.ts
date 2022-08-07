@@ -16,19 +16,19 @@ export type HttpMethod = typeof HTTP_METHODS[number];
 export interface NormalizedEndpoint {
   endpoint: string;
   method: string[];
-  handler: EndPointHandler;
+  handler: EndpointHandler;
 }
 
-export interface ResolvedEndPoint {
+export interface ResolvedEndpoint {
   endpoint: string;
   method?: HttpMethod | HttpMethod[];
-  handler: EndPointHandler;
+  handler: EndpointHandler;
 }
 
-export type EndPoint = Resolvable<{
+export type Endpoint = Resolvable<{
   endpoint: string;
   method?: HttpMethod | HttpMethod[];
-  handler: EndPointHandler;
+  handler: EndpointHandler;
 }>;
 
-export type EndPointHandler = (context: RequestContext) => void | Promise<void>;
+export type EndpointHandler = (context: RequestContext) => void | Promise<void>;
