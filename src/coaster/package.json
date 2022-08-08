@@ -6,7 +6,8 @@
     "url": "https://www.ryanmpoe.com"
   },
   "bin": {
-    "coaster": "./coaster.js"
+    "coaster": "./coaster.js",
+    "coaster-serve": "./coasterServe.js"
   },
   "license": "MIT",
   "version": "0.0.1",
@@ -14,9 +15,10 @@
   "scripts": {
     "test": "unit-test",
     "test:watch": "unit-test-watch",
-    "build:cli": "yarn compile --outfile=dist/coaster.js src/cli/coaster.ts",
+    "build:coaster": "yarn compile --outfile=dist/coaster.js src/cli/coaster.ts",
+    "build:coaster:serve": "yarn compile --outfile=dist/coasterServe.js src/cli/serve/coasterServe.ts",
     "compile": "esbuild --bundle --platform=node --target=node10.4",
-    "build": "yarn build:cli"
+    "build": "yarn build:coaster && yarn build:coaster:serve"
   },
   "dependencies": {
     "@baublet/coaster-log-service": "0.0.1",
@@ -24,10 +26,13 @@
     "@baublet/coaster-fs": "0.0.1",
     "@baublet/coaster-utils": "0.0.1",
     "@baublet/coaster-unit-test": "0.0.1",
+    "@colors/colors": "1.5.0",
     "@types/uuid": "^8.0.1",
+    "chokidar": "^3.5.3",
     "commander": "9.4.0",
     "cookie-parser": "1.4.6",
     "esbuild-register": "latest",
+    "execa": "6.1.0",
     "express": "^4.18.1",
     "json5": "^2.2.1",
     "uuid": "7",
