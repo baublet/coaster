@@ -12,6 +12,10 @@ export interface Manifest {
    */
   endpoints?: string | string[] | FileDescriptor | FileDescriptor[];
   /**
+   * The not-found handler for your application.
+   */
+  notFound?: string | FileDescriptor;
+  /**
    * If you want Coaster to manage your deployments, use these to define your
    * deployment pipelines.
    */
@@ -24,6 +28,7 @@ export interface NormalizedManifest {
   key: string;
   endpoints: FileDescriptor[];
   deployments: FileDescriptor[];
+  notFound: FileDescriptor;
 }
 
 /**

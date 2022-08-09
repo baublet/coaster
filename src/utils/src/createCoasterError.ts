@@ -1,3 +1,5 @@
+import stringify from "safe-json-stringify";
+
 import { CoasterError, ErrorDetails } from "./error";
 import { base64encode } from "./base64encode";
 
@@ -20,7 +22,9 @@ export function createCoasterError({
   details?: ErrorDetails;
   error?: Error | CoasterError | any;
 }): CoasterError {
-  const errorSynthetic: CoasterError["error"] = { message: error };
+  const errorSynthetic: { message: string; stack?: string } = {
+    message: error,
+  };
   if (typeof error === "object" && error) {
     if (error instanceof Error) {
       errorSynthetic.message = error.message;
@@ -31,11 +35,24 @@ export function createCoasterError({
     }
   }
 
+  let newDetails = undefined;
+  if (details && error) {
+    newDetails = {
+      ...details,
+      error,
+    };
+  } else if (details && !error) {
+    newDetails = details;
+  } else if (!details && error) {
+    newDetails = {
+      previousError: stringify(error),
+    };
+  }
+
   return {
     __isCoasterError: true,
     code: base64encode(code),
     message: message,
-    details: details,
-    error: errorSynthetic,
+    details: newDetails,
   };
 }

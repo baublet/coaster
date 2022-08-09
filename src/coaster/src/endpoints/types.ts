@@ -27,7 +27,11 @@ export interface ResolvedEndpoint {
 
 export type Endpoint = Resolvable<{
   endpoint: string;
-  method?: HttpMethod | HttpMethod[];
+  method?: "all" | HttpMethod | HttpMethod[];
+  handler: EndpointHandler;
+}>;
+
+export type NotFoundEndpoint = Resolvable<{
   handler: EndpointHandler;
 }>;
 

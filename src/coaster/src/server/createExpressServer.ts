@@ -76,14 +76,15 @@ export async function createExpressServer(
     }
 
     for (const method of normalizedEndpoint.method) {
-      const methodRegistrar = (endpoint: string, handler: Function) =>
-        (app as any)[method](endpoint, handler);
-      if (methodRegistrar === undefined) {
+      if ((app as any)[method] === undefined) {
         return createCoasterError({
           code: "createServer-endpoint-method-not-supported",
           message: `Endpoint method ${normalizedEndpoint.method} not supported`,
         });
       }
+      const methodRegistrar = (endpoint: string, handler: Function) =>
+        (app as any)[method](endpoint, handler);
+
       // Register the endpoint with express
       methodRegistrar(
         endpoint.endpoint,
@@ -96,6 +97,40 @@ export async function createExpressServer(
           })
       );
     }
+  }
+
+  if (manifest.notFound) {
+    console.log("Registering 404");
+    const resolvedEndpoint = await getEndpointFromFileDescriptor({
+      file: path.resolve(process.cwd(), manifest.notFound.file),
+      exportName: manifest.notFound.exportName,
+    });
+    if (!resolvedEndpoint) {
+      return createCoasterError({
+        code: "createServer-not-found-endpoint-not-found",
+        message: `Not found endpoint not found`,
+        details: {
+          notFound: JSON.stringify(manifest.notFound),
+        },
+      });
+    }
+
+    const normalizedNotFoundEndpoint = normalizeEndpoint(resolvedEndpoint);
+    if (isCoasterError(normalizedNotFoundEndpoint)) {
+      return createCoasterError({
+        code: "createServer-not-found-endpoint-declaration-error",
+        message: `Error normalizing the not-found (404) endpoint declaration`,
+        error: normalizedNotFoundEndpoint,
+      });
+    }
+    app.use((request, response) => {
+      response.send("404");
+      handleExpressMethodWithHandler({
+        request,
+        response,
+        handler: normalizedNotFoundEndpoint.handler,
+      });
+    });
   }
 
   let server: http.Server;
@@ -143,7 +178,7 @@ async function handleExpressMethodWithHandler({
 }: {
   request: Request;
   response: Response;
-  next: NextFunction;
+  next?: NextFunction;
   handler: EndpointHandler;
 }): Promise<void> {
   try {
@@ -156,6 +191,6 @@ async function handleExpressMethodWithHandler({
   } catch {
     // TODO: handle errors
   } finally {
-    next();
+    next?.();
   }
 }

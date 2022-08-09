@@ -25,12 +25,34 @@ export async function getEndpointFromFileDescriptor(
     });
   }
 
-  const fileImport = await import(file);
-  const exportExists = exportName in fileImport;
-  if (!exportExists) {
+  const fileImport = await perform(async () => {
+    try {
+      const fileImport: Record<string, any> = await import(file);
+      const exportExists = exportName in fileImport;
+      if (!exportExists) {
+        return createCoasterError({
+          code: "getEndpointFromFileDescriptor-export-not-found",
+          message: `Endpoint descriptor file ${file} does not export "${exportName}"`,
+        });
+      }
+      return fileImport;
+    } catch (error) {
+      return "module-not-found";
+    }
+  });
+
+  if (isCoasterError(fileImport)) {
+    return fileImport;
+  }
+
+  if (fileImport === "module-not-found") {
     return createCoasterError({
-      code: "getEndpointFromFileDescriptor-export-not-found",
-      message: `Endpoint descriptor file ${file} does not export "${exportName}"`,
+      code: "getEndpointFromFileDescriptor-module-not-found",
+      message: `Endpoint descriptor file ${file} not found`,
+      details: {
+        file,
+        exportName,
+      },
     });
   }
 

@@ -47,12 +47,14 @@ export async function createExpressRequestContext({
     response: {
       hasFlushed: () => hasFlushed,
       appendData: (data) => {
+        hasFlushed = false;
         if (responseHeadersSent) {
           return createResponseHeadersSentError();
         }
         responseBuffer.push(data);
       },
       setData: (data) => {
+        hasFlushed = false;
         if (responseHeadersSent) {
           return createResponseHeadersSentError();
         }

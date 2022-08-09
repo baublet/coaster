@@ -1,9 +1,9 @@
 import { Endpoint, lazyLoadedEndpoint } from "@baublet/coaster";
 
 const todoIndex: Endpoint = {
-  endpoint: "/users",
+  endpoint: "/todos",
   method: "get",
-  handler: lazyLoadedEndpoint(() => import("./users")),
+  handler: lazyLoadedEndpoint(() => import("./todos")),
 };
 
 export default todoIndex;

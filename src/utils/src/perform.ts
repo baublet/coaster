@@ -7,18 +7,22 @@ import { CoasterError } from "./error";
  * function's returned or resolved value. Useful for wrapping non-Coaster code
  * that may throw errors.
  */
-export async function perform<T extends () => any>(
+export async function perform<T extends () => Promise<any>>(
   callback: T
-): Promise<
-  (ReturnType<T> extends Promise<infer R> ? R : ReturnType<T>) | CoasterError
-> {
+): Promise<CoasterError | PromiseResolvedType<ReturnType<T>>> {
   try {
     return await callback();
   } catch (error) {
+    console.log(new Error());
     return createCoasterError({
       code: "perform-error",
       message: "Error performing function",
       error,
+      details: {
+        stackTrace: new Error().stack,
+      },
     });
   }
 }
+
+type PromiseResolvedType<T> = T extends Promise<infer R> ? R : never;

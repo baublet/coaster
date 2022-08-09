@@ -125,16 +125,34 @@ async function parseManifest(
     const stringifiedEndpoints = jsonStringify(rootNode.endpoints);
     if (isCoasterError(stringifiedEndpoints)) {
       return createCoasterError({
-        code: `parseManifest-Endpoints-stringify`,
-        message: `Unexpected error inspecting manifest Endpoints`,
+        code: `parseManifest-endpoints-stringify`,
+        message: `Unexpected error inspecting manifest endpoints`,
         error: stringifiedEndpoints,
       });
     }
     return createCoasterError({
-      code: `parseManifest-Endpoints`,
+      code: `parseManifest-endpoints`,
       message: `One or more of the components are invalid`,
       error: endpoints,
       details: { components: stringifiedEndpoints },
+    });
+  }
+
+  const notFound = normalizeFileDescriptor(rootNode.endpoints);
+  if (isCoasterError(notFound)) {
+    const stringifiedNotFoundEndpoint = jsonStringify(rootNode.notFound);
+    if (isCoasterError(stringifiedNotFoundEndpoint)) {
+      return createCoasterError({
+        code: `parseManifest-not-found-endpoint-stringify`,
+        message: `Unexpected error inspecting manifest not-found endpoint`,
+        error: stringifiedNotFoundEndpoint,
+      });
+    }
+    return createCoasterError({
+      code: `parseManifest-not-found-endpoints`,
+      message: `One or more of the components are invalid`,
+      error: endpoints,
+      details: { components: stringifiedNotFoundEndpoint },
     });
   }
 
@@ -143,6 +161,7 @@ async function parseManifest(
     port: port,
     key,
     endpoints,
+    notFound: notFound[0],
     deployments: [],
   };
 }

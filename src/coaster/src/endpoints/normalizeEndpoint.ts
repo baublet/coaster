@@ -5,30 +5,34 @@ import {
   isCoasterError,
 } from "@baublet/coaster-utils";
 
-import { NormalizedEndpoint } from "./types";
+import { HTTP_METHODS, NormalizedEndpoint } from "./types";
 
 export function normalizeEndpoint(
   endpoint: unknown
 ): NormalizedEndpoint | CoasterError {
   const endpointAsRecord = asTypeOrError("object", endpoint);
   if (isCoasterError(endpointAsRecord)) {
-    return createCoasterError({
-      code: "normalizeEndpoint-endpoint-not-object",
-      message: `Expected endpoint to be an object, but instead received a ${typeof endpoint}`,
-      error: endpointAsRecord,
-    });
+    return endpointAsRecord;
   }
 
-  const route = asTypeOrError("string", endpointAsRecord.endpoint);
-  if (isCoasterError(route)) {
-    return createCoasterError({
-      code: "normalizeEndpoint-route-not-string",
-      message: `Expected endpoint route to be a string, but instead received a ${typeof endpointAsRecord.route}`,
-      error: route,
-    });
+  let route = "*";
+  if (endpointAsRecord.endpoint) {
+    const castRoute = asTypeOrError("string", endpointAsRecord.endpoint);
+    if (isCoasterError(castRoute)) {
+      return createCoasterError({
+        code: "normalizeEndpoint-route-not-string",
+        message: `Expected endpoint route, if provided, to be a string, but instead received a ${typeof endpointAsRecord.route}`,
+        error: route,
+      });
+    }
+    route = castRoute;
   }
 
   const method = (() => {
+    if (!endpointAsRecord.method) {
+      return [...HTTP_METHODS];
+    }
+
     if (Array.isArray(endpointAsRecord.method)) {
       const methods: string[] = [];
       for (const subjectMethod of endpointAsRecord.method) {
