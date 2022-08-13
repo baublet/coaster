@@ -4,17 +4,24 @@ import {
 } from "@baublet/coaster";
 
 const graphqlHandler: LazyLoadedHandler = createGraphqlEndpointHandler({
+  createContext: (context) => ({
+    ...context,
+    hello: "world",
+  }),
   typeDefs: [
     `
     type Query {
-      ping: String!
+      ping(fail: Boolean = false): String!
     }
   `,
   ],
   resolvers: {
     Query: {
-      ping: () => {
-        throw new Error("ruh roh");
+      ping: (parent, args: { fail: boolean }, context) => {
+        console.log(context.hello);
+        if (args.fail) {
+          throw new Error("Fail triggered");
+        }
         return "pong";
       },
     },

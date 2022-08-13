@@ -17,26 +17,46 @@ import { EndpointHandler } from "../endpoints/types";
 
 log.debug("GraphQL modules loaded");
 
-export function createGraphqlEndpointHandler({
+type ResolverType<TParent = any, TArgs = any, TContext = any, TInfo = any> = (
+  parent: TParent,
+  args: TArgs,
+  context: TContext,
+  info?: TInfo
+) => any;
+interface ResolversObjectType<TContext = RequestContext> {
+  Query?: Record<string, ResolverType<any, any, TContext>>;
+  Mutation?: Record<string, ResolverType<any, any, TContext>>;
+  [key: string]:
+    | undefined
+    | Record<string, ResolverType<any, any, TContext>>
+    | Record<string, Record<string, ResolverType<any, any, TContext>>>;
+}
+
+export function createGraphqlEndpointHandler<
+  TCreateContext extends (context: RequestContext) => any
+>({
   typeDefs,
   resolvers,
   handleError = handleErrorDefault,
   playgroundEnabled = true,
+  createContext,
 }: {
   typeDefs: string[];
-  resolvers: any;
-  handleError?: (
-    context: RequestContext,
-    error: CoasterError
-  ) => void | Promise<void>;
+  handleError?: (args: {
+    requestContext: RequestContext;
+    graphqlContext?: any;
+    error: CoasterError;
+  }) => void | Promise<void>;
   playgroundEnabled?: boolean;
+  createContext: TCreateContext;
+  resolvers: ResolversObjectType<ReturnType<TCreateContext>>;
 }): EndpointHandler {
   let open = false;
   let openPromise: Promise<void> | undefined;
 
   const server = new ApolloServer({
     typeDefs,
-    resolvers,
+    resolvers: resolvers as any,
     csrfPrevention: true,
   });
 
@@ -50,12 +70,12 @@ export function createGraphqlEndpointHandler({
     return openPromise;
   }
 
-  return async (context: RequestContext) => {
-    if (context.request.method === "get" && playgroundEnabled) {
+  return async (requestContext: RequestContext) => {
+    if (requestContext.request.method === "get" && playgroundEnabled) {
       const playgroundMiddleware = await getPlaygroundMiddleware();
       playgroundMiddleware(
-        context.request._dangerouslyAccessRawRequest(),
-        context.response._dangerouslyAccessRawResponse()
+        requestContext.request._dangerouslyAccessRawRequest(),
+        requestContext.response._dangerouslyAccessRawResponse()
       );
       return;
     }
@@ -64,82 +84,98 @@ export function createGraphqlEndpointHandler({
       await handleOpen();
     }
 
-    await parseBody(context);
+    await parseBody(requestContext);
 
-    const isPost = context.request.method === "post";
+    const isPost = requestContext.request.method === "post";
     if (!isPost) {
-      return handleError(
-        context,
-        createCoasterError({
+      return handleError({
+        requestContext,
+        error: createCoasterError({
           code: "graphql-method-not-post",
           message: "GraphQL only accepts POST requests",
           details: {
-            requestMethod: context.request.method,
-            headers: stringify(context.request.headers),
-            requestBody: stringify(context.request.body),
+            requestMethod: requestContext.request.method,
+            headers: stringify(requestContext.request.headers),
+            requestBody: stringify(requestContext.request.body),
           },
-        })
-      );
+        }),
+      });
     }
 
     const isJson =
-      context.request.headers.get("content-type")?.toString() ===
+      requestContext.request.headers.get("content-type")?.toString() ===
       "application/json";
     if (!isJson) {
-      return handleError(
-        context,
-        createCoasterError({
+      return handleError({
+        requestContext,
+        error: createCoasterError({
           code: "graphql-content-type-not-json",
           message: "GraphQL only accepts content-type: application/json",
           details: {
-            requestMethod: context.request.method,
-            headers: stringify(context.request.headers),
-            requestBody: stringify(context.request.body),
+            requestMethod: requestContext.request.method,
+            headers: stringify(requestContext.request.headers),
+            requestBody: stringify(requestContext.request.body),
           },
-        })
-      );
+        }),
+      });
     }
 
-    const hasRequestBody = Boolean(context.request.body);
+    const hasRequestBody = Boolean(requestContext.request.body);
     if (!hasRequestBody) {
-      return handleError(
-        context,
-        createCoasterError({
+      return handleError({
+        requestContext,
+        error: createCoasterError({
           code: "graphql-no-request-body",
           message: "GraphQL requires a request body",
           details: {
-            request: stringify(context.request),
+            request: stringify(requestContext.request),
           },
-        })
-      );
+        }),
+      });
     }
 
-    const requestBody = context.request.body;
+    const requestBody = requestContext.request.body;
     if (isCoasterError(requestBody)) {
-      return handleError(
-        context,
-        createCoasterError({
+      return handleError({
+        requestContext,
+        error: createCoasterError({
           code: "graphql-error-parsing-request-body",
           message: "Error parsing request body. Body must be valid JSON",
           error: requestBody,
-          details: context.request.body,
-        })
-      );
+          details: requestContext.request.body,
+        }),
+      });
     }
 
     if (typeof requestBody !== "object" || requestBody === null) {
-      return handleError(
-        context,
-        createCoasterError({
+      return handleError({
+        requestContext,
+        error: createCoasterError({
           code: "graphql-error-parsing-request-body",
           message: "Error parsing request body. Body must be an object",
           error: requestBody,
-          details: context.request.body,
-        })
-      );
+          details: requestContext.request.body,
+        }),
+      });
     }
 
     const requestBodyAsRecord: Record<string, any> = requestBody;
+
+    const graphqlContext = await perform(async () => {
+      return (await createContext?.(requestContext)) || requestContext;
+    });
+
+    if (isCoasterError(graphqlContext)) {
+      return handleError({
+        requestContext,
+        error: createCoasterError({
+          code: "graphql-error-creating-context",
+          message: "Error creating context",
+          error: graphqlContext,
+          details: requestContext.request.body,
+        }),
+      });
+    }
 
     const result = await perform(() => {
       return server.executeOperation(
@@ -148,27 +184,29 @@ export function createGraphqlEndpointHandler({
           operationName: requestBodyAsRecord.operationName,
           variables: requestBodyAsRecord.variables,
         },
-        context
+        graphqlContext
       );
     });
 
     if (isCoasterError(result)) {
-      return handleError(context, result);
+      return handleError({ graphqlContext, requestContext, error: result });
     }
 
-    const status = context.response.setStatus(result.http.statusCode || 200);
+    const status = requestContext.response.setStatus(
+      result.http.statusCode || 200
+    );
     if (isCoasterError(status)) {
-      return handleError(context, status);
+      return handleError({ graphqlContext, requestContext, error: status });
     }
 
-    const headers = context.response.setHeaders(result.http.headers);
+    const headers = requestContext.response.setHeaders(result.http.headers);
     if (isCoasterError(headers)) {
-      return handleError(context, headers);
+      return handleError({ graphqlContext, requestContext, error: headers });
     }
 
-    const json = context.response.sendJson(result.result);
+    const json = requestContext.response.sendJson(result.result);
     if (isCoasterError(json)) {
-      return handleError(context, json);
+      return handleError({ graphqlContext, requestContext, error: json });
     }
   };
 }
@@ -178,16 +216,25 @@ const error400Codes: string[] = [
   "graphql-method-not-post",
   "graphql-error-parsing-request-body",
 ];
-function handleErrorDefault(context: RequestContext, error: CoasterError) {
+function handleErrorDefault({
+  requestContext,
+  error,
+}: {
+  requestContext: RequestContext;
+  graphqlContext?: any;
+  error: CoasterError;
+}) {
   if (error400Codes.includes(error.code)) {
-    context.response.setStatus(400);
+    requestContext.response.setStatus(400);
   } else {
-    context.response.setStatus(500);
+    requestContext.response.setStatus(500);
   }
-  if (context.request.headers.get("content-type") === "application/json") {
-    context.response.sendJson(error);
+  if (
+    requestContext.request.headers.get("content-type") === "application/json"
+  ) {
+    requestContext.response.sendJson(error);
   } else {
-    context.response.setData(error);
+    requestContext.response.setData(error);
   }
 }
 
