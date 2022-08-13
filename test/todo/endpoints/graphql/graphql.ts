@@ -18,7 +18,7 @@ const graphqlHandler: LazyLoadedHandler = createGraphqlEndpointHandler({
   resolvers: {
     Query: {
       ping: (parent, args: { fail: boolean }, context) => {
-        console.log(context.hello);
+        context.log("info", "We made it!");
         if (args.fail) {
           throw new Error("Fail triggered");
         }

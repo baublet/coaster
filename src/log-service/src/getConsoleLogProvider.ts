@@ -8,7 +8,7 @@ export function getConsoleLogProvider(): LogProvider {
       console.error(message, ...optionalParams),
     warn: (message?: any, ...optionalParams: any[]) =>
       console.warn(message, ...optionalParams),
-    log: (message?: any, ...optionalParams: any[]) =>
+    info: (message?: any, ...optionalParams: any[]) =>
       console.log(message, ...optionalParams),
   };
 }

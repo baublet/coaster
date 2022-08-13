@@ -9,7 +9,7 @@ export const getConsoleLogService: () => ServiceFactory<LogService> = () => {
     setProvider: (newProvider) => {
       provider = newProvider;
     },
-    log: (...args: any[]) => provider.log(...args),
+    info: (...args: any[]) => provider.info(...args),
     debug: (...args: any[]) => provider.debug(...args),
     error: (...args: any[]) => provider.error(...args),
     warn: (...args: any[]) => provider.warn(...args),
