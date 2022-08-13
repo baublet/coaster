@@ -1,7 +1,21 @@
-import { LazyLoadedHandler } from "@baublet/coaster";
+import {
+  LazyLoadedHandler,
+  createGraphqlEndpointHandler,
+} from "@baublet/coaster";
 
-const graphqlHandler: LazyLoadedHandler = (context) => {
-  context.response.setData("Users");
-};
+const graphqlHandler: LazyLoadedHandler = createGraphqlEndpointHandler({
+  typeDefs: [
+    `
+    type Query {
+      ping: String!
+    }
+  `,
+  ],
+  resolvers: {
+    Query: {
+      ping: () => "pong",
+    },
+  },
+});
 
 export default graphqlHandler;

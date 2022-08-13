@@ -27,6 +27,10 @@ export async function createExpressRequestContext({
     }
   >();
 
+  for (const [key, value] of Object.entries(request.headers)) {
+    requestHeadersMap.set(key, value);
+  }
+
   let responseHeadersSent = false;
   let responseStatus = 200;
   let hasFlushed = false;
@@ -38,13 +42,15 @@ export async function createExpressRequestContext({
   return {
     ...getContextLogProperties(serviceContainer),
     request: {
+      _dangerouslyAccessRawRequest: () => request,
       cookies: request.cookies,
       headers: requestHeadersMap,
-      method: request.method as HttpMethod,
+      method: request.method.toLowerCase() as HttpMethod,
       body: request.body,
     },
     services: serviceContainer,
     response: {
+      _dangerouslyAccessRawResponse: () => response,
       hasFlushed: () => hasFlushed,
       appendData: (data) => {
         hasFlushed = false;
@@ -64,7 +70,7 @@ export async function createExpressRequestContext({
         if (responseHeadersSent) {
           return createResponseHeadersSentError();
         }
-        responseHeadersMap.set("Content-Type", "application/json");
+        responseHeadersMap.set("content-type", "application/json");
         responseBuffer.splice(
           0,
           responseBuffer.length,
@@ -75,14 +81,14 @@ export async function createExpressRequestContext({
         if (responseHeadersSent) {
           return createResponseHeadersSentError();
         }
-        responseHeadersMap.set(key, payload);
+        responseHeadersMap.set(key.toLowerCase(), payload);
       },
       setHeaders: (headers) => {
         if (responseHeadersSent) {
           return createResponseHeadersSentError();
         }
         for (const [key, value] of Object.entries(headers)) {
-          responseHeadersMap.set(key, value);
+          responseHeadersMap.set(key.toLowerCase(), value);
         }
       },
       getHeader: (key) => responseHeadersMap.get(key),

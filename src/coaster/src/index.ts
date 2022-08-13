@@ -7,3 +7,5 @@ export type {
 export type { Manifest } from "./manifest/types";
 
 export { lazyLoadedEndpoint } from "./endpoints/lazyLoadedEndpoint";
+
+export { createGraphqlEndpointHandler } from "./graphql/createGraphqlEndpointHandler";

@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response } from "express";
+import express, { Request, Response } from "express";
 import http from "http";
 import path from "path";
 
@@ -88,11 +88,10 @@ export async function createExpressServer(
       // Register the endpoint with express
       methodRegistrar(
         endpoint.endpoint,
-        (request: Request, response: Response, next: NextFunction) =>
+        (request: Request, response: Response) =>
           handleExpressMethodWithHandler({
             request,
             response,
-            next,
             handler: endpoint.handler,
           })
       );
@@ -100,7 +99,6 @@ export async function createExpressServer(
   }
 
   if (manifest.notFound) {
-    console.log("Registering 404");
     const resolvedEndpoint = await getEndpointFromFileDescriptor({
       file: path.resolve(process.cwd(), manifest.notFound.file),
       exportName: manifest.notFound.exportName,
@@ -124,7 +122,6 @@ export async function createExpressServer(
       });
     }
     app.use((request, response) => {
-      response.send("404");
       handleExpressMethodWithHandler({
         request,
         response,
@@ -173,15 +170,14 @@ export async function createExpressServer(
 async function handleExpressMethodWithHandler({
   request,
   response,
-  next,
   handler,
 }: {
   request: Request;
   response: Response;
-  next?: NextFunction;
   handler: EndpointHandler;
 }): Promise<void> {
   try {
+    console.log(`${request.method} ${request.url}`);
     const context = await createExpressRequestContext({
       request,
       response,
@@ -190,7 +186,5 @@ async function handleExpressMethodWithHandler({
     await context.response.flushData();
   } catch {
     // TODO: handle errors
-  } finally {
-    next?.();
   }
 }

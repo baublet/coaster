@@ -1,7 +1,4 @@
-import stringify from "safe-json-stringify";
-
 import { CoasterError, ErrorDetails } from "./error";
-import { base64encode } from "./base64encode";
 
 /**
  * Creates a CoasterError that includes a message and an opaque code. Developers
@@ -32,14 +29,14 @@ export function createCoasterError({
     newDetails = details;
   } else if (!details && error) {
     newDetails = {
-      previousError: stringify(error),
+      error,
     };
   }
 
   return {
     __isCoasterError: true,
-    code: base64encode(code),
-    message: message,
+    code,
+    message,
     details: newDetails,
   };
 }

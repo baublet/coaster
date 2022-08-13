@@ -2,7 +2,7 @@ import { Endpoint, lazyLoadedEndpoint } from "@baublet/coaster";
 
 const graphqlIndex: Endpoint = {
   endpoint: "/graphql",
-  method: "get",
+  method: ["get", "post"],
   handler: lazyLoadedEndpoint(() => import("./graphql")),
 };
 

@@ -1,4 +1,6 @@
 import "cookie-parser";
+import { Request, Response } from "express";
+
 import { CoasterError } from "@baublet/coaster-utils";
 
 import { HttpMethod } from "../endpoints/types";
@@ -13,12 +15,14 @@ export interface CoasterCookieOptions {
 
 export interface RequestContext extends Context {
   request: {
+    _dangerouslyAccessRawRequest: () => Request;
     cookies: Map<string, string>;
     headers: Map<string, string | string[] | undefined>;
     method: HttpMethod;
     body?: any;
   };
   response: {
+    _dangerouslyAccessRawResponse: () => Response;
     /**
      * Returns true if the response for this request has been flushed.
      */

@@ -3,22 +3,25 @@ import {
   CoasterError,
   createCoasterError,
   isCoasterError,
-  jsonParse,
   perform,
 } from "@baublet/coaster-utils";
 import stringify from "safe-json-stringify";
+import bodyParser from "body-parser";
 
 import { RequestContext } from "../context/request";
 import { EndpointHandler } from "../endpoints/types";
 
-export function createGraphqlEndpointHandler<TContext extends RequestContext>({
+export function createGraphqlEndpointHandler({
   typeDefs,
   resolvers,
   handleError = handleErrorDefault,
 }: {
   typeDefs: string[];
   resolvers: any;
-  handleError: (context: TContext, error: CoasterError) => void | Promise<void>;
+  handleError?: (
+    context: RequestContext,
+    error: CoasterError
+  ) => void | Promise<void>;
 }): EndpointHandler {
   let open = false;
   let openPromise: Promise<void> | undefined;
@@ -38,18 +41,20 @@ export function createGraphqlEndpointHandler<TContext extends RequestContext>({
     return openPromise;
   }
 
-  return async (context: any) => {
+  return async (context: RequestContext) => {
     if (!open) {
       await handleOpen();
     }
+
+    await parseBody(context);
 
     const isPost = context.request.method === "post";
     if (!isPost) {
       return handleError(
         context,
         createCoasterError({
-          code: "graphqlTrack-method-not-post",
-          message: "GraphQL tracks only accepts POST requests",
+          code: "graphql-method-not-post",
+          message: "GraphQL only accepts POST requests",
           details: {
             requestMethod: context.request.method,
             headers: stringify(context.request.headers),
@@ -60,13 +65,14 @@ export function createGraphqlEndpointHandler<TContext extends RequestContext>({
     }
 
     const isJson =
-      context.request.headers.get("Content-Type") === "application/json";
+      context.request.headers.get("content-type")?.toString() ===
+      "application/json";
     if (!isJson) {
       return handleError(
         context,
         createCoasterError({
-          code: "graphqlTrack-content-type-not-json",
-          message: "GraphQL tracks only accepts Content-Type: application/json",
+          code: "graphql-content-type-not-json",
+          message: "GraphQL only accepts content-type: application/json",
           details: {
             requestMethod: context.request.method,
             headers: stringify(context.request.headers),
@@ -76,12 +82,26 @@ export function createGraphqlEndpointHandler<TContext extends RequestContext>({
       );
     }
 
-    const requestBody = jsonParse(context.request.body);
+    const hasRequestBody = Boolean(context.request.body);
+    if (!hasRequestBody) {
+      return handleError(
+        context,
+        createCoasterError({
+          code: "graphql-no-request-body",
+          message: "GraphQL requires a request body",
+          details: {
+            request: stringify(context.request),
+          },
+        })
+      );
+    }
+
+    const requestBody = context.request.body;
     if (isCoasterError(requestBody)) {
       return handleError(
         context,
         createCoasterError({
-          code: "graphqlTrack-error-parsing-request-body",
+          code: "graphql-error-parsing-request-body",
           message: "Error parsing request body. Body must be valid JSON",
           error: requestBody,
           details: context.request.body,
@@ -93,7 +113,7 @@ export function createGraphqlEndpointHandler<TContext extends RequestContext>({
       return handleError(
         context,
         createCoasterError({
-          code: "graphqlTrack-error-parsing-request-body",
+          code: "graphql-error-parsing-request-body",
           message: "Error parsing request body. Body must be an object",
           error: requestBody,
           details: context.request.body,
@@ -135,7 +155,32 @@ export function createGraphqlEndpointHandler<TContext extends RequestContext>({
   };
 }
 
+const error400Codes: string[] = [
+  "graphql-error-parsing-request-body",
+  "graphql-method-not-post",
+  "graphql-error-parsing-request-body",
+];
 function handleErrorDefault(context: RequestContext, error: CoasterError) {
-  context.response.setStatus(500);
-  context.response.sendJson(error);
+  if (error400Codes.includes(error.code)) {
+    context.response.setStatus(400);
+  } else {
+    context.response.setStatus(500);
+  }
+  if (context.request.headers.get("content-type") === "application/json") {
+    context.response.sendJson(error);
+  } else {
+    context.response.setData(error);
+  }
+}
+
+const handleBodyParsing = bodyParser.json();
+function parseBody(context: RequestContext): Promise<void> {
+  const request = context.request._dangerouslyAccessRawRequest();
+  const response = context.response._dangerouslyAccessRawResponse();
+  return new Promise<void>((resolve) => {
+    handleBodyParsing(request, response, () => {
+      context.request.body = request.body;
+      resolve();
+    });
+  });
 }
