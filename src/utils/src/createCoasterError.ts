@@ -22,19 +22,6 @@ export function createCoasterError({
   details?: ErrorDetails;
   error?: Error | CoasterError | any;
 }): CoasterError {
-  const errorSynthetic: { message: string; stack?: string } = {
-    message: error,
-  };
-  if (typeof error === "object" && error) {
-    if (error instanceof Error) {
-      errorSynthetic.message = error.message;
-      errorSynthetic.stack = error.stack;
-    } else {
-      errorSynthetic.message = error?.message;
-      errorSynthetic.stack = error?.stack;
-    }
-  }
-
   let newDetails = undefined;
   if (details && error) {
     newDetails = {

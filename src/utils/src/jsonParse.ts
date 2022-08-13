@@ -4,7 +4,7 @@ import { CoasterError } from "./error";
 
 export function jsonParse(
   ...args: Parameters<typeof JSON["parse"]>
-): string | CoasterError {
+): unknown | CoasterError {
   try {
     return JSON.parse(...args);
   } catch (error) {

@@ -7,5 +7,6 @@ export const manifest: Manifest = {
     { file: "endpoints/" },
     { file: "endpoints/users" },
     { file: "endpoints/todos" },
+    { file: "endpoints/graphql" },
   ],
 };

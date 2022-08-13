@@ -12,6 +12,8 @@ export { base64encode } from "./base64encode";
 export { collate } from "./collate";
 export { createCoasterError } from "./createCoasterError";
 export { fullyResolve } from "./fullyResolve";
+export { objectHasProperty } from "./objectHasProperty";
+export { htmlifyCoasterErrorPage } from "./htmlifyCoasterErrorPage";
 export { isCoasterError } from "./isCoasterError";
 export { jsonParse } from "./jsonParse";
 export { jsonStringify } from "./jsonStringify";
