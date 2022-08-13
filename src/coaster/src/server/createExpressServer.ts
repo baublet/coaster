@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import http from "http";
 import path from "path";
+import hash from "node-object-hash";
 
 import {
   asyncMap,
@@ -16,6 +17,7 @@ import { EndpointHandler, ResolvedEndpoint } from "../endpoints/types";
 import { FileDescriptor, NormalizedManifest } from "../manifest/types";
 import { Server } from "./types";
 import { createExpressRequestContext } from "../context/createExpressRequestContext";
+import { log } from "../server/log";
 
 export async function createExpressServer(
   manifest: NormalizedManifest,
@@ -47,9 +49,9 @@ export async function createExpressServer(
 
   const resolvedEndpoints = await asyncMap(
     allEndpointDescriptors,
-    async (subject) => {
+    (subject) => {
       subject.file = path.resolve(process.cwd(), subject.file);
-      return await getEndpointFromFileDescriptor(subject);
+      return getEndpointFromFileDescriptor(subject);
     }
   );
   const endpoints = await withWrappedHook(
@@ -143,7 +145,7 @@ export async function createExpressServer(
               resolve();
             })
             .catch((error) => {
-              console.error(error);
+              log.error(error);
               resolve(error);
             });
         });
@@ -167,6 +169,10 @@ export async function createExpressServer(
   };
 }
 
+const hashRequest = hash({
+  sort: true,
+  coerce: true,
+});
 async function handleExpressMethodWithHandler({
   request,
   response,
@@ -176,8 +182,21 @@ async function handleExpressMethodWithHandler({
   response: Response;
   handler: EndpointHandler;
 }): Promise<void> {
+  const requestIncomingTime = Date.now();
+  const uniqueRequestHash = hashRequest.hash({
+    time: requestIncomingTime,
+    request: {
+      method: request.method,
+      url: request.url,
+      headers: request.headers,
+      body: request.body,
+      query: request.query,
+      protocol: request.protocol,
+      originalUrl: request.originalUrl,
+    },
+  });
   try {
-    console.log(`${request.method} ${request.url}`);
+    log.debug(`${request.method} ${request.url} [${uniqueRequestHash}]`);
     const context = await createExpressRequestContext({
       request,
       response,

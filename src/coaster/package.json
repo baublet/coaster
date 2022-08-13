@@ -36,7 +36,9 @@
     "execa": "6.1.0",
     "express": "^4.18.1",
     "graphql": "^16.5.0",
+    "graphql-playground-middleware-express": "^1.7.23",
     "json5": "^2.2.1",
+    "node-object-hash": "^2.3.10",
     "uuid": "7",
     "yargs": "^16.2.0",
     "yup": "^0.32.11"

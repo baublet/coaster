@@ -1,3 +1,7 @@
+import { log } from "../server/log";
+
+log.debug("Loading GraphQL modules");
+
 import { ApolloServer } from "@apollo/server";
 import {
   CoasterError,
@@ -11,10 +15,13 @@ import bodyParser from "body-parser";
 import { RequestContext } from "../context/request";
 import { EndpointHandler } from "../endpoints/types";
 
+log.debug("GraphQL modules loaded");
+
 export function createGraphqlEndpointHandler({
   typeDefs,
   resolvers,
   handleError = handleErrorDefault,
+  playgroundEnabled = true,
 }: {
   typeDefs: string[];
   resolvers: any;
@@ -22,6 +29,7 @@ export function createGraphqlEndpointHandler({
     context: RequestContext,
     error: CoasterError
   ) => void | Promise<void>;
+  playgroundEnabled?: boolean;
 }): EndpointHandler {
   let open = false;
   let openPromise: Promise<void> | undefined;
@@ -29,6 +37,7 @@ export function createGraphqlEndpointHandler({
   const server = new ApolloServer({
     typeDefs,
     resolvers,
+    csrfPrevention: true,
   });
 
   async function handleOpen() {
@@ -42,6 +51,15 @@ export function createGraphqlEndpointHandler({
   }
 
   return async (context: RequestContext) => {
+    if (context.request.method === "get" && playgroundEnabled) {
+      const playgroundMiddleware = await getPlaygroundMiddleware();
+      playgroundMiddleware(
+        context.request._dangerouslyAccessRawRequest(),
+        context.response._dangerouslyAccessRawResponse()
+      );
+      return;
+    }
+
     if (!open) {
       await handleOpen();
     }
@@ -183,4 +201,23 @@ function parseBody(context: RequestContext): Promise<void> {
       resolve();
     });
   });
+}
+
+let graphqlPlaygroundMiddleware: Promise<any> | undefined;
+function getPlaygroundMiddleware() {
+  if (!graphqlPlaygroundMiddleware) {
+    log.debug("Loading GraphQL Playground middleware");
+    graphqlPlaygroundMiddleware = import(
+      "graphql-playground-middleware-express"
+    ).then((module) => {
+      log.debug("GraphQL playground module loaded");
+      return module.default({
+        endpoint: " ",
+        settings: {
+          "request.credentials": "include",
+        },
+      });
+    });
+  }
+  return graphqlPlaygroundMiddleware;
 }

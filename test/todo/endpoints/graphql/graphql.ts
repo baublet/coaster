@@ -13,7 +13,10 @@ const graphqlHandler: LazyLoadedHandler = createGraphqlEndpointHandler({
   ],
   resolvers: {
     Query: {
-      ping: () => "pong",
+      ping: () => {
+        throw new Error("ruh roh");
+        return "pong";
+      },
     },
   },
 });

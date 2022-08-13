@@ -3,11 +3,12 @@ import { CoasterError, isCoasterError } from "@baublet/coaster-utils";
 import { NormalizedManifest } from "../../manifest/types";
 import { createExpressServer } from "../../server/createExpressServer";
 import { Server } from "../../server/types";
+import { log } from "../../server/log";
 
-export async function initializeExpressServer(
+export function initializeExpressServer(
   manifest: NormalizedManifest
 ): Promise<Server | CoasterError> {
-  return await createExpressServer(manifest, {
+  return createExpressServer(manifest, {
     afterEndpointsLoaded: async (endpoints) => {
       // Loop through them twice: once to see if we should exit,
       // then exit if there are errors. If there are no errors,
@@ -20,13 +21,13 @@ export async function initializeExpressServer(
           // NOOP: here for type safety
           continue;
         }
-        console.log(`Loaded endpoint: ${endpoint?.endpoint}`);
+        log.debug(`Loaded endpoint: ${endpoint?.endpoint}`);
       }
 
       return endpoints;
     },
     afterServerStart: async ({ port }) => {
-      console.log(`Server started on port ${port} 🚂`);
+      log.info(`Server started on port ${port} 🚂`);
     },
   });
 }
