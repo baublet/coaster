@@ -104,6 +104,7 @@ export async function createGraphqlTrack({
   });
 
   return {
+    __isCoasterTrack: true,
     build: () => {},
     handler: graphqlHandler,
   };
