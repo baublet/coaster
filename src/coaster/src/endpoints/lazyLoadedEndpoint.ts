@@ -63,7 +63,7 @@ const defaultOnUnexpectedError: OnUnexpectedError = async ({
   context,
   error,
 }) => {
-  context.log("error", "Unexpected error in handler", error);
+  context.log("error", "Unexpected error in handler", { error });
   context.response.setStatus(500);
   context.response.flushData();
 };

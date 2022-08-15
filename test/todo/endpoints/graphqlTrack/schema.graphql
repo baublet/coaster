@@ -1,0 +1,47 @@
+type Query {
+  ping(fail: Boolean = false): String!
+  user: User
+}
+
+type Mutation {
+  createTodo(input: CreateTodoInput!): TodoMutationPayload!
+  updateTodo(input: UpdateTodoInput!): TodoMutationPayload!
+  deleteTodo(input: DeleteTodoInput!): TodoMutationPayload!
+}
+
+type Todo {
+  id: ID!
+  text: String!
+  status: TodoStatus!
+  user: User!
+}
+
+type User {
+  id: ID!
+  name: String!
+  todos: [Todo!]!
+}
+
+type TodoMutationPayload {
+  success: Boolean!
+  status: TodoStatus!
+}
+
+input CreateTodoInput {
+  text: String!
+}
+
+input UpdateTodoInput {
+  id: ID!
+  text: String
+  completed: Boolean
+}
+
+input DeleteTodoInput {
+  id: ID!
+}
+
+enum TodoStatus {
+  TODO
+  DONE
+}

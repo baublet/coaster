@@ -9,11 +9,7 @@ const graphqlHandler: LazyLoadedHandler = createGraphqlEndpointHandler({
     hello: "world",
   }),
   typeDefs: [
-    `
-    type Query {
-      ping(fail: Boolean = false): String!
-    }
-  `,
+    `type Query { ping(fail: Boolean = false): PingResponse } type PingResponse { message: String! }`,
   ],
   resolvers: {
     Query: {
@@ -22,7 +18,7 @@ const graphqlHandler: LazyLoadedHandler = createGraphqlEndpointHandler({
         if (args.fail) {
           throw new Error("Fail triggered");
         }
-        return "pong";
+        return { message: "pong" };
       },
     },
   },

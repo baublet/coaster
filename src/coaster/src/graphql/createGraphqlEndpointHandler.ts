@@ -57,7 +57,6 @@ export function createGraphqlEndpointHandler<
   const server = new ApolloServer({
     typeDefs,
     resolvers: resolvers as any,
-    csrfPrevention: true,
   });
 
   async function handleOpen() {

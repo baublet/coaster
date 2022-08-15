@@ -1,3 +1,5 @@
+import stringify from "safe-json-stringify";
+
 import {
   CoasterError,
   createCoasterError,
@@ -37,23 +39,19 @@ export async function getEndpointFromFileDescriptor(
       }
       return fileImport;
     } catch (error) {
-      return "module-not-found";
+      return createCoasterError({
+        code: "getEndpointFromFileDescriptor-unexpected-error-importing",
+        message: `Unexpected error importing ${file}`,
+        details: {
+          error: stringify(error as any),
+          exportName,
+        },
+      });
     }
   });
 
   if (isCoasterError(fileImport)) {
     return fileImport;
-  }
-
-  if (fileImport === "module-not-found") {
-    return createCoasterError({
-      code: "getEndpointFromFileDescriptor-module-not-found",
-      message: `Endpoint descriptor file ${file} not found`,
-      details: {
-        file,
-        exportName,
-      },
-    });
   }
 
   const fullyResolvedExport = await perform(async () => {
