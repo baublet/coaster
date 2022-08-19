@@ -15,13 +15,11 @@
   "scripts": {
     "test": "unit-test",
     "test:watch": "unit-test-watch",
-    "build:coaster": "yarn compile --outfile=dist/coaster.js src/cli/coaster.ts",
-    "build:coaster:serve": "yarn compile --outfile=dist/coasterServe.js src/cli/serve/coasterServe.ts",
-    "compile": "esbuild --bundle --platform=node --target=node10.4",
-    "build": "yarn build:coaster && yarn build:coaster:serve"
+    "build": "yarn coaster-build"
   },
   "dependencies": {
     "@apollo/server": "^4.0.0-alpha.4",
+    "@baublet/coaster-build-tools": "0.0.1",
     "@baublet/coaster-fs": "0.0.1",
     "@baublet/coaster-log-service": "0.0.1",
     "@baublet/coaster-unit-test": "0.0.1",

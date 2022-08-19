@@ -2,16 +2,16 @@
  * Runtime for the standalone Coaster Express server
  */
 
-import { log } from "../../server/log";
+import { log } from "./server/log";
 log.debug("Loading Coaster internals");
 
 import path from "path";
 
 import { isCoasterError } from "@baublet/coaster-utils";
 
-import { loadRawManifest } from "../../manifest/loadRawManifest";
-import { logCoasterError } from "../utils/logCoasterError";
-import { initializeExpressServer } from "./initializeExpressServer";
+import { loadRawManifest } from "./manifest/loadRawManifest";
+import { logCoasterError } from "./cli/utils/logCoasterError";
+import { initializeExpressServer } from "./cli/serve/initializeExpressServer";
 
 log.debug("Internals loaded");
 

@@ -1,9 +1,8 @@
 import { Command as Program } from "commander";
-
-import { serve } from "./serve";
+import { serve } from "./cli/serve";
 
 const program = new Program();
-const version = require("../../package.json").version;
+const version = require("../package.json").version;
 
 (async () => {
   program

@@ -1,0 +1,27 @@
+{
+  "name": "@baublet/coaster-build-tools",
+  "description": "For building Coaster applications",
+  "version": "0.0.1",
+  "bin": {
+    "coaster-build": "./build.js"
+  },
+  "author": {
+    "email": "baublet@gmail.com",
+    "name": "Ryan Poe",
+    "url": "https://www.ryanmpoe.com"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "esbuild --external:esbuild --bundle --platform=node --target=node10.4 --outdir=dist ./src/*.ts"
+  },
+  "dependencies": {
+    "@types/fs-extra": "^9.0.13",
+    "@types/recursive-readdir": "^2.2.1",
+    "esbuild": "latest",
+    "execa": "6.1.0",
+    "fs-extra": "^10.1.0",
+    "recursive-readdir": "^2.2.2",
+    "vitest": "^0.9.3"
+  },
+  "devDependencies": {}
+}

@@ -13,11 +13,10 @@
   },
   "license": "MIT",
   "scripts": {
-    "build:unit-test": "yarn compile --outfile=dist/unit-test.js src/unit-test.ts",
-    "compile": "esbuild --bundle --platform=node --target=node10.4",
-    "build": "yarn build:unit-test"
+    "build": "yarn coaster-build"
   },
   "dependencies": {
+    "@baublet/coaster-build-tools": "0.0.1",
     "execa": "6.1.0",
     "esbuild": "latest",
     "vitest": "^0.9.3"

@@ -9,10 +9,12 @@
   "version": "0.0.1",
   "main": "src/index.ts",
   "scripts": {
+    "build": "yarn coaster-build",
     "test": "unit-test",
     "test:watch": "unit-test-watch"
   },
   "dependencies": {
+    "@baublet/coaster-build-tools": "0.0.1",
     "@baublet/service-container": "^0.7.0"
   }
 }
