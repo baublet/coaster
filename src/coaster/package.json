@@ -6,6 +6,7 @@
     "url": "https://www.ryanmpoe.com"
   },
   "bin": {
+    "build": "./build.js",
     "coaster": "./coaster.js",
     "coaster-serve": "./coasterServe.js"
   },

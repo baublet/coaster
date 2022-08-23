@@ -19,60 +19,87 @@ import { CoasterTrack } from "../track/types";
 import { getFailedTrack } from "../track/getFailedTrack";
 import { createGraphqlEndpointHandler } from "./createGraphqlEndpointHandler";
 import { log } from "../server/log";
+import { ResolvedEndpoint } from "../endpoints/types";
+
+interface CreateGraphqlTrackArguments extends ResolvedEndpoint {
+  schemaPath: string;
+  resolversPath: string;
+  createContext?: (context: any) => any;
+}
 
 export async function createGraphqlTrack({
   createContext = (context) => context,
   schemaPath,
   resolversPath,
-}: {
-  schemaPath: string;
-  resolversPath: string;
-  createContext?: (context: any) => any;
-}): Promise<CoasterTrack | CoasterError> {
+  endpoint,
+  method,
+}: Omit<CreateGraphqlTrackArguments, "handler">): Promise<
+  CoasterTrack | CoasterError
+> {
   const schemaExists = await fileExists(schemaPath);
   if (isCoasterError(schemaExists)) {
-    return getFailedTrack(schemaExists);
+    return getFailedTrack({
+      endpoint,
+      method,
+      error: schemaExists,
+    });
   }
 
   if (!schemaExists) {
-    return getFailedTrack(
-      createCoasterError({
+    return getFailedTrack({
+      endpoint,
+      method,
+      error: createCoasterError({
         message: "Could not find schema file " + schemaPath,
         code: "createGraphqlTrack-schemaNotFound",
         details: {
           schemaPath,
         },
-      })
-    );
+      }),
+    });
   }
 
   const typeDefs = await readFile(schemaPath);
   if (isCoasterError(typeDefs)) {
-    return getFailedTrack(typeDefs);
+    return getFailedTrack({
+      endpoint,
+      method,
+      error: typeDefs,
+    });
   }
 
   const resolversStats = await stat(resolversPath);
   if (isCoasterError(resolversStats)) {
-    return getFailedTrack(resolversStats);
+    return getFailedTrack({
+      endpoint,
+      method,
+      error: resolversStats,
+    });
   }
 
   if (!resolversStats.isDirectory()) {
-    return getFailedTrack(
-      createCoasterError({
+    return getFailedTrack({
+      endpoint,
+      method,
+      error: createCoasterError({
         message: "Resolvers path must be a directory",
         code: "createGraphqlTrack-resolvers-path-must-be-a-directory",
         details: {
           resolversPath,
         },
-      })
-    );
+      }),
+    });
   }
 
   const allResolversFiles = await getAllFilesInDirectoryRecursively(
     resolversPath
   );
   if (isCoasterError(allResolversFiles)) {
-    return getFailedTrack(allResolversFiles);
+    return getFailedTrack({
+      endpoint,
+      method,
+      error: allResolversFiles,
+    });
   }
 
   const resolversMap = new Map<string, (...args: any[]) => any>();
@@ -105,8 +132,12 @@ export async function createGraphqlTrack({
 
   return {
     __isCoasterTrack: true,
-    build: () => {},
+    build: (tools) => {
+      tools.log.debug("~~ TBD placeholder for building applications ~~");
+    },
     handler: graphqlHandler,
+    endpoint,
+    method,
   };
 }
 

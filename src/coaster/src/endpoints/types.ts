@@ -25,14 +25,18 @@ export interface ResolvedEndpoint {
   handler: EndpointHandler;
 }
 
-export type Endpoint = Resolvable<{
+export type Endpoint = Resolvable<EndpointInput>;
+
+interface EndpointInput {
   endpoint: string;
   method?: "all" | HttpMethod | HttpMethod[];
   handler: EndpointHandler;
-}>;
+}
 
 export type NotFoundEndpoint = Resolvable<{
   handler: EndpointHandler;
 }>;
 
-export type EndpointHandler = (context: RequestContext) => void | Promise<void>;
+export interface EndpointHandler {
+  (context: RequestContext): void | Promise<void>;
+}

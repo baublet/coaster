@@ -1,9 +1,13 @@
-import { Endpoint, lazyLoadedEndpoint } from "@baublet/coaster";
+import path from "path";
 
-const graphqlIndex: Endpoint = {
-  endpoint: "/graphqlTrack",
+import { createGraphqlTrack } from "@baublet/coaster";
+
+const graphqlTrack = createGraphqlTrack({
+  endpoint: "/graphql-track",
   method: ["get", "post"],
-  handler: lazyLoadedEndpoint(() => import("./graphqlTrack")),
-};
+  createContext: (context) => context,
+  resolversPath: path.resolve(__dirname, "resolvers"),
+  schemaPath: path.resolve(__dirname, "schema.graphql"),
+});
 
-export default graphqlIndex;
+export default graphqlTrack;

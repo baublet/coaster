@@ -1,5 +1,5 @@
 {
-  "name": "todo-test",
+  "name": "@baublet/coaster-todo-test",
   "license": "MIT",
   "version": "0.0.1",
   "dependencies": {

@@ -2,11 +2,12 @@ import { CoasterError, isCoasterError } from "@baublet/coaster-utils";
 
 import { CoasterTrack } from "./types";
 import { EndpointHandler } from "../endpoints/types";
+import { RequestContext } from "../context/request";
 
 export function getTrackHandler<T extends Promise<CoasterTrack | CoasterError>>(
   track: T
 ): EndpointHandler {
-  return async (context) => {
+  async function coasterTrackHandler(context: RequestContext) {
     const resolvedTrack = await track;
 
     if (isCoasterError(resolvedTrack)) {
@@ -16,5 +17,7 @@ export function getTrackHandler<T extends Promise<CoasterTrack | CoasterError>>(
     }
 
     return resolvedTrack.handler(context);
-  };
+  }
+
+  return coasterTrackHandler;
 }
