@@ -21,7 +21,11 @@ export async function buildGraphqlTrack({
       // documents: "./src/resolvers/**/*.ts",
       generates: {
         [outputFile]: {
-          plugins: ["typescript-operations", "typescript-resolvers"],
+          plugins: [
+            "typescript",
+            "typescript-operations",
+            "typescript-resolvers",
+          ],
         },
       },
     });
