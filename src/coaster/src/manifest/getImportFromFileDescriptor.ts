@@ -1,6 +1,5 @@
 import {
   CoasterError,
-  assertIsError,
   createCoasterError,
   fullyResolve,
 } from "@baublet/coaster-utils";
@@ -9,7 +8,7 @@ import { fileExists } from "@baublet/coaster-fs";
 import { FileDescriptor } from "../manifest/types";
 
 export async function getImportFromFileDescriptor<T = never>(
-  descriptor: FileDescriptor
+  descriptor: Required<FileDescriptor>
 ): Promise<T | CoasterError> {
   const filePath = descriptor.file;
   const descriptorFileExists = await fileExists(descriptor.file);
@@ -22,18 +21,40 @@ export async function getImportFromFileDescriptor<T = never>(
 
   try {
     const importedFile = await import(filePath);
-    const importName = descriptor.exportName || "default";
-    const importedModule = importedFile[importName];
+    const importName = descriptor.exportName;
 
+    if (!importName) {
+      return createCoasterError({
+        code: "getImportFromFileDescriptor-no-export-name",
+        message: `Export not found: ${importName} in ${filePath}`,
+        details: {
+          descriptor,
+        },
+      });
+    }
+
+    if (!(importName in importedFile)) {
+      return createCoasterError({
+        code: "getImportFromFileDescriptor-export-not-found",
+        message: `Export not found: ${importName} in ${filePath}`,
+        details: {
+          descriptor,
+        },
+      });
+    }
+
+    const importedModule = importedFile[importName];
     const fullyResolvedEndpoint = await fullyResolve<T>(importedModule);
 
     return fullyResolvedEndpoint;
   } catch (error) {
-    assertIsError(error);
     return createCoasterError({
       code: "getImportFromFileDescriptor-fileImportError",
       message: `Unexpected error importing file (${filePath})`,
-      error,
+      details: {
+        error,
+        descriptor,
+      },
     });
   }
 }

@@ -4,6 +4,7 @@ export type {
   EndpointHandler,
   NotFoundEndpoint,
 } from "./endpoints/types";
+export { createNotFoundEndpoint } from "./endpoints/createNotFoundEndpoint";
 export type { Manifest } from "./manifest/types";
 
 export { lazyLoadedEndpoint } from "./endpoints/lazyLoadedEndpoint";

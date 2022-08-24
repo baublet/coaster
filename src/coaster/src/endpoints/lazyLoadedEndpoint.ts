@@ -1,10 +1,12 @@
+import stringify from "safe-json-stringify";
+
 import { RequestContext } from "../context/request";
 import { ResolvedEndpoint } from "./types";
 
 export function lazyLoadedEndpoint<TModule extends () => Promise<any>>(
   module: TModule,
   {
-    moduleProperty = "default",
+    moduleProperty = "handler",
     onUnexpectedError = defaultOnUnexpectedError,
   }: {
     moduleProperty?: string;
@@ -26,6 +28,7 @@ export function lazyLoadedEndpoint<TModule extends () => Promise<any>>(
                   `Handler has no such export: "${moduleProperty}"`,
                   {
                     moduleProperty,
+                    properties: Object.keys(importedFile),
                   }
                 )
               );
@@ -73,6 +76,10 @@ export type LazyLoadedHandler = (context: RequestContext) => any;
 const getErrorLoadingImportHandler =
   (reason: string, ...details: any[]) =>
   (context: RequestContext) => {
+    context.response.setStatus(500);
+    context.response.appendData(
+      `Error loading endpoint handler: ${stringify([reason, ...details])}`
+    );
     context.log("error", "Error lazy loading endpoint handler", {
       reason,
       details: details.length ? details : undefined,

@@ -5,19 +5,19 @@ import {
   isCoasterError,
   jsonStringify,
 } from "@baublet/coaster-utils";
-import { Manifest, NormalizedFileDescriptor } from "./types";
+import { Manifest, FileDescriptor } from "./types";
 
 export function normalizeFileDescriptor(
   field: Manifest["endpoints"]
-): NormalizedFileDescriptor[] | CoasterError {
+): FileDescriptor[] | CoasterError {
   if (typeof field === "string") {
-    return [{ file: field, exportName: "default" }];
+    return [{ file: field }];
   } else if (Array.isArray(field)) {
-    const descriptors: NormalizedFileDescriptor[] = [];
+    const descriptors: FileDescriptor[] = [];
 
     for (const descriptor of field) {
       if (typeof descriptor === "string") {
-        descriptors.push({ file: descriptor, exportName: "default" });
+        descriptors.push({ file: descriptor });
       } else {
         const descriptorAsRecord = asTypeOrError("object", descriptor);
         if (isCoasterError(descriptorAsRecord)) {
@@ -43,7 +43,7 @@ export function normalizeFileDescriptor(
 
         const exportName = descriptor.exportName
           ? asTypeOrError("string", descriptor.exportName)
-          : "default";
+          : undefined;
         if (isCoasterError(exportName)) {
           return createCoasterError({
             code: "normalizeFileDescriptor-export-name-not-string",
@@ -55,7 +55,7 @@ export function normalizeFileDescriptor(
         }
         descriptors.push({
           file,
-          exportName: descriptor.exportName || "default",
+          exportName: descriptor.exportName,
         });
       }
     }
@@ -87,7 +87,7 @@ export function normalizeFileDescriptor(
 
     const exportName = descriptor.exportName
       ? asTypeOrError("string", descriptor.exportName)
-      : "default";
+      : undefined;
     if (isCoasterError(exportName)) {
       return createCoasterError({
         code: "normalizeFileDescriptor-export-name-not-string",

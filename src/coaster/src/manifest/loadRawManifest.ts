@@ -138,7 +138,7 @@ async function parseManifest(
     });
   }
 
-  const notFound = normalizeFileDescriptor(rootNode.endpoints);
+  const notFound = normalizeFileDescriptor(rootNode.notFound);
   if (isCoasterError(notFound)) {
     const stringifiedNotFoundEndpoint = jsonStringify(rootNode.notFound);
     if (isCoasterError(stringifiedNotFoundEndpoint)) {

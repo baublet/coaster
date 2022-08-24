@@ -8,7 +8,6 @@ import {
   perform,
   isCoasterError,
 } from "@baublet/coaster-utils";
-import { fileExists } from "@baublet/coaster-fs";
 
 import { FileDescriptor } from "../manifest/types";
 import { HTTP_METHODS, HttpMethod, ResolvedEndpoint } from "./types";
@@ -18,15 +17,7 @@ export async function getEndpointFromFileDescriptor(
   fileDescriptor: FileDescriptor
 ): Promise<CoasterError | ResolvedEndpoint | CoasterTrack> {
   const file = fileDescriptor.file;
-  const exportName = fileDescriptor.exportName || "default";
-
-  const exists = await fileExists(file);
-  if (!exists) {
-    return createCoasterError({
-      code: "getEndpointFromFileDescriptor-file-not-found",
-      message: `Endpoint descriptor file ${file} not found`,
-    });
-  }
+  const exportName = fileDescriptor.exportName || "endpoint";
 
   const fileImport = await perform(async () => {
     try {

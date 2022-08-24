@@ -1,13 +1,12 @@
 import { Endpoint } from "@baublet/coaster";
 
-const todoIndex: Endpoint = () => {
+export const endpoint: Endpoint = () => {
   return {
     endpoint: "/",
     method: "get",
+    fruit: "loops",
     handler: async (context) => {
       context.response.setData("Hello, world!");
     },
   };
 };
-
-export default todoIndex;

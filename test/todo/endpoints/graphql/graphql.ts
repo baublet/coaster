@@ -3,7 +3,7 @@ import {
   createGraphqlEndpointHandler,
 } from "@baublet/coaster";
 
-const graphqlHandler: LazyLoadedHandler = createGraphqlEndpointHandler({
+export const handler: LazyLoadedHandler = createGraphqlEndpointHandler({
   createContext: (context) => ({
     ...context,
     hello: "world",
@@ -23,5 +23,3 @@ const graphqlHandler: LazyLoadedHandler = createGraphqlEndpointHandler({
     },
   },
 });
-
-export default graphqlHandler;

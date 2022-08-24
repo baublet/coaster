@@ -51,6 +51,7 @@ export async function createExpressServer(
     allEndpointDescriptors,
     (subject) => {
       subject.file = path.resolve(process.cwd(), subject.file);
+      subject.exportName = subject.exportName || "endpoint";
       return getEndpointFromFileDescriptor(subject);
     }
   );
@@ -117,12 +118,10 @@ export async function createExpressServer(
 
     const normalizedNotFoundEndpoint = normalizeEndpoint(resolvedEndpoint);
     if (isCoasterError(normalizedNotFoundEndpoint)) {
-      return createCoasterError({
-        code: "createServer-not-found-endpoint-declaration-error",
-        message: `Error normalizing the not-found (404) endpoint declaration`,
-        error: normalizedNotFoundEndpoint,
-      });
+      return normalizedNotFoundEndpoint;
     }
+
+    log.debug("Registering not found endpoint");
     app.use((request, response) => {
       handleExpressMethodWithHandler({
         request,
@@ -203,7 +202,8 @@ async function handleExpressMethodWithHandler({
     });
     await handler(context);
     await context.response.flushData();
-  } catch {
-    // TODO: handle errors
+  } catch (error) {
+    log.error("Unexpected error handling request", { error });
+    response.status(500).send("Unexpected error");
   }
 }
