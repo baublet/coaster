@@ -1,5 +1,6 @@
 import { Command as Program } from "commander";
 import { serve } from "./cli/serve";
+import { build } from "./cli/build";
 
 const program = new Program();
 const version = require("../package.json").version;
@@ -11,6 +12,7 @@ const version = require("../package.json").version;
     .version(version);
 
   serve(program);
+  build(program);
 
   await program.parseAsync();
 })();

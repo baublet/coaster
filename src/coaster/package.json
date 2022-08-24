@@ -6,7 +6,7 @@
     "url": "https://www.ryanmpoe.com"
   },
   "bin": {
-    "build": "./build.js",
+    "coaster-build-application": "./buildApplication.js",
     "coaster": "./coaster.js",
     "coaster-serve": "./coasterServe.js"
   },
@@ -27,6 +27,11 @@
     "@baublet/coaster-utils": "0.0.1",
     "@baublet/service-container": "^0.7.0",
     "@colors/colors": "1.5.0",
+    "@graphql-codegen/cli": "^2.11.6",
+    "@graphql-codegen/core": "^2.6.2",
+    "@graphql-codegen/typescript": "^2.7.3",
+    "@graphql-codegen/typescript-operations": "^2.5.3",
+    "@graphql-codegen/typescript-resolvers": "^2.7.3",
     "@types/uuid": "^8.0.1",
     "chokidar": "^3.5.3",
     "commander": "9.4.0",

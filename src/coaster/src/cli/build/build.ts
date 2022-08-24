@@ -44,7 +44,7 @@ export function build(program: Program) {
         process.cwd(),
         "node_modules",
         ".bin",
-        "coaster-build"
+        "coaster-build-application"
       );
 
       // Set a lock, so we don't restart before the first start is complete
@@ -143,13 +143,13 @@ function runCommand(
 ): Omit<ChildProcess, "kill"> & {
   kill: (signal?: string, options?: KillOptions) => void;
 } {
-  console.log("\n⏳ " + colors.green("Starting server..."));
+  console.log("\n⏳ " + colors.green("Building application..."));
   console.log(
     "   r, enter  " +
-      colors.dim(". restart server") +
+      colors.dim(". rebuild") +
       "\n" +
       "   q, ctrl-c " +
-      colors.dim(". quit server") +
+      colors.dim(". quit") +
       "\n"
   );
 

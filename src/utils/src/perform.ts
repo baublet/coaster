@@ -13,7 +13,6 @@ export async function perform<T extends () => Promise<any>>(
   try {
     return await callback();
   } catch (error) {
-    console.log(new Error());
     return createCoasterError({
       code: "perform-error",
       message: "Error performing function",

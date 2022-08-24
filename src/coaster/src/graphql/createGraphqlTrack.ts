@@ -20,6 +20,7 @@ import { getFailedTrack } from "../track/getFailedTrack";
 import { createGraphqlEndpointHandler } from "./createGraphqlEndpointHandler";
 import { log } from "../server/log";
 import { ResolvedEndpoint } from "../endpoints/types";
+import { buildGraphqlTrack } from "./buildGraphqlTrack";
 
 interface CreateGraphqlTrackArguments extends ResolvedEndpoint {
   schemaPath: string;
@@ -133,7 +134,10 @@ export async function createGraphqlTrack({
   return {
     __isCoasterTrack: true,
     build: (tools) => {
-      tools.log.debug("~~ TBD placeholder for building applications ~~");
+      return buildGraphqlTrack({
+        tools,
+        schemaPath,
+      });
     },
     handler: graphqlHandler,
     endpoint,
