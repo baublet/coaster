@@ -5,7 +5,4 @@ export type CoasterError = {
   details?: ErrorDetails;
 };
 
-export type ErrorDetails = Record<
-  string,
-  string | number | boolean | undefined | null
->;
+export type ErrorDetails = Record<string, any>;

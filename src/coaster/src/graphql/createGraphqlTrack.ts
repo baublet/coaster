@@ -25,15 +25,17 @@ import { buildGraphqlTrack } from "./buildGraphqlTrack";
 interface CreateGraphqlTrackArguments extends ResolvedEndpoint {
   schemaPath: string;
   resolversPath: string;
-  createContext?: (context: any) => any;
+  createContextPath?: string;
+  contextType?: string;
 }
 
 export async function createGraphqlTrack({
-  createContext = (context) => context,
   schemaPath,
   resolversPath,
   endpoint,
   method,
+  createContextPath,
+  contextType,
 }: Omit<CreateGraphqlTrackArguments, "handler">): Promise<
   CoasterTrack | CoasterError
 > {
@@ -125,6 +127,47 @@ export async function createGraphqlTrack({
     }
   });
 
+  let createContext: (context: any) => any = (context) => context;
+  let resolvedContextType: string =
+    contextType || "@baublet/coaster#RequestContext";
+  if (createContextPath) {
+    try {
+      const createContextModule = await import(createContextPath);
+      const createContextFunction = createContextModule["createContext"];
+      if (!isInvokable(createContextFunction)) {
+        return getFailedTrack({
+          endpoint,
+          method,
+          error: createCoasterError({
+            message:
+              "Create context function must be invokable, and as an export named 'createContext'",
+            code: "createGraphqlTrack-create-context-function-must-be-invokable",
+            details: {
+              createContextPath,
+              createContextFunction,
+              createContextModule,
+            },
+          }),
+        });
+      }
+      createContext = createContextFunction;
+      resolvedContextType = `${createContextPath}#createContext`;
+    } catch (error) {
+      return getFailedTrack({
+        endpoint,
+        method,
+        error: createCoasterError({
+          code: "createGraphqlTrack-create-context-module-not-found",
+          message: `Could not find create context module ${createContextPath}`,
+          details: {
+            createContextPath,
+            error,
+          },
+        }),
+      });
+    }
+  }
+
   const graphqlHandler = createGraphqlEndpointHandler({
     createContext,
     resolvers: accessProxy,
@@ -137,6 +180,7 @@ export async function createGraphqlTrack({
       return buildGraphqlTrack({
         tools,
         schemaPath,
+        contextType: resolvedContextType,
       });
     },
     handler: graphqlHandler,
@@ -199,10 +243,10 @@ function loadHandlerFromResolversAndPath(
         return loadedResolver(...args);
       }
 
-      loadedResolver = module?.["handler"] || module?.["default"];
+      loadedResolver = module?.["handler"];
       if (!loadedResolver) {
         log.error(
-          `FATAL: Resolver module ${moduleFullPath} does not export a handler. Resolver modules need to export either "handler" or "default" to work as module resolvers.`,
+          `FATAL: Resolver module ${moduleFullPath} does not export a handler. Resolver modules need to export either "handler" to work as module resolvers.`,
           {
             moduleKeys: Object.keys(loadedResolver),
           }
