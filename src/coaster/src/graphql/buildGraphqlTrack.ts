@@ -1,5 +1,7 @@
 import path from "path";
+
 import { CoasterError, perform } from "@baublet/coaster-utils";
+
 import { BuildTools } from "../build/types";
 
 export async function buildGraphqlTrack({
@@ -22,7 +24,6 @@ export async function buildGraphqlTrack({
     await generate({
       silent: true,
       schema: schemaPath,
-      // documents: "./src/resolvers/**/*.ts",
       generates: {
         [outputFile]: {
           config: {

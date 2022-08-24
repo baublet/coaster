@@ -246,7 +246,7 @@ function loadHandlerFromResolversAndPath(
       loadedResolver = module?.["handler"];
       if (!loadedResolver) {
         log.error(
-          `FATAL: Resolver module ${moduleFullPath} does not export a handler. Resolver modules need to export either "handler" to work as module resolvers.`,
+          `FATAL: Resolver module ${moduleFullPath} does not export a handler. Resolver modules need to export a named "handler" to work as module resolvers.`,
           {
             moduleKeys: Object.keys(loadedResolver),
           }
