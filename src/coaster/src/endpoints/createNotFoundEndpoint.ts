@@ -4,7 +4,7 @@ export function createNotFoundEndpoint(
   handler: NormalizedEndpoint["handler"]
 ): Endpoint {
   return {
-    endpoint: "*",
+    endpoint: "404",
     handler,
   };
 }

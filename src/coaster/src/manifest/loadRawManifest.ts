@@ -7,7 +7,6 @@ import {
   createCoasterError,
   isCoasterError,
   asTypeOrError,
-  jsonStringify,
   fullyResolve,
 } from "@baublet/coaster-utils";
 
@@ -122,38 +121,17 @@ async function parseManifest(
 
   const endpoints = normalizeFileDescriptor(rootNode.endpoints);
   if (isCoasterError(endpoints)) {
-    const stringifiedEndpoints = jsonStringify(rootNode.endpoints);
-    if (isCoasterError(stringifiedEndpoints)) {
-      return createCoasterError({
-        code: `parseManifest-endpoints-stringify`,
-        message: `Unexpected error inspecting manifest endpoints`,
-        error: stringifiedEndpoints,
-      });
-    }
-    return createCoasterError({
-      code: `parseManifest-endpoints`,
-      message: `One or more of the components are invalid`,
-      error: endpoints,
-      details: { components: stringifiedEndpoints },
-    });
+    return endpoints;
   }
 
   const notFound = normalizeFileDescriptor(rootNode.notFound);
   if (isCoasterError(notFound)) {
-    const stringifiedNotFoundEndpoint = jsonStringify(rootNode.notFound);
-    if (isCoasterError(stringifiedNotFoundEndpoint)) {
-      return createCoasterError({
-        code: `parseManifest-not-found-endpoint-stringify`,
-        message: `Unexpected error inspecting manifest not-found endpoint`,
-        error: stringifiedNotFoundEndpoint,
-      });
-    }
-    return createCoasterError({
-      code: `parseManifest-not-found-endpoints`,
-      message: `One or more of the components are invalid`,
-      error: endpoints,
-      details: { components: stringifiedNotFoundEndpoint },
-    });
+    return notFound;
+  }
+
+  const middleware = normalizeFileDescriptor(rootNode.middleware);
+  if (isCoasterError(middleware)) {
+    return middleware;
   }
 
   return {
@@ -162,6 +140,7 @@ async function parseManifest(
     key,
     endpoints,
     notFound: notFound[0],
+    middleware,
     deployments: [],
   };
 }

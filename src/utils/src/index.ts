@@ -15,6 +15,7 @@ export { getAccessProxy } from "./getAccessProxy";
 export { getEventBus } from "./eventBus";
 export { fullyResolve } from "./fullyResolve";
 export { isInvokable } from "./isInvokable";
+export { ItemOrArrayOfItems } from "./ItemOrArrayOfItems";
 export { objectHasProperty } from "./objectHasProperty";
 export { htmlifyCoasterErrorPage } from "./htmlifyCoasterErrorPage";
 export { isCoasterError } from "./isCoasterError";

@@ -28,6 +28,10 @@ export async function buildGraphqlTrack({
         [outputFile]: {
           config: {
             contextType,
+            enumsAsConst: true,
+            enumsAsTypes: true,
+            maybeValue: "T | undefined",
+            inputMaybeValue: "T | null | undefined",
             ...customConfig,
           },
           plugins: [

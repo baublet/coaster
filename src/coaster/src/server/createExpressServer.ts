@@ -13,19 +13,40 @@ import {
 
 import { getEndpointFromFileDescriptor } from "../endpoints/getEndpointFromFileDescriptor";
 import { normalizeEndpoint } from "../endpoints/normalizeEndpoint";
-import { EndpointHandler, ResolvedEndpoint } from "../endpoints/types";
+import {
+  EndpointHandler,
+  NormalizedEndpointMiddleware,
+  ResolvedEndpoint,
+} from "../endpoints/types";
 import { FileDescriptor, NormalizedManifest } from "../manifest/types";
 import { Server } from "./types";
 import { createExpressRequestContext } from "../context/createExpressRequestContext";
 import { log } from "../server/log";
+import { getMiddlewareFromFileDescriptor } from "../endpoints/getMiddlewareFromFileDescriptor";
+import { RequestContext } from "../context/request";
+
+declare global {
+  namespace Express {
+    interface Request {
+      _coasterRequestContext: RequestContext;
+      _coasterRequestId: string;
+    }
+  }
+}
 
 export async function createExpressServer(
   manifest: NormalizedManifest,
   options: {
     routeLoadingMode?: "lazy" | "eager";
+    beforeMiddlewareLoaded?: (
+      endpoints: FileDescriptor[]
+    ) => Promise<FileDescriptor[]>;
     beforeEndpointsLoaded?: (
       endpoints: FileDescriptor[]
     ) => Promise<FileDescriptor[]>;
+    afterMiddlewareLoaded?: (
+      middleware: (CoasterError | NormalizedEndpointMiddleware)[]
+    ) => Promise<(CoasterError | NormalizedEndpointMiddleware)[]>;
     afterEndpointsLoaded?: (
       endPoints: (CoasterError | ResolvedEndpoint)[]
     ) => Promise<(CoasterError | ResolvedEndpoint)[]>;
@@ -42,15 +63,33 @@ export async function createExpressServer(
     }) => Promise<void>;
   } = {}
 ): Promise<Server | CoasterError> {
+  const middlewareDescriptors = await withWrappedHook(
+    options.beforeMiddlewareLoaded,
+    manifest.middleware
+  );
+
   const allEndpointDescriptors = await withWrappedHook(
     options.beforeEndpointsLoaded,
     manifest.endpoints
   );
 
+  const resolvedMiddleware = await asyncMap(
+    middlewareDescriptors,
+    (subject) => {
+      subject.file = resolvePath(subject.file);
+      subject.exportName = subject.exportName || "middleware";
+      return getMiddlewareFromFileDescriptor(subject);
+    }
+  );
+  const middleware = await withWrappedHook(
+    options.afterMiddlewareLoaded,
+    resolvedMiddleware
+  );
+
   const resolvedEndpoints = await asyncMap(
     allEndpointDescriptors,
     (subject) => {
-      subject.file = path.resolve(process.cwd(), subject.file);
+      subject.file = resolvePath(subject.file);
       subject.exportName = subject.exportName || "endpoint";
       return getEndpointFromFileDescriptor(subject);
     }
@@ -62,7 +101,38 @@ export async function createExpressServer(
     )
   );
 
+  const expressInstance = express();
+
+  // The first-stop in every request: creates the Coaster context for the request,
+  // attaches it to the request, and adds a request ID to the request.
+  expressInstance.use((request, response, next) => {
+    createRequestContext(request, response)
+      .then(() => {
+        next();
+      })
+      .catch((error) => {
+        next(error);
+      });
+  });
+
   const app = await withWrappedHook(options.afterExpressLoaded, express());
+
+  for (const middlewareFunction of middleware) {
+    if (isCoasterError(middlewareFunction)) {
+      return middlewareFunction;
+    }
+    app.use(async (request, _response, next) => {
+      try {
+        const result = await middlewareFunction(request._coasterRequestContext);
+        if (isCoasterError(result)) {
+          return next(result);
+        }
+        next();
+      } catch (error) {
+        next(error);
+      }
+    });
+  }
 
   for (const endpoint of endpoints) {
     if (isCoasterError(endpoint)) {
@@ -103,7 +173,7 @@ export async function createExpressServer(
 
   if (manifest.notFound) {
     const resolvedEndpoint = await getEndpointFromFileDescriptor({
-      file: path.resolve(process.cwd(), manifest.notFound.file),
+      file: resolvePath(manifest.notFound.file),
       exportName: manifest.notFound.exportName,
     });
     if (!resolvedEndpoint) {
@@ -206,4 +276,41 @@ async function handleExpressMethodWithHandler({
     log.error("Unexpected error handling request", { error });
     response.status(500).send("Unexpected error");
   }
+}
+
+function resolvePath(target: string): string {
+  if (target.startsWith("/")) {
+    return target;
+  }
+  return path.resolve(process.cwd(), target);
+}
+
+export async function createRequestContext(
+  request: Request,
+  response: Response
+) {
+  const requestIncomingTime = Date.now();
+  const uniqueRequestHash = hashRequest.hash({
+    time: requestIncomingTime,
+    request: {
+      method: request.method,
+      url: request.url,
+      headers: request.headers,
+      body: request.body,
+      query: request.query,
+      protocol: request.protocol,
+      originalUrl: request.originalUrl,
+    },
+  });
+  (request as any)._coasterRequestId = uniqueRequestHash;
+
+  const context = await createExpressRequestContext({
+    request,
+    response,
+  });
+  (request as any)._coasterRequestContext = context;
+
+  log.debug(`${request.method} ${request.url} [${uniqueRequestHash}]`);
+
+  return context;
 }

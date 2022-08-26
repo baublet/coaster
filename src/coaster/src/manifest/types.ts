@@ -10,7 +10,7 @@ export interface Manifest {
   /**
    * Your application's Endpoint or Endpoints.
    */
-  endpoints?: string | string[] | FileDescriptor | FileDescriptor[];
+  endpoints?: ItemOrArrayOfItems<string | FileDescriptor>;
   /**
    * The not-found handler for your application.
    */
@@ -19,7 +19,11 @@ export interface Manifest {
    * If you want Coaster to manage your deployments, use these to define your
    * deployment pipelines.
    */
-  deployments?: string | string[] | FileDescriptor | FileDescriptor[];
+  deployments?: ItemOrArrayOfItems<string | FileDescriptor>;
+  /**
+   * Application-level middleware to apply to all requests
+   */
+  middleware?: ItemOrArrayOfItems<string | FileDescriptor>;
 }
 
 export interface NormalizedManifest {
@@ -28,6 +32,7 @@ export interface NormalizedManifest {
   key: string;
   endpoints: FileDescriptor[];
   deployments: FileDescriptor[];
+  middleware: FileDescriptor[];
   notFound: FileDescriptor;
 }
 
@@ -45,3 +50,5 @@ export interface NormalizedFileDescriptor {
   file: string;
   exportName: string;
 }
+
+type ItemOrArrayOfItems<T> = T | T[];

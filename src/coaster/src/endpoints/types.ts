@@ -1,6 +1,11 @@
-import type { Resolvable } from "@baublet/coaster-utils";
+import type {
+  CoasterError,
+  Resolvable,
+  TypeOrPromiseType,
+} from "@baublet/coaster-utils";
 
 import type { RequestContext } from "../context/request";
+import { FileDescriptor } from "../manifest/types";
 
 export const HTTP_METHODS = [
   "get",
@@ -31,6 +36,16 @@ interface EndpointInput {
   endpoint: string;
   method?: "all" | HttpMethod | HttpMethod[];
   handler: EndpointHandler;
+  /**
+   * Route-level middleware applying only to requests to this endpoint
+   */
+  middleware?:
+    | string
+    | string[]
+    | FileDescriptor
+    | FileDescriptor[]
+    | EndpointMiddleware
+    | EndpointMiddleware[];
 }
 
 export type NotFoundEndpoint = Resolvable<{
@@ -40,3 +55,9 @@ export type NotFoundEndpoint = Resolvable<{
 export interface EndpointHandler {
   (context: RequestContext): void | Promise<void>;
 }
+
+export interface NormalizedEndpointMiddleware {
+  (context: RequestContext): TypeOrPromiseType<void | CoasterError>;
+}
+
+export type EndpointMiddleware = Resolvable<NormalizedEndpointMiddleware>;
