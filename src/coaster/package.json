@@ -25,7 +25,7 @@
     "@baublet/coaster-log-service": "0.0.1",
     "@baublet/coaster-unit-test": "0.0.1",
     "@baublet/coaster-utils": "0.0.1",
-    "@baublet/service-container": "^0.7.0",
+    "@baublet/service-container": "^0.8.3",
     "@colors/colors": "1.5.0",
     "@graphql-codegen/cli": "^2.11.6",
     "@graphql-codegen/core": "^2.6.2",

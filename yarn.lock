@@ -672,10 +672,10 @@
     "@babel/helper-validator-identifier" "^7.18.6"
     to-fast-properties "^2.0.0"
 
-"@baublet/service-container@^0.7.0":
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/@baublet/service-container/-/service-container-0.7.0.tgz#b52bc4e5ff2c56948614ecd98b39769a8482ca04"
-  integrity sha512-j0QyhcbQkrcYEkzVNoohTY35bUCZ0dYhjCzJWeguG/u6dcSPqsMR3P/hLbC11fpfQ+wkOyrJ8po+ZIcLjHRQKw==
+"@baublet/service-container@^0.8.3":
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/@baublet/service-container/-/service-container-0.8.3.tgz#cf8155e8c096efd0bfcab2fff020585c007300ed"
+  integrity sha512-W5JMVx3v/3H2yLVPeLwFxSun7iA26KGtWqP6DLKkcsBP9lVlDqnB+DloFeCRRLnFeVlfAkK2vmQrdHjYskTcxw==
 
 "@bcoe/v8-coverage@^0.2.3":
   version "0.2.3"
