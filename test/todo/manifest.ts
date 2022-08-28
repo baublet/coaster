@@ -4,12 +4,12 @@ export const manifest: Manifest = {
   name: "todo",
   port: "8888",
   notFound: "endpoints/notFound",
-  middleware: ["middleware/test"],
+  middleware: "middleware/test",
   endpoints: [
-    { file: "endpoints/" },
+    "endpoints/",
     "endpoints/users",
-    { file: "endpoints/todos" },
-    { file: "endpoints/graphql" },
-    { file: "endpoints/graphqlTrack" },
+    "endpoints/todos",
+    "endpoints/graphql",
+    "endpoints/graphqlTrack",
   ],
 };
