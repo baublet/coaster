@@ -1,4 +1,5 @@
 import {
+  CoasterError,
   createCoasterError,
   isCoasterError,
   perform,
@@ -11,7 +12,7 @@ export function getExpressMiddleware(
 ): NormalizedEndpointMiddleware {
   return (context) => {
     let resolved = false;
-    return new Promise((resolve) => {
+    return new Promise<void | CoasterError>((resolve) => {
       const next = (error?: any) => {
         if (resolved) {
           // TODO: log this

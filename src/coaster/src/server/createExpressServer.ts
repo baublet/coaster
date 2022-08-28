@@ -130,7 +130,7 @@ export async function createExpressServer(
     }
     app.use(async (request, _response, next) => {
       try {
-        const result = await middlewareFunction(
+        const result: any = await middlewareFunction(
           request.__coasterRequestContext
         );
         if (isCoasterError(result)) {
@@ -179,7 +179,12 @@ export async function createExpressServer(
         log.debug(`Registering middleware (${method}) ${endpoint.endpoint}`);
         for (const endpointMiddlewareFunction of normalizedEndpoint.middleware) {
           log.debug(
-            colors.dim(` ${endpointMiddlewareFunction.name || "anonymous fn"}`)
+            colors.dim(
+              ` ${
+                endpointMiddlewareFunction.__coasterMiddlewareNameHint ||
+                "anonymous fn"
+              }`
+            )
           );
           aggregatedMiddleware.push(
             async (

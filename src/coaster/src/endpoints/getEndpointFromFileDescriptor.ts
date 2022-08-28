@@ -19,6 +19,7 @@ import {
   EndpointInput,
 } from "./types";
 import { getMiddlewareFromFileDescriptor } from "./getMiddlewareFromFileDescriptor";
+import { RequestContext } from "../context/request";
 
 export async function getEndpointFromFileDescriptor(
   fileDescriptor: FileDescriptor
@@ -159,65 +160,69 @@ export async function getEndpointFromFileDescriptor(
       }
 
       let handlerPromise: Promise<CoasterError | NormalizedEndpointMiddleware>;
-      aggregatedMiddleware.push(
-        Promise.resolve(async (context) => {
-          if (!handlerPromise) {
-            handlerPromise = getMiddlewareFromFileDescriptor({
-              file: fileName,
-              exportName,
-            });
-          }
+      const handlerFn = async (context: RequestContext) => {
+        if (!handlerPromise) {
+          handlerPromise = getMiddlewareFromFileDescriptor({
+            file: fileName,
+            exportName,
+          });
+        }
 
-          const resolvedHandler = await handlerPromise;
-          if (isCoasterError(resolvedHandler)) {
-            context.log("error", "Middleware error", {
-              error: resolvedHandler,
-            });
-            context.response.setStatus(500);
-            if (
-              context.request.headers.get("content-type") === "application/json"
-            ) {
-              context.response.sendJson({ error: resolvedHandler });
-            } else {
-              context.response.setData(resolvedHandler.message);
-            }
-            context.response.flushData();
-            return;
+        const resolvedHandler = await handlerPromise;
+        if (isCoasterError(resolvedHandler)) {
+          context.log("error", "Middleware error", {
+            error: resolvedHandler,
+          });
+          context.response.setStatus(500);
+          if (
+            context.request.headers.get("content-type") === "application/json"
+          ) {
+            context.response.sendJson({ error: resolvedHandler });
+          } else {
+            context.response.setData(resolvedHandler.message);
           }
+          context.response.flushData();
+          return;
+        }
 
-          return resolvedHandler(context);
-        })
-      );
+        return resolvedHandler(context);
+      };
+      handlerFn.__coasterMiddlewareNameHint =
+        `${fileName}#${exportName}`.replace(process.cwd(), "");
+      aggregatedMiddleware.push(Promise.resolve(handlerFn));
       continue;
     }
     if (typeof middlewareItem === "string") {
       let handlerPromise: Promise<CoasterError | NormalizedEndpointMiddleware>;
-      aggregatedMiddleware.push(
-        Promise.resolve(async (context) => {
-          if (!handlerPromise) {
-            handlerPromise = getMiddlewareFromFileDescriptor({
-              file: middlewareItem,
-              exportName: "middleware",
-            });
-          }
+      const handlerFn = async (context: RequestContext) => {
+        if (!handlerPromise) {
+          handlerPromise = getMiddlewareFromFileDescriptor({
+            file: middlewareItem,
+            exportName: "middleware",
+          });
+        }
 
-          const resolvedHandler = await handlerPromise;
-          if (isCoasterError(resolvedHandler)) {
-            context.response.setStatus(500);
-            if (
-              context.request.headers.get("content-type") === "application/json"
-            ) {
-              context.response.sendJson({ error: resolvedHandler });
-            } else {
-              context.response.setData(resolvedHandler.message);
-            }
-            context.response.flushData();
-            return;
+        const resolvedHandler = await handlerPromise;
+        if (isCoasterError(resolvedHandler)) {
+          context.response.setStatus(500);
+          if (
+            context.request.headers.get("content-type") === "application/json"
+          ) {
+            context.response.sendJson({ error: resolvedHandler });
+          } else {
+            context.response.setData(resolvedHandler.message);
           }
+          context.response.flushData();
+          return;
+        }
 
-          return resolvedHandler(context);
-        })
+        return resolvedHandler(context);
+      };
+      handlerFn.__coasterMiddlewareNameHint = middlewareItem.replace(
+        process.cwd(),
+        ""
       );
+      aggregatedMiddleware.push(Promise.resolve(handlerFn));
       continue;
     }
     return createCoasterError({

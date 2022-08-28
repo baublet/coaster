@@ -9,6 +9,7 @@ import {
 
 import { FileDescriptor } from "../manifest/types";
 import { NormalizedEndpointMiddleware } from "../endpoints/types";
+import { RequestContext } from "../context/request";
 
 export async function getMiddlewareFromFileDescriptor(
   fileDescriptor: FileDescriptor
@@ -18,7 +19,7 @@ export async function getMiddlewareFromFileDescriptor(
 
   let handler: any;
 
-  return async (context) => {
+  const middlewareHandler = async (context: RequestContext) => {
     if (handler) {
       return perform(() => handler(context));
     }
@@ -76,4 +77,7 @@ export async function getMiddlewareFromFileDescriptor(
     handler = fullyResolvedExport;
     return perform(() => handler(context));
   };
+  middlewareHandler.name = `${file}#${exportName}`;
+
+  return middlewareHandler;
 }
