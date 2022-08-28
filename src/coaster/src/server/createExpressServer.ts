@@ -181,8 +181,8 @@ export async function createExpressServer(
           log.debug(
             colors.dim(
               ` ${
-                endpointMiddlewareFunction.__coasterMiddlewareNameHint ||
-                "anonymous fn"
+                (endpointMiddlewareFunction as any)
+                  ?.__coasterMiddlewareNameHint || "anonymous fn"
               }`
             )
           );
@@ -321,7 +321,9 @@ async function handleExpressMethodWithHandler({
       }));
     const resolvedContext = await context;
     await handler(resolvedContext);
-    await resolvedContext.response.flushData();
+    if (!context.response.hasFlushed()) {
+      await resolvedContext.response.flushData();
+    }
   } catch (error) {
     log.error("Unexpected error handling request", { error });
     response.status(500).send("Unexpected error");

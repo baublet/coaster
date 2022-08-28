@@ -1,5 +1,5 @@
 import { EndpointMiddleware } from "@baublet/coaster";
 
 export const middleware: EndpointMiddleware = (context) => {
-  context.log("debug", "GraphQL endpoint-level middleware. Test 4, complete!");
+  context.log("debug", "Endpoint-level middleware. Test 4, complete!");
 };
