@@ -4,7 +4,7 @@ export const manifest: Manifest = {
   name: "todo",
   port: "8888",
   notFound: "endpoints/notFound",
-  middleware: ["middleware/requestId"],
+  middleware: ["middleware/test"],
   endpoints: [
     { file: "endpoints/" },
     "endpoints/users",
