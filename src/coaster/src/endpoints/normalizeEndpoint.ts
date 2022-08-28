@@ -5,10 +5,15 @@ import {
   isCoasterError,
 } from "@baublet/coaster-utils";
 
-import { HTTP_METHODS, NormalizedEndpoint } from "./types";
+import {
+  HTTP_METHODS,
+  NormalizedEndpoint,
+  NormalizedEndpointMiddleware,
+  ResolvedEndpoint,
+} from "./types";
 
 export function normalizeEndpoint(
-  endpoint: unknown
+  endpoint: ResolvedEndpoint
 ): NormalizedEndpoint | CoasterError {
   const endpointAsRecord = asTypeOrError("object", endpoint);
   if (isCoasterError(endpointAsRecord)) {
@@ -72,9 +77,47 @@ export function normalizeEndpoint(
     });
   }
 
+  const middleware: NormalizedEndpointMiddleware[] = [];
+  if (endpointAsRecord.middleware) {
+    const middlewareDescriptors = Array.isArray(endpointAsRecord.middleware)
+      ? endpointAsRecord.middleware
+      : [endpointAsRecord.middleware];
+    for (const middlewareDescriptor of middlewareDescriptors) {
+      if (typeof middlewareDescriptor === "function") {
+        middleware.push(middlewareDescriptor);
+      }
+      if (typeof middlewareDescriptor === "object") {
+        if (typeof middlewareDescriptor.file !== "string") {
+          return createCoasterError({
+            code: "normalizeEndpoint-invalid-middleware-descriptor",
+            message: `Expected endpoint middleware to be a string, handler function, or file descriptor, or array of those.`,
+            error: handler,
+            details: {
+              middlewareDescriptor,
+            },
+          });
+        }
+        if (
+          middlewareDescriptor.exportName &&
+          typeof middlewareDescriptor.exportName !== "string"
+        ) {
+          return createCoasterError({
+            code: "normalizeEndpoint-invalid-middleware-descriptor",
+            message: `Expected endpoint file descriptor export name to be a string, but instead received a ${typeof middlewareDescriptor.exportName}`,
+            error: handler,
+            details: {
+              middlewareDescriptor,
+            },
+          });
+        }
+      }
+    }
+  }
+
   return {
     endpoint: route,
     method,
     handler,
+    middleware,
   };
 }

@@ -23,7 +23,7 @@ export async function buildTrack({
   }
 
   return perform(async () => {
-    const result = await resolvedEndpoint?.build(buildTools);
+    const result = await resolvedEndpoint?.build?.(buildTools);
     if (isCoasterError(result)) {
       return result;
     }

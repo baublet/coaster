@@ -10,7 +10,7 @@ import {
   CoasterError,
   createCoasterError,
   isCoasterError,
-  isInvokable,
+  isInvocable,
   getAccessProxy,
   perform,
 } from "@baublet/coaster-utils";
@@ -19,10 +19,11 @@ import { CoasterTrack } from "../track/types";
 import { getFailedTrack } from "../track/getFailedTrack";
 import { createGraphqlEndpointHandler } from "./createGraphqlEndpointHandler";
 import { log } from "../server/log";
-import { ResolvedEndpoint } from "../endpoints/types";
+import { EndpointInput } from "../endpoints/types";
 import { buildGraphqlTrack } from "./buildGraphqlTrack";
+import { getMethodsFromMethod } from "../endpoints/getMethodsFromMethod";
 
-interface CreateGraphqlTrackArguments extends ResolvedEndpoint {
+interface CreateGraphqlTrackArguments extends EndpointInput {
   schemaPath: string;
   resolversPath: string;
   createContextPath?: string;
@@ -33,12 +34,14 @@ export async function createGraphqlTrack({
   schemaPath,
   resolversPath,
   endpoint,
-  method,
+  method: methodInput,
   createContextPath,
   contextType,
+  middleware,
 }: Omit<CreateGraphqlTrackArguments, "handler">): Promise<
   CoasterTrack | CoasterError
 > {
+  const method = getMethodsFromMethod(methodInput);
   const schemaExists = await fileExists(schemaPath);
   if (isCoasterError(schemaExists)) {
     return getFailedTrack({
@@ -134,14 +137,14 @@ export async function createGraphqlTrack({
     try {
       const createContextModule = await import(createContextPath);
       const createContextFunction = createContextModule["createContext"];
-      if (!isInvokable(createContextFunction)) {
+      if (!isInvocable(createContextFunction)) {
         return getFailedTrack({
           endpoint,
           method,
           error: createCoasterError({
             message:
-              "Create context function must be invokable, and as an export named 'createContext'",
-            code: "createGraphqlTrack-create-context-function-must-be-invokable",
+              "Create context function must be invocable, and as an export named 'createContext'",
+            code: "createGraphqlTrack-create-context-function-must-be-invocable",
             details: {
               createContextPath,
               createContextFunction,
@@ -186,6 +189,7 @@ export async function createGraphqlTrack({
     handler: graphqlHandler,
     endpoint,
     method,
+    middleware,
   };
 }
 
@@ -256,7 +260,7 @@ function loadHandlerFromResolversAndPath(
         return loadedResolver(...args);
       }
 
-      if (!isInvokable(loadedResolver)) {
+      if (!isInvocable(loadedResolver)) {
         log.error(
           `FATAL: Resolver module handler ${moduleFullPath} is not a function. Resolver modules must export their handlers as functions. Instead received ${typeof loadedResolver}`,
           module

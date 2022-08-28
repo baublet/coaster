@@ -1,7 +1,8 @@
-import express, { Request, Response } from "express";
+import express, { Handler, NextFunction, Request, Response } from "express";
 import http from "http";
 import path from "path";
 import hash from "node-object-hash";
+import colors from "@colors/colors";
 
 import {
   asyncMap,
@@ -14,7 +15,7 @@ import {
 import { getEndpointFromFileDescriptor } from "../endpoints/getEndpointFromFileDescriptor";
 import { normalizeEndpoint } from "../endpoints/normalizeEndpoint";
 import {
-  EndpointHandler,
+  NormalizedEndpointHandler,
   NormalizedEndpointMiddleware,
   ResolvedEndpoint,
 } from "../endpoints/types";
@@ -28,8 +29,8 @@ import { RequestContext } from "../context/request";
 declare global {
   namespace Express {
     interface Request {
-      _coasterRequestContext: RequestContext;
-      _coasterRequestId: string;
+      __coasterRequestContext: RequestContext;
+      __coasterRequestId: string;
     }
   }
 }
@@ -38,13 +39,13 @@ export async function createExpressServer(
   manifest: NormalizedManifest,
   options: {
     routeLoadingMode?: "lazy" | "eager";
-    beforeMiddlewareLoaded?: (
+    beforeManifestMiddlewareLoaded?: (
       endpoints: FileDescriptor[]
     ) => Promise<FileDescriptor[]>;
     beforeEndpointsLoaded?: (
       endpoints: FileDescriptor[]
     ) => Promise<FileDescriptor[]>;
-    afterMiddlewareLoaded?: (
+    afterManifestMiddlewareLoaded?: (
       middleware: (CoasterError | NormalizedEndpointMiddleware)[]
     ) => Promise<(CoasterError | NormalizedEndpointMiddleware)[]>;
     afterEndpointsLoaded?: (
@@ -64,7 +65,7 @@ export async function createExpressServer(
   } = {}
 ): Promise<Server | CoasterError> {
   const middlewareDescriptors = await withWrappedHook(
-    options.beforeMiddlewareLoaded,
+    options.beforeManifestMiddlewareLoaded,
     manifest.middleware
   );
 
@@ -81,8 +82,9 @@ export async function createExpressServer(
       return getMiddlewareFromFileDescriptor(subject);
     }
   );
+
   const middleware = await withWrappedHook(
-    options.afterMiddlewareLoaded,
+    options.afterManifestMiddlewareLoaded,
     resolvedMiddleware
   );
 
@@ -94,6 +96,7 @@ export async function createExpressServer(
       return getEndpointFromFileDescriptor(subject);
     }
   );
+
   const endpoints = await withWrappedHook(
     options.afterEndpointsLoaded,
     resolvedEndpoints.filter(
@@ -107,7 +110,8 @@ export async function createExpressServer(
   // attaches it to the request, and adds a request ID to the request.
   expressInstance.use((request, response, next) => {
     createRequestContext(request, response)
-      .then(() => {
+      .then((context) => {
+        request.__coasterRequestContext = context;
         next();
       })
       .catch((error) => {
@@ -115,7 +119,10 @@ export async function createExpressServer(
       });
   });
 
-  const app = await withWrappedHook(options.afterExpressLoaded, express());
+  const app = await withWrappedHook(
+    options.afterExpressLoaded,
+    expressInstance
+  );
 
   for (const middlewareFunction of middleware) {
     if (isCoasterError(middlewareFunction)) {
@@ -123,7 +130,9 @@ export async function createExpressServer(
     }
     app.use(async (request, _response, next) => {
       try {
-        const result = await middlewareFunction(request._coasterRequestContext);
+        const result = await middlewareFunction(
+          request.__coasterRequestContext
+        );
         if (isCoasterError(result)) {
           return next(result);
         }
@@ -155,28 +164,69 @@ export async function createExpressServer(
           message: `Endpoint method ${normalizedEndpoint.method} not supported`,
         });
       }
-      const methodRegistrar = (endpoint: string, handler: Function) =>
-        (app as any)[method](endpoint, handler);
+      const methodRegistrar = ({
+        endpoint,
+        handler,
+        middleware,
+      }: {
+        endpoint: string;
+        handler: Function;
+        middleware: Handler[];
+      }) => (app as any)[method](endpoint, ...middleware, handler);
+
+      const aggregatedMiddleware: Handler[] = [];
+      if (normalizedEndpoint.middleware.length > 0) {
+        log.debug(`Registering middleware (${method}) ${endpoint.endpoint}`);
+        for (const endpointMiddlewareFunction of normalizedEndpoint.middleware) {
+          log.debug(
+            colors.dim(` ${endpointMiddlewareFunction.name || "anonymous fn"}`)
+          );
+          aggregatedMiddleware.push(
+            async (
+              request: Request,
+              _response: unknown,
+              next: NextFunction
+            ) => {
+              try {
+                const result = await endpointMiddlewareFunction(
+                  request.__coasterRequestContext
+                );
+                if (request.__coasterRequestContext.response.hasFlushed()) {
+                  const warningMessage = `Middleware ${endpointMiddlewareFunction.name} flushed response`;
+                  log.debug(warningMessage);
+                  next(warningMessage);
+                  return;
+                }
+                next(result);
+              } catch (error) {
+                next(error);
+              }
+            }
+          );
+        }
+      }
 
       // Register the endpoint with express
-      methodRegistrar(
-        endpoint.endpoint,
-        (request: Request, response: Response) =>
-          handleExpressMethodWithHandler({
+      methodRegistrar({
+        endpoint: endpoint.endpoint,
+        middleware: aggregatedMiddleware,
+        handler: (request: Request, response: Response) => {
+          return handleExpressMethodWithHandler({
             request,
             response,
             handler: endpoint.handler,
-          })
-      );
+          });
+        },
+      });
     }
   }
 
   if (manifest.notFound) {
-    const resolvedEndpoint = await getEndpointFromFileDescriptor({
+    const resolvedNotFoundEndpoint = await getEndpointFromFileDescriptor({
       file: resolvePath(manifest.notFound.file),
       exportName: manifest.notFound.exportName,
     });
-    if (!resolvedEndpoint) {
+    if (!resolvedNotFoundEndpoint) {
       return createCoasterError({
         code: "createServer-not-found-endpoint-not-found",
         message: `Not found endpoint not found`,
@@ -186,7 +236,13 @@ export async function createExpressServer(
       });
     }
 
-    const normalizedNotFoundEndpoint = normalizeEndpoint(resolvedEndpoint);
+    if (isCoasterError(resolvedNotFoundEndpoint)) {
+      return resolvedNotFoundEndpoint;
+    }
+
+    const normalizedNotFoundEndpoint = normalizeEndpoint(
+      resolvedNotFoundEndpoint
+    );
     if (isCoasterError(normalizedNotFoundEndpoint)) {
       return normalizedNotFoundEndpoint;
     }
@@ -249,29 +305,18 @@ async function handleExpressMethodWithHandler({
 }: {
   request: Request;
   response: Response;
-  handler: EndpointHandler;
+  handler: NormalizedEndpointHandler;
 }): Promise<void> {
-  const requestIncomingTime = Date.now();
-  const uniqueRequestHash = hashRequest.hash({
-    time: requestIncomingTime,
-    request: {
-      method: request.method,
-      url: request.url,
-      headers: request.headers,
-      body: request.body,
-      query: request.query,
-      protocol: request.protocol,
-      originalUrl: request.originalUrl,
-    },
-  });
   try {
-    log.debug(`${request.method} ${request.url} [${uniqueRequestHash}]`);
-    const context = await createExpressRequestContext({
-      request,
-      response,
-    });
-    await handler(context);
-    await context.response.flushData();
+    const context =
+      request.__coasterRequestContext ||
+      (await createExpressRequestContext({
+        request,
+        response,
+      }));
+    const resolvedContext = await context;
+    await handler(resolvedContext);
+    await resolvedContext.response.flushData();
   } catch (error) {
     log.error("Unexpected error handling request", { error });
     response.status(500).send("Unexpected error");
@@ -302,13 +347,13 @@ export async function createRequestContext(
       originalUrl: request.originalUrl,
     },
   });
-  (request as any)._coasterRequestId = uniqueRequestHash;
+  (request as any).__coasterRequestId = uniqueRequestHash;
 
   const context = await createExpressRequestContext({
     request,
     response,
   });
-  (request as any)._coasterRequestContext = context;
+  (request as any).__coasterRequestContext = context;
 
   log.debug(`${request.method} ${request.url} [${uniqueRequestHash}]`);
 

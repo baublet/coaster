@@ -1,13 +1,7 @@
-import { CoasterError, TypeOrPromiseType } from "@baublet/coaster-utils";
+import { EndpointInput } from "../endpoints/types";
 
-import { ResolvedEndpoint } from "../endpoints/types";
-import { BuildTools } from "../build/types";
-
-export interface CoasterTrack extends ResolvedEndpoint {
+export interface CoasterTrack extends EndpointInput {
   __isCoasterTrack: true;
-  build: (
-    tools: BuildTools
-  ) => TypeOrPromiseType<undefined | CoasterError | void>;
 }
 
 export function isCoasterTrack(value: any): value is CoasterTrack {

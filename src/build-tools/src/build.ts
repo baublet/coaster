@@ -33,6 +33,6 @@ const distDirectory = path.join(currentDirectory, "dist");
 })()
   .then(() => {})
   .catch((error) => {
-    console.log(error);
+    console.log("Unexpected error building application", error);
     process.exit(1);
   });

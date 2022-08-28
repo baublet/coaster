@@ -1,7 +1,7 @@
 export type { LazyLoadedHandler } from "./endpoints/lazyLoadedEndpoint";
 export type {
   Endpoint,
-  EndpointHandler,
+  NormalizedEndpointHandler,
   NotFoundEndpoint,
   EndpointMiddleware,
 } from "./endpoints/types";

@@ -1,8 +1,10 @@
 import type {
   CoasterError,
+  ItemOrArrayOfItems,
   Resolvable,
   TypeOrPromiseType,
 } from "@baublet/coaster-utils";
+import { BuildTools } from "../build/types";
 
 import type { RequestContext } from "../context/request";
 import { FileDescriptor } from "../manifest/types";
@@ -21,43 +23,46 @@ export type HttpMethod = typeof HTTP_METHODS[number];
 export interface NormalizedEndpoint {
   endpoint: string;
   method: string[];
-  handler: EndpointHandler;
+  handler: NormalizedEndpointHandler;
+  middleware: NormalizedEndpointMiddleware[];
 }
 
 export interface ResolvedEndpoint {
   endpoint: string;
   method?: HttpMethod | HttpMethod[];
-  handler: EndpointHandler;
+  handler: NormalizedEndpointHandler;
+  middleware?: NormalizedEndpointMiddleware[];
 }
 
 export type Endpoint = Resolvable<EndpointInput>;
 
-interface EndpointInput {
+export interface EndpointInput {
   endpoint: string;
   method?: "all" | HttpMethod | HttpMethod[];
-  handler: EndpointHandler;
+  handler: NormalizedEndpointHandler;
   /**
    * Route-level middleware applying only to requests to this endpoint
    */
-  middleware?:
-    | string
-    | string[]
-    | FileDescriptor
-    | FileDescriptor[]
-    | EndpointMiddleware
-    | EndpointMiddleware[];
+  middleware?: ItemOrArrayOfItems<
+    string | FileDescriptor | NormalizedEndpointMiddleware
+  >;
+  build?: (
+    tools: BuildTools
+  ) => TypeOrPromiseType<undefined | CoasterError | void>;
 }
 
 export type NotFoundEndpoint = Resolvable<{
-  handler: EndpointHandler;
+  handler: NormalizedEndpointHandler;
 }>;
 
-export interface EndpointHandler {
-  (context: RequestContext): void | Promise<void>;
+export interface NormalizedEndpointHandler {
+  (context: RequestContext): HandlerReturn;
 }
 
 export interface NormalizedEndpointMiddleware {
-  (context: RequestContext): TypeOrPromiseType<void | CoasterError>;
+  (context: RequestContext): HandlerReturn;
 }
 
-export type EndpointMiddleware = Resolvable<NormalizedEndpointMiddleware>;
+export type EndpointMiddleware = NormalizedEndpointMiddleware;
+
+export type HandlerReturn = TypeOrPromiseType<CoasterError | any>;

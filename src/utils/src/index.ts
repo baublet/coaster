@@ -2,6 +2,7 @@ export type { CoasterError } from "./error";
 export type { Resolvable } from "./resolvable";
 
 export { arrayIncludes } from "./arrayIncludes";
+export { filterUndefined } from "./filterUndefined";
 export { assertIsError } from "./assertIsError";
 export { assertIsNotCoasterError } from "./assertIsNotCoasterError";
 export { asTypeOrError } from "./asTypeOrError";
@@ -14,7 +15,7 @@ export { createCoasterError } from "./createCoasterError";
 export { getAccessProxy } from "./getAccessProxy";
 export { getEventBus } from "./eventBus";
 export { fullyResolve } from "./fullyResolve";
-export { isInvokable } from "./isInvokable";
+export { isInvocable } from "./isInvocable";
 export { ItemOrArrayOfItems } from "./ItemOrArrayOfItems";
 export { objectHasProperty } from "./objectHasProperty";
 export { htmlifyCoasterErrorPage } from "./htmlifyCoasterErrorPage";

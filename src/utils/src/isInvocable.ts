@@ -1,4 +1,4 @@
-export function isInvokable(
+export function isInvocable(
   maybeFn: unknown
 ): maybeFn is (...args: any[]) => any {
   const type = typeof maybeFn;

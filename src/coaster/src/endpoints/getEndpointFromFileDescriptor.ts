@@ -7,15 +7,22 @@ import {
   fullyResolve,
   perform,
   isCoasterError,
+  collate,
 } from "@baublet/coaster-utils";
 
 import { FileDescriptor } from "../manifest/types";
-import { HTTP_METHODS, HttpMethod, ResolvedEndpoint } from "./types";
-import { CoasterTrack } from "../track/types";
+import {
+  HTTP_METHODS,
+  HttpMethod,
+  ResolvedEndpoint,
+  NormalizedEndpointMiddleware,
+  EndpointInput,
+} from "./types";
+import { getMiddlewareFromFileDescriptor } from "./getMiddlewareFromFileDescriptor";
 
 export async function getEndpointFromFileDescriptor(
   fileDescriptor: FileDescriptor
-): Promise<CoasterError | ResolvedEndpoint | CoasterTrack> {
+): Promise<CoasterError | ResolvedEndpoint> {
   const file = fileDescriptor.file;
   const exportName = fileDescriptor.exportName || "endpoint";
 
@@ -47,9 +54,9 @@ export async function getEndpointFromFileDescriptor(
   }
 
   const fullyResolvedExport = await perform(async () => {
-    const resolvedExport: Partial<ResolvedEndpoint> = await fullyResolve(
-      fileImport[exportName]
-    );
+    const resolvedExport: Omit<ResolvedEndpoint, "middleware"> & {
+      middleware: EndpointInput["middleware"];
+    } = await fullyResolve(fileImport[exportName]);
     return resolvedExport;
   });
   if (isCoasterError(fullyResolvedExport)) {
@@ -129,10 +136,113 @@ export async function getEndpointFromFileDescriptor(
     });
   }
 
+  const aggregatedMiddleware: Promise<
+    NormalizedEndpointMiddleware | CoasterError
+  >[] = [];
+  const collatedMiddleware = collate(fullyResolvedExport.middleware);
+  for (const middlewareItem of collatedMiddleware) {
+    if (typeof middlewareItem === "function") {
+      aggregatedMiddleware.push(Promise.resolve(middlewareItem));
+      continue;
+    }
+    if (typeof middlewareItem === "object") {
+      const fileName = middlewareItem.file;
+      const exportName = middlewareItem.exportName || "middleware";
+      if (!fileName || !exportName) {
+        return createCoasterError({
+          code: "getEndpointFromFileDescriptor-invalid-middleware-descriptor",
+          message: `Middleware descriptor/handler in ${file} middleware must be a function, string, file descriptor, or array of any of the above.`,
+          details: {
+            middlewareDescriptor: middlewareItem,
+          },
+        });
+      }
+
+      let handlerPromise: Promise<CoasterError | NormalizedEndpointMiddleware>;
+      aggregatedMiddleware.push(
+        Promise.resolve(async (context) => {
+          if (!handlerPromise) {
+            handlerPromise = getMiddlewareFromFileDescriptor({
+              file: fileName,
+              exportName,
+            });
+          }
+
+          const resolvedHandler = await handlerPromise;
+          if (isCoasterError(resolvedHandler)) {
+            context.log("error", "Middleware error", {
+              error: resolvedHandler,
+            });
+            context.response.setStatus(500);
+            if (
+              context.request.headers.get("content-type") === "application/json"
+            ) {
+              context.response.sendJson({ error: resolvedHandler });
+            } else {
+              context.response.setData(resolvedHandler.message);
+            }
+            context.response.flushData();
+            return;
+          }
+
+          return resolvedHandler(context);
+        })
+      );
+      continue;
+    }
+    if (typeof middlewareItem === "string") {
+      let handlerPromise: Promise<CoasterError | NormalizedEndpointMiddleware>;
+      aggregatedMiddleware.push(
+        Promise.resolve(async (context) => {
+          if (!handlerPromise) {
+            handlerPromise = getMiddlewareFromFileDescriptor({
+              file: middlewareItem,
+              exportName: "middleware",
+            });
+          }
+
+          const resolvedHandler = await handlerPromise;
+          if (isCoasterError(resolvedHandler)) {
+            context.response.setStatus(500);
+            if (
+              context.request.headers.get("content-type") === "application/json"
+            ) {
+              context.response.sendJson({ error: resolvedHandler });
+            } else {
+              context.response.setData(resolvedHandler.message);
+            }
+            context.response.flushData();
+            return;
+          }
+
+          return resolvedHandler(context);
+        })
+      );
+      continue;
+    }
+    return createCoasterError({
+      code: "getEndpointFromFileDescriptor-invalid-middleware-descriptor",
+      message: `Middleware descriptor/handler in ${file} middleware must be a function, string, file descriptor, or array of any of the above.`,
+      details: {
+        middlewareDescriptor: middlewareItem,
+      },
+    });
+  }
+
+  const resolvedMiddleware = await Promise.all(aggregatedMiddleware);
+  const middleware: NormalizedEndpointMiddleware[] = [];
+  for (const resolvedValue of resolvedMiddleware) {
+    if (isCoasterError(resolvedValue)) {
+      return resolvedValue;
+    }
+    middleware.push(resolvedValue);
+  }
+
   return {
     ...fullyResolvedExport,
     endpoint,
     method: methods,
     handler,
+    middleware,
   };
 }
