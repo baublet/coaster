@@ -11,7 +11,11 @@ export { asyncMap } from "./asyncMap";
 export { base64decode } from "./base64decode";
 export { base64encode } from "./base64encode";
 export { collate } from "./collate";
-export { createCoasterError } from "./createCoasterError";
+export {
+  addDetailsToCoasterError,
+  createCoasterError,
+  combineCoasterErrors,
+} from "./createCoasterError";
 export { getAccessProxy } from "./getAccessProxy";
 export { getEventBus } from "./eventBus";
 export { fullyResolve } from "./fullyResolve";

@@ -8,10 +8,13 @@ export const endpoint = createGraphqlTrack({
   resolversPath: path.resolve(__dirname, "resolvers"),
   schemaPath: path.resolve(__dirname, "schema.graphql"),
   middleware: [
-    path.resolve(__dirname, "middleware", "queryHash"),
-    path.resolve(__dirname, "middleware", "test1"),
+    "middleware/queryHash",
+    {
+      file: path.resolve(__dirname, "middleware", "test1"),
+      exportName: "default",
+    },
     path.resolve(__dirname, "middleware", "test2"),
-    path.resolve(__dirname, "middleware", "test3"),
-    path.resolve(__dirname, "middleware", "test4"),
+    "./middleware/test3",
+    "./middleware/test4#test4",
   ],
 });

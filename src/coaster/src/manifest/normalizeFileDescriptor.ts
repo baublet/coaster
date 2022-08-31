@@ -1,3 +1,5 @@
+import path from "path";
+
 import {
   asTypeOrError,
   CoasterError,
@@ -5,9 +7,42 @@ import {
   isCoasterError,
   jsonStringify,
 } from "@baublet/coaster-utils";
+
 import { Manifest, FileDescriptor } from "./types";
 
 export function normalizeFileDescriptor(
+  field: Manifest["endpoints"]
+): FileDescriptor[] | CoasterError {
+  const collapsedEndpoints = collapseTypes(field);
+
+  if (isCoasterError(collapsedEndpoints)) {
+    return collapsedEndpoints;
+  }
+
+  const filesWithoutHashes: FileDescriptor[] = [];
+  for (const file of collapsedEndpoints) {
+    console.log({ file });
+    if (file.file.includes("#")) {
+      if (file.exportName) {
+        return createCoasterError({
+          code: "normalizeFileDescriptor-file-with-hash-and-export-name",
+          message: `Expected file descriptor to not contain a hash if export name is specified, but got "${file.file}" with export name "${file.exportName}". Do not do this, even if they match. Use one or the other.`,
+        });
+      }
+      const [fileWithoutHash, hash] = file.file.split("#");
+      filesWithoutHashes.push({
+        file: fileWithoutHash,
+        exportName: hash,
+      });
+      continue;
+    }
+    filesWithoutHashes.push(file);
+  }
+
+  return filesWithoutHashes;
+}
+
+function collapseTypes(
   field: Manifest["endpoints"]
 ): FileDescriptor[] | CoasterError {
   if (typeof field === "string") {

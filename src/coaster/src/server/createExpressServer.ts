@@ -1,6 +1,6 @@
+import path from "path";
 import express, { Handler, NextFunction, Request, Response } from "express";
 import http from "http";
-import path from "path";
 import hash from "node-object-hash";
 import colors from "@colors/colors";
 
@@ -10,6 +10,7 @@ import {
   CoasterError,
   isCoasterError,
   withWrappedHook,
+  jsonStringify,
 } from "@baublet/coaster-utils";
 
 import { getEndpointFromFileDescriptor } from "../endpoints/getEndpointFromFileDescriptor";
@@ -25,6 +26,7 @@ import { createExpressRequestContext } from "../context/createExpressRequestCont
 import { log } from "../server/log";
 import { getMiddlewareFromFileDescriptor } from "../endpoints/getMiddlewareFromFileDescriptor";
 import { RequestContext } from "../context/request";
+import { resolveInputPathFromFile } from "../common/resolveInputPathFromFile";
 
 declare global {
   namespace Express {
@@ -36,7 +38,10 @@ declare global {
 }
 
 export async function createExpressServer(
-  manifest: NormalizedManifest,
+  {
+    manifest,
+    manifestFullPath,
+  }: { manifest: NormalizedManifest; manifestFullPath: string },
   options: {
     routeLoadingMode?: "lazy" | "eager";
     beforeManifestMiddlewareLoaded?: (
@@ -64,6 +69,8 @@ export async function createExpressServer(
     }) => Promise<void>;
   } = {}
 ): Promise<Server | CoasterError> {
+  const endpointFileFullPath = path.dirname(manifestFullPath);
+
   const middlewareDescriptors = await withWrappedHook(
     options.beforeManifestMiddlewareLoaded,
     manifest.middleware
@@ -77,7 +84,7 @@ export async function createExpressServer(
   const resolvedMiddleware = await asyncMap(
     middlewareDescriptors,
     (subject) => {
-      subject.file = resolvePath(subject.file);
+      subject.file = resolveInputPathFromFile(subject.file, manifestFullPath);
       subject.exportName = subject.exportName || "middleware";
       return getMiddlewareFromFileDescriptor(subject);
     }
@@ -91,17 +98,22 @@ export async function createExpressServer(
   const resolvedEndpoints = await asyncMap(
     allEndpointDescriptors,
     (subject) => {
-      subject.file = resolvePath(subject.file);
+      const resolvedFile = resolveInputPathFromFile(
+        subject.file,
+        manifestFullPath
+      );
+      subject.file = resolvedFile;
       subject.exportName = subject.exportName || "endpoint";
-      return getEndpointFromFileDescriptor(subject);
+      return getEndpointFromFileDescriptor({
+        fileDescriptor: subject,
+        endpointFileFullPath: resolvedFile,
+      });
     }
   );
 
   const endpoints = await withWrappedHook(
     options.afterEndpointsLoaded,
-    resolvedEndpoints.filter(
-      (endPointOrLazyLoad) => typeof endPointOrLazyLoad !== "function"
-    )
+    resolvedEndpoints
   );
 
   const expressInstance = express();
@@ -138,6 +150,7 @@ export async function createExpressServer(
         }
         next();
       } catch (error) {
+        log.error(error);
         next(error);
       }
     });
@@ -147,8 +160,10 @@ export async function createExpressServer(
     if (isCoasterError(endpoint)) {
       return endpoint;
     }
-
-    const normalizedEndpoint = normalizeEndpoint(endpoint);
+    const normalizedEndpoint = await normalizeEndpoint(
+      endpoint,
+      manifestFullPath
+    );
     if (isCoasterError(normalizedEndpoint)) {
       return createCoasterError({
         code: "createServer-endpoint-declaration-error",
@@ -178,14 +193,10 @@ export async function createExpressServer(
       if (normalizedEndpoint.middleware.length > 0) {
         log.debug(`Registering middleware (${method}) ${endpoint.endpoint}`);
         for (const endpointMiddlewareFunction of normalizedEndpoint.middleware) {
-          log.debug(
-            colors.dim(
-              ` ${
-                (endpointMiddlewareFunction as any)
-                  ?.__coasterMiddlewareNameHint || "anonymous fn"
-              }`
-            )
-          );
+          const middlewareNameHint =
+            (endpointMiddlewareFunction as any)?.__coasterMiddlewareNameHint ||
+            "anonymous fn";
+          log.debug(colors.dim(middlewareNameHint));
           aggregatedMiddleware.push(
             async (
               request: Request,
@@ -196,9 +207,38 @@ export async function createExpressServer(
                 const result = await endpointMiddlewareFunction(
                   request.__coasterRequestContext
                 );
+                if (isCoasterError(result)) {
+                  request.__coasterRequestContext.log(
+                    "error",
+                    "Unexpected error executing endpoint middleware",
+                    { result }
+                  );
+                  const response = request.__coasterRequestContext.response;
+                  if (response.hasFlushed()) {
+                    const warningMessage = `Middleware ${middlewareNameHint} flushed the response`;
+                    log.debug(colors.dim(warningMessage));
+                    next(warningMessage);
+                    return;
+                  }
+
+                  response.setStatus(500);
+                  if (
+                    request.__coasterRequestContext.request.headers.get(
+                      "content-type"
+                    ) === "application/json"
+                  ) {
+                    return response.sendJson({
+                      error: result.message,
+                      code: result.code,
+                      details: result.details,
+                    });
+                  }
+                  response.setData(jsonStringify(result));
+                  return response.flushData();
+                }
                 if (request.__coasterRequestContext.response.hasFlushed()) {
-                  const warningMessage = `Middleware ${endpointMiddlewareFunction.name} flushed response`;
-                  log.debug(warningMessage);
+                  const warningMessage = `Middleware ${middlewareNameHint} flushed the response`;
+                  log.debug(colors.dim(warningMessage));
                   next(warningMessage);
                   return;
                 }
@@ -227,9 +267,16 @@ export async function createExpressServer(
   }
 
   if (manifest.notFound) {
+    const notFoundFullPath = resolveInputPathFromFile(
+      manifest.notFound.file,
+      manifestFullPath
+    );
     const resolvedNotFoundEndpoint = await getEndpointFromFileDescriptor({
-      file: resolvePath(manifest.notFound.file),
-      exportName: manifest.notFound.exportName,
+      fileDescriptor: {
+        file: notFoundFullPath,
+        exportName: manifest.notFound.exportName,
+      },
+      endpointFileFullPath: notFoundFullPath,
     });
     if (!resolvedNotFoundEndpoint) {
       return createCoasterError({
@@ -245,14 +292,15 @@ export async function createExpressServer(
       return resolvedNotFoundEndpoint;
     }
 
-    const normalizedNotFoundEndpoint = normalizeEndpoint(
-      resolvedNotFoundEndpoint
+    const normalizedNotFoundEndpoint = await normalizeEndpoint(
+      resolvedNotFoundEndpoint,
+      manifestFullPath
     );
     if (isCoasterError(normalizedNotFoundEndpoint)) {
       return normalizedNotFoundEndpoint;
     }
 
-    log.debug("Registering not found endpoint");
+    log.debug(colors.dim("Registering not found endpoint"));
     app.use((request, response) => {
       handleExpressMethodWithHandler({
         request,
@@ -328,13 +376,6 @@ async function handleExpressMethodWithHandler({
     log.error("Unexpected error handling request", { error });
     response.status(500).send("Unexpected error");
   }
-}
-
-function resolvePath(target: string): string {
-  if (target.startsWith("/")) {
-    return target;
-  }
-  return path.resolve(process.cwd(), target);
 }
 
 export async function createRequestContext(

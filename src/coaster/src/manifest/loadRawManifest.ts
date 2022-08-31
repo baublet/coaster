@@ -35,10 +35,10 @@ export async function loadRawManifest(
 
     if (typeof manifestNode === "function") {
       const resolvedManifestNode = await fullyResolve(manifestNode);
-      return parseManifest(resolvedManifestNode);
+      return parseManifest(resolvedManifestNode, path);
     }
 
-    return parseManifest(manifestNode);
+    return parseManifest(manifestNode, path);
   }
 
   const manifestString = await readFile(path, options);
@@ -49,7 +49,7 @@ export async function loadRawManifest(
 
   try {
     const manifest: unknown = JSON5.parse(manifestString);
-    return await parseManifest(manifest);
+    return await parseManifest(manifest, path);
   } catch (error) {
     assertIsError(error);
     return createCoasterError({
@@ -64,7 +64,8 @@ export async function loadRawManifest(
 }
 
 async function parseManifest(
-  manifest: unknown
+  manifest: unknown,
+  fullPath: string
 ): Promise<NormalizedManifest | CoasterError> {
   const rootNode = asTypeOrError("object", manifest);
   if (isCoasterError(rootNode)) {
@@ -135,6 +136,7 @@ async function parseManifest(
   }
 
   return {
+    __coasterManifestFullPath: fullPath,
     name,
     port: port,
     key,

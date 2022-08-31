@@ -4,6 +4,8 @@ import {
   createCoasterError,
   isCoasterError,
 } from "@baublet/coaster-utils";
+import { resolveInputPathFromFile } from "../common/resolveInputPathFromFile";
+import { getMiddlewareFromFileDescriptor } from "./getMiddlewareFromFileDescriptor";
 
 import {
   HTTP_METHODS,
@@ -12,9 +14,10 @@ import {
   ResolvedEndpoint,
 } from "./types";
 
-export function normalizeEndpoint(
-  endpoint: ResolvedEndpoint
-): NormalizedEndpoint | CoasterError {
+export async function normalizeEndpoint(
+  endpoint: ResolvedEndpoint,
+  manifestFullPath: string
+): Promise<NormalizedEndpoint | CoasterError> {
   const endpointAsRecord = asTypeOrError("object", endpoint);
   if (isCoasterError(endpointAsRecord)) {
     return endpointAsRecord;
@@ -85,7 +88,9 @@ export function normalizeEndpoint(
     for (const middlewareDescriptor of middlewareDescriptors) {
       if (typeof middlewareDescriptor === "function") {
         middleware.push(middlewareDescriptor);
+        continue;
       }
+
       if (typeof middlewareDescriptor === "object") {
         if (typeof middlewareDescriptor.file !== "string") {
           return createCoasterError({
@@ -97,6 +102,7 @@ export function normalizeEndpoint(
             },
           });
         }
+
         if (
           middlewareDescriptor.exportName &&
           typeof middlewareDescriptor.exportName !== "string"
@@ -110,7 +116,46 @@ export function normalizeEndpoint(
             },
           });
         }
+        const middlewareFunction = await getMiddlewareFromFileDescriptor({
+          file: resolveInputPathFromFile(
+            middlewareDescriptor.file,
+            manifestFullPath
+          ),
+          exportName: middlewareDescriptor.exportName,
+        });
+
+        if (isCoasterError(middlewareFunction)) {
+          return middlewareFunction;
+        }
+
+        middleware.push(middlewareFunction);
+        continue;
       }
+
+      if (typeof middlewareDescriptor === "string") {
+        const middlewareFunction = await getMiddlewareFromFileDescriptor({
+          file: resolveInputPathFromFile(
+            middlewareDescriptor,
+            manifestFullPath
+          ),
+        });
+
+        if (isCoasterError(middlewareFunction)) {
+          return middlewareFunction;
+        }
+
+        middleware.push(middlewareFunction);
+        continue;
+      }
+
+      return createCoasterError({
+        code: "normalizeEndpoint-invalid-middleware-descriptor",
+        message: `Expected endpoint middleware to be a string, handler function, or file descriptor, or array of those.`,
+        details: {
+          type: typeof middlewareDescriptor,
+          middlewareDescriptor,
+        },
+      });
     }
   }
 

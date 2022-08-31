@@ -27,6 +27,7 @@ export interface Manifest {
 }
 
 export interface NormalizedManifest {
+  __coasterManifestFullPath: string;
   name: string;
   port: string;
   key: string;

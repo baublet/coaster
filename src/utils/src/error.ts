@@ -3,6 +3,7 @@ export type CoasterError = {
   code: string;
   message: string;
   details?: ErrorDetails;
+  time: number;
 };
 
 export type ErrorDetails = Record<string, any>;

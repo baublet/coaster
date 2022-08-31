@@ -17,10 +17,12 @@ export function getFailedTrack({
     endpoint,
     method,
     build: () => {
+      console.log({ WeInError: error });
       logCoasterError(error);
       process.exit(1);
     },
     handler: (context) => {
+      console.log(" WHAT HAPPEN ");
       context.response.setStatus(500);
       context.response.sendJson(JSON.stringify(error));
     },

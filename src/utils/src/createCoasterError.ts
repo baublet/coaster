@@ -38,5 +38,48 @@ export function createCoasterError({
     code,
     message,
     details: newDetails,
+    time: Date.now(),
   };
+}
+
+export function addDetailsToCoasterError(
+  error: CoasterError,
+  details: ErrorDetails
+): CoasterError {
+  return {
+    ...error,
+    details: {
+      ...error.details,
+      ...details,
+    },
+  };
+}
+
+export function combineCoasterErrors(
+  ...errorsInput: CoasterError[]
+): CoasterError {
+  if (errorsInput.length === 0) {
+    return createCoasterError({
+      code: "combineCoasterErrors-no-errors",
+      message: "No errors were provided to combineCoasterErrors",
+      details: { stack: new Error().stack },
+    });
+  }
+
+  if (errorsInput.length < 2) {
+    return errorsInput[0];
+  }
+
+  const errors = errorsInput.slice(0, -1);
+  const lastError = errorsInput[errorsInput.length - 1];
+  return errors.reduce((acc, error) => {
+    if (!acc.details) {
+      acc.details = {};
+    }
+    if (!acc.details.__coasterErrorParents) {
+      acc.details.__coasterErrorParents = [];
+    }
+    acc.details.__coasterErrorParents.push(error);
+    return acc;
+  }, lastError);
 }

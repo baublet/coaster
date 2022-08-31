@@ -8,6 +8,7 @@ import {
   perform,
   isCoasterError,
   collate,
+  addDetailsToCoasterError,
 } from "@baublet/coaster-utils";
 
 import { FileDescriptor } from "../manifest/types";
@@ -20,58 +21,75 @@ import {
 } from "./types";
 import { getMiddlewareFromFileDescriptor } from "./getMiddlewareFromFileDescriptor";
 import { RequestContext } from "../context/request";
+import { getNormalizedFileDescriptorFromFileInput } from "../common/getNormalizedFileDescriptorFromFileInput";
 
-export async function getEndpointFromFileDescriptor(
-  fileDescriptor: FileDescriptor
-): Promise<CoasterError | ResolvedEndpoint> {
-  const file = fileDescriptor.file;
-  const exportName = fileDescriptor.exportName || "endpoint";
+export async function getEndpointFromFileDescriptor({
+  fileDescriptor,
+  endpointFileFullPath,
+}: {
+  fileDescriptor: FileDescriptor;
+  endpointFileFullPath: string;
+}): Promise<CoasterError | ResolvedEndpoint> {
+  const normalizedDescriptor = getNormalizedFileDescriptorFromFileInput({
+    fileInput: fileDescriptor,
+    exportNameIfNotSpecified: "endpoint",
+    referenceFileFullPath: endpointFileFullPath,
+  });
+
+  if (isCoasterError(normalizedDescriptor)) {
+    return normalizedDescriptor;
+  }
 
   const fileImport = await perform(async () => {
     try {
-      const fileImport: Record<string, any> = await import(file);
-      const exportExists = exportName in fileImport;
+      const fileImport: Record<string, any> = await import(
+        normalizedDescriptor.file
+      );
+      const exportExists = normalizedDescriptor.exportName in fileImport;
       if (!exportExists) {
         return createCoasterError({
           code: "getEndpointFromFileDescriptor-export-not-found",
-          message: `Endpoint descriptor file ${file} does not export "${exportName}"`,
+          message: `Endpoint descriptor file ${normalizedDescriptor.file} does not export "${normalizedDescriptor.exportName}"`,
+          details: { normalizedDescriptor },
         });
       }
       return fileImport;
     } catch (error) {
       return createCoasterError({
         code: "getEndpointFromFileDescriptor-unexpected-error-importing",
-        message: `Unexpected error importing ${file}`,
+        message: `Unexpected error importing ${normalizedDescriptor.file}`,
         details: {
           error: stringify(error as any),
-          exportName,
+          normalizedDescriptor,
         },
       });
     }
   });
 
   if (isCoasterError(fileImport)) {
-    return fileImport;
+    return addDetailsToCoasterError(fileImport, { normalizedDescriptor });
   }
 
   const fullyResolvedExport = await perform(async () => {
     const resolvedExport: Omit<ResolvedEndpoint, "middleware"> & {
       middleware: EndpointInput["middleware"];
-    } = await fullyResolve(fileImport[exportName]);
+    } = await fullyResolve(fileImport[normalizedDescriptor.exportName]);
     return resolvedExport;
   });
   if (isCoasterError(fullyResolvedExport)) {
-    return fullyResolvedExport;
+    return addDetailsToCoasterError(fullyResolvedExport, {
+      normalizedDescriptor,
+    });
   }
-
-  const declaredMethods = fullyResolvedExport.method || "get";
+  const declaredMethods = fullyResolvedExport?.method || "get";
   const methods: HttpMethod[] = [];
   if (Array.isArray(declaredMethods)) {
     for (const method of declaredMethods) {
       if (typeof method !== "string") {
         return createCoasterError({
           code: "getEndpointFromFileDescriptor-export-not-string",
-          message: `Endpoint descriptor file ${file} method names must be strings or arrays of strings. Instead, received a ${typeof method}`,
+          message: `Endpoint descriptor method names must be strings or arrays of strings. Instead, received a ${typeof method}`,
+          details: { normalizedDescriptor },
         });
       }
       const lowercaseMethod = method.toLowerCase();
@@ -85,7 +103,8 @@ export async function getEndpointFromFileDescriptor(
       if (!arrayIncludes(HTTP_METHODS, lowercaseMethod)) {
         return createCoasterError({
           code: "getEndpointFromFileDescriptor-export-not-valid-method",
-          message: `Endpoint descriptor file ${file} method ${method} is not a valid HTTP method`,
+          message: `Endpoint descriptor file ${normalizedDescriptor.file} method ${method} is not a valid HTTP method`,
+          details: { normalizedDescriptor },
         });
       }
 
@@ -98,7 +117,8 @@ export async function getEndpointFromFileDescriptor(
     if (!arrayIncludes(HTTP_METHODS, lowercaseMethod)) {
       return createCoasterError({
         code: "getEndpointFromFileDescriptor-export-not-valid-method",
-        message: `Endpoint descriptor file ${file} method ${lowercaseMethod} is not a valid HTTP method`,
+        message: `Endpoint descriptor file method ${lowercaseMethod} is not a valid HTTP method`,
+        details: { normalizedDescriptor },
       });
     }
 
@@ -109,7 +129,8 @@ export async function getEndpointFromFileDescriptor(
   if (!endpointExists) {
     return createCoasterError({
       code: "getEndpointFromFileDescriptor-export-not-endpoint",
-      message: `Endpoint descriptor file ${file} does not export an endpoint descriptor (e.g., "/api")`,
+      message: `Endpoint descriptor file does not export an endpoint descriptor (e.g., "/api")`,
+      details: { normalizedDescriptor },
     });
   }
 
@@ -117,7 +138,8 @@ export async function getEndpointFromFileDescriptor(
   if (typeof endpoint !== "string") {
     return createCoasterError({
       code: "getEndpointFromFileDescriptor-export-not-string",
-      message: `Endpoint descriptor file ${file} endpoint must be a string. Instead, received a ${typeof endpoint}`,
+      message: `Endpoint descriptor file endpoint must be a string. Instead, received a ${typeof endpoint}`,
+      details: { normalizedDescriptor },
     });
   }
 
@@ -125,7 +147,8 @@ export async function getEndpointFromFileDescriptor(
   if (!handlerExists) {
     return createCoasterError({
       code: "getEndpointFromFileDescriptor-export-not-handler",
-      message: `Endpoint descriptor file ${file} does not export a handler`,
+      message: `Endpoint descriptor file does not export a handler`,
+      details: { normalizedDescriptor },
     });
   }
 
@@ -133,7 +156,8 @@ export async function getEndpointFromFileDescriptor(
   if (typeof handler !== "function") {
     return createCoasterError({
       code: "getEndpointFromFileDescriptor-export-not-function",
-      message: `Endpoint descriptor file ${file} handler must be a function. Instead, received a ${typeof handler}`,
+      message: `Endpoint descriptor file handler must be a function. Instead, received a ${typeof handler}`,
+      details: { normalizedDescriptor },
     });
   }
 
@@ -146,99 +170,61 @@ export async function getEndpointFromFileDescriptor(
       aggregatedMiddleware.push(Promise.resolve(middlewareItem));
       continue;
     }
-    if (typeof middlewareItem === "object") {
-      const fileName = middlewareItem.file;
-      const exportName = middlewareItem.exportName || "middleware";
-      if (!fileName || !exportName) {
-        return createCoasterError({
-          code: "getEndpointFromFileDescriptor-invalid-middleware-descriptor",
-          message: `Middleware descriptor/handler in ${file} middleware must be a function, string, file descriptor, or array of any of the above.`,
-          details: {
-            middlewareDescriptor: middlewareItem,
-          },
-        });
+
+    const normalizedMiddlewareDescriptor =
+      getNormalizedFileDescriptorFromFileInput({
+        fileInput: middlewareItem,
+        exportNameIfNotSpecified: "middleware",
+        referenceFileFullPath: endpointFileFullPath,
+      });
+
+    if (isCoasterError(normalizedMiddlewareDescriptor)) {
+      return addDetailsToCoasterError(normalizedMiddlewareDescriptor, {
+        normalizedDescriptor,
+      });
+    }
+
+    let handlerPromise: Promise<CoasterError | NormalizedEndpointMiddleware>;
+    const handlerFn = async (context: RequestContext) => {
+      if (!handlerPromise) {
+        handlerPromise = getMiddlewareFromFileDescriptor(
+          normalizedMiddlewareDescriptor
+        );
       }
 
-      let handlerPromise: Promise<CoasterError | NormalizedEndpointMiddleware>;
-      const handlerFn = async (context: RequestContext) => {
-        if (!handlerPromise) {
-          handlerPromise = getMiddlewareFromFileDescriptor({
-            file: fileName,
-            exportName,
-          });
+      const resolvedHandler = await handlerPromise;
+      if (isCoasterError(resolvedHandler)) {
+        context.log("error", "Middleware error", {
+          error: resolvedHandler,
+        });
+        context.response.setStatus(500);
+        if (
+          context.request.headers.get("content-type") === "application/json"
+        ) {
+          context.response.sendJson({ error: resolvedHandler });
+        } else {
+          context.response.setData(resolvedHandler.message);
         }
+        context.response.flushData();
+        return;
+      }
 
-        const resolvedHandler = await handlerPromise;
-        if (isCoasterError(resolvedHandler)) {
-          context.log("error", "Middleware error", {
-            error: resolvedHandler,
-          });
-          context.response.setStatus(500);
-          if (
-            context.request.headers.get("content-type") === "application/json"
-          ) {
-            context.response.sendJson({ error: resolvedHandler });
-          } else {
-            context.response.setData(resolvedHandler.message);
-          }
-          context.response.flushData();
-          return;
-        }
-
-        return resolvedHandler(context);
-      };
-      handlerFn.__coasterMiddlewareNameHint =
-        `${fileName}#${exportName}`.replace(process.cwd(), "");
-      aggregatedMiddleware.push(Promise.resolve(handlerFn));
-      continue;
-    }
-    if (typeof middlewareItem === "string") {
-      let handlerPromise: Promise<CoasterError | NormalizedEndpointMiddleware>;
-      const handlerFn = async (context: RequestContext) => {
-        if (!handlerPromise) {
-          handlerPromise = getMiddlewareFromFileDescriptor({
-            file: middlewareItem,
-            exportName: "middleware",
-          });
-        }
-
-        const resolvedHandler = await handlerPromise;
-        if (isCoasterError(resolvedHandler)) {
-          context.response.setStatus(500);
-          if (
-            context.request.headers.get("content-type") === "application/json"
-          ) {
-            context.response.sendJson({ error: resolvedHandler });
-          } else {
-            context.response.setData(resolvedHandler.message);
-          }
-          context.response.flushData();
-          return;
-        }
-
-        return resolvedHandler(context);
-      };
-      handlerFn.__coasterMiddlewareNameHint = middlewareItem.replace(
+      return resolvedHandler(context);
+    };
+    handlerFn.__coasterMiddlewareNameHint =
+      `${normalizedMiddlewareDescriptor.file}#${normalizedMiddlewareDescriptor.exportName}`.replace(
         process.cwd(),
         ""
       );
-      aggregatedMiddleware.push(Promise.resolve(handlerFn));
-      continue;
-    }
-    return createCoasterError({
-      code: "getEndpointFromFileDescriptor-invalid-middleware-descriptor",
-      message: `Middleware descriptor/handler in ${file} middleware must be a function, string, file descriptor, or array of any of the above.`,
-      details: {
-        middlewareDescriptor: middlewareItem,
-      },
-    });
+    aggregatedMiddleware.push(Promise.resolve(handlerFn));
+    continue;
   }
 
   const resolvedMiddleware = await Promise.all(aggregatedMiddleware);
   const middleware: NormalizedEndpointMiddleware[] = [];
   for (const resolvedValue of resolvedMiddleware) {
     if (isCoasterError(resolvedValue)) {
-      return resolvedValue;
+      return addDetailsToCoasterError(resolvedValue, { normalizedDescriptor });
     }
     middleware.push(resolvedValue);
   }
