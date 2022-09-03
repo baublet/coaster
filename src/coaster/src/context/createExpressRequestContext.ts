@@ -10,9 +10,11 @@ import { HttpMethod } from "../endpoints/types";
 export async function createExpressRequestContext({
   request,
   response,
+  requestId,
 }: {
   request: Request;
   response: Response;
+  requestId: string;
 }): Promise<RequestContext> {
   const serviceContainer = createServiceContainer();
 
@@ -47,6 +49,7 @@ export async function createExpressRequestContext({
       headers: requestHeadersMap,
       method: request.method.toLowerCase() as HttpMethod,
       body: request.body,
+      getRequestId: () => requestId,
     },
     services: serviceContainer,
     response: {

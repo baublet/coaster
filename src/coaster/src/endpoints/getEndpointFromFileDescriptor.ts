@@ -175,7 +175,7 @@ export async function getEndpointFromFileDescriptor({
       getNormalizedFileDescriptorFromFileInput({
         fileInput: middlewareItem,
         exportNameIfNotSpecified: "middleware",
-        referenceFileFullPath: endpointFileFullPath,
+        referenceFileFullPath: normalizedDescriptor.file,
       });
 
     if (isCoasterError(normalizedMiddlewareDescriptor)) {

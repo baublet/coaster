@@ -1,4 +1,3 @@
-import path from "path";
 import express, { Handler, NextFunction, Request, Response } from "express";
 import http from "http";
 import hash from "node-object-hash";
@@ -11,22 +10,26 @@ import {
   isCoasterError,
   withWrappedHook,
   jsonStringify,
+  isInvocable,
 } from "@baublet/coaster-utils";
 
 import { getEndpointFromFileDescriptor } from "../endpoints/getEndpointFromFileDescriptor";
-import { normalizeEndpoint } from "../endpoints/normalizeEndpoint";
 import {
   NormalizedEndpointHandler,
   NormalizedEndpointMiddleware,
   ResolvedEndpoint,
 } from "../endpoints/types";
-import { FileDescriptor, NormalizedManifest } from "../manifest/types";
+import {
+  NormalizedFileDescriptor,
+  NormalizedManifest,
+} from "../manifest/types";
 import { Server } from "./types";
 import { createExpressRequestContext } from "../context/createExpressRequestContext";
 import { log } from "../server/log";
 import { getMiddlewareFromFileDescriptor } from "../endpoints/getMiddlewareFromFileDescriptor";
 import { RequestContext } from "../context/request";
 import { resolveInputPathFromFile } from "../common/resolveInputPathFromFile";
+import { COASTER_REQUEST_ID_HEADER_NAME } from "../common/coasterRequestId";
 
 declare global {
   namespace Express {
@@ -45,11 +48,11 @@ export async function createExpressServer(
   options: {
     routeLoadingMode?: "lazy" | "eager";
     beforeManifestMiddlewareLoaded?: (
-      endpoints: FileDescriptor[]
-    ) => Promise<FileDescriptor[]>;
+      endpoints: NormalizedFileDescriptor[]
+    ) => Promise<NormalizedFileDescriptor[]>;
     beforeEndpointsLoaded?: (
-      endpoints: FileDescriptor[]
-    ) => Promise<FileDescriptor[]>;
+      endpoints: NormalizedFileDescriptor[]
+    ) => Promise<NormalizedFileDescriptor[]>;
     afterManifestMiddlewareLoaded?: (
       middleware: (CoasterError | NormalizedEndpointMiddleware)[]
     ) => Promise<(CoasterError | NormalizedEndpointMiddleware)[]>;
@@ -69,8 +72,6 @@ export async function createExpressServer(
     }) => Promise<void>;
   } = {}
 ): Promise<Server | CoasterError> {
-  const endpointFileFullPath = path.dirname(manifestFullPath);
-
   const middlewareDescriptors = await withWrappedHook(
     options.beforeManifestMiddlewareLoaded,
     manifest.middleware
@@ -83,9 +84,10 @@ export async function createExpressServer(
 
   const resolvedMiddleware = await asyncMap(
     middlewareDescriptors,
-    (subject) => {
-      subject.file = resolveInputPathFromFile(subject.file, manifestFullPath);
-      subject.exportName = subject.exportName || "middleware";
+    async (subject) => {
+      if (isInvocable(subject)) {
+        return subject;
+      }
       return getMiddlewareFromFileDescriptor(subject);
     }
   );
@@ -97,13 +99,14 @@ export async function createExpressServer(
 
   const resolvedEndpoints = await asyncMap(
     allEndpointDescriptors,
-    (subject) => {
+    async (subject) => {
+      if (isInvocable(subject)) {
+        return subject();
+      }
       const resolvedFile = resolveInputPathFromFile(
         subject.file,
         manifestFullPath
       );
-      subject.file = resolvedFile;
-      subject.exportName = subject.exportName || "endpoint";
       return getEndpointFromFileDescriptor({
         fileDescriptor: subject,
         endpointFileFullPath: resolvedFile,
@@ -119,7 +122,8 @@ export async function createExpressServer(
   const expressInstance = express();
 
   // The first-stop in every request: creates the Coaster context for the request,
-  // attaches it to the request, and adds a request ID to the request.
+  // attaches it to the request, and adds a request ID to the request, if one does
+  // not already exist.
   expressInstance.use((request, response, next) => {
     createRequestContext(request, response)
       .then((context) => {
@@ -160,23 +164,11 @@ export async function createExpressServer(
     if (isCoasterError(endpoint)) {
       return endpoint;
     }
-    const normalizedEndpoint = await normalizeEndpoint(
-      endpoint,
-      manifestFullPath
-    );
-    if (isCoasterError(normalizedEndpoint)) {
-      return createCoasterError({
-        code: "createServer-endpoint-declaration-error",
-        message: `Error normalizing endpoint declaration`,
-        error: normalizedEndpoint,
-      });
-    }
-
-    for (const method of normalizedEndpoint.method) {
+    for (const method of endpoint.method) {
       if ((app as any)[method] === undefined) {
         return createCoasterError({
           code: "createServer-endpoint-method-not-supported",
-          message: `Endpoint method ${normalizedEndpoint.method} not supported`,
+          message: `Endpoint method ${endpoint.method} not supported`,
         });
       }
       const methodRegistrar = ({
@@ -190,9 +182,9 @@ export async function createExpressServer(
       }) => (app as any)[method](endpoint, ...middleware, handler);
 
       const aggregatedMiddleware: Handler[] = [];
-      if (normalizedEndpoint.middleware.length > 0) {
+      if (endpoint.middleware.length > 0) {
         log.debug(`Registering middleware (${method}) ${endpoint.endpoint}`);
-        for (const endpointMiddlewareFunction of normalizedEndpoint.middleware) {
+        for (const endpointMiddlewareFunction of endpoint.middleware) {
           const middlewareNameHint =
             (endpointMiddlewareFunction as any)?.__coasterMiddlewareNameHint ||
             "anonymous fn";
@@ -292,12 +284,8 @@ export async function createExpressServer(
       return resolvedNotFoundEndpoint;
     }
 
-    const normalizedNotFoundEndpoint = await normalizeEndpoint(
-      resolvedNotFoundEndpoint,
-      manifestFullPath
-    );
-    if (isCoasterError(normalizedNotFoundEndpoint)) {
-      return normalizedNotFoundEndpoint;
+    if (isCoasterError(resolvedNotFoundEndpoint)) {
+      return resolvedNotFoundEndpoint;
     }
 
     log.debug(colors.dim("Registering not found endpoint"));
@@ -305,7 +293,7 @@ export async function createExpressServer(
       handleExpressMethodWithHandler({
         request,
         response,
-        handler: normalizedNotFoundEndpoint.handler,
+        handler: resolvedNotFoundEndpoint.handler,
       });
     });
   }
@@ -361,16 +349,18 @@ async function handleExpressMethodWithHandler({
   handler: NormalizedEndpointHandler;
 }): Promise<void> {
   try {
-    const context =
-      request.__coasterRequestContext ||
-      (await createExpressRequestContext({
-        request,
-        response,
-      }));
-    const resolvedContext = await context;
-    await handler(resolvedContext);
+    if (request.__coasterRequestContext) {
+      return await handler(request.__coasterRequestContext);
+    }
+    const requestId = getRequestIdFromRequestObject(request);
+    const context = await createExpressRequestContext({
+      request,
+      response,
+      requestId,
+    });
+    await handler(context);
     if (!context.response.hasFlushed()) {
-      await resolvedContext.response.flushData();
+      await context.response.flushData();
     }
   } catch (error) {
     log.error("Unexpected error handling request", { error });
@@ -382,28 +372,43 @@ export async function createRequestContext(
   request: Request,
   response: Response
 ) {
-  const requestIncomingTime = Date.now();
-  const uniqueRequestHash = hashRequest.hash({
-    time: requestIncomingTime,
-    request: {
-      method: request.method,
-      url: request.url,
-      headers: request.headers,
-      body: request.body,
-      query: request.query,
-      protocol: request.protocol,
-      originalUrl: request.originalUrl,
-    },
-  });
-  (request as any).__coasterRequestId = uniqueRequestHash;
+  const requestId = getRequestIdFromRequestObject(request);
+  (request as any).__coasterRequestId = requestId;
 
   const context = await createExpressRequestContext({
     request,
     response,
+    requestId,
   });
   (request as any).__coasterRequestContext = context;
 
-  log.debug(`${request.method} ${request.url} [${uniqueRequestHash}]`);
+  log.debug(`${request.method} ${request.url} [${requestId}]`);
 
   return context;
+}
+
+function getRequestIdFromRequestObject(request: Request): string {
+  let requestId: string = "";
+
+  const userSuppliedRequestId = request.headers[COASTER_REQUEST_ID_HEADER_NAME];
+  if (userSuppliedRequestId && typeof userSuppliedRequestId === "string") {
+    requestId = userSuppliedRequestId;
+  } else {
+    const requestIncomingTime = Date.now();
+    const uniqueRequestHash = hashRequest.hash({
+      time: requestIncomingTime,
+      request: {
+        method: request.method,
+        url: request.url,
+        headers: request.headers,
+        body: request.body,
+        query: request.query,
+        protocol: request.protocol,
+        originalUrl: request.originalUrl,
+      },
+    });
+    requestId = uniqueRequestHash;
+  }
+
+  return requestId;
 }

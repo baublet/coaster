@@ -1,3 +1,5 @@
+import { ItemOrArrayOfItems } from "@baublet/coaster-utils";
+
 export interface Manifest {
   name: string;
   port?: string;
@@ -31,10 +33,10 @@ export interface NormalizedManifest {
   name: string;
   port: string;
   key: string;
-  endpoints: FileDescriptor[];
-  deployments: FileDescriptor[];
-  middleware: FileDescriptor[];
-  notFound: FileDescriptor;
+  endpoints: NormalizedFileDescriptor[];
+  deployments: NormalizedFileDescriptor[];
+  middleware: NormalizedFileDescriptor[];
+  notFound: NormalizedFileDescriptor;
 }
 
 /**
@@ -51,5 +53,3 @@ export interface NormalizedFileDescriptor {
   file: string;
   exportName: string;
 }
-
-type ItemOrArrayOfItems<T> = T | T[];

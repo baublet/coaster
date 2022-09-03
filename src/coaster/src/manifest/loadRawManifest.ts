@@ -2,16 +2,21 @@ import JSON5 from "json5";
 
 import { readFile } from "@baublet/coaster-fs";
 import {
-  assertIsError,
   CoasterError,
   createCoasterError,
   isCoasterError,
   asTypeOrError,
   fullyResolve,
+  getItemOrArrayOfItems,
+  arrayHasNoCoasterErrors,
 } from "@baublet/coaster-utils";
 
-import { NormalizedManifest } from "./types";
-import { normalizeFileDescriptor } from "./normalizeFileDescriptor";
+import {
+  FileDescriptor,
+  NormalizedFileDescriptor,
+  NormalizedManifest,
+} from "./types";
+import { getNormalizedFileDescriptorFromFileInput } from "../common/getNormalizedFileDescriptorFromFileInput";
 
 const DEFAULT_PORT = process.env.COASTER_PORT || 8080;
 
@@ -51,7 +56,6 @@ export async function loadRawManifest(
     const manifest: unknown = JSON5.parse(manifestString);
     return await parseManifest(manifest, path);
   } catch (error) {
-    assertIsError(error);
     return createCoasterError({
       code: "loadRawManifest-parseError",
       message: `Error parsing manifest file: ${path}`,
@@ -120,19 +124,53 @@ async function parseManifest(
     });
   }
 
-  const endpoints = normalizeFileDescriptor(rootNode.endpoints);
-  if (isCoasterError(endpoints)) {
-    return endpoints;
+  const endpointsArray = getItemOrArrayOfItems(rootNode.endpoints);
+  const endpoints = endpointsArray.map((endpoint: FileDescriptor | string) =>
+    getNormalizedFileDescriptorFromFileInput({
+      exportNameIfNotSpecified: "endpoint",
+      fileInput: endpoint,
+      referenceFileFullPath: fullPath,
+    })
+  );
+
+  if (!arrayHasNoCoasterErrors(endpoints)) {
+    return createCoasterError({
+      code: `parseManifest-endpoints`,
+      message: `Error parsing endpoints`,
+      details: {
+        errors: endpoints.filter(isCoasterError),
+      },
+    });
   }
 
-  const notFound = normalizeFileDescriptor(rootNode.notFound);
+  const notFound = getNormalizedFileDescriptorFromFileInput({
+    fileInput: rootNode.notFound,
+    exportNameIfNotSpecified: "notFound",
+    referenceFileFullPath: fullPath,
+  });
   if (isCoasterError(notFound)) {
     return notFound;
   }
 
-  const middleware = normalizeFileDescriptor(rootNode.middleware);
-  if (isCoasterError(middleware)) {
-    return middleware;
+  const middlewareArray = getItemOrArrayOfItems<string | FileDescriptor>(
+    rootNode.middleware
+  );
+  const middleware = middlewareArray.map((middleware) =>
+    getNormalizedFileDescriptorFromFileInput({
+      exportNameIfNotSpecified: "middleware",
+      fileInput: middleware,
+      referenceFileFullPath: fullPath,
+    })
+  );
+
+  if (!arrayHasNoCoasterErrors(middleware)) {
+    return createCoasterError({
+      code: `parseManifest-middleware`,
+      message: `Error parsing middleware`,
+      details: {
+        errors: middleware.filter(isCoasterError),
+      },
+    });
   }
 
   return {
@@ -140,9 +178,9 @@ async function parseManifest(
     name,
     port: port,
     key,
-    endpoints,
-    notFound: notFound[0],
-    middleware,
+    endpoints: endpoints as NormalizedFileDescriptor[],
+    notFound,
+    middleware: middleware as NormalizedFileDescriptor[],
     deployments: [],
   };
 }

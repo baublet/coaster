@@ -33,12 +33,16 @@ export function createCoasterError({
     };
   }
 
+  const newStackTraces = error ? [error.stack] : [];
+  newStackTraces.push(new Error().stack);
+
   return {
     __isCoasterError: true,
     code,
     message,
     details: newDetails,
     time: Date.now(),
+    stackTraces: newStackTraces,
   };
 }
 

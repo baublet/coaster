@@ -1,5 +1,3 @@
-import path from "path";
-
 import {
   asTypeOrError,
   CoasterError,
@@ -21,7 +19,6 @@ export function normalizeFileDescriptor(
 
   const filesWithoutHashes: FileDescriptor[] = [];
   for (const file of collapsedEndpoints) {
-    console.log({ file });
     if (file.file.includes("#")) {
       if (file.exportName) {
         return createCoasterError({

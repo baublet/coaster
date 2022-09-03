@@ -4,6 +4,7 @@ export type CoasterError = {
   message: string;
   details?: ErrorDetails;
   time: number;
+  stackTraces: string[];
 };
 
 export type ErrorDetails = Record<string, any>;

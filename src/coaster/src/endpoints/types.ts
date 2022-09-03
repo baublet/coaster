@@ -29,9 +29,9 @@ export interface NormalizedEndpoint {
 
 export interface ResolvedEndpoint {
   endpoint: string;
-  method?: HttpMethod | HttpMethod[];
+  method: HttpMethod | HttpMethod[];
   handler: NormalizedEndpointHandler;
-  middleware?: NormalizedEndpointMiddleware[];
+  middleware: NormalizedEndpointMiddleware[];
 }
 
 export type Endpoint = Resolvable<EndpointInput>;

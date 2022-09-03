@@ -20,6 +20,7 @@ export interface RequestContext extends Context {
     headers: Map<string, string | string[] | undefined>;
     method: HttpMethod;
     body?: any;
+    getRequestId: () => string;
   };
   response: {
     _dangerouslyAccessRawResponse: () => Response;

@@ -19,6 +19,5 @@ export function resolveInputPathFromFile(
     result = path.resolve(inputFilePath, pathToResolve);
   }
 
-  console.log({ pathToResolve, inputFileLocation, result });
   return result;
 }

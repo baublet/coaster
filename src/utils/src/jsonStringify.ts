@@ -1,4 +1,3 @@
-import { assertIsError } from "./assertIsError";
 import { createCoasterError } from "./createCoasterError";
 import { CoasterError } from "./error";
 
@@ -8,7 +7,6 @@ export function jsonStringify(
   try {
     return JSON.stringify(...args);
   } catch (error) {
-    assertIsError(error);
     return createCoasterError({
       code: `stringify`,
       message: `Failed to stringify`,
