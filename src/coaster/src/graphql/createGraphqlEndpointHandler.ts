@@ -13,7 +13,7 @@ import stringify from "safe-json-stringify";
 import bodyParser from "body-parser";
 
 import { RequestContext } from "../context/request";
-import { EndpointHandler } from "../endpoints/types";
+import { NormalizedEndpointHandler } from "../endpoints/types";
 
 log.debug("GraphQL modules loaded");
 
@@ -50,7 +50,7 @@ export function createGraphqlEndpointHandler<
   playgroundEnabled?: boolean;
   createContext: TCreateContext;
   resolvers: ResolversObjectType<ReturnType<TCreateContext>>;
-}): EndpointHandler {
+}): NormalizedEndpointHandler {
   let open = false;
   let openPromise: Promise<void> | undefined;
 

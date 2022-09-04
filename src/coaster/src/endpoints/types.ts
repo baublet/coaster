@@ -4,8 +4,8 @@ import type {
   Resolvable,
   TypeOrPromiseType,
 } from "@baublet/coaster-utils";
-import { BuildTools } from "../build/types";
 
+import { BuildTools } from "../build/types";
 import type { RequestContext } from "../context/request";
 import { FileDescriptor } from "../manifest/types";
 
@@ -20,11 +20,17 @@ export const HTTP_METHODS = [
 ] as const;
 export type HttpMethod = typeof HTTP_METHODS[number];
 
+export type EndpointBuildFunction = (
+  tools: BuildTools
+) => TypeOrPromiseType<undefined | CoasterError | void>;
+
 export interface NormalizedEndpoint {
   endpoint: string;
   method: string[];
   handler: NormalizedEndpointHandler;
   middleware: NormalizedEndpointMiddleware[];
+  build: undefined | EndpointBuildFunction;
+  buildWatchPatterns: string[];
 }
 
 export interface ResolvedEndpoint {
@@ -32,6 +38,8 @@ export interface ResolvedEndpoint {
   method: HttpMethod | HttpMethod[];
   handler: NormalizedEndpointHandler;
   middleware: NormalizedEndpointMiddleware[];
+  build: undefined | EndpointBuildFunction;
+  buildWatchPatterns: string[];
 }
 
 export type Endpoint = Resolvable<EndpointInput>;
@@ -46,9 +54,15 @@ export interface EndpointInput {
   middleware?: ItemOrArrayOfItems<
     string | FileDescriptor | NormalizedEndpointMiddleware
   >;
-  build?: (
-    tools: BuildTools
-  ) => TypeOrPromiseType<undefined | CoasterError | void>;
+  build?: EndpointBuildFunction;
+  /**
+   * If your build function relies on specific files, you can specify them here
+   * as a list of wildcard patterns. In watch mode, when one or more files matching
+   * those patterns change, the endpoint will be rebuilt.
+   *
+   * Only utilized in development.
+   */
+  buildWatchPatterns?: string[];
 }
 
 export type NotFoundEndpoint = Resolvable<{

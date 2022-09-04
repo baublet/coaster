@@ -2,7 +2,12 @@ import stringify from "safe-json-stringify";
 
 import { CoasterError } from "@baublet/coaster-utils";
 
-export function logCoasterError(error: CoasterError): void {
+const defaultLogger = (...args: any[]) => console.error(...args);
+
+export function logCoasterError(
+  error: CoasterError,
+  log: (...args: any[]) => void = defaultLogger
+): void {
   const details = !error.details
     ? ``
     : `\n\ndetails:
@@ -13,7 +18,7 @@ export function logCoasterError(error: CoasterError): void {
       ? ""
       : "\n\n" + error.stackTraces.join(`\n\n`);
 
-  console.error(
+  log(
     `--------------------------------------------------------------------------------
 | CoasterError                                                                 |
 --------------------------------------------------------------------------------

@@ -186,6 +186,7 @@ export async function createGraphqlTrack({
         contextType: resolvedContextType,
       });
     },
+    buildWatchPatterns: [schemaPath],
     handler: graphqlHandler,
     endpoint,
     method,

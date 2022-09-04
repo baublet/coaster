@@ -3,10 +3,10 @@ import path from "path";
 import { CoasterError } from "@baublet/coaster-utils";
 
 import { NormalizedManifest } from "../../manifest/types";
-import { buildTrack } from "../../track/buildTrack";
+import { buildEndpoint } from "../../endpoints/buildEndpoint";
 import { getBuildTools } from "../../build/getBuildTools";
 
-export async function buildTracks(
+export async function buildEndpoints(
   manifest: NormalizedManifest
 ): Promise<undefined | CoasterError[]> {
   const promises: Promise<undefined | CoasterError>[] = [];
@@ -14,13 +14,15 @@ export async function buildTracks(
   const buildTools = getBuildTools();
 
   for (const endpoint of manifest.endpoints) {
+    const endpointFileFullPath = path.resolve(process.cwd(), endpoint.file);
     promises.push(
-      buildTrack({
+      buildEndpoint({
         fileDescriptor: {
           file: path.resolve(process.cwd(), endpoint.file),
           exportName: endpoint.exportName,
         },
         buildTools,
+        endpointFileFullPath,
       })
     );
   }

@@ -71,8 +71,12 @@ export async function getEndpointFromFileDescriptor({
   }
 
   const fullyResolvedExport = await perform(async () => {
-    const resolvedExport: Omit<ResolvedEndpoint, "middleware"> & {
+    const resolvedExport: Omit<
+      ResolvedEndpoint,
+      "middleware" | "buildWatchPatterns"
+    > & {
       middleware: EndpointInput["middleware"];
+      buildWatchPatterns: string[];
     } = await fullyResolve(fileImport[normalizedDescriptor.exportName]);
     return resolvedExport;
   });
@@ -235,5 +239,6 @@ export async function getEndpointFromFileDescriptor({
     method: methods,
     handler,
     middleware,
+    build: fullyResolvedExport.build,
   };
 }

@@ -1365,6 +1365,13 @@
   resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-3.0.5.tgz#1001cc5e6a3704b83c236027e77f2f58ea010f40"
   integrity sha512-Klz949h02Gz2uZCMGwDUSDS1YBlTdDDgbWHi+81l29tQALUtvz4rAYi5uoVhE5Lagoq6DeqAUlbrHvW/mXDgdQ==
 
+"@types/mkdirp@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@types/mkdirp/-/mkdirp-1.0.2.tgz#8d0bad7aa793abe551860be1f7ae7f3198c16666"
+  integrity sha512-o0K1tSO0Dx5X6xlU5F1D6625FawhC3dU3iqr25lluNv/+/QIVH8RLNEiVokgIZo+mz+87w/3Mkg/VvQS+J51fQ==
+  dependencies:
+    "@types/node" "*"
+
 "@types/node-fetch@^2.6.1":
   version "2.6.2"
   resolved "https://registry.yarnpkg.com/@types/node-fetch/-/node-fetch-2.6.2.tgz#d1a9c5fd049d9415dce61571557104dec3ec81da"
@@ -6017,6 +6024,11 @@ which@^2.0.1:
   integrity sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==
   dependencies:
     isexe "^2.0.0"
+
+wildcard-match@^5.1.2:
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/wildcard-match/-/wildcard-match-5.1.2.tgz#66b438001391674d8599b45da051e0bd9f33cd2a"
+  integrity sha512-qNXwI591Z88c8bWxp+yjV60Ch4F8Riawe3iGxbzquhy8Xs9m+0+SLFBGb/0yCTIDElawtaImC37fYZ+dr32KqQ==
 
 word-wrap@~1.2.3:
   version "1.2.3"

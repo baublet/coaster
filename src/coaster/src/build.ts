@@ -11,7 +11,7 @@ import { isCoasterError } from "@baublet/coaster-utils";
 
 import { loadRawManifest } from "./manifest/loadRawManifest";
 import { logCoasterError } from "./cli/utils/logCoasterError";
-import { buildTracks } from "./cli/build/buildTracks";
+import { buildEndpoints } from "./cli/build/buildEndpoints";
 
 log.debug("Internals loaded");
 
@@ -27,13 +27,19 @@ const MANIFEST_FULL_PATH = process.env.MANIFEST_FULL_PATH || "./manifest.ts";
     process.exit(1);
   }
 
-  log.debug("Building tracks");
-  const result = await buildTracks(loadedManifest);
+  log.debug("Building endpoints");
+  const result = await buildEndpoints(loadedManifest);
 
   if (isCoasterError(result)) {
     logCoasterError(result);
     process.exit(1);
   }
-
-  log.debug("Tracks built");
-})();
+})()
+  .then(() => {
+    log.debug("Endpoints built");
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
