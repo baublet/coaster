@@ -15,12 +15,22 @@ export async function buildGraphqlTrack({
   contextType: string;
   customConfig?: Record<string, any>;
 }): Promise<void | CoasterError> {
-  const { generate } = await import("@graphql-codegen/cli");
-  const baseName = path.basename(schemaPath);
-  const outputFile = path.resolve(path.dirname(schemaPath), `${baseName}.ts`);
+  tools.log.info("Loading GraphQL-Codegen tools");
+  tools.setProgress(3, 100); // arbitrary, unless someone has a better idea
 
-  return perform(async () => {
+  const { generate } = await import("@graphql-codegen/cli");
+  tools.setProgress(45, 100);
+
+  const baseName = path.basename(schemaPath);
+  const outputFile = path.resolve(
+    path.dirname(schemaPath),
+    `${baseName}.generated.ts`
+  );
+  tools.setProgress(47, 100);
+
+  const result = perform(async () => {
     tools.log.debug(`Generating GraphQL types from ${schemaPath}`);
+    tools.setProgress(50, 100);
     await generate({
       silent: true,
       schema: schemaPath,
@@ -42,5 +52,9 @@ export async function buildGraphqlTrack({
         },
       },
     });
+    tools.log.debug("GraphQL types generated");
+    tools.setProgress(99, 100);
   });
+  tools.setProgress(100, 100);
+  return result;
 }

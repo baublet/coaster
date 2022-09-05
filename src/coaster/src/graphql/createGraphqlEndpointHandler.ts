@@ -1,7 +1,5 @@
 import { log } from "../server/log";
 
-log.debug("Loading GraphQL modules");
-
 import { ApolloServer } from "@apollo/server";
 import {
   CoasterError,
@@ -14,8 +12,6 @@ import bodyParser from "body-parser";
 
 import { RequestContext } from "../context/request";
 import { NormalizedEndpointHandler } from "../endpoints/types";
-
-log.debug("GraphQL modules loaded");
 
 type ResolverType<TParent = any, TArgs = any, TContext = any, TInfo = any> = (
   parent: TParent,

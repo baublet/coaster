@@ -1,45 +1,50 @@
+const startTime = Date.now();
+
 /**
- * Runtime for the standalone Coaster Express server
+ * Runtime for the standalone Coaster Express build script
  */
-
-import { log } from "./server/log";
-log.debug("Loading Coaster internals");
-
 import path from "path";
 
-import { isCoasterError } from "@baublet/coaster-utils";
+import { CoasterError, isCoasterError } from "@baublet/coaster-utils";
 
 import { loadRawManifest } from "./manifest/loadRawManifest";
 import { logCoasterError } from "./cli/utils/logCoasterError";
 import { buildEndpoints } from "./cli/build/buildEndpoints";
 
-log.debug("Internals loaded");
-
 const MANIFEST_FULL_PATH = process.env.MANIFEST_FULL_PATH || "./manifest.ts";
 
 (async () => {
-  log.debug("Loading manifest");
   const manifestPath = path.resolve(process.cwd(), MANIFEST_FULL_PATH);
   const loadedManifest = await loadRawManifest(manifestPath);
 
   if (isCoasterError(loadedManifest)) {
-    logCoasterError(loadedManifest);
+    logFailure(loadedManifest);
     process.exit(1);
   }
 
-  log.debug("Building endpoints");
   const result = await buildEndpoints(loadedManifest);
 
   if (isCoasterError(result)) {
-    logCoasterError(result);
+    logFailure(result);
     process.exit(1);
   }
 })()
   .then(() => {
-    log.debug("Endpoints built");
+    console.log("Successful build took " + (Date.now() - startTime) + "ms");
     process.exit(0);
   })
   .catch((error) => {
-    console.error(error);
+    if (isCoasterError(error)) {
+      logFailure(error);
+    } else {
+      console.error(error);
+    }
     process.exit(1);
   });
+
+function logFailure(error: CoasterError): void {
+  logCoasterError(error, (error) => console.error(error));
+  console.log(
+    "Failed to build application after " + (Date.now() - startTime) + "ms"
+  );
+}

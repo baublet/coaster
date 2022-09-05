@@ -1,1 +1,1 @@
-schema.graphql.ts
+*.generated.ts

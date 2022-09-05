@@ -56,7 +56,7 @@ export function build(program: Program) {
       let lastWatcherEvent = 0;
       let bufferedChanges = 0;
 
-      let childProcess = runCommand({
+      let childProcess = await runCommand({
         coasterServePath,
         additionalArguments,
         watch: watchModeEnabled,
@@ -75,15 +75,16 @@ export function build(program: Program) {
           console.log("🧹 " + colors.dim("Cleaning up old processes"));
 
           await childProcess.kill();
-          childProcess = runCommand({
-            coasterServePath,
-            additionalArguments,
-            watch: watchModeEnabled,
-          });
 
           setTimeout(() => {
             watchingLocked = false;
           }, WATCH_DELAY_MS);
+
+          childProcess = await runCommand({
+            coasterServePath,
+            additionalArguments,
+            watch: watchModeEnabled,
+          });
         };
 
         const maybeWatcher = (() => {
@@ -140,14 +141,14 @@ export function build(program: Program) {
 
         process.stdin.on("data", async (data: any) => {
           if (data === "r" || data === "R" || data === "\r") {
-            await childProcess.kill();
+            await childProcess?.kill?.();
             return await restart();
           }
 
           if (data === "q" || data === "Q" || data === "\u0003") {
             console.log("\n🧼 " + colors.dim("Cleaning up processes"));
 
-            await childProcess.kill("SIGTERM", {
+            await childProcess?.kill?.("SIGTERM", {
               forceKillAfterTimeout: 3000,
             });
 
@@ -163,7 +164,7 @@ export function build(program: Program) {
     });
 }
 
-function runCommand({
+async function runCommand({
   additionalArguments,
   coasterServePath,
   watch,
@@ -171,9 +172,11 @@ function runCommand({
   watch: boolean;
   coasterServePath: string;
   additionalArguments: string[];
-}): Omit<ChildProcess, "kill"> & {
-  kill: (signal?: string, options?: KillOptions) => void;
-} {
+}): Promise<
+  Omit<ChildProcess, "kill"> & {
+    kill: (signal?: string, options?: KillOptions) => void;
+  }
+> {
   if (watch) {
     console.log("\n⏳ " + colors.green("Building application"));
     console.log(colors.dim("   Watching for changes"));
@@ -187,11 +190,17 @@ function runCommand({
     );
   }
 
-  return execa("node", [coasterServePath, ...additionalArguments], {
-    all: true,
-    cwd: process.cwd(),
-    env: process.env,
-    argv0: process.argv0,
-    stdio: "inherit",
-  });
+  const result = await execa(
+    "node",
+    [coasterServePath, ...additionalArguments],
+    {
+      all: true,
+      cwd: process.cwd(),
+      env: process.env,
+      argv0: process.argv0,
+      stdio: "inherit",
+    }
+  );
+
+  return result;
 }
