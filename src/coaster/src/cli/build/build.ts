@@ -1,8 +1,7 @@
-import { ChildProcess } from "child_process";
 import path from "path";
 
 import { Command as Program } from "commander";
-import { execa, KillOptions } from "execa";
+import { execa } from "execa";
 import colors from "@colors/colors";
 import { watch } from "chokidar";
 
@@ -44,7 +43,7 @@ export function build(program: Program) {
       // TODO: process any CLI arguments into coaster serve variables
       const additionalArguments: string[] = [];
 
-      const coasterServePath = path.resolve(
+      const coasterBuildPath = path.resolve(
         process.cwd(),
         "node_modules",
         ".bin",
@@ -56,8 +55,8 @@ export function build(program: Program) {
       let lastWatcherEvent = 0;
       let bufferedChanges = 0;
 
-      let childProcess = await runCommand({
-        coasterServePath,
+      let childProcess = runCommand({
+        coasterBuildPath,
         additionalArguments,
         watch: watchModeEnabled,
       });
@@ -80,8 +79,8 @@ export function build(program: Program) {
             watchingLocked = false;
           }, WATCH_DELAY_MS);
 
-          childProcess = await runCommand({
-            coasterServePath,
+          childProcess = runCommand({
+            coasterBuildPath,
             additionalArguments,
             watch: watchModeEnabled,
           });
@@ -164,19 +163,15 @@ export function build(program: Program) {
     });
 }
 
-async function runCommand({
+function runCommand({
   additionalArguments,
-  coasterServePath,
+  coasterBuildPath,
   watch,
 }: {
   watch: boolean;
-  coasterServePath: string;
+  coasterBuildPath: string;
   additionalArguments: string[];
-}): Promise<
-  Omit<ChildProcess, "kill"> & {
-    kill: (signal?: string, options?: KillOptions) => void;
-  }
-> {
+}) {
   if (watch) {
     console.log("\n⏳ " + colors.green("Building application"));
     console.log(colors.dim("   Watching for changes"));
@@ -190,17 +185,11 @@ async function runCommand({
     );
   }
 
-  const result = await execa(
-    "node",
-    [coasterServePath, ...additionalArguments],
-    {
-      all: true,
-      cwd: process.cwd(),
-      env: process.env,
-      argv0: process.argv0,
-      stdio: "inherit",
-    }
-  );
-
-  return result;
+  return execa("node", [coasterBuildPath, ...additionalArguments], {
+    all: true,
+    cwd: process.cwd(),
+    env: process.env,
+    argv0: process.argv0,
+    stdio: "inherit",
+  });
 }

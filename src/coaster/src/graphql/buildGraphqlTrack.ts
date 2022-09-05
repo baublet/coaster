@@ -28,8 +28,13 @@ export async function buildGraphqlTrack({
   );
   tools.setProgress(47, 100);
 
-  const result = perform(async () => {
-    tools.log.debug(`Generating GraphQL types from ${schemaPath}`);
+  const result = await perform(async () => {
+    tools.log.debug(
+      `Generating GraphQL types from ${schemaPath.replace(
+        process.cwd() + path.sep,
+        ""
+      )}`
+    );
     tools.setProgress(50, 100);
     await generate({
       silent: true,

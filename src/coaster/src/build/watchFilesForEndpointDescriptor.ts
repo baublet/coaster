@@ -100,7 +100,7 @@ function getEndpointWatchFilePath(
     process.cwd(),
     "node_modules",
     ".coaster",
-    hashString(endpointDescriptorInManifest) + ".json"
+    hashString(endpointDescriptorInManifest) + ".buildWatch.json"
   );
 }
 

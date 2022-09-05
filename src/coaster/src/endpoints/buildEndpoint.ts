@@ -14,11 +14,15 @@ export async function buildEndpoint({
   fileDescriptor,
   buildTools,
   endpointFileFullPath,
+  onHasBuild,
 }: {
   fileDescriptor: FileDescriptor;
   buildTools: BuildTools;
   endpointFileFullPath: string;
+  onHasBuild?: () => void;
 }): Promise<undefined | CoasterError> {
+  buildTools.log.debug("Loading endpoint from file descriptor");
+  buildTools.setProgress(2, 100);
   const resolvedEndpoint = await getEndpointFromFileDescriptor({
     fileDescriptor,
     endpointFileFullPath,
@@ -40,7 +44,9 @@ export async function buildEndpoint({
     });
   }
 
-  return perform(async () => {
+  onHasBuild?.();
+
+  const result = await perform(async () => {
     const result = await resolvedEndpoint?.build?.(buildTools);
     if (isCoasterError(result)) {
       return result;
@@ -58,4 +64,8 @@ export async function buildEndpoint({
 
     return undefined;
   });
+
+  buildTools.setProgress(100, 100);
+
+  return result;
 }

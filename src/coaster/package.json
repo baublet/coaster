@@ -34,6 +34,7 @@
     "@graphql-codegen/typescript-resolvers": "^2.7.3",
     "@types/uuid": "^8.0.1",
     "chokidar": "^3.5.3",
+    "cli-progress": "^3.11.2",
     "commander": "9.4.0",
     "cookie-parser": "1.4.6",
     "esbuild-register": "latest",
@@ -51,6 +52,7 @@
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.100",
+    "@types/cli-progress": "^3.11.0",
     "@types/cookie-parser": "1.4.3",
     "@types/express": "^4.17.13",
     "@types/mkdirp": "^1.0.2",
