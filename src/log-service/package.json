@@ -15,6 +15,8 @@
   },
   "dependencies": {
     "@baublet/coaster-build-tools": "0.0.1",
-    "@baublet/service-container": "^0.8.3"
+    "@baublet/service-container": "^0.8.3",
+    "@colors/colors": "1.5.0",
+    "safe-json-stringify": "1.2.0"
   }
 }

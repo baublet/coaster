@@ -1,14 +1,11 @@
+import { formatLog } from "./formatLog";
 import { LogProvider } from "./types";
 
 export function getConsoleLogProvider(): LogProvider {
   return {
-    debug: (message?: any, ...optionalParams: any[]) =>
-      console.debug(message, ...optionalParams),
-    error: (message?: any, ...optionalParams: any[]) =>
-      console.error(message, ...optionalParams),
-    warn: (message?: any, ...optionalParams: any[]) =>
-      console.warn(message, ...optionalParams),
-    info: (message?: any, ...optionalParams: any[]) =>
-      console.log(message, ...optionalParams),
+    debug: (...args: any[]) => console.debug(formatLog(...args)),
+    error: (...args: any[]) => console.error(formatLog(...args)),
+    warn: (...args: any[]) => console.warn(formatLog(...args)),
+    info: (...args: any[]) => console.log(formatLog(...args)),
   };
 }
