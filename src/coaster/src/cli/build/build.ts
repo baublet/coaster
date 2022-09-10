@@ -6,6 +6,7 @@ import colors from "@colors/colors";
 import { watch } from "chokidar";
 
 import { isCoasterError } from "@baublet/coaster-utils";
+import { log } from "@baublet/coaster-log-service";
 
 import { loadRawManifest } from "../../manifest/loadRawManifest";
 import { logCoasterError } from "../utils/logCoasterError";
@@ -70,8 +71,8 @@ export function build(program: Program) {
         const restart = async () => {
           watchingLocked = true;
 
-          console.log("\n🔃 " + colors.green("Rebuilding application..."));
-          console.log("🧹 " + colors.dim("Cleaning up old processes"));
+          log.info("\n🔃 " + colors.green("Rebuilding application..."));
+          log.info("🧹 " + colors.dim("Cleaning up old processes"));
 
           await childProcess.kill();
 
@@ -103,13 +104,13 @@ export function build(program: Program) {
               }
 
               if (lastWatcherEvent === 0 && !watchingLocked) {
-                console.log("\n📦 " + colors.blue("Change detected..."));
+                log.info("\n📦 " + colors.blue("Change detected..."));
               }
               if (!watchingLocked) {
                 if (bufferedChanges < 5) {
-                  console.log(colors.dim(`[${event}] ${path}`));
+                  log.info(colors.dim(`[${event}] ${path}`));
                 } else if (bufferedChanges === 5) {
-                  console.log(colors.dim("..."));
+                  log.info(colors.dim("..."));
                 }
               }
               if (!watchingLocked) {
@@ -145,14 +146,14 @@ export function build(program: Program) {
           }
 
           if (data === "q" || data === "Q" || data === "\u0003") {
-            console.log("\n🧼 " + colors.dim("Cleaning up processes"));
+            log.info("\n🧼 " + colors.dim("Cleaning up processes"));
 
             await childProcess?.kill?.("SIGTERM", {
               forceKillAfterTimeout: 3000,
             });
 
             if (maybeWatcher) {
-              console.log("🚿 " + colors.dim("Cleaning up watchers"));
+              log.info("🚿 " + colors.dim("Cleaning up watchers"));
               await maybeWatcher.close();
             }
 
@@ -173,9 +174,9 @@ function runCommand({
   additionalArguments: string[];
 }) {
   if (watch) {
-    console.log("\n⏳ " + colors.green("Building application"));
-    console.log(colors.dim("   Watching for changes"));
-    console.log(
+    log.info("\n⏳ " + colors.green("Building application"));
+    log.info(colors.dim("   Watching for changes"));
+    log.info(
       "   r, enter  " +
         colors.dim(". rebuild") +
         "\n" +

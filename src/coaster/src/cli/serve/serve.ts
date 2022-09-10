@@ -7,6 +7,7 @@ import colors from "@colors/colors";
 import { watch } from "chokidar";
 
 import { isCoasterError } from "@baublet/coaster-utils";
+import { log } from "@baublet/coaster-log-service";
 
 import { loadRawManifest } from "../../manifest/loadRawManifest";
 import { logCoasterError } from "../utils/logCoasterError";
@@ -58,8 +59,8 @@ export function serve(program: Program) {
       async function restart() {
         watchingLocked = true;
 
-        console.log("\n🔃 " + colors.green("Restarting server..."));
-        console.log("🧹 " + colors.dim("Cleaning up old processes"));
+        log.info("\n🔃 " + colors.green("Restarting server..."));
+        log.info("🧹 " + colors.dim("Cleaning up old processes"));
 
         await childProcess.kill();
         childProcess = runCommand(coasterServePath, additionalArguments);
@@ -79,13 +80,13 @@ export function serve(program: Program) {
 
         const watcher = watch(process.cwd()).on("all", (event, path) => {
           if (lastWatcherEvent === 0 && !watchingLocked) {
-            console.log("\n📦 " + colors.blue("Change detected..."));
+            log.info("\n📦 " + colors.blue("Change detected..."));
           }
           if (!watchingLocked) {
             if (bufferedChanges < 5) {
-              console.log(colors.dim(`[${event}] ${path}`));
+              log.info(colors.dim(`[${event}] ${path}`));
             } else if (bufferedChanges === 5) {
-              console.log(colors.dim("..."));
+              log.info(colors.dim("..."));
             }
           }
           if (!watchingLocked) {
@@ -120,18 +121,18 @@ export function serve(program: Program) {
         }
 
         if (data === "q" || data === "Q" || data === "\u0003") {
-          console.log("\n🧼 " + colors.dim("Cleaning up processes"));
+          log.info("\n🧼 " + colors.dim("Cleaning up processes"));
 
           await childProcess.kill("SIGTERM", {
             forceKillAfterTimeout: 3000,
           });
 
           if (maybeWatcher) {
-            console.log("🚿 " + colors.dim("Cleaning up watchers"));
+            log.info("🚿 " + colors.dim("Cleaning up watchers"));
             await maybeWatcher.close();
           }
 
-          console.log("");
+          log.info("");
 
           process.exit(0);
         }
@@ -145,8 +146,8 @@ function runCommand(
 ): Omit<ChildProcess, "kill"> & {
   kill: (signal?: string, options?: KillOptions) => void;
 } {
-  console.log("\n⏳ " + colors.green("Starting server..."));
-  console.log(
+  log.info("\n⏳ " + colors.green("Starting server..."));
+  log.info(
     "   r, enter  " +
       colors.dim(". restart server") +
       "\n" +

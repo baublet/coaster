@@ -2,7 +2,7 @@
  * Runtime for the standalone Coaster Express server
  */
 
-import { log } from "./server/log";
+import { log } from "@baublet/coaster-log-service";
 log.debug("Loading Coaster internals");
 
 import path from "path";

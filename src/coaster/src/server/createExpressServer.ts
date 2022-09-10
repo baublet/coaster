@@ -11,7 +11,9 @@ import {
   withWrappedHook,
   jsonStringify,
   isInvocable,
+  perform,
 } from "@baublet/coaster-utils";
+import { log } from "@baublet/coaster-log-service";
 
 import { getEndpointFromFileDescriptor } from "../endpoints/getEndpointFromFileDescriptor";
 import {
@@ -25,11 +27,11 @@ import {
 } from "../manifest/types";
 import { Server } from "./types";
 import { createExpressRequestContext } from "../context/createExpressRequestContext";
-import { log } from "../server/log";
 import { getMiddlewareFromFileDescriptor } from "../endpoints/getMiddlewareFromFileDescriptor";
 import { RequestContext } from "../context/request";
 import { resolveInputPathFromFile } from "../common/resolveInputPathFromFile";
 import { COASTER_REQUEST_ID_HEADER_NAME } from "../common/coasterRequestId";
+import { performance } from "perf_hooks";
 
 declare global {
   namespace Express {
@@ -326,7 +328,7 @@ export async function createExpressServer(
               resolve();
             })
             .catch((error) => {
-              console.error(error);
+              log.error(error);
               resolve(error);
             });
         });
@@ -349,19 +351,36 @@ async function handleExpressMethodWithHandler({
   handler: NormalizedEndpointHandler;
 }): Promise<void> {
   try {
-    if (request.__coasterRequestContext) {
-      return await handler(request.__coasterRequestContext);
-    }
     const requestId = getRequestIdFromRequestObject(request);
-    const context = await createExpressRequestContext({
-      request,
-      response,
-      requestId,
+
+    const context = await perform(async () => {
+      if (request.__coasterRequestContext) {
+        return request.__coasterRequestContext;
+      }
+      log.debug("Creating request context");
+      return createExpressRequestContext({
+        request,
+        response,
+        requestId,
+      });
     });
+    if (isCoasterError(context)) {
+      log.error("Unexpected error handling request", { context });
+      response.status(500).send("Unexpected error");
+      return;
+    }
+
+    context.log("debug", "Handling request with primary handler");
+    const handlerStartTime = performance.now();
     await handler(context);
     if (!context.response.hasFlushed()) {
       await context.response.flushData();
     }
+    const handlerEndTime = performance.now();
+    const elapsedMs = handlerEndTime - handlerStartTime;
+    const roundedElapsedTime =
+      Math.round((elapsedMs + Number.EPSILON) * 100) / 100;
+    context.log("debug", `Request handler complete in ${roundedElapsedTime}ms`);
   } catch (error) {
     log.error("Unexpected error handling request", { error });
     response.status(500).send("Unexpected error");

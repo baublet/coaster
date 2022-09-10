@@ -5,6 +5,7 @@ export const endpoint: Endpoint = () => {
     endpoint: "/",
     method: "get",
     handler: async (context) => {
+      context.log("info", "Index page hit");
       context.response.setData("Hello, world!");
     },
   };

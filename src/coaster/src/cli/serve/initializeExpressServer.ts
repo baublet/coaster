@@ -1,9 +1,9 @@
 import { CoasterError, isCoasterError } from "@baublet/coaster-utils";
+import { log } from "@baublet/coaster-log-service";
 
 import { NormalizedManifest } from "../../manifest/types";
 import { createExpressServer } from "../../server/createExpressServer";
 import { Server } from "../../server/types";
-import { log } from "../../server/log";
 
 export function initializeExpressServer(
   manifest: NormalizedManifest

@@ -23,6 +23,7 @@ export function getFailedTrack({
     handler: (context) => {
       context.response.setStatus(500);
       context.response.sendJson(JSON.stringify(error));
+      context.log("error", error);
     },
   };
 }

@@ -1,5 +1,3 @@
-import { log } from "../server/log";
-
 import { ApolloServer } from "@apollo/server";
 import {
   CoasterError,
@@ -9,6 +7,8 @@ import {
 } from "@baublet/coaster-utils";
 import stringify from "safe-json-stringify";
 import bodyParser from "body-parser";
+
+import { log } from "@baublet/coaster-log-service";
 
 import { RequestContext } from "../context/request";
 import { NormalizedEndpointHandler } from "../endpoints/types";

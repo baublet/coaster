@@ -1,13 +1,10 @@
-import {
-  LogProvider,
-  getConsoleLogProvider,
-} from "@baublet/coaster-log-service";
+import { log, LogProvider } from "@baublet/coaster-log-service";
 
 import { BuildTools } from "./types";
 
 export function getBuildTools(
-  { logProvider = getConsoleLogProvider() }: { logProvider?: LogProvider } = {
-    logProvider: getConsoleLogProvider(),
+  { logProvider = log }: { logProvider?: LogProvider } = {
+    logProvider: log,
   }
 ): BuildTools {
   let _current = 0;

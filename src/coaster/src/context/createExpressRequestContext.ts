@@ -42,7 +42,7 @@ export async function createExpressRequestContext({
   }
 
   return {
-    ...getContextLogProperties(serviceContainer),
+    ...getContextLogProperties(),
     request: {
       _dangerouslyAccessRawRequest: () => request,
       cookies: request.cookies,

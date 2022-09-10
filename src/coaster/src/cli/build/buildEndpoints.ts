@@ -4,6 +4,7 @@ import { MultiBar, Presets, SingleBar } from "cli-progress";
 import colors from "@colors/colors";
 
 import { CoasterError, isCoasterError } from "@baublet/coaster-utils";
+import { log } from "@baublet/coaster-log-service";
 
 import { NormalizedManifest } from "../../manifest/types";
 import { buildEndpoint } from "../../endpoints/buildEndpoint";
@@ -61,7 +62,7 @@ export async function buildEndpoints(
           if (isCoasterError(error)) {
             logCoasterError(error);
           } else {
-            console.error(error);
+            log.error(error);
           }
         } finally {
           progressBar?.update(100);

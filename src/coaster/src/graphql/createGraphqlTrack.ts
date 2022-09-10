@@ -14,11 +14,11 @@ import {
   getAccessProxy,
   perform,
 } from "@baublet/coaster-utils";
+import { log } from "@baublet/coaster-log-service";
 
 import { CoasterTrack } from "../track/types";
 import { getFailedTrack } from "../track/getFailedTrack";
 import { createGraphqlEndpointHandler } from "./createGraphqlEndpointHandler";
-import { log } from "../server/log";
 import { EndpointInput } from "../endpoints/types";
 import { buildGraphqlTrack } from "./buildGraphqlTrack";
 import { getMethodsFromMethod } from "../endpoints/getMethodsFromMethod";

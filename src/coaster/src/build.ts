@@ -6,6 +6,7 @@ const startTime = Date.now();
 import path from "path";
 
 import { CoasterError, isCoasterError } from "@baublet/coaster-utils";
+import { log } from "@baublet/coaster-log-service";
 
 import { loadRawManifest } from "./manifest/loadRawManifest";
 import { logCoasterError } from "./cli/utils/logCoasterError";
@@ -30,21 +31,21 @@ const MANIFEST_FULL_PATH = process.env.MANIFEST_FULL_PATH || "./manifest.ts";
   }
 })()
   .then(() => {
-    console.log("Successful build took " + (Date.now() - startTime) + "ms");
+    log.info("Successful build took " + (Date.now() - startTime) + "ms");
     process.exit(0);
   })
   .catch((error) => {
     if (isCoasterError(error)) {
       logFailure(error);
     } else {
-      console.error(error);
+      log.error(error);
     }
     process.exit(1);
   });
 
 function logFailure(error: CoasterError): void {
-  logCoasterError(error, (error) => console.error(error));
-  console.log(
+  logCoasterError(error);
+  log.error(
     "Failed to build application after " + (Date.now() - startTime) + "ms"
   );
 }

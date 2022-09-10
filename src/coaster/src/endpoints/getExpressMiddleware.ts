@@ -1,10 +1,13 @@
+import { RequestHandler } from "express";
+
 import {
   CoasterError,
   createCoasterError,
   isCoasterError,
   perform,
 } from "@baublet/coaster-utils";
-import { RequestHandler } from "express";
+import { log } from "@baublet/coaster-log-service";
+
 import { NormalizedEndpointMiddleware } from "./types";
 
 export function getExpressMiddleware(
@@ -58,7 +61,7 @@ export function getExpressMiddleware(
           resolved = true;
         })
         .catch((error) => {
-          console.error(error);
+          log.error(error);
         });
     });
   };

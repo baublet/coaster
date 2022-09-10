@@ -11,6 +11,7 @@ import {
   jsonParse,
   jsonStringify,
 } from "@baublet/coaster-utils";
+import { log } from "@baublet/coaster-log-service";
 
 import { hashString } from "../common/hashString";
 import { NormalizedManifest } from "../manifest/types";
@@ -55,11 +56,15 @@ export async function getWatchFilesForEndpointDescriptor(
       if (typeof wildcardPath === "string") {
         paths.push(wildcardPath);
       } else {
-        // TODO: log this
+        log.error(
+          `Wildcard path is not a string. It is instead a ${typeof wildcardPath} (${wildcardPath})`
+        );
       }
     }
   } else {
-    // TODO: log this
+    log.error(
+      `File contents is not an array. It is instead a ${typeof parsedFileContents} (${parsedFileContents})`
+    );
   }
 
   return paths;

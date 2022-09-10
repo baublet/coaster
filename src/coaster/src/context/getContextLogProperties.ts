@@ -1,5 +1,4 @@
-import { getConsoleLogService } from "@baublet/coaster-log-service";
-import { ServiceContainer } from "@baublet/service-container";
+import { log } from "@baublet/coaster-log-service";
 
 import { Context } from "./base";
 
@@ -9,19 +8,10 @@ import { Context } from "./base";
  * developers. We thus have to expose the logging service from the context
  * for ease of access.
  */
-export function getContextLogProperties(
-  serviceContainer: ServiceContainer
-): Pick<Context, "log" | "setLogService" | "getLogService"> {
-  let logService = getConsoleLogService();
-
+export function getContextLogProperties(): Pick<Context, "log"> {
   return {
-    setLogService: (newLogService) => {
-      logService = newLogService;
-    },
-    getLogService: () => logService,
     log: (level, ...details) => {
-      const provider = serviceContainer.get(logService);
-      provider[level](...details);
+      log[level](...details);
     },
   };
 }

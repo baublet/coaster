@@ -10,12 +10,14 @@
   },
   "license": "MIT",
   "scripts": {
+    "build": "yarn coaster-build",
     "test": "unit-test"
   },
   "dependencies": {
     "safe-json-stringify": "1.2.0"
   },
   "devDependencies": {
+    "@baublet/coaster-build-tools": "0.0.1",
     "@baublet/coaster-unit-test": "0.0.1",
     "@types/safe-json-stringify": "*"
   }

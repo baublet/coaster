@@ -20,7 +20,6 @@
   },
   "dependencies": {
     "@apollo/server": "^4.0.0-alpha.4",
-    "@baublet/coaster-build-tools": "0.0.1",
     "@baublet/coaster-fs": "0.0.1",
     "@baublet/coaster-log-service": "0.0.1",
     "@baublet/coaster-unit-test": "0.0.1",
@@ -51,6 +50,7 @@
     "yup": "^0.32.11"
   },
   "devDependencies": {
+    "@baublet/coaster-build-tools": "0.0.1",
     "@types/aws-lambda": "^8.10.100",
     "@types/cli-progress": "^3.11.0",
     "@types/cookie-parser": "1.4.3",
