@@ -15,6 +15,7 @@ import { log } from "@baublet/coaster-log-service";
 
 import { hashString } from "../common/hashString";
 import { NormalizedManifest } from "../manifest/types";
+import { logCoasterError } from "../cli/utils/logCoasterError";
 
 /**
  * When building an endpoint, our main CLI process won't load the endpoint from the
@@ -122,7 +123,7 @@ export async function shouldRebuild(
   const allPaths = new Set<string>();
   for (const endpointPath of endpointPaths) {
     if (isCoasterError(endpointPath)) {
-      // TODO: log this
+      logCoasterError(endpointPath);
       continue;
     }
     for (const path of endpointPath) {

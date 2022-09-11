@@ -1,4 +1,4 @@
-import { log, LogProvider } from "@baublet/coaster-log-service";
+import { log, LogProvider, LogLevel } from "@baublet/coaster-log-service";
 
 import { BuildTools } from "./types";
 
@@ -10,9 +10,9 @@ export function getBuildTools(
   let _current = 0;
   let _target = 0;
   let _onProgressChange: undefined | ((percent: number) => void) = undefined;
-  const _isFlushing = false;
+  let _isFlushing = false;
 
-  const logs: string[] = [];
+  const logs: { message: string; level: LogLevel }[] = [];
 
   return {
     onProgressChange: (callback) => {
@@ -29,33 +29,39 @@ export function getBuildTools(
       }
     },
     getProgress: () => ({ currentProgress: _current, targetProgress: _target }),
+    flushLogs: () => {
+      _isFlushing = true;
+      logs.forEach(({ message, level }) => {
+        logProvider[level](message);
+      });
+    },
     log: {
       debug: (message: string) => {
         if (_isFlushing) {
           logProvider.debug(message);
         } else {
-          logs.push(message);
+          logs.push({ message, level: "debug" });
         }
       },
       info: (message: string) => {
         if (_isFlushing) {
           logProvider.info(message);
         } else {
-          logs.push(message);
+          logs.push({ message, level: "info" });
         }
       },
       warn: (message: string) => {
         if (_isFlushing) {
           logProvider.warn(message);
         } else {
-          logs.push(message);
+          logs.push({ message, level: "warn" });
         }
       },
       error: (message: string) => {
         if (_isFlushing) {
           logProvider.error(message);
         } else {
-          logs.push(message);
+          logs.push({ message, level: "error" });
         }
       },
     },

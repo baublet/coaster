@@ -4,6 +4,7 @@ import { log } from "@baublet/coaster-log-service";
 import { NormalizedManifest } from "../../manifest/types";
 import { createExpressServer } from "../../server/createExpressServer";
 import { Server } from "../../server/types";
+import { logCoasterError } from "../utils/logCoasterError";
 
 export function initializeExpressServer(
   manifest: NormalizedManifest
@@ -23,7 +24,7 @@ export function initializeExpressServer(
         }
         for (const endpoint of endpoints) {
           if (isCoasterError(endpoint)) {
-            // NOOP: here for type safety
+            logCoasterError(endpoint);
             continue;
           }
           log.debug(`Loaded endpoint: ${endpoint?.endpoint}`);
