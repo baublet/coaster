@@ -1,4 +1,4 @@
-import { createNotFoundEndpoint } from "@baublet/coaster";
+import { createNotFoundEndpoint } from "@baublet/coaster/endpoints";
 
 export const notFound = createNotFoundEndpoint(async (context) => {
   context.response.setStatus(404);

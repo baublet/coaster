@@ -1,4 +1,5 @@
-import { Endpoint, lazyLoadedEndpoint } from "@baublet/coaster";
+import { Endpoint } from "@baublet/coaster";
+import { lazyLoadedEndpoint } from "@baublet/coaster/endpoints";
 
 const endpoint: Endpoint = {
   endpoint: "/todos",

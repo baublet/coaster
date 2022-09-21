@@ -5,4 +5,4 @@
  * so that we can build the below file later, yet still have access to the
  * script. (This means we don't have to link scripts in a separate phase.)
  */
-require("./dist/build");
+require("../dist/build");

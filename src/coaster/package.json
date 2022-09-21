@@ -6,9 +6,9 @@
     "url": "https://www.ryanmpoe.com"
   },
   "bin": {
-    "coaster-build-application": "./buildApplication.js",
-    "coaster": "./coaster.js",
-    "coaster-serve": "./coasterServe.js"
+    "coaster-build-application": "./bin/buildApplication.js",
+    "coaster": "./bin/coaster.js",
+    "coaster-serve": "./bin/coasterServe.js"
   },
   "license": "MIT",
   "version": "0.0.1",

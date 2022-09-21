@@ -3,7 +3,7 @@
   "description": "For building Coaster applications",
   "version": "0.0.1",
   "bin": {
-    "coaster-build": "./build.js"
+    "coaster-build": "./bin/build.js"
   },
   "author": {
     "email": "baublet@gmail.com",

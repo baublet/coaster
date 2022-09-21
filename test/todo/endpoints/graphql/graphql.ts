@@ -1,7 +1,5 @@
-import {
-  LazyLoadedHandler,
-  createGraphqlEndpointHandler,
-} from "@baublet/coaster";
+import { createGraphqlEndpointHandler } from "@baublet/coaster/graphql";
+import { LazyLoadedHandler } from "@baublet/coaster";
 
 export const handler: LazyLoadedHandler = createGraphqlEndpointHandler({
   createContext: (context) => ({

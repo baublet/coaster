@@ -1,6 +1,6 @@
 import path from "path";
 
-import { createGraphqlTrack } from "@baublet/coaster";
+import { createGraphqlTrack } from "@baublet/coaster/graphql";
 
 export const endpoint = createGraphqlTrack({
   endpoint: "/graphql-track",
