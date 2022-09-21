@@ -1,5 +1,3 @@
-import stringify from "safe-json-stringify";
-
 import {
   CoasterError,
   createCoasterError,
@@ -58,8 +56,8 @@ export async function getEndpointFromFileDescriptor({
       return createCoasterError({
         code: "getEndpointFromFileDescriptor-unexpected-error-importing",
         message: `Unexpected error importing ${normalizedDescriptor.file}`,
+        error,
         details: {
-          error: stringify(error as any),
           normalizedDescriptor,
         },
       });
