@@ -5,7 +5,7 @@ interface ProxiedRecord<T extends (...args: any[]) => any> {
 
 /**
  * Returns an object proxy that allows a single access point to control what
- * the ultimate return is.
+ * the final return value of the chained call is.
  *
  * E.g.,
  *
@@ -14,43 +14,20 @@ interface ProxiedRecord<T extends (...args: any[]) => any> {
  *  console.log(path);
  * });
  *
- * test.foo.bar.baz; // logs ["foo", "bar", "baz"]
+ * test.foo.bar.baz(); // logs ["foo", "bar", "baz"]
  */
-let proxiesCreated = 0;
 export function getAccessProxy<
   T extends (paths: string[], ...args: any[]) => any
->(
-  handler: T,
-  paths: string[] = [],
-  proxyCacheMap: Map<string, any> = new Map()
-): ProxiedRecord<T> {
-  proxiesCreated++;
-  function getProxyForPath(handler: T, paths: string[]) {
-    const path = paths.join(".");
-    if (proxyCacheMap.has(path)) {
-      return proxyCacheMap.get(path);
-    }
-
-    const proxy = getAccessProxy(handler, paths, proxyCacheMap);
-    proxyCacheMap.set(path, proxy);
-    return proxy;
-  }
-
-  const proxy = new Proxy(handler, {
+>(handler: T): ProxiedRecord<T> {
+  const paths: string[] = [];
+  const proxy: any = new Proxy(handler, {
     get(target, prop) {
-      return getProxyForPath(handler, [...paths, String(prop)]);
+      paths.push(String(prop));
+      return proxy;
     },
     apply(target, thisArg, args) {
-      return handler(paths, ...args);
+      return handler(paths.splice(0, paths.length), ...args);
     },
   });
   return proxy;
-}
-
-export function _getProxiesCreated() {
-  return proxiesCreated;
-}
-
-export function _resetProxiesCreated() {
-  proxiesCreated = 0;
 }

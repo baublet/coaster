@@ -1,17 +1,10 @@
-import {
-  coasterTest,
-  expect,
-  it,
-  beforeEach,
-} from "@baublet/coaster-unit-test";
+import { Suite, Target } from "benchmark";
 
-import {
-  getAccessProxy,
-  _getProxiesCreated,
-  _resetProxiesCreated,
-} from "./getAccessProxy";
+import { coasterTest, expect, it } from "@baublet/coaster-unit-test";
 
-beforeEach(_resetProxiesCreated);
+import { getAccessProxy } from "./getAccessProxy";
+
+const MINIMUM_OPS_PER_SECOND = 200_000;
 
 it("provides a proper access proxy", () => {
   const fn = coasterTest.fn();
@@ -31,15 +24,38 @@ it("provides a proper access proxy", () => {
   expect(fn).toHaveBeenCalledWith(["foo", "bar"]);
   expect(fn).toHaveBeenCalledWith(["foo", "bar", "baz"]);
 
-  expect(_getProxiesCreated()).toBe(4);
   expect(fn).toHaveBeenCalledTimes(8);
 });
 
-it("properly caches access proxies", () => {
-  const fn = coasterTest.fn();
-  const proxy = getAccessProxy(fn);
+it("benchmarks", async () => {
+  const suite = new Suite();
 
-  proxy.foo.bar.baz();
+  // add tests
+  console.log("Benchmarking...");
+  let cycleResult = 0;
+  suite
+    .add("pure access speed", () => {
+      function doNothing() {}
+      const proxy = getAccessProxy(doNothing);
 
-  expect(fn).toHaveBeenCalledWith(["foo", "bar", "baz"]);
+      proxy.foo.bar.baz();
+      proxy.daenerys.stormborn.of.house.targaryen.the.first.of.her.name.queen.of.the.andals.and.the.first.men.protector.of.the.seven.kingdoms.the.mother.of.dragons.the.khaleesi.of.the.great.grass.sea.the.unburnt.the.breaker.of.chains();
+      proxy.daenerys.stormborn();
+      proxy.daenerys.stormborn.of.house.targaryen();
+      proxy.foo.bar();
+    })
+    // add listeners
+    .on("cycle", (event: { target: Target }) => {
+      function doNothing() {}
+      const proxy = getAccessProxy(doNothing);
+
+      proxy.foo.bar.baz();
+      cycleResult = event.target.hz || 0;
+    })
+    .run();
+
+  console.log(
+    `Benchmark finished with ${cycleResult.toLocaleString()} ops/sec`
+  );
+  expect(cycleResult).toBeGreaterThan(MINIMUM_OPS_PER_SECOND);
 });
