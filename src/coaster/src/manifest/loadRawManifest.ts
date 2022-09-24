@@ -49,7 +49,12 @@ export async function loadRawManifest(
   const manifestString = await readFile(path, options);
 
   if (isCoasterError(manifestString)) {
-    return manifestString;
+    return createCoasterError({
+      code: `loadRawManifest-readFile`,
+      message: `Error reading manifest file ${path}`,
+      previousError: manifestString,
+      details: { path, options },
+    });
   }
 
   try {
@@ -76,6 +81,7 @@ async function parseManifest(
     return createCoasterError({
       code: `parseManifest-rootNode`,
       message: `Expected manifest root node an object, got a ${typeof manifest}`,
+      previousError: rootNode,
     });
   }
 
@@ -84,6 +90,7 @@ async function parseManifest(
     return createCoasterError({
       code: `parseManifest-name`,
       message: `Expected manifest name to be a string, got a ${typeof rootNode.name}`,
+      previousError: name,
     });
   }
 
@@ -92,13 +99,13 @@ async function parseManifest(
   if (isNaN(numericPort)) {
     return createCoasterError({
       code: `parseManifest-port-notANumber`,
-      message: `Expected manifest port to be a numeric string or number, got ${port}`,
+      message: `Expected manifest port to be a numeric string or number, got ${port} (NaN)`,
     });
   }
   if (numericPort === Infinity) {
     return createCoasterError({
       code: `parseManifest-port-infinity`,
-      message: `Expected manifest port to be a numeric string or number, got ${port}`,
+      message: `Expected manifest port to be a numeric string or number, got ${port} (Infinity)`,
     });
   }
   if (numericPort % 1 !== 0) {
@@ -121,6 +128,7 @@ async function parseManifest(
     return createCoasterError({
       code: `parseManifest-key`,
       message: `Expected manifest key to be a string, got a ${typeof rootNode.key}`,
+      previousError: key,
     });
   }
 
@@ -149,7 +157,12 @@ async function parseManifest(
     referenceFileFullPath: fullPath,
   });
   if (isCoasterError(notFound)) {
-    return notFound;
+    return createCoasterError({
+      code: `parseManifest-notFound`,
+      message: `Error parsing notFound`,
+      details: { fileInput: rootNode.notFound, referenceFile: fullPath },
+      previousError: notFound,
+    });
   }
 
   const middlewareArray = getItemOrArrayOfItems<string | FileDescriptor>(
@@ -169,6 +182,27 @@ async function parseManifest(
       message: `Error parsing middleware`,
       details: {
         errors: middleware.filter(isCoasterError),
+      },
+    });
+  }
+
+  const deploymentsArray = getItemOrArrayOfItems<string | FileDescriptor>(
+    rootNode.middleware
+  );
+  const deployments = deploymentsArray.map((middleware) =>
+    getNormalizedFileDescriptorFromFileInput({
+      exportNameIfNotSpecified: "middleware",
+      fileInput: middleware,
+      referenceFileFullPath: fullPath,
+    })
+  );
+
+  if (!arrayHasNoCoasterErrors(deployments)) {
+    return createCoasterError({
+      code: `parseManifest-middleware`,
+      message: `Error parsing middleware`,
+      details: {
+        errors: deployments.filter(isCoasterError),
       },
     });
   }

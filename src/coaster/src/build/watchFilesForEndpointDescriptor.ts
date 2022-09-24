@@ -33,7 +33,15 @@ export async function getWatchFilesForEndpointDescriptor(
 
   const fileExistsResult = await fileExists(pathToFile);
   if (isCoasterError(fileExistsResult)) {
-    return fileExistsResult;
+    return createCoasterError({
+      code: "getWatchFilesForEndpointDescriptor-fileExistsError",
+      message:
+        "Unexpected checking if endpoint descriptor file exists. This is likely to be a low-level system error",
+      details: {
+        pathToFile,
+      },
+      previousError: fileExistsResult,
+    });
   }
 
   // No file here, yet, nothing to watch!
@@ -43,12 +51,27 @@ export async function getWatchFilesForEndpointDescriptor(
 
   const fileContents = await readFile(pathToFile);
   if (isCoasterError(fileContents)) {
-    return fileContents;
+    return createCoasterError({
+      code: "getWatchFilesForEndpointDescriptor-readFileError",
+      message: "Unexpected error reading endpoint descriptor",
+      details: {
+        path: pathToFile,
+      },
+      previousError: fileContents,
+    });
   }
 
   const parsedFileContents = jsonParse(fileContents);
   if (isCoasterError(parsedFileContents)) {
-    return parsedFileContents;
+    return createCoasterError({
+      code: "getWatchFilesForEndpointDescriptor-parseError",
+      message: "Unexpected error parsing endpoint descriptor",
+      details: {
+        pathToFile,
+        fileContents,
+      },
+      previousError: parsedFileContents,
+    });
   }
 
   const paths: string[] = [];
@@ -80,20 +103,36 @@ export async function saveWatchFilesForEndpointDescriptor(
     await mkdirp(path.dirname(pathToFile));
     const stringifyResult = jsonStringify(watchFiles);
     if (isCoasterError(stringifyResult)) {
-      return stringifyResult;
+      return createCoasterError({
+        code: "saveWatchFilesForEndpointDescriptor-stringifyError",
+        message: "Unexpected error stringifying watch files",
+        details: {
+          pathToFile,
+          watchFiles,
+        },
+        previousError: stringifyResult,
+      });
     }
     const writeResult = await writeFile(pathToFile, stringifyResult);
     if (isCoasterError(writeResult)) {
-      return writeResult;
+      return createCoasterError({
+        code: "saveWatchFilesForEndpointDescriptor-writeFileError",
+        message: "Unexpected error writing watch files",
+        details: {
+          pathToFile,
+          watchFiles,
+        },
+        previousError: writeResult,
+      });
     }
   } catch (error) {
     return createCoasterError({
       code: "saveWatchFilesForEndpoint",
       message: `Unexpected error saving watch files for endpoint: ${endpointDescriptorInManifest}`,
+      error,
       details: {
         endpointDescriptorInManifest,
         pathToFile,
-        error,
       },
     });
   }

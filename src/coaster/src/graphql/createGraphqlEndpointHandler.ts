@@ -136,7 +136,7 @@ export function createGraphqlEndpointHandler<
         error: createCoasterError({
           code: "graphql-error-parsing-request-body",
           message: "Error parsing request body. Body must be valid JSON",
-          error: requestBody,
+          previousError: requestBody,
           details: requestContext.request.body,
         }),
       });
@@ -166,7 +166,7 @@ export function createGraphqlEndpointHandler<
         error: createCoasterError({
           code: "graphql-error-creating-context",
           message: "Error creating context",
-          error: graphqlContext,
+          previousError: graphqlContext,
           details: requestContext.request.body,
         }),
       });

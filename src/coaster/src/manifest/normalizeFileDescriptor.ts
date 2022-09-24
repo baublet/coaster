@@ -14,7 +14,12 @@ export function normalizeFileDescriptor(
   const collapsedEndpoints = collapseTypes(field);
 
   if (isCoasterError(collapsedEndpoints)) {
-    return collapsedEndpoints;
+    return createCoasterError({
+      code: "normalizeFileDescriptor-could-not-collapse-endpoints",
+      message: "Could not collapse endpoints into a single file descriptor",
+      details: { field },
+      previousError: collapsedEndpoints,
+    });
   }
 
   const filesWithoutHashes: FileDescriptor[] = [];
@@ -58,7 +63,7 @@ function collapseTypes(
             message: `Expected file descriptor to be a string or object, but got a ${typeof descriptor}: ${jsonStringify(
               descriptor
             )}`,
-            error: descriptorAsRecord,
+            previousError: descriptorAsRecord,
           });
         }
 
@@ -69,7 +74,7 @@ function collapseTypes(
             message: `Expected file descriptor file to be a string, but got a ${typeof descriptor.file}: ${jsonStringify(
               descriptor.file
             )}`,
-            error: file,
+            previousError: file,
           });
         }
 
@@ -82,7 +87,7 @@ function collapseTypes(
             message: `Expected export name to be a string, but got a ${typeof descriptor.exportName}: ${jsonStringify(
               descriptor.exportName
             )}`,
-            error: exportName,
+            previousError: exportName,
           });
         }
         descriptors.push({
@@ -102,7 +107,7 @@ function collapseTypes(
         message: `Expected file descriptor to be a string or object, but got a ${typeof descriptor}: ${jsonStringify(
           descriptor
         )}`,
-        error: descriptorAsRecord,
+        previousError: descriptorAsRecord,
       });
     }
 
@@ -113,7 +118,7 @@ function collapseTypes(
         message: `Expected file descriptor file to be a string, but got a ${typeof descriptor.file}: ${jsonStringify(
           descriptor.file
         )}`,
-        error: file,
+        previousError: file,
       });
     }
 
@@ -126,7 +131,7 @@ function collapseTypes(
         message: `Expected export name to be a string, but got a ${typeof descriptor.exportName}: ${jsonStringify(
           descriptor.exportName
         )}`,
-        error: exportName,
+        previousError: exportName,
       });
     }
 

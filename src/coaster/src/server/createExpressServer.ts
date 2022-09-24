@@ -164,7 +164,15 @@ export async function createExpressServer(
 
   for (const endpoint of endpoints) {
     if (isCoasterError(endpoint)) {
-      return endpoint;
+      return createCoasterError({
+        code: "createExpressServer-unexpected error loading endpoint",
+        message: `Error loading one or more endpoints from ${manifestFullPath}`,
+        details: {
+          endpoint,
+          manifestFullPath,
+        },
+        previousError: endpoint,
+      });
     }
     for (const method of endpoint.method) {
       if ((app as any)[method] === undefined) {
@@ -283,6 +291,12 @@ export async function createExpressServer(
     }
 
     if (isCoasterError(resolvedNotFoundEndpoint)) {
+      return createCoasterError({
+        code: "createExpressServer-unexpected-error-loading-not-found-endpoint",
+        message: `Error loading not found endpoint from ${manifestFullPath}`,
+        details: { manifestFullPath },
+        previousError: resolvedNotFoundEndpoint,
+      });
       return resolvedNotFoundEndpoint;
     }
 

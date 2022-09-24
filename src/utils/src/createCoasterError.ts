@@ -12,78 +12,47 @@ export function createCoasterError({
   code,
   message,
   details,
-  error,
+  previousError,
+  error: properError,
 }: {
   code: string;
   message: string;
   details?: ErrorDetails;
-  error?: Error | CoasterError | any;
+  error?: unknown;
+  previousError?: CoasterError;
 }): CoasterError {
-  let newDetails = undefined;
-  if (details && error) {
-    newDetails = {
-      ...details,
-      error,
-    };
-  } else if (details && !error) {
-    newDetails = details;
-  } else if (!details && error) {
-    newDetails = {
-      error,
-    };
-  }
-
-  const newStackTraces = error ? [error.stack] : [];
-  newStackTraces.push(new Error().stack);
-
-  return {
+  const error = previousError || {
     __isCoasterError: true,
     code,
     message,
-    details: newDetails,
+    details,
     time: Date.now(),
-    stackTraces: newStackTraces,
   };
-}
 
-export function addDetailsToCoasterError(
-  error: CoasterError,
-  details: ErrorDetails
-): CoasterError {
-  return {
-    ...error,
-    details: {
-      ...error.details,
+  if (previousError) {
+    error.code = error.code + "\n → " + code;
+    error.message = error.message + "\n → " + message;
+    error.details = {
       ...details,
-    },
-  };
+      previous: previousError.details,
+    };
+  }
+
+  if (!error.details) {
+    error.details = {};
+  }
+
+  if (isObject(properError)) {
+    error.details.errorMessage = properError?.message;
+    error.details.errorStack = properError?.stack;
+    error.details.errorExtensions = properError?.extensions;
+  } else {
+    error.details.error = properError;
+  }
+
+  return error;
 }
 
-export function combineCoasterErrors(
-  ...errorsInput: CoasterError[]
-): CoasterError {
-  if (errorsInput.length === 0) {
-    return createCoasterError({
-      code: "combineCoasterErrors-no-errors",
-      message: "No errors were provided to combineCoasterErrors",
-      details: { stack: new Error().stack },
-    });
-  }
-
-  if (errorsInput.length < 2) {
-    return errorsInput[0];
-  }
-
-  const errors = errorsInput.slice(0, -1);
-  const lastError = errorsInput[errorsInput.length - 1];
-  return errors.reduce((acc, error) => {
-    if (!acc.details) {
-      acc.details = {};
-    }
-    if (!acc.details.__coasterErrorParents) {
-      acc.details.__coasterErrorParents = [];
-    }
-    acc.details.__coasterErrorParents.push(error);
-    return acc;
-  }, lastError);
+function isObject<T extends Record<string, any>>(value: unknown): value is T {
+  return typeof value === "object" && value !== null;
 }

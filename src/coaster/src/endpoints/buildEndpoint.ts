@@ -29,7 +29,15 @@ export async function buildEndpoint({
   });
 
   if (isCoasterError(resolvedEndpoint)) {
-    return resolvedEndpoint;
+    return createCoasterError({
+      code: "buildEndpoint-getEndpointFromFileDescriptorError",
+      message: "Unexpected error getting endpoint from file descriptor",
+      details: {
+        fileDescriptor,
+        endpointFileFullPath,
+      },
+      previousError: resolvedEndpoint,
+    });
   }
 
   if (resolvedEndpoint.build === undefined) {
@@ -40,7 +48,7 @@ export async function buildEndpoint({
     return createCoasterError({
       code: "buildEndpoint-build-is-not-a-function",
       message: `Endpoint build is not a function`,
-      details: { resolvedEndpoint },
+      details: { fileDescriptor, endpointFileFullPath, resolvedEndpoint },
     });
   }
 
@@ -49,7 +57,15 @@ export async function buildEndpoint({
   const result = await perform(async () => {
     const result = await resolvedEndpoint?.build?.(buildTools);
     if (isCoasterError(result)) {
-      return result;
+      return createCoasterError({
+        code: "buildEndpoint-buildError",
+        message: "Unexpected error building endpoint",
+        details: {
+          fileDescriptor,
+          endpointFileFullPath,
+        },
+        previousError: result,
+      });
     }
 
     if (resolvedEndpoint.buildWatchPatterns) {
@@ -58,7 +74,16 @@ export async function buildEndpoint({
         resolvedEndpoint.buildWatchPatterns
       );
       if (isCoasterError(saveResult)) {
-        return saveResult;
+        return createCoasterError({
+          code: "buildEndpoint-saveWatchFilesForEndpointDescriptorError",
+          message:
+            "Unexpected error saving watch files for endpoint descriptor",
+          details: {
+            fileDescriptor,
+            endpointFileFullPath,
+          },
+          previousError: saveResult,
+        });
       }
     }
 

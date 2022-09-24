@@ -6,7 +6,6 @@ import {
   perform,
   isCoasterError,
   collate,
-  addDetailsToCoasterError,
 } from "@baublet/coaster-utils";
 
 import { FileDescriptor } from "../manifest/types";
@@ -35,7 +34,12 @@ export async function getEndpointFromFileDescriptor({
   });
 
   if (isCoasterError(normalizedDescriptor)) {
-    return normalizedDescriptor;
+    return createCoasterError({
+      code: "getEndpointFromFileDescriptor-normalizedDescriptorError",
+      message: "Unexpected error getting normalized descriptor from file input",
+      details: { fileDescriptor, endpointFileFullPath },
+      previousError: normalizedDescriptor,
+    });
   }
 
   const fileImport = await perform(async () => {
@@ -65,7 +69,12 @@ export async function getEndpointFromFileDescriptor({
   });
 
   if (isCoasterError(fileImport)) {
-    return addDetailsToCoasterError(fileImport, { normalizedDescriptor });
+    return createCoasterError({
+      code: "getEndpointFromFileDescriptor-fileImportError",
+      message: "Unexpected error importing endpoint file",
+      details: { fileDescriptor, endpointFileFullPath },
+      previousError: fileImport,
+    });
   }
 
   const fullyResolvedExport = await perform(async () => {
@@ -79,8 +88,11 @@ export async function getEndpointFromFileDescriptor({
     return resolvedExport;
   });
   if (isCoasterError(fullyResolvedExport)) {
-    return addDetailsToCoasterError(fullyResolvedExport, {
-      normalizedDescriptor,
+    return createCoasterError({
+      code: "getEndpointFromFileDescriptor-fullyResolvedExportError",
+      message: "Unexpected error fully resolving endpoint export",
+      details: { fileDescriptor, endpointFileFullPath },
+      previousError: fullyResolvedExport,
     });
   }
   const declaredMethods = fullyResolvedExport?.method || "get";
@@ -181,8 +193,11 @@ export async function getEndpointFromFileDescriptor({
       });
 
     if (isCoasterError(normalizedMiddlewareDescriptor)) {
-      return addDetailsToCoasterError(normalizedMiddlewareDescriptor, {
-        normalizedDescriptor,
+      return createCoasterError({
+        code: "getEndpointFromFileDescriptor-normalizedMiddlewareDescriptorError",
+        message: "Unexpected error normalizing middleware descriptor",
+        details: { fileDescriptor, endpointFileFullPath },
+        previousError: normalizedMiddlewareDescriptor,
       });
     }
 
@@ -226,7 +241,12 @@ export async function getEndpointFromFileDescriptor({
   const middleware: NormalizedEndpointMiddleware[] = [];
   for (const resolvedValue of resolvedMiddleware) {
     if (isCoasterError(resolvedValue)) {
-      return addDetailsToCoasterError(resolvedValue, { normalizedDescriptor });
+      return createCoasterError({
+        code: "getEndpointFromFileDescriptor-resolvedMiddlewareError",
+        message: "Unexpected error resolving middleware",
+        details: { fileDescriptor, endpointFileFullPath },
+        previousError: resolvedValue,
+      });
     }
     middleware.push(resolvedValue);
   }
