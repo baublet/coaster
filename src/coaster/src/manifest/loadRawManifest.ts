@@ -186,27 +186,6 @@ async function parseManifest(
     });
   }
 
-  const deploymentsArray = getItemOrArrayOfItems<string | FileDescriptor>(
-    rootNode.middleware
-  );
-  const deployments = deploymentsArray.map((middleware) =>
-    getNormalizedFileDescriptorFromFileInput({
-      exportNameIfNotSpecified: "middleware",
-      fileInput: middleware,
-      referenceFileFullPath: fullPath,
-    })
-  );
-
-  if (!arrayHasNoCoasterErrors(deployments)) {
-    return createCoasterError({
-      code: `parseManifest-middleware`,
-      message: `Error parsing middleware`,
-      details: {
-        errors: deployments.filter(isCoasterError),
-      },
-    });
-  }
-
   return {
     __coasterManifestFullPath: fullPath,
     name,
@@ -215,6 +194,5 @@ async function parseManifest(
     endpoints: endpoints as NormalizedFileDescriptor[],
     notFound,
     middleware: middleware as NormalizedFileDescriptor[],
-    deployments: [],
   };
 }

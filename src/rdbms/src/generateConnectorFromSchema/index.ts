@@ -1,0 +1,1 @@
+export { generateConnectorFromSchema } from "./generateConnectorFromSchema";

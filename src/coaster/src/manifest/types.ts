@@ -18,11 +18,6 @@ export interface Manifest {
    */
   notFound?: string | FileDescriptor;
   /**
-   * If you want Coaster to manage your deployments, use these to define your
-   * deployment pipelines.
-   */
-  deployments?: ItemOrArrayOfItems<string | FileDescriptor>;
-  /**
    * Application-level middleware to apply to all requests
    */
   middleware?: ItemOrArrayOfItems<string | FileDescriptor>;
@@ -34,7 +29,6 @@ export interface NormalizedManifest {
   port: string;
   key: string;
   endpoints: NormalizedFileDescriptor[];
-  deployments: NormalizedFileDescriptor[];
   middleware: NormalizedFileDescriptor[];
   notFound: NormalizedFileDescriptor;
 }
