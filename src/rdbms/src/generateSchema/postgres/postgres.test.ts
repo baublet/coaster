@@ -40,7 +40,7 @@ async function waitForConnected(tries: number): Promise<void> {
     return;
   }
 
-  await wait(1000);
+  await wait(500);
   await waitForConnected(tries - 1);
 }
 
@@ -95,7 +95,7 @@ it("passes the basics", async () => {
           "columns": [
             {
               "hasDefaultValue": true,
-              "indexed": false,
+              "indexed": true,
               "name": "id",
               "nameInDb": "\\"id\\"",
               "nullable": false,
@@ -105,7 +105,7 @@ it("passes the basics", async () => {
             },
             {
               "hasDefaultValue": false,
-              "indexed": false,
+              "indexed": true,
               "name": "username",
               "nameInDb": "\\"username\\"",
               "nullable": false,
@@ -125,7 +125,7 @@ it("passes the basics", async () => {
             },
             {
               "hasDefaultValue": false,
-              "indexed": false,
+              "indexed": true,
               "name": "email",
               "nameInDb": "\\"email\\"",
               "nullable": false,
@@ -155,7 +155,7 @@ it("passes the basics", async () => {
             },
           ],
           "comment": "The users table",
-          "name": "users",
+          "name": "Users",
           "nameInDb": "\\"public\\".\\"users\\"",
         },
         {
@@ -212,7 +212,7 @@ it("passes the basics", async () => {
             },
           ],
           "comment": "Connects GitHub accounts to user records",
-          "name": "accountsGitHub",
+          "name": "AccountsGitHub",
           "nameInDb": "\\"accounts\\".\\"git_hub\\"",
         },
       ],

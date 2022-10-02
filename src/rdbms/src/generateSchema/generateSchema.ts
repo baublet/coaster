@@ -4,7 +4,7 @@ import {
   perform,
 } from "@baublet/coaster-utils";
 
-import { GenerateCoasterRdmbsConnectionOptions, RdbmsSchema } from "../types";
+import { GenerateCoasterRdbmsConnectionOptions, RdbmsSchema } from "../types";
 import { postgres } from "./postgres";
 
 /**
@@ -13,7 +13,7 @@ import { postgres } from "./postgres";
  * is then used to build a connector for the schema for code to interact with.
  */
 export async function generateSchema(
-  options: GenerateCoasterRdmbsConnectionOptions
+  options: GenerateCoasterRdbmsConnectionOptions
 ): Promise<RdbmsSchema | CoasterError> {
   switch (options.config.client) {
     case "postgres":

@@ -67,7 +67,7 @@ export interface RdbmsColumn {
    * field. If columns aren't indexed, we protect users from negatively affecting
    * performance by doing un-indexed lookups.
    *
-   * Caveat: this can be overwritten by an option when generating the RDMBS
+   * Caveat: this can be overwritten by an option when generating the Rdbms
    * connector (`allowUnindexedLookups: true`).
    */
   indexed: boolean;
@@ -83,7 +83,7 @@ export interface RdbmsColumn {
 
 export type RdbmsConfig = Knex.Config;
 
-export interface GenerateCoasterRdmbsConnectionOptions {
+export interface GenerateCoasterRdbmsConnectionOptions {
   /**
    * A pointer for connecting to your RDBMS source of truth. Follows the Knex
    * signature for connecting to a database.
@@ -98,7 +98,8 @@ export interface GenerateCoasterRdmbsConnectionOptions {
    *
    * For example, to allow an unindexed lookup on the `users` table, you would
    * provide `["users"]`. To allow an unindexed lookup only on the `users`
-   * table's names, you would provide `["users.name"]`.
+   * table's names, you would provide `["users.name"]`. Note: in the postgres
+   * driver, you must also provide the schema, e.g., `["public.users.name"]`.
    */
   allowUnindexedLookups?: boolean | string[];
   /**

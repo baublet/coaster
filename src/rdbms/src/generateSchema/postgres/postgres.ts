@@ -4,7 +4,7 @@ import match from "wildcard-match";
 import { CoasterError, createCoasterError } from "@baublet/coaster-utils";
 
 import {
-  GenerateCoasterRdmbsConnectionOptions,
+  GenerateCoasterRdbmsConnectionOptions,
   RdbmsSchema,
   RdbmsTable,
   RdbmsColumn,
@@ -17,7 +17,7 @@ const SCHEMA_TO_IGNORE = ["information_schema", "pg_*"];
 const isIgnored = match(SCHEMA_TO_IGNORE);
 
 export async function postgres(
-  options: GenerateCoasterRdmbsConnectionOptions
+  options: GenerateCoasterRdbmsConnectionOptions
 ): Promise<RdbmsSchema | CoasterError> {
   const connection = knex(options.config);
   const query: QueryFunction = async (query: string, params: any[] = []) => {
@@ -26,6 +26,11 @@ export async function postgres(
   };
 
   const schemas: string[] = [];
+
+  const { indexes } = await getSystemIndexes({
+    query,
+    options,
+  });
 
   if (options.schemas) {
     schemas.push(...options.schemas);
@@ -53,7 +58,7 @@ export async function postgres(
   const schemaTablePromises: Promise<void>[] = [];
   for (const schema of schemas) {
     schemaTablePromises.push(
-      attachSchemaTables({ query, schema, allTables, options })
+      attachSchemaTables({ query, schema, allTables, options, indexes })
     );
   }
   await Promise.all(schemaTablePromises);
@@ -70,11 +75,13 @@ async function attachSchemaTables({
   schema,
   allTables,
   options,
+  indexes,
 }: {
   schema: string;
   query: QueryFunction;
   allTables: RdbmsTable[];
-  options: GenerateCoasterRdmbsConnectionOptions;
+  options: GenerateCoasterRdbmsConnectionOptions;
+  indexes: Map<string, boolean>;
 }): Promise<void> {
   const results = await query<
     { table_name: string; table_schema: string; comment?: string }[]
@@ -99,10 +106,11 @@ async function attachSchemaTables({
     table_schema: schemaName,
     comment,
   } of results) {
-    const tableNiceName = transformName(
-      schemaName === "public" ? tableName : `${schemaName}_${tableName}`,
-      options.namingConventions?.tableName
-    );
+    const tableNiceName = transformName({
+      name: schemaName === "public" ? tableName : `${schemaName}_${tableName}`,
+      transformer: options.namingConventions?.tableName,
+      defaultTransformer: "pascalCase",
+    });
 
     tablePromises.push(
       new Promise((resolve) => {
@@ -115,9 +123,15 @@ async function attachSchemaTables({
         allTables.push(table);
 
         tablePromises.push(
-          attachTableColumns({ query, table, options, schemaName, tableName })
+          attachTableColumns({
+            query,
+            table,
+            options,
+            schemaName,
+            tableName,
+            indexes,
+          })
         );
-        tablePromises.push(attachTablePrimaryKeys({ query, table, options }));
 
         resolve();
       })
@@ -133,43 +147,51 @@ async function attachTableColumns({
   options,
   schemaName,
   tableName,
+  indexes,
 }: {
   table: RdbmsTable;
   query: QueryFunction;
-  options: GenerateCoasterRdmbsConnectionOptions;
+  options: GenerateCoasterRdbmsConnectionOptions;
   schemaName: string;
   tableName: string;
+  indexes: Map<string, boolean>;
 }): Promise<void> {
-  const results = await query<
+  const columns = await query<
     {
-      column_name: string;
-      is_nullable: "YES" | "NO";
-      data_type: string;
-      column_default: string | null;
-      is_updatable: "YES" | "NO";
+      defaultValue: string | null;
+      columnName: string;
+      isNullable: "YES" | "NO";
+      dataType: string;
+      columnDefault: string | null;
+      isUpdatable: "YES" | "NO";
     }[]
   >(
     `
-      SELECT *
-        FROM information_schema.columns
+      SELECT column_default AS "defaultValue",
+        column_name AS "columnName",
+        data_type AS "dataType",
+        is_nullable AS "isNullable",
+        is_updatable AS "isUpdatable"
+      FROM information_schema.columns
       WHERE table_schema = ?
-        AND table_name  = ?
+        AND table_name = ?
       ORDER BY ordinal_position;
   `,
     [schemaName, tableName]
   );
 
   for (const {
-    column_default: defaultValue,
-    column_name: columnName,
-    data_type: dataType,
-    is_nullable: isNullable,
-    is_updatable: isUpdatable,
-  } of results) {
-    const columnNiceName = transformName(
-      columnName,
-      options.namingConventions?.columnName
-    );
+    defaultValue,
+    columnName,
+    dataType,
+    isNullable,
+    isUpdatable,
+  } of columns) {
+    const columnNiceName = transformName({
+      name: columnName,
+      transformer: options.namingConventions?.columnName,
+      defaultTransformer: "camelCase",
+    });
     const nullable = isNullable === "YES";
 
     const column: RdbmsColumn = {
@@ -178,7 +200,7 @@ async function attachTableColumns({
       type: dataType,
       nullable,
       updatable: isUpdatable === "YES",
-      indexed: false,
+      indexed: Boolean(indexes.get(`${schemaName}.${tableName}.${columnName}`)),
       hasDefaultValue: defaultValue !== null,
       valueType: getTypeScriptTypeFromPostgresColumnType({
         dataType,
@@ -190,11 +212,75 @@ async function attachTableColumns({
   }
 }
 
-async function attachTablePrimaryKeys({}: {
-  table: RdbmsTable;
+async function getSystemIndexes({
+  query,
+}: {
   query: QueryFunction;
-  options: GenerateCoasterRdmbsConnectionOptions;
-}): Promise<void> {}
+  options: GenerateCoasterRdbmsConnectionOptions;
+}): Promise<{
+  indexes: Map<string, boolean>;
+  data: {
+    schemaName: string;
+    tableName: string;
+    columnNames: string[];
+    isPrimary: boolean;
+  }[];
+}> {
+  const results = await query<
+    {
+      schemaName: string;
+      tableName: string;
+      columnNames: string[];
+      isUnique: boolean;
+      isPrimary: boolean;
+    }[]
+  >(
+    `
+    SELECT
+      U.usename                AS "userName",
+      ns.nspname               AS "schemaName",
+      idx.indrelid :: REGCLASS AS "tableName",
+      i.relname                AS "indexName",
+      idx.indisunique          AS "isUnique",
+      idx.indisprimary         AS "isPrimary",
+      am.amname                AS "indexType",
+      idx.indkey,
+          ARRAY(
+              SELECT pg_get_indexdef(idx.indexrelid, k + 1, TRUE)
+              FROM
+                generate_subscripts(idx.indkey, 1) AS k
+              ORDER BY k
+          ) AS "columnNames",
+      (idx.indexprs IS NOT NULL) OR (idx.indkey::int[] @> array[0]) AS "isFunctional",
+      idx.indpred IS NOT NULL AS "isPartial"
+    FROM pg_index AS idx
+      JOIN pg_class AS i
+        ON i.oid = idx.indexrelid
+      JOIN pg_am AS am
+        ON i.relam = am.oid
+      JOIN pg_namespace AS NS ON i.relnamespace = NS.OID
+      JOIN pg_user AS U ON i.relowner = U.usesysid
+    WHERE NOT nspname LIKE 'pg%'; -- Excluding system tables
+    `
+  );
+
+  const data = results.map((result) => ({
+    schemaName: result.schemaName,
+    tableName: result.tableName,
+    isPrimary: result.isPrimary,
+    columnNames: result.columnNames,
+  }));
+
+  const indexes = new Map<string, boolean>();
+
+  for (const { schemaName, tableName, columnNames } of data) {
+    for (const columnName of columnNames) {
+      indexes.set(`${schemaName}.${tableName}.${columnName}`, true);
+    }
+  }
+
+  return { indexes, data };
+}
 
 function getTypeScriptTypeFromPostgresColumnType({
   dataType,
@@ -211,15 +297,28 @@ function getTypeScriptTypeFromPostgresColumnType({
     dataType.includes("numeric") ||
     dataType.includes("decimal") ||
     dataType.includes("double") ||
+    dataType.includes("money") ||
     dataType.includes("serial")
   ) {
     pieces.push("number");
-  } else if (dataType.includes("char") || dataType.includes("text")) {
+  } else if (
+    dataType.includes("char") ||
+    dataType.includes("text") ||
+    dataType.includes("uuid")
+  ) {
     pieces.push("string");
   } else if (dataType.includes("bool")) {
     pieces.push("boolean");
-  } else if (dataType.includes("date") || dataType.includes("time")) {
+  } else if (
+    dataType.includes("date") ||
+    dataType.includes("time") ||
+    dataType.includes("interval")
+  ) {
     pieces.push("Date");
+  } else if (dataType.includes("json")) {
+    pieces.push("any");
+  } else {
+    pieces.push("unknown");
   }
 
   return pieces.join(" | ");
