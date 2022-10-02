@@ -80,9 +80,9 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  // await execa("docker-compose", ["down"], {
-  //   cwd: __dirname,
-  // });
+  await execa("docker-compose", ["down"], {
+    cwd: __dirname,
+  });
   await query(`DROP SCHEMA IF EXISTS public CASCADE`);
   await query(`DROP SCHEMA IF EXISTS test_schema CASCADE`);
 });
