@@ -15,9 +15,12 @@
   },
   "dependencies": {
     "@baublet/coaster-build-tools": "0.0.1",
-    "@baublet/coaster-utils": "0.0.1",
     "@baublet/coaster-unit-test": "0.0.1",
+    "@baublet/coaster-utils": "0.0.1",
+    "change-case": "^4.1.2",
+    "knex": "2.3.0",
     "lru_map": "^0.4.1",
-    "knex": "2.3.0"
+    "pg": "^8.8.0",
+    "wildcard-match": "^5.1.2"
   }
 }

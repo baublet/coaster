@@ -2,18 +2,6 @@ import type { Knex } from "knex";
 
 export interface RdbmsSchema {
   /**
-   * The nice, generated name for the schema
-   */
-  name: string;
-  /**
-   * The name of the schema in the database
-   */
-  nameInDb: string;
-  /**
-   * If applicable, the comment attached to the schema
-   */
-  comment?: string;
-  /**
    * The tables in the schema
    */
   tables: RdbmsTable[];
@@ -67,6 +55,14 @@ export interface RdbmsColumn {
    */
   nullable: boolean;
   /**
+   * True if this column is updatable, false otherwise
+   */
+  updatable: boolean;
+  /**
+   * True if this column has a default value, false otherwise
+   */
+  hasDefaultValue: boolean;
+  /**
    * We use this to tell our RDBMS connector whether or not this is a searchable
    * field. If columns aren't indexed, we protect users from negatively affecting
    * performance by doing un-indexed lookups.
@@ -105,4 +101,22 @@ export interface GenerateCoasterRdmbsConnectionOptions {
    * table's names, you would provide `["users.name"]`.
    */
   allowUnindexedLookups?: boolean | string[];
+  /**
+   * If applicable for the database type, enter the name of schemas you want to
+   * generate an ORM for. If you don't provide this, we'll generate an ORM for
+   * all schemas in the database visible to the user in the provided config.
+   */
+  schemas?: string[];
+  /**
+   * Allows you to specify a custom name for the generated ORM. If you don't
+   * provide this, we default to camelCase for generated code, that is transformed
+   * into the database format in-code.
+   */
+  namingConventions?: {
+    schemaName?: NameTransformer;
+    tableName?: NameTransformer;
+    columnName?: NameTransformer;
+  };
 }
+
+export type NameTransformer = (name: string) => string;

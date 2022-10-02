@@ -27,5 +27,6 @@ export { jsonStringify } from "./jsonStringify";
 export { perform } from "./perform";
 export { withWrappedHook } from "./withWrappedHook";
 export { safeToLowerCase } from "./safeToLowerCase";
+export { wait } from "./wait";
 
 export type { TypeOrPromiseType } from "./TypeOrPromiseType";
