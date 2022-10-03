@@ -5,6 +5,7 @@ import { afterAll, beforeAll, expect, it } from "@baublet/coaster-unit-test";
 import { wait } from "@baublet/coaster-utils";
 
 import { postgres } from "./postgres";
+import { schema } from "./schema";
 
 const pgConfig: Knex.Config = {
   client: "postgres",
@@ -24,7 +25,7 @@ async function query<T>(query: string): Promise<T> {
 
 async function isConnected(): Promise<boolean> {
   try {
-    await query("SELECT 1");
+    await query("SELECT 1;");
     return true;
   } catch (error) {
     return false;
@@ -49,42 +50,17 @@ beforeAll(async () => {
     cwd: __dirname,
   });
 
-  await waitForConnected(5);
+  await waitForConnected(10);
 
-  await query(`DROP SCHEMA IF EXISTS public CASCADE`);
-  await query(`CREATE SCHEMA public`);
-  await query(`
-    CREATE TABLE public.users (
-      id serial PRIMARY KEY,
-      username text UNIQUE NOT NULL,
-      password text NOT NULL,
-      email text UNIQUE NOT NULL,
-      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-    );
-    COMMENT ON TABLE public.users IS 'The users table';
-    `);
-
-  await query(`DROP SCHEMA IF EXISTS accounts CASCADE`);
-  await query(`CREATE SCHEMA accounts`);
-  await query(`
-    CREATE TABLE accounts.git_hub (
-      id serial PRIMARY KEY,
-      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      user_id integer NOT NULL REFERENCES public.users(id),
-      github_id text UNIQUE NOT NULL
-    );
-    COMMENT ON TABLE accounts.git_hub IS 'Connects GitHub accounts to user records';
-`);
+  for (const queryText of schema) {
+    await query(queryText);
+  }
 });
 
 afterAll(async () => {
   await execa("docker-compose", ["down"], {
     cwd: __dirname,
   });
-  await query(`DROP SCHEMA IF EXISTS public CASCADE`);
-  await query(`DROP SCHEMA IF EXISTS test_schema CASCADE`);
 });
 
 it("passes the basics", async () => {

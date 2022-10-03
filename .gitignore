@@ -1,10 +1,8 @@
 node_modules
 coverage
-testDatabases/*.sqlite
-src/generateORM/drivers/postgres/data
 tmp/*
 !tmp/.gitkeep
-src/generateORM/integrationTests/generated.ts
 generated.*.ts
 dist
 .turbo
+src/rdbms/src/**/*.generated.ts
