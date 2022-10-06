@@ -1,4 +1,9 @@
-export type { Manifest } from "./manifest/types";
+export type {
+  Manifest,
+  FileDescriptor,
+  SingleFileDescriptorInput,
+  MultipleFileDescriptorInput,
+} from "./manifest/types";
 export type {
   Endpoint,
   NormalizedEndpointHandler,

@@ -47,3 +47,8 @@ export interface NormalizedFileDescriptor {
   file: string;
   exportName: string;
 }
+
+export type SingleFileDescriptorInput = string | FileDescriptor;
+export type MultipleFileDescriptorInput = ItemOrArrayOfItems<
+  string | FileDescriptor
+>;

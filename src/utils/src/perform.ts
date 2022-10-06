@@ -8,10 +8,10 @@ import { CoasterError } from "./error";
  * that may throw errors.
  */
 export async function perform<T extends () => Promise<any>>(
-  callback: T
+  fn: T
 ): Promise<CoasterError | PromiseResolvedType<ReturnType<T>>> {
   try {
-    return await callback();
+    return await fn();
   } catch (error) {
     return createCoasterError({
       code: "perform-error",
@@ -25,3 +25,20 @@ export async function perform<T extends () => Promise<any>>(
 }
 
 type PromiseResolvedType<T> = T extends Promise<infer R> ? R : never;
+
+export function performSync<T extends () => any>(
+  fn: T
+): ReturnType<T> | CoasterError {
+  try {
+    return fn();
+  } catch (error) {
+    return createCoasterError({
+      code: "perform-error",
+      message: "Error performing function",
+      error,
+      details: {
+        stackTrace: new Error().stack,
+      },
+    });
+  }
+}

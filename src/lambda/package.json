@@ -1,5 +1,5 @@
 {
-  "name": "@baublet/coaster-rdbms",
+  "name": "@baublet/coaster-lambda",
   "version": "0.0.1",
   "main": "dist/index",
   "types": "src/index.ts",
@@ -17,10 +17,7 @@
     "@baublet/coaster-build-tools": "0.0.1",
     "@baublet/coaster-unit-test": "0.0.1",
     "@baublet/coaster-utils": "0.0.1",
-    "change-case": "^4.1.2",
-    "knex": "2.3.0",
-    "lru_map": "^0.4.1",
-    "pg": "^8.8.0",
-    "wildcard-match": "^5.1.2"
+    "@baublet/coaster": "0.0.1",
+    "serverless-http": "^3.0.2"
   }
 }

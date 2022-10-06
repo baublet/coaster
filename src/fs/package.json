@@ -11,7 +11,7 @@
   "license": "MIT",
   "scripts": {
     "test": "unit-test",
-    "build": "yarn coaster-build"
+    "build": "coaster-build"
   },
   "dependencies": {
     "@baublet/coaster-build-tools": "0.0.1",

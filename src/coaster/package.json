@@ -16,7 +16,7 @@
   "scripts": {
     "test": "unit-test",
     "test:watch": "unit-test-watch",
-    "build": "yarn coaster-build"
+    "build": "coaster-build"
   },
   "dependencies": {
     "@apollo/server": "^4.0.0-alpha.4",

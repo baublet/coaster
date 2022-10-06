@@ -24,7 +24,7 @@ export { htmlifyCoasterErrorPage } from "./htmlifyCoasterErrorPage";
 export { isCoasterError } from "./isCoasterError";
 export { jsonParse } from "./jsonParse";
 export { jsonStringify } from "./jsonStringify";
-export { perform } from "./perform";
+export { perform, performSync } from "./perform";
 export { withWrappedHook } from "./withWrappedHook";
 export { safeToLowerCase } from "./safeToLowerCase";
 export { wait } from "./wait";

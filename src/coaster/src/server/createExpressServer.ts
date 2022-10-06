@@ -25,7 +25,7 @@ import {
   NormalizedFileDescriptor,
   NormalizedManifest,
 } from "../manifest/types";
-import { Server } from "./types";
+import { ExpressServer } from "./types";
 import { createExpressRequestContext } from "../context/createExpressRequestContext";
 import { getMiddlewareFromFileDescriptor } from "../endpoints/getMiddlewareFromFileDescriptor";
 import { RequestContext } from "../context/request";
@@ -73,7 +73,7 @@ export async function createExpressServer(
       server: http.Server;
     }) => Promise<void>;
   } = {}
-): Promise<Server | CoasterError> {
+): Promise<ExpressServer | CoasterError> {
   const middlewareDescriptors = await withWrappedHook(
     options.beforeManifestMiddlewareLoaded,
     manifest.middleware
@@ -297,11 +297,6 @@ export async function createExpressServer(
         details: { manifestFullPath },
         previousError: resolvedNotFoundEndpoint,
       });
-      return resolvedNotFoundEndpoint;
-    }
-
-    if (isCoasterError(resolvedNotFoundEndpoint)) {
-      return resolvedNotFoundEndpoint;
     }
 
     log.debug(colors.dim("Registering not found endpoint"));
@@ -318,6 +313,7 @@ export async function createExpressServer(
   const port = manifest.port || 3000;
 
   return {
+    getExpressInstance: () => app,
     start: () => {
       return new Promise((resolve) => {
         server = app.listen(port, async () => {

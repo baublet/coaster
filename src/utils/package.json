@@ -10,7 +10,7 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "yarn coaster-build",
+    "build": "coaster-build",
     "test": "unit-test"
   },
   "dependencies": {
