@@ -1,4 +1,10 @@
-import express, { Handler, NextFunction, Request, Response } from "express";
+import express, {
+  Handler,
+  NextFunction,
+  Request,
+  Response,
+  Express,
+} from "express";
 import http from "http";
 import hash from "node-object-hash";
 import colors from "@colors/colors";
@@ -46,7 +52,12 @@ export async function createExpressServer(
   {
     manifest,
     manifestFullPath,
-  }: { manifest: NormalizedManifest; manifestFullPath: string },
+    expressInstance = express(),
+  }: {
+    manifest: NormalizedManifest;
+    manifestFullPath: string;
+    expressInstance?: Express;
+  },
   options: {
     routeLoadingMode?: "lazy" | "eager";
     beforeManifestMiddlewareLoaded?: (
@@ -120,8 +131,6 @@ export async function createExpressServer(
     options.afterEndpointsLoaded,
     resolvedEndpoints
   );
-
-  const expressInstance = express();
 
   // The first-stop in every request: creates the Coaster context for the request,
   // attaches it to the request, and adds a request ID to the request, if one does
@@ -199,57 +208,55 @@ export async function createExpressServer(
             (endpointMiddlewareFunction as any)?.__coasterMiddlewareNameHint ||
             "anonymous fn";
           log.debug(colors.dim(middlewareNameHint));
-          aggregatedMiddleware.push(
-            async (
-              request: Request,
-              _response: unknown,
-              next: NextFunction
-            ) => {
-              try {
-                const result = await endpointMiddlewareFunction(
-                  request.__coasterRequestContext
+          aggregatedMiddleware.push(async function dynamicMiddlewareHandler(
+            request: Request,
+            _response: unknown,
+            next: NextFunction
+          ) {
+            try {
+              const result = await endpointMiddlewareFunction(
+                request.__coasterRequestContext
+              );
+              if (isCoasterError(result)) {
+                request.__coasterRequestContext.log(
+                  "error",
+                  "Unexpected error executing endpoint middleware",
+                  { result }
                 );
-                if (isCoasterError(result)) {
-                  request.__coasterRequestContext.log(
-                    "error",
-                    "Unexpected error executing endpoint middleware",
-                    { result }
-                  );
-                  const response = request.__coasterRequestContext.response;
-                  if (response.hasFlushed()) {
-                    const warningMessage = `Middleware ${middlewareNameHint} flushed the response`;
-                    log.debug(colors.dim(warningMessage));
-                    next(warningMessage);
-                    return;
-                  }
-
-                  response.setStatus(500);
-                  if (
-                    request.__coasterRequestContext.request.headers.get(
-                      "content-type"
-                    ) === "application/json"
-                  ) {
-                    return response.sendJson({
-                      error: result.message,
-                      code: result.code,
-                      details: result.details,
-                    });
-                  }
-                  response.setData(jsonStringify(result));
-                  return response.flushData();
-                }
-                if (request.__coasterRequestContext.response.hasFlushed()) {
+                const response = request.__coasterRequestContext.response;
+                if (response.hasFlushed()) {
                   const warningMessage = `Middleware ${middlewareNameHint} flushed the response`;
                   log.debug(colors.dim(warningMessage));
                   next(warningMessage);
                   return;
                 }
-                next(result);
-              } catch (error) {
-                next(error);
+
+                response.setStatus(500);
+                if (
+                  request.__coasterRequestContext.request.headers.get(
+                    "content-type"
+                  ) === "application/json"
+                ) {
+                  return response.sendJson({
+                    error: result.message,
+                    code: result.code,
+                    details: result.details,
+                  });
+                }
+                response.setData(jsonStringify(result));
+                return response.flushData();
               }
+              if (request.__coasterRequestContext.response.hasFlushed()) {
+                const warningMessage = `Middleware ${middlewareNameHint} flushed the response`;
+                log.debug(colors.dim(warningMessage));
+                next(warningMessage);
+                return;
+              }
+              next(result);
+            } catch (error) {
+              next(error);
             }
-          );
+          });
         }
       }
 

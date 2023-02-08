@@ -1,6 +1,10 @@
-export const handler = () => {
+import { MutationResolvers } from "../../schema.graphql.generated";
+
+console.log("createTodo code loaded");
+
+export const handler: MutationResolvers["createTodo"] = () => {
   return {
-    success: 1,
+    success: true,
     status: "TODO",
   };
 };

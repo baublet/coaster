@@ -111,7 +111,7 @@ export async function createGraphqlTrack({
   const resolversMap = new Map<string, (...args: any[]) => any>();
   const accessProxy = getAccessProxy((paths) => {
     const lastPath = paths[paths.length - 1];
-    if (lastPath.startsWith("__")) {
+    if (!lastPath || lastPath.startsWith("__")) {
       return () => true;
     }
     if (lastPath === "bind") {
@@ -128,6 +128,7 @@ export async function createGraphqlTrack({
       resolversMap.set(modulePath, resolver);
       return resolver;
     }
+    return undefined;
   });
 
   let createContext: (context: any) => any = (context) => context;
