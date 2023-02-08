@@ -1,5 +1,8 @@
+import path from "path";
+
 export async function pathsToResolvers({
   paths,
+  resolversPath,
 }: {
   paths: string[];
   resolversPath: string;
@@ -15,9 +18,11 @@ export async function pathsToResolvers({
       continue;
     }
 
-    const pathParts = filePath.split("/").filter(Boolean);
+    const pathParts = filePath
+      .replace(resolversPath, "")
+      .split("/")
+      .filter(Boolean);
 
-    const breadcrumbs: string[] = [];
     let node = resolvers;
     for (let i = 0; i < pathParts.length - 1; i++) {
       const part = pathParts[i];
@@ -25,16 +30,18 @@ export async function pathsToResolvers({
       if (typeof node[part] === "string") {
         // TODO: return an error here. Invalid graphql structure (you can't have a "People" resolver _and_ field resolvers for "People")
         // Error could be like "Types with children cannot have a resolver."
+        continue;
       }
 
-      breadcrumbs.push(part);
       if (!node[part]) {
         node[part] = {};
       }
       node = node[part];
     }
 
-    node[pathParts[pathParts.length - 1]] = filePath;
+    const terminalPathPart = pathParts[pathParts.length - 1];
+    const terminalPathPartWithoutExtension = path.parse(terminalPathPart).name;
+    node[terminalPathPartWithoutExtension] = filePath;
   }
 
   return resolvers;
