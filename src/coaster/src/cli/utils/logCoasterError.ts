@@ -13,11 +13,6 @@ export function logCoasterError(
     : `\n\ndetails:
       ${stringify(error.details)}`;
 
-  const stackTraces =
-    error.stackTraces.length === 0
-      ? ""
-      : "\n\n" + error.stackTraces.join(`\n\n`);
-
   logger(
     `--------------------------------------------------------------------------------
 | CoasterError                                                                 |
@@ -25,7 +20,7 @@ export function logCoasterError(
 ${error.code}
   ${error.time}
 
-${error.message}${details}${stackTraces}
+${error.message}${details}
 --------------------------------------------------------------------------------`
   );
 }

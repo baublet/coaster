@@ -1,5 +1,3 @@
-import path from "path";
-
 import {
   fileExists,
   getAllFilesInDirectoryRecursively,
@@ -11,7 +9,6 @@ import {
   createCoasterError,
   isCoasterError,
   isInvocable,
-  getAccessProxy,
   perform,
 } from "@baublet/coaster-utils";
 import { log } from "@baublet/coaster-log-service";
@@ -22,6 +19,8 @@ import { createGraphqlEndpointHandler } from "./createGraphqlEndpointHandler";
 import { EndpointInput } from "../endpoints/types";
 import { buildGraphqlTrack } from "./buildGraphqlTrack";
 import { getMethodsFromMethod } from "../endpoints/getMethodsFromMethod";
+import { resolverPathsToResolvers } from "./resolverPathsToResolvers";
+import { pathsToResolverPaths } from "./pathsToResolverPaths";
 
 interface CreateGraphqlTrackArguments extends EndpointInput {
   schemaPath: string;
@@ -109,26 +108,21 @@ export async function createGraphqlTrack({
   }
 
   const resolversMap = new Map<string, (...args: any[]) => any>();
-  const accessProxy = getAccessProxy((paths) => {
-    const lastPath = paths[paths.length - 1];
-    if (!lastPath || lastPath.startsWith("__")) {
-      return () => true;
-    }
-    if (lastPath === "bind") {
-      const pathsWithoutBind = paths.slice(0, -1);
-      const modulePath = path.resolve(resolversPath, ...pathsWithoutBind);
-      const existingResolver = resolversMap.get(modulePath);
+  const resolversAndModules: Record<string, any> = resolverPathsToResolvers({
+    getResolver: (pathToModule) => {
+      const existingResolver = resolversMap.get(pathToModule);
       if (existingResolver) {
         return existingResolver;
       }
-      const resolver = loadHandlerFromResolversAndPath(
-        resolversPath,
-        pathsWithoutBind
-      );
-      resolversMap.set(modulePath, resolver);
+      const resolver = getHandlerFromPath(pathToModule);
+      resolversMap.set(pathToModule, resolver);
       return resolver;
-    }
-    return undefined;
+    },
+    resolverPaths: pathsToResolverPaths({
+      ignorePatterns: [],
+      paths: allResolversFiles,
+      resolversPath,
+    }),
   });
 
   let createContext: (context: any) => any = (context) => context;
@@ -174,7 +168,7 @@ export async function createGraphqlTrack({
 
   const graphqlHandler = createGraphqlEndpointHandler({
     createContext,
-    resolvers: accessProxy,
+    resolvers: resolversAndModules,
     typeDefs: [typeDefs],
   });
 
@@ -195,82 +189,78 @@ export async function createGraphqlTrack({
   };
 }
 
-function loadHandlerFromResolversAndPath(
-  resolversPath: string,
-  modulePaths: string[]
-): (...args: any[]) => any {
-  const moduleRoot = path.resolve(resolversPath, ...modulePaths);
-  const moduleFullPath = moduleRoot + ".ts";
-  const leafNode = modulePaths[modulePaths.length - 1];
-  const defaultResolver = (parent: any) => {
-    if (typeof parent !== "object") {
-      return null;
-    }
-    return parent?.[leafNode];
-  };
+function getHandlerFromPath(modulePath: string): (...args: any[]) => any {
+  let loadedResolver: (...args: any[]) => any;
 
-  let resolverLoaded = false;
-  let loadedResolver: any;
+  function getErrorResolver(error: CoasterError) {
+    return () => {
+      throw error;
+    };
+  }
 
   return async (...args: any[]) => {
-    if (!resolverLoaded) {
-      const moduleExists = await fileExists(moduleFullPath);
-      if (isCoasterError(moduleExists)) {
-        log.error(
-          `FATAL: Unexpected error finding resolver module ${moduleFullPath}`,
-          {
-            moduleFullPath,
-            moduleRoot,
-            args,
-          }
-        );
-        resolverLoaded = true;
-        loadedResolver = defaultResolver;
-        return loadedResolver(...args);
-      }
+    if (loadedResolver) {
+      return loadedResolver(...args);
+    }
 
-      if (!moduleExists) {
-        log.debug(
-          `Resolver module ${moduleFullPath} not found, using default module resolver`
-        );
-        resolverLoaded = true;
-        loadedResolver = defaultResolver;
-        return loadedResolver(...args);
-      }
+    const moduleExists = await fileExists(modulePath);
+    if (isCoasterError(moduleExists)) {
+      log.error(
+        `FATAL: Unexpected error finding resolver module ${modulePath}`,
+        {
+          modulePath,
+          args,
+        }
+      );
+      return getErrorResolver(moduleExists);
+    }
 
-      const module = await perform(async () => import(moduleFullPath));
-      if (isCoasterError(module)) {
-        log.error(
-          `FATAL: Unexpected error loading resolver module ${moduleFullPath}`,
-          module
-        );
-        resolverLoaded = true;
-        loadedResolver = defaultResolver;
-        return loadedResolver(...args);
-      }
+    if (!moduleExists) {
+      log.error(`Resolver module ${modulePath} not found`);
+      return getErrorResolver(
+        createCoasterError({
+          code: "createGraphqlTrack-resolver-module-not-found",
+          message: `Resolver module ${modulePath} not found`,
+        })
+      );
+    }
 
-      loadedResolver = module?.["handler"];
-      if (!loadedResolver) {
-        log.error(
-          `FATAL: Resolver module ${moduleFullPath} does not export a handler. Resolver modules need to export a named "handler" to work as module resolvers.`,
-          {
-            moduleKeys: Object.keys(loadedResolver),
-          }
-        );
-        resolverLoaded = true;
-        loadedResolver = defaultResolver;
-        return loadedResolver(...args);
-      }
+    const module = await perform(async () => import(modulePath));
+    if (isCoasterError(module)) {
+      log.error(
+        `FATAL: Unexpected error loading resolver module ${modulePath}`,
+        module
+      );
+      return getErrorResolver(module);
+    }
 
-      if (!isInvocable(loadedResolver)) {
-        log.error(
-          `FATAL: Resolver module handler ${moduleFullPath} is not a function. Resolver modules must export their handlers as functions. Instead received ${typeof loadedResolver}`,
-          module
-        );
-        resolverLoaded = true;
-        loadedResolver = defaultResolver;
-        return loadedResolver(...args);
-      }
+    loadedResolver = module?.["handler"];
+    if (!loadedResolver) {
+      log.error(
+        `FATAL: Resolver module ${modulePath} does not export a handler. Resolver modules need to export a named "handler" to work as module resolvers.`,
+        {
+          moduleKeys: Object.keys(loadedResolver),
+        }
+      );
+      return getErrorResolver(
+        createCoasterError({
+          code: "createGraphqlTrack-resolver-module-missing-handler",
+          message: `Resolver module ${modulePath} does not export a handler. Resolver modules need to export a named "handler" to work as module resolvers.`,
+        })
+      );
+    }
+
+    if (!isInvocable(loadedResolver)) {
+      log.error(
+        `FATAL: Resolver module handler ${modulePath} is not a function. Resolver modules must export their handlers as functions. Instead received ${typeof loadedResolver}`,
+        module
+      );
+      return getErrorResolver(
+        createCoasterError({
+          code: "createGraphqlTrack-resolver-module-handler-not-invocable",
+          message: `Resolver module handler ${modulePath} is not a function. Resolver modules must export their handlers as functions. Instead received ${typeof loadedResolver}`,
+        })
+      );
     }
 
     return loadedResolver(...args);

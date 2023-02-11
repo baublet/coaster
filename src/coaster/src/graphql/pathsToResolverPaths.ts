@@ -4,7 +4,7 @@ export interface ObjectWithStringLeafs {
   [key: string]: string | ObjectWithStringLeafs;
 }
 
-export async function pathsToResolverPaths({
+export function pathsToResolverPaths({
   paths,
   resolversPath,
   ignorePatterns,
@@ -12,7 +12,7 @@ export async function pathsToResolverPaths({
   paths: string[];
   resolversPath: string;
   ignorePatterns: RegExp[];
-}): Promise<ObjectWithStringLeafs> {
+}): ObjectWithStringLeafs {
   const resolvers: ObjectWithStringLeafs = {};
 
   for (const filePath of paths) {
@@ -30,18 +30,11 @@ export async function pathsToResolverPaths({
     let node = resolvers;
     for (let i = 0; i < pathParts.length - 1; i++) {
       const part = pathParts[i];
-      const nodePart = node[part];
 
-      if (typeof nodePart === "string") {
-        // TODO: return an error here. Invalid graphql structure (you can't have a "People" resolver _and_ field resolvers for "People")
-        // Error could be like "Types with children cannot have a resolver."
-        continue;
-      }
-
-      if (!node[part]) {
+      if (typeof node[part] !== "object") {
         node[part] = {};
       }
-      node = nodePart;
+      node = node[part] as ObjectWithStringLeafs;
     }
 
     const terminalPathPart = pathParts[pathParts.length - 1];

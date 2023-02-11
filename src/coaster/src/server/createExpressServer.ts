@@ -174,7 +174,7 @@ export async function createExpressServer(
   for (const endpoint of endpoints) {
     if (isCoasterError(endpoint)) {
       return createCoasterError({
-        code: "createExpressServer-unexpected error loading endpoint",
+        code: "createExpressServer-unexpected-error-loading-endpoint",
         message: `Error loading one or more endpoints from ${manifestFullPath}`,
         details: {
           endpoint,
