@@ -1,10 +1,10 @@
 import { expect, it } from "@baublet/coaster-unit-test";
 
-import { pathsToResolvers } from "./pathsToResolvers";
+import { pathsToResolverPaths } from "./pathsToResolverPaths";
 
 it("returns resolver paths properly", async () => {
   await expect(
-    pathsToResolvers({
+    pathsToResolverPaths({
       resolversPath: "/path/to/resolvers/",
       paths: [
         "/path/to/resolvers/Person/name.ts",
@@ -22,6 +22,7 @@ it("returns resolver paths properly", async () => {
       },
       "Query": {
         "people": "/path/to/resolvers/Query/people.ts",
+        "people.test": "/path/to/resolvers/Query/people.test.ts",
       },
     }
   `);
