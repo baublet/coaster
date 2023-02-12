@@ -52,3 +52,8 @@ export type SingleFileDescriptorInput = string | FileDescriptor;
 export type MultipleFileDescriptorInput = ItemOrArrayOfItems<
   string | FileDescriptor
 >;
+
+export interface ModuleMetaData {
+  filePath: string;
+  importName: string;
+}

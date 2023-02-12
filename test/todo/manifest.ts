@@ -16,5 +16,6 @@ export const manifest: Manifest = {
     { file: "endpoints/todos", exportName: "default" },
     "endpoints/graphql",
     "endpoints/graphqlTrack",
+    "endpoints/ui",
   ],
 };

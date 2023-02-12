@@ -5,11 +5,14 @@
  * @param resolvable The "to-resolve" subject
  * @returns The fully resolved resolvable subject
  */
-export async function fullyResolve<T>(resolvable: unknown): Promise<T> {
+export async function fullyResolve<T>(
+  resolvable: unknown,
+  ...optionalArgs: unknown[]
+): Promise<T> {
   let resolvedValue: any = await resolvable;
 
   if (typeof resolvedValue === "function") {
-    resolvedValue = await resolvedValue();
+    resolvedValue = await resolvedValue(...optionalArgs);
   }
 
   return resolvedValue;

@@ -5,7 +5,7 @@ import {
 } from "@baublet/coaster-utils";
 import { fileExists } from "@baublet/coaster-fs";
 
-import { FileDescriptor } from "../manifest/types";
+import { FileDescriptor, ModuleMetaData } from "../manifest/types";
 
 export async function getImportFromFileDescriptor<T = never>(
   descriptor: Required<FileDescriptor>
@@ -43,8 +43,15 @@ export async function getImportFromFileDescriptor<T = never>(
       });
     }
 
+    const moduleMetaData: ModuleMetaData = {
+      filePath,
+      importName,
+    };
     const importedModule = importedFile[importName];
-    const fullyResolvedEndpoint = await fullyResolve<T>(importedModule);
+    const fullyResolvedEndpoint = await fullyResolve<T>(
+      importedModule,
+      moduleMetaData
+    );
 
     return fullyResolvedEndpoint;
   } catch (error) {

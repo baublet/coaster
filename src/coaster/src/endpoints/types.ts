@@ -7,7 +7,7 @@ import type {
 
 import { BuildTools } from "../build/types";
 import type { RequestContext } from "../context/request";
-import { FileDescriptor } from "../manifest/types";
+import { FileDescriptor, ModuleMetaData } from "../manifest/types";
 
 export const HTTP_METHODS = [
   "get",
@@ -42,7 +42,7 @@ export interface ResolvedEndpoint {
   buildWatchPatterns: string[];
 }
 
-export type Endpoint = Resolvable<EndpointInput>;
+export type Endpoint = Resolvable<EndpointInput, ModuleMetaData>;
 
 export interface EndpointInput {
   endpoint: string;

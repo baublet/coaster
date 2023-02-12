@@ -1,3 +1,5 @@
-export type Resolvable<T> = T extends (...args: any[]) => any
-  ? never
-  : T | Promise<T> | (() => T);
+export type Resolvable<T, TFnArgs = any> =
+  | T
+  | Promise<T>
+  | ((arg: TFnArgs) => T)
+  | ((arg: TFnArgs) => Promise<T>);

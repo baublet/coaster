@@ -45,6 +45,7 @@
     "mkdirp": "^1.0.4",
     "node-object-hash": "^2.3.10",
     "uuid": "7",
+    "vite": "^4.1.1",
     "wildcard-match": "^5.1.2",
     "yargs": "^16.2.0",
     "yup": "^0.32.11"
