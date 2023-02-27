@@ -21,8 +21,8 @@ export function getFailedTrack({
       process.exit(1);
     },
     handler: (context) => {
-      context.response.setStatus(500);
-      context.response.sendJson(JSON.stringify(error));
+      context.response.status(500);
+      context.response.json(error);
       context.log("error", error);
     },
   };

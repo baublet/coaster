@@ -3,7 +3,7 @@ export type {
   FileDescriptor,
   SingleFileDescriptorInput,
   MultipleFileDescriptorInput,
-  ModuleMetaData,
+  ModuleMetadata as ModuleMetadata,
 } from "./manifest/types";
 export type {
   Endpoint,

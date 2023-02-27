@@ -170,6 +170,7 @@ export async function createGraphqlTrack({
     createContext,
     resolvers: resolversAndModules,
     typeDefs: [typeDefs],
+    playgroundEnabled: true,
   });
 
   return {

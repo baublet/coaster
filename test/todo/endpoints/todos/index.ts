@@ -3,7 +3,7 @@ import { lazyLoadedEndpoint } from "@baublet/coaster/endpoints";
 
 const endpoint: Endpoint = {
   endpoint: "/todos",
-  method: "get",
+  method: "GET",
   handler: lazyLoadedEndpoint(() => import("./todos")),
 };
 

@@ -12,10 +12,13 @@ export async function perform<T extends () => Promise<any>>(
 ): Promise<CoasterError | PromiseResolvedType<ReturnType<T>>> {
   try {
     return await fn();
-  } catch (error) {
+  } catch (error: any) {
     return createCoasterError({
       code: "perform-error",
-      message: "Error performing function",
+      message:
+        error && typeof error === "object" && "message" in error
+          ? error?.message
+          : "Error performing function",
       error,
       details: {
         stackTrace: new Error().stack,

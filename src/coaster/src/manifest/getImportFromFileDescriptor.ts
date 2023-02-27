@@ -1,3 +1,5 @@
+import path from "path";
+
 import {
   CoasterError,
   createCoasterError,
@@ -5,7 +7,7 @@ import {
 } from "@baublet/coaster-utils";
 import { fileExists } from "@baublet/coaster-fs";
 
-import { FileDescriptor, ModuleMetaData } from "../manifest/types";
+import { FileDescriptor, ModuleMetadata } from "../manifest/types";
 
 export async function getImportFromFileDescriptor<T = never>(
   descriptor: Required<FileDescriptor>
@@ -43,14 +45,15 @@ export async function getImportFromFileDescriptor<T = never>(
       });
     }
 
-    const moduleMetaData: ModuleMetaData = {
+    const moduleMetadata: ModuleMetadata = {
       filePath,
+      fileBaseName: path.basename(filePath),
       importName,
     };
     const importedModule = importedFile[importName];
     const fullyResolvedEndpoint = await fullyResolve<T>(
       importedModule,
-      moduleMetaData
+      moduleMetadata
     );
 
     return fullyResolvedEndpoint;

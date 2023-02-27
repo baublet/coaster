@@ -1,0 +1,14 @@
+{
+  "include": ["./**/*"],
+  "compilerOptions": {
+    "lib": ["DOM"],
+    "module": "commonjs",
+    "target": "es2020",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": true,
+    "jsx": "react"
+  }
+}

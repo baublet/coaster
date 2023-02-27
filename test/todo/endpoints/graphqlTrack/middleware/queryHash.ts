@@ -6,8 +6,8 @@ const hashRequest = hash({
 }).hash;
 
 export const middleware: EndpointMiddleware = (context) => {
-  if (context.request.method === "post") {
+  if (context.request.method === "POST") {
     const bodyHash = hashRequest({ requestBody: context.request.body });
-    context.response.setHeader("X-Query-Hash", bodyHash);
+    context.response.header("X-Query-Hash", bodyHash);
   }
 };

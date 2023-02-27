@@ -38,10 +38,8 @@ export function lazyLoadedEndpoint<TModule extends () => Promise<any>>(
               try {
                 await importedFile[moduleProperty](context);
               } catch (error) {
-                context.response.setStatus(500);
+                context.response.status(500);
                 await onUnexpectedError?.({ error, context });
-              } finally {
-                context.response.flushData();
               }
             });
           } catch (error) {
@@ -67,8 +65,7 @@ const defaultOnUnexpectedError: OnUnexpectedError = async ({
   error,
 }) => {
   context.log("error", "Unexpected error in handler", { error });
-  context.response.setStatus(500);
-  context.response.flushData();
+  context.response.status(500);
 };
 
 export type LazyLoadedHandler = (context: RequestContext) => any;
@@ -76,8 +73,8 @@ export type LazyLoadedHandler = (context: RequestContext) => any;
 const getErrorLoadingImportHandler =
   (reason: string, ...details: any[]) =>
   (context: RequestContext) => {
-    context.response.setStatus(500);
-    context.response.appendData(
+    context.response.status(500);
+    context.response.send(
       `Error loading endpoint handler: ${stringify([reason, ...details])}`
     );
     context.log("error", "Error lazy loading endpoint handler", {

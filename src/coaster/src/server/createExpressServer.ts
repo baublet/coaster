@@ -1,3 +1,4 @@
+import { performance } from "perf_hooks";
 import express, {
   Handler,
   NextFunction,
@@ -18,6 +19,7 @@ import {
   jsonStringify,
   isInvocable,
   perform,
+  getErrorLikeStringFromUnknown,
 } from "@baublet/coaster-utils";
 import { log } from "@baublet/coaster-log-service";
 
@@ -37,7 +39,6 @@ import { getMiddlewareFromFileDescriptor } from "../endpoints/getMiddlewareFromF
 import { RequestContext } from "../context/request";
 import { resolveInputPathFromFile } from "../common/resolveInputPathFromFile";
 import { COASTER_REQUEST_ID_HEADER_NAME } from "../common/coasterRequestId";
-import { performance } from "perf_hooks";
 
 declare global {
   namespace Express {
@@ -183,7 +184,8 @@ export async function createExpressServer(
         previousError: endpoint,
       });
     }
-    for (const method of endpoint.method) {
+    for (const uppercaseMethod of endpoint.method) {
+      const method = uppercaseMethod.toLowerCase();
       if ((app as any)[method] === undefined) {
         return createCoasterError({
           code: "createServer-endpoint-method-not-supported",
@@ -224,30 +226,30 @@ export async function createExpressServer(
                   { result }
                 );
                 const response = request.__coasterRequestContext.response;
-                if (response.hasFlushed()) {
-                  const warningMessage = `Middleware ${middlewareNameHint} flushed the response`;
+                if (response.writable === false) {
+                  const warningMessage = `Middleware ${middlewareNameHint} flushed the response during an error state, and the response is no longer writable`;
                   log.debug(colors.dim(warningMessage));
                   next(warningMessage);
                   return;
                 }
 
-                response.setStatus(500);
+                response.status(500);
                 if (
-                  request.__coasterRequestContext.request.headers.get(
+                  request.__coasterRequestContext.request.header(
                     "content-type"
                   ) === "application/json"
                 ) {
-                  return response.sendJson({
+                  return response.json({
                     error: result.message,
                     code: result.code,
                     details: result.details,
                   });
                 }
-                response.setData(jsonStringify(result));
-                return response.flushData();
+                response.send(jsonStringify(result));
+                return;
               }
-              if (request.__coasterRequestContext.response.hasFlushed()) {
-                const warningMessage = `Middleware ${middlewareNameHint} flushed the response`;
+              if (request.__coasterRequestContext.response.writable === false) {
+                const warningMessage = `Middleware ${middlewareNameHint} flushed the response, and the response is no longer writable`;
                 log.debug(colors.dim(warningMessage));
                 next(warningMessage);
                 return;
@@ -368,8 +370,6 @@ async function handleExpressMethodWithHandler({
   handler: NormalizedEndpointHandler;
 }): Promise<void> {
   try {
-    const requestId = getRequestIdFromRequestObject(request);
-
     const context = await perform(async () => {
       if (request.__coasterRequestContext) {
         return request.__coasterRequestContext;
@@ -378,29 +378,35 @@ async function handleExpressMethodWithHandler({
       return createExpressRequestContext({
         request,
         response,
-        requestId,
       });
     });
+
     if (isCoasterError(context)) {
-      log.error("Unexpected error handling request", { context });
-      response.status(500).send("Unexpected error");
+      log.error("Unexpected error creating context", { context });
+      if (!response.headersSent) {
+        response.status(500);
+      }
       return;
     }
 
     context.log("debug", "Handling request with primary handler");
+
     const handlerStartTime = performance.now();
     await handler(context);
-    if (!context.response.hasFlushed()) {
-      await context.response.flushData();
-    }
+
     const handlerEndTime = performance.now();
     const elapsedMs = handlerEndTime - handlerStartTime;
     const roundedElapsedTime =
       Math.round((elapsedMs + Number.EPSILON) * 100) / 100;
+
     context.log("debug", `Request handler complete in ${roundedElapsedTime}ms`);
   } catch (error) {
-    log.error("Unexpected error handling request", { error });
-    response.status(500).send("Unexpected error");
+    log.error("Unexpected error handling request", {
+      error: getErrorLikeStringFromUnknown(error),
+    });
+    if (!response.headersSent) {
+      response.status(500);
+    }
   }
 }
 
@@ -414,7 +420,6 @@ export async function createRequestContext(
   const context = await createExpressRequestContext({
     request,
     response,
-    requestId,
   });
   (request as any).__coasterRequestContext = context;
 

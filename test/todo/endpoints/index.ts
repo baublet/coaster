@@ -3,10 +3,10 @@ import { Endpoint } from "@baublet/coaster";
 export const endpoint: Endpoint = () => {
   return {
     endpoint: "/",
-    method: "get",
+    method: "GET",
     handler: async (context) => {
       context.log("info", "Index page hit");
-      context.response.setData("Hello, world!");
+      context.response.send("Hello, world!");
     },
   };
 };

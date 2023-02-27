@@ -3,12 +3,12 @@ import { log } from "@baublet/coaster-log-service";
 
 import { NormalizedManifest } from "../../manifest/types";
 import { createExpressServer } from "../../server/createExpressServer";
-import { Server } from "../../server/types";
+import { ExpressServer } from "../../server/types";
 import { logCoasterError } from "../utils/logCoasterError";
 
 export function initializeExpressServer(
   manifest: NormalizedManifest
-): Promise<Server | CoasterError> {
+): Promise<ExpressServer | CoasterError> {
   return createExpressServer(
     {
       manifest,

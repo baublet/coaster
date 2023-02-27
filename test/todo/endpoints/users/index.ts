@@ -3,6 +3,6 @@ import { lazyLoadedEndpoint } from "@baublet/coaster/endpoints";
 
 export const endpoint: Endpoint = Promise.resolve({
   endpoint: "/users",
-  method: "get",
+  method: "GET",
   handler: lazyLoadedEndpoint(() => import("./users")),
 });

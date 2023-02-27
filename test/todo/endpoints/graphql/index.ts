@@ -3,6 +3,6 @@ import { lazyLoadedEndpoint } from "@baublet/coaster/endpoints";
 
 export const endpoint: Endpoint = {
   endpoint: "/graphql",
-  method: ["get", "post"],
+  method: ["GET", "POST"],
   handler: lazyLoadedEndpoint(() => import("./graphql")),
 };

@@ -66,12 +66,10 @@ export function createGraphqlEndpointHandler<
   }
 
   return async (requestContext: RequestContext) => {
-    if (requestContext.request.method === "get" && playgroundEnabled) {
+    console.log({ method: requestContext.request.method });
+    if (requestContext.request.method === "GET" && playgroundEnabled) {
       const playgroundMiddleware = await getPlaygroundMiddleware();
-      playgroundMiddleware(
-        requestContext.request._dangerouslyAccessRawRequest(),
-        requestContext.response._dangerouslyAccessRawResponse()
-      );
+      playgroundMiddleware(requestContext.request, requestContext.response);
       return;
     }
 
@@ -81,7 +79,7 @@ export function createGraphqlEndpointHandler<
 
     await parseBody(requestContext);
 
-    const isPost = requestContext.request.method === "post";
+    const isPost = requestContext.request.method === "POST";
     if (!isPost) {
       return handleError({
         requestContext,
@@ -98,8 +96,7 @@ export function createGraphqlEndpointHandler<
     }
 
     const isJson =
-      requestContext.request.headers.get("content-type")?.toString() ===
-      "application/json";
+      requestContext.request.header("content-type") === "application/json";
     if (!isJson) {
       return handleError({
         requestContext,
@@ -187,19 +184,19 @@ export function createGraphqlEndpointHandler<
       return handleError({ graphqlContext, requestContext, error: result });
     }
 
-    const status = requestContext.response.setStatus(
+    const status = requestContext.response.status(
       result.http.statusCode || 200
     );
     if (isCoasterError(status)) {
       return handleError({ graphqlContext, requestContext, error: status });
     }
 
-    const headers = requestContext.response.setHeaders(result.http.headers);
-    if (isCoasterError(headers)) {
-      return handleError({ graphqlContext, requestContext, error: headers });
+    const headers = result.http.headers.entries();
+    for (const header of headers) {
+      requestContext.response.setHeader(header[0], header[1]);
     }
 
-    const json = requestContext.response.sendJson(result.result);
+    const json = requestContext.response.json(result.result);
     if (isCoasterError(json)) {
       return handleError({ graphqlContext, requestContext, error: json });
     }
@@ -220,23 +217,21 @@ function handleErrorDefault({
   error: CoasterError;
 }) {
   if (error400Codes.includes(error.code)) {
-    requestContext.response.setStatus(400);
+    requestContext.response.status(400);
   } else {
-    requestContext.response.setStatus(500);
+    requestContext.response.status(500);
   }
-  if (
-    requestContext.request.headers.get("content-type") === "application/json"
-  ) {
-    requestContext.response.sendJson(error);
+  if (requestContext.request.header("content-type") === "application/json") {
+    requestContext.response.json(error);
   } else {
-    requestContext.response.setData(error);
+    requestContext.response.send(error);
   }
 }
 
 const handleBodyParsing = bodyParser.json();
 function parseBody(context: RequestContext): Promise<void> {
-  const request = context.request._dangerouslyAccessRawRequest();
-  const response = context.response._dangerouslyAccessRawResponse();
+  const request = context.request;
+  const response = context.response;
   return new Promise<void>((resolve) => {
     handleBodyParsing(request, response, () => {
       context.request.body = request.body;

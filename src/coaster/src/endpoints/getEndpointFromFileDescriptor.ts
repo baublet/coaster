@@ -1,3 +1,5 @@
+import path from "path";
+
 import {
   CoasterError,
   createCoasterError,
@@ -8,9 +10,9 @@ import {
   collate,
 } from "@baublet/coaster-utils";
 
-import { FileDescriptor } from "../manifest/types";
+import { FileDescriptor, ModuleMetadata } from "../manifest/types";
 import {
-  HTTP_METHODS,
+  HTTP_METHODS_LOWERCASE,
   HttpMethod,
   ResolvedEndpoint,
   NormalizedEndpointMiddleware,
@@ -78,13 +80,22 @@ export async function getEndpointFromFileDescriptor({
   }
 
   const fullyResolvedExport = await perform(async () => {
+    const moduleMetadata: ModuleMetadata = {
+      filePath: normalizedDescriptor.file,
+      fileBaseName: path.basename(normalizedDescriptor.file),
+      importName: normalizedDescriptor.exportName,
+    };
+
     const resolvedExport: Omit<
       ResolvedEndpoint,
       "middleware" | "buildWatchPatterns"
     > & {
       middleware: EndpointInput["middleware"];
       buildWatchPatterns: string[];
-    } = await fullyResolve(fileImport[normalizedDescriptor.exportName]);
+    } = await fullyResolve(
+      fileImport[normalizedDescriptor.exportName],
+      moduleMetadata
+    );
     return resolvedExport;
   });
   if (isCoasterError(fullyResolvedExport)) {
@@ -95,7 +106,7 @@ export async function getEndpointFromFileDescriptor({
       previousError: fullyResolvedExport,
     });
   }
-  const declaredMethods = fullyResolvedExport?.method || "get";
+  const declaredMethods = fullyResolvedExport?.method || "GET";
   const methods: HttpMethod[] = [];
   if (Array.isArray(declaredMethods)) {
     for (const method of declaredMethods) {
@@ -114,29 +125,29 @@ export async function getEndpointFromFileDescriptor({
       }
 
       // If it's a valid method, add it
-      if (!arrayIncludes(HTTP_METHODS, lowercaseMethod)) {
+      if (!arrayIncludes(HTTP_METHODS_LOWERCASE, lowercaseMethod)) {
         return createCoasterError({
           code: "getEndpointFromFileDescriptor-export-not-valid-method",
-          message: `Endpoint descriptor file ${normalizedDescriptor.file} method ${method} is not a valid HTTP method`,
+          message: `Method "${method}" is not a valid HTTP method`,
           details: { normalizedDescriptor },
         });
       }
 
-      methods.push(lowercaseMethod);
+      methods.push(method);
     }
   } else {
     const lowercaseMethod = declaredMethods.toLowerCase();
 
     // If it's a valid method, add it
-    if (!arrayIncludes(HTTP_METHODS, lowercaseMethod)) {
+    if (!arrayIncludes(HTTP_METHODS_LOWERCASE, lowercaseMethod)) {
       return createCoasterError({
         code: "getEndpointFromFileDescriptor-export-not-valid-method",
-        message: `Endpoint descriptor file method ${lowercaseMethod} is not a valid HTTP method`,
+        message: `Method ${lowercaseMethod} is not a valid HTTP method`,
         details: { normalizedDescriptor },
       });
     }
 
-    methods.push(lowercaseMethod);
+    methods.push(lowercaseMethod as HttpMethod);
   }
 
   const endpointExists = "endpoint" in fullyResolvedExport;
@@ -214,15 +225,12 @@ export async function getEndpointFromFileDescriptor({
         context.log("error", "Middleware error", {
           error: resolvedHandler,
         });
-        context.response.setStatus(500);
-        if (
-          context.request.headers.get("content-type") === "application/json"
-        ) {
-          context.response.sendJson({ error: resolvedHandler });
+        context.response.status(500);
+        if (context.request.header("content-type") === "application/json") {
+          context.response.json({ error: resolvedHandler });
         } else {
-          context.response.setData(resolvedHandler.message);
+          context.response.send(resolvedHandler.message);
         }
-        context.response.flushData();
         return;
       }
 

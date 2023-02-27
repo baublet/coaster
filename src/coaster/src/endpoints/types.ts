@@ -7,18 +7,22 @@ import type {
 
 import { BuildTools } from "../build/types";
 import type { RequestContext } from "../context/request";
-import { FileDescriptor, ModuleMetaData } from "../manifest/types";
+import { FileDescriptor, ModuleMetadata } from "../manifest/types";
 
 export const HTTP_METHODS = [
-  "get",
-  "post",
-  "put",
-  "delete",
-  "patch",
-  "options",
-  "head",
+  "ALL",
+  "GET",
+  "POST",
+  "PUT",
+  "DELETE",
+  "PATCH",
+  "OPTIONS",
+  "HEAD",
 ] as const;
 export type HttpMethod = typeof HTTP_METHODS[number];
+export const HTTP_METHODS_LOWERCASE = HTTP_METHODS.map((method) =>
+  method.toLowerCase()
+);
 
 export type EndpointBuildFunction = (
   tools: BuildTools
@@ -42,7 +46,7 @@ export interface ResolvedEndpoint {
   buildWatchPatterns: string[];
 }
 
-export type Endpoint = Resolvable<EndpointInput, ModuleMetaData>;
+export type Endpoint = Resolvable<EndpointInput, ModuleMetadata>;
 
 export interface EndpointInput {
   endpoint: string;

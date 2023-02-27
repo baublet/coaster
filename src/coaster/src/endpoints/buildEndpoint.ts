@@ -57,15 +57,7 @@ export async function buildEndpoint({
   const result = await perform(async () => {
     const result = await resolvedEndpoint?.build?.(buildTools);
     if (isCoasterError(result)) {
-      return createCoasterError({
-        code: "buildEndpoint-buildError",
-        message: "Unexpected error building endpoint",
-        details: {
-          fileDescriptor,
-          endpointFileFullPath,
-        },
-        previousError: result,
-      });
+      return result;
     }
 
     if (resolvedEndpoint.buildWatchPatterns) {

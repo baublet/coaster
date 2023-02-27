@@ -1,4 +1,4 @@
-import { RequestHandler } from "express";
+import type { RequestHandler } from "express";
 
 import {
   CoasterError,
@@ -40,29 +40,24 @@ export function getExpressMiddleware(
       };
 
       perform(async () => {
-        await handler(
-          context.request._dangerouslyAccessRawRequest(),
-          context.response._dangerouslyAccessRawResponse(),
-          next
-        );
+        await handler(context.request, context.response, next);
       })
         .then((result) => {
+          // The middleware handled things correctly, so we don't need to do anything
           if (resolved) {
             return;
           }
 
           if (isCoasterError(result)) {
-            resolve(result);
             resolved = true;
+            resolve(result);
             return;
           }
 
-          resolve();
           resolved = true;
+          resolve();
         })
-        .catch((error) => {
-          log.error(error);
-        });
+        .catch(log.error);
     });
   };
 }
