@@ -7,15 +7,15 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "yarn turbo run build --output-logs=new-only",
-    "rebuild": "yarn clean; yarn; yarn build",
+    "build": "pnpm turbo run build --output-logs=new-only",
+    "rebuild": "pnpm clean; pnpm; pnpm build",
     "test": "vitest --coverage --watch",
-    "test:all": "yarn turbo run test --output-logs=new-only",
-    "test:watch": "npx nodemon --ignore */node_modules/* --ignore */dist/* --watch './src/' -e 'ts,tsx,js' --exec 'yarn test'",
+    "test:all": "pnpm turbo run test --output-logs=new-only",
+    "test:watch": "npx nodemon --ignore */node_modules/* --ignore */dist/* --watch './src/' -e 'ts,tsx,js' --exec 'pnpm test'",
     "clean": "rm -rf **/*/dist **/*/node_modules node_modules",
     "lint:all": "eslint src/ --ext ts --fix",
     "lint:tsc": "tsc --noEmit",
-    "postinstall": "yarn build"
+    "postinstall": "pnpm build"
   },
   "private": true,
   "workspaces": [

@@ -1,3 +1,5 @@
+import type { Application } from "express";
+
 import type {
   CoasterError,
   ItemOrArrayOfItems,
@@ -19,7 +21,7 @@ export const HTTP_METHODS = [
   "OPTIONS",
   "HEAD",
 ] as const;
-export type HttpMethod = typeof HTTP_METHODS[number];
+export type HttpMethod = (typeof HTTP_METHODS)[number];
 export const HTTP_METHODS_LOWERCASE = HTTP_METHODS.map((method) =>
   method.toLowerCase()
 );
@@ -84,3 +86,27 @@ export interface NormalizedEndpointMiddleware {
 export type EndpointMiddleware = NormalizedEndpointMiddleware;
 
 export type HandlerReturn = TypeOrPromiseType<CoasterError | any>;
+
+// All of these types must be `undefined | T` because these are private internal
+// types that certain plugins may or may not pass.
+export interface InternalEndpoint extends ResolvedEndpoint {
+  /**
+   * Generally, you don't want to be modifying the underlying express instance at all.
+   * But sometimes, we need to bolt on some middleware that we don't want to try to
+   * manually make interoperable with our context primitives. Use this to do that.
+   */
+  dangerouslyApplyMiddleware?:
+    | DangerouslyApplyMiddlewareHandler
+    | DangerouslyApplyMiddlewareHandler[];
+}
+
+export type DangerouslyApplyMiddlewareHandler = (
+  app: Application
+) => any | Promise<any>;
+
+export function assertIsCoasterInternalEndpoint(
+  value: any
+): asserts value is InternalEndpoint {
+  // We actually don't want to assert here, since we don't throw errors. That's why the
+  // above `InternalCoasterTrack` type has only partial props.
+}

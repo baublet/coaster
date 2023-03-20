@@ -4,16 +4,20 @@ import { Command as Program } from "commander";
 import path from "path";
 import { execa, KillOptions } from "execa";
 import colors from "@colors/colors";
-import { watch } from "chokidar";
 
 import { isCoasterError } from "@baublet/coaster-utils";
 import { log } from "@baublet/coaster-log-service";
 
 import { loadRawManifest } from "../../manifest/loadRawManifest";
 import { logCoasterError } from "../utils/logCoasterError";
+import { getPathExecutable } from "../utils/getPathExecutable";
 
 // Time before we start watching files
 const WATCH_DELAY_MS = 1000;
+
+const GLOBALLY_IGNORED_PATH_MATCHES = [
+  `${path.sep}node_modules${path.sep}.vite`,
+];
 
 export function serve(program: Program) {
   program
@@ -55,7 +59,15 @@ export function serve(program: Program) {
       let lastWatcherEvent = 0;
       let bufferedChanges = 0;
 
-      let childProcess = runCommand(coasterServePath, additionalArguments);
+      const additionalEnvVars = {
+        COASTER_WATCH: String(Boolean(options.watch)),
+      };
+
+      let childProcess = await runCommand(
+        coasterServePath,
+        additionalArguments,
+        additionalEnvVars
+      );
       async function restart() {
         watchingLocked = true;
 
@@ -63,7 +75,11 @@ export function serve(program: Program) {
         log.info("🧹 " + colors.dim("Cleaning up old processes"));
 
         await childProcess.kill();
-        childProcess = runCommand(coasterServePath, additionalArguments);
+        childProcess = await runCommand(
+          coasterServePath,
+          additionalArguments,
+          additionalEnvVars
+        );
 
         setTimeout(() => {
           watchingLocked = false;
@@ -73,12 +89,24 @@ export function serve(program: Program) {
       process.stdin.setRawMode(true);
       process.stdin.setEncoding("utf8");
 
-      const maybeWatcher = (() => {
+      const maybeWatcher = await (async () => {
         if (!options.watch) {
           return;
         }
 
+        const { watch } = await import("chokidar");
         const watcher = watch(process.cwd()).on("all", (event, path) => {
+          if (isIgnored({ path, event })) {
+            log.debug(
+              colors.dim(
+                `Ignoring file change [${event}]: ${path.replace(
+                  process.cwd(),
+                  ""
+                )}`
+              )
+            );
+            return;
+          }
           if (lastWatcherEvent === 0 && !watchingLocked) {
             log.info("\n📦 " + colors.blue("Change detected..."));
           }
@@ -140,12 +168,15 @@ export function serve(program: Program) {
     });
 }
 
-function runCommand(
+async function runCommand(
   coasterServePath: string,
-  additionalArguments: string[]
-): Omit<ChildProcess, "kill"> & {
-  kill: (signal?: string, options?: KillOptions) => void;
-} {
+  additionalArguments: string[],
+  envVars: Record<string, string> = {}
+): Promise<
+  Omit<ChildProcess, "kill"> & {
+    kill: (signal?: string, options?: KillOptions) => void;
+  }
+> {
   log.info("\n⏳ " + colors.green("Starting server..."));
   log.info(
     "   r, enter  " +
@@ -156,11 +187,25 @@ function runCommand(
       "\n"
   );
 
-  return execa("node", [coasterServePath, ...additionalArguments], {
+  const executable = await getPathExecutable(coasterServePath);
+
+  return execa(executable, [coasterServePath, ...additionalArguments], {
     all: true,
     cwd: process.cwd(),
-    env: process.env,
+    env: {
+      ...process.env,
+      ...envVars,
+    },
     argv0: process.argv0,
     stdio: "inherit",
   });
+}
+
+function isIgnored({ path }: { path: string; event: string }) {
+  for (let i = 0; i < GLOBALLY_IGNORED_PATH_MATCHES.length; i++) {
+    if (path.includes(GLOBALLY_IGNORED_PATH_MATCHES[i])) {
+      return true;
+    }
+  }
+  return false;
 }

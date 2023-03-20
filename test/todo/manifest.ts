@@ -1,4 +1,4 @@
-import { Manifest } from "@baublet/coaster";
+import type { Manifest } from "@baublet/coaster";
 
 export const manifest: Manifest = {
   name: "todo",

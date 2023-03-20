@@ -6,3 +6,4 @@ generated.*.ts
 dist
 .turbo
 src/rdbms/src/**/*.generated.ts
+pnpm-lock.yaml

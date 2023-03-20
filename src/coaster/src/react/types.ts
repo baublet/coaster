@@ -17,5 +17,5 @@ export type CreateReactTrackOptions = Pick<
    *
    * Default: "assets"
    */
-  assetsDir?: string;
+  assetsPath?: string;
 };

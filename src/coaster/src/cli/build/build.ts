@@ -11,6 +11,7 @@ import { log } from "@baublet/coaster-log-service";
 import { loadRawManifest } from "../../manifest/loadRawManifest";
 import { logCoasterError } from "../utils/logCoasterError";
 import { shouldRebuild } from "../../build/watchFilesForEndpointDescriptor";
+import { getPathExecutable } from "../utils/getPathExecutable";
 
 // Time before we start watching files
 const WATCH_DELAY_MS = 1000;
@@ -56,7 +57,7 @@ export function build(program: Program) {
       let lastWatcherEvent = 0;
       let bufferedChanges = 0;
 
-      let childProcess = runCommand({
+      let childProcess = await runCommand({
         coasterBuildPath,
         additionalArguments,
         watch: watchModeEnabled,
@@ -80,7 +81,7 @@ export function build(program: Program) {
             watchingLocked = false;
           }, WATCH_DELAY_MS);
 
-          childProcess = runCommand({
+          childProcess = await runCommand({
             coasterBuildPath,
             additionalArguments,
             watch: watchModeEnabled,
@@ -164,7 +165,7 @@ export function build(program: Program) {
     });
 }
 
-function runCommand({
+async function runCommand({
   additionalArguments,
   coasterBuildPath,
   watch,
@@ -186,7 +187,9 @@ function runCommand({
     );
   }
 
-  return execa("node", [coasterBuildPath, ...additionalArguments], {
+  const executable = await getPathExecutable(coasterBuildPath);
+
+  return execa(executable, [coasterBuildPath, ...additionalArguments], {
     all: true,
     cwd: process.cwd(),
     env: process.env,

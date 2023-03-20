@@ -28,6 +28,7 @@ import {
   NormalizedEndpointHandler,
   NormalizedEndpointMiddleware,
   ResolvedEndpoint,
+  assertIsCoasterInternalEndpoint,
 } from "../endpoints/types";
 import {
   NormalizedFileDescriptor,
@@ -173,6 +174,7 @@ export async function createExpressServer(
   }
 
   for (const endpoint of endpoints) {
+    assertIsCoasterInternalEndpoint(endpoint);
     if (isCoasterError(endpoint)) {
       return createCoasterError({
         code: "createExpressServer-unexpected-error-loading-endpoint",
@@ -184,6 +186,21 @@ export async function createExpressServer(
         previousError: endpoint,
       });
     }
+
+    if (endpoint.dangerouslyApplyMiddleware) {
+      const middlewareFunctions = Array.isArray(
+        endpoint.dangerouslyApplyMiddleware
+      )
+        ? endpoint.dangerouslyApplyMiddleware
+        : [endpoint.dangerouslyApplyMiddleware];
+
+      for (const applyMiddleware of middlewareFunctions) {
+        console.log("\n\n\nTEST TEST TEST\n\n\n");
+        log.info(`Applying custom middleware for ${endpoint.endpoint}`);
+        await applyMiddleware(app);
+      }
+    }
+
     for (const uppercaseMethod of endpoint.method) {
       const method = uppercaseMethod.toLowerCase();
       if ((app as any)[method] === undefined) {

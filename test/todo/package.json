@@ -2,6 +2,11 @@
   "name": "@baublet/coaster-todo-test",
   "license": "MIT",
   "version": "0.0.1",
+  "scripts": {
+    "develop": "(cd ../../; rm -rf ./node_modules/@baublet; pnpm install; pnpm run build); pnpm install; pnpm run coaster serve --watch",
+    "build": "pnpm coaster build",
+    "serve": "pnpm coaster serve"
+  },
   "dependencies": {
     "@baublet/coaster": "0.0.1",
     "node-object-hash": "^2.3.10",
