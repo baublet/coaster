@@ -195,7 +195,6 @@ export async function createExpressServer(
         : [endpoint.dangerouslyApplyMiddleware];
 
       for (const applyMiddleware of middlewareFunctions) {
-        console.log("\n\n\nTEST TEST TEST\n\n\n");
         log.info(`Applying custom middleware for ${endpoint.endpoint}`);
         await applyMiddleware(app);
       }

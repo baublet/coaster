@@ -16,14 +16,24 @@ export function createDevelopmentReactTrack(
   }
 > {
   return async (metadata) => {
+    const normalizedEndpoint =
+      trackOptions.endpoint === "*" ? "/" : trackOptions.endpoint;
+
     const viteModule = await import("vite");
+    const reactPlugin = await import("@vitejs/plugin-react");
+
     const vite = await viteModule.createServer({
       server: { middlewareMode: true },
       configFile: false,
       root: metadata.filePath,
       appType: "custom",
-      base: "/",
+      base: normalizedEndpoint,
       clearScreen: false,
+      plugins: [
+        reactPlugin.default({
+          include: "**/*.tsx",
+        }),
+      ],
     });
 
     const rootHtmlFile = path.resolve(metadata.filePath, "index.html");
@@ -36,7 +46,7 @@ export function createDevelopmentReactTrack(
       },
       buildWatchPatterns: [],
       dangerouslyApplyMiddleware: (app) =>
-        app.use(trackOptions.endpoint, vite.middlewares),
+        app.use(normalizedEndpoint, vite.middlewares),
       handler: async (context) => {
         const request = context.request;
         const response = context.response;

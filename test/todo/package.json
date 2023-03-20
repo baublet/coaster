@@ -3,7 +3,7 @@
   "license": "MIT",
   "version": "0.0.1",
   "scripts": {
-    "develop": "(cd ../../; rm -rf ./node_modules/@baublet; pnpm install; pnpm run build); pnpm install; pnpm run coaster serve --watch",
+    "develop": "(cd ../../; rm -rf ./node_modules/@baublet; pnpm install; pnpm build); pnpm install; pnpm coaster serve --watch",
     "build": "pnpm coaster build",
     "serve": "pnpm coaster serve"
   },
