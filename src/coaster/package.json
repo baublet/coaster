@@ -1,14 +1,15 @@
 {
   "name": "@baublet/coaster",
+  "type": "module",
   "author": {
     "email": "baublet@gmail.com",
     "name": "Ryan Poe",
     "url": "https://www.ryanmpoe.com"
   },
   "bin": {
-    "coaster-build-application": "./bin/buildApplication.js",
-    "coaster": "./bin/coaster.js",
-    "coaster-serve": "./bin/coasterServe.js"
+    "coaster-build-application": "./bin/buildApplication.cjs",
+    "coaster": "./bin/coaster.cjs",
+    "coaster-serve": "./bin/coasterServe.cjs"
   },
   "license": "MIT",
   "version": "0.0.1",

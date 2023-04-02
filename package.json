@@ -9,7 +9,7 @@
   "scripts": {
     "build": "pnpm turbo run build --output-logs=new-only",
     "rebuild": "pnpm clean; pnpm; pnpm build",
-    "test": "vitest --coverage --watch",
+    "test": "pnpm vitest --coverage --watch",
     "test:all": "pnpm turbo run test --output-logs=new-only",
     "test:watch": "npx nodemon --ignore */node_modules/* --ignore */dist/* --watch './src/' -e 'ts,tsx,js' --exec 'pnpm test'",
     "clean": "rm -rf **/*/dist **/*/node_modules node_modules",

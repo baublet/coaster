@@ -27,7 +27,7 @@ export function createDevelopmentReactTrack(
       configFile: false,
       root: metadata.filePath,
       appType: "custom",
-      base: normalizedEndpoint,
+      base: trackOptions.assetsPath,
       clearScreen: false,
       plugins: [
         reactPlugin.default({

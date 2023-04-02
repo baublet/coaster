@@ -3,8 +3,9 @@
   "description": "For unit-testing Coaster applications",
   "version": "0.0.1",
   "main": "src/index.ts",
+  "type": "module",
   "bin": {
-    "unit-test": "./unit-test.js"
+    "unit-test": "./unit-test.mjs"
   },
   "author": {
     "email": "baublet@gmail.com",

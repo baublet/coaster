@@ -1,5 +1,6 @@
 {
   "name": "@baublet/coaster-log-service",
+  "type": "module",
   "author": {
     "email": "baublet@gmail.com",
     "name": "Ryan Poe",

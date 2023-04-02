@@ -1,6 +1,7 @@
 {
   "name": "@baublet/coaster-utils",
   "description": "Isomorphic, side-effect-free utilities for working with Coaster.",
+  "type": "module",
   "version": "0.0.1",
   "main": "src/index.ts",
   "author": {

@@ -1,5 +1,8 @@
 import path from "path";
+import { fileURLToPath } from "url";
 import { execa } from "execa";
+
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 const testRunnerPath = path.resolve(
   __dirname,

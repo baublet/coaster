@@ -45,7 +45,7 @@ export async function buildReactTrack({
         warnOnce: buildTools.log.warn,
       },
       build: {
-        assetsDir: trackOptions.assetsDir,
+        assetsDir: trackOptions.assetsPath,
         emptyOutDir: true,
         outDir: buildFolder,
         sourcemap: true,

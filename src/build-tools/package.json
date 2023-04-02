@@ -2,8 +2,9 @@
   "name": "@baublet/coaster-build-tools",
   "description": "For building Coaster applications",
   "version": "0.0.1",
+  "type": "module",
   "bin": {
-    "coaster-build": "./bin/build.js"
+    "coaster-build": "./bin/build.mjs"
   },
   "author": {
     "email": "baublet@gmail.com",
@@ -12,7 +13,7 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "esbuild --external:esbuild --bundle --platform=node --target=node10.4 --outdir=dist ./src/*.ts"
+    "build": "esbuild --packages=external --bundle --platform=node --format=esm --target=node16 --outdir=dist ./src/*.ts"
   },
   "dependencies": {
     "@types/fs-extra": "^9.0.13",
