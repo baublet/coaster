@@ -3,6 +3,7 @@
   "description": "For building Coaster applications",
   "version": "0.0.1",
   "type": "module",
+  "main": "dist/index.js",
   "bin": {
     "coaster-build": "./bin/build.mjs"
   },
@@ -13,7 +14,7 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "esbuild --packages=external --bundle --platform=node --format=esm --target=node16 --outdir=dist ./src/*.ts"
+    "build": "esbuild --packages=external --bundle --platform=node --format=esm --target=node16 --outdir=dist ./src/*.ts; cp -r ./src/* ./dist"
   },
   "dependencies": {
     "@types/fs-extra": "^9.0.13",

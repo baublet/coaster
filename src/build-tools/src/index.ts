@@ -1,0 +1,1 @@
+export { getPathExecutable } from "./getPathExecutable";

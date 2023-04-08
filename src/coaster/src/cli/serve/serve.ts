@@ -7,10 +7,10 @@ import colors from "@colors/colors";
 
 import { isCoasterError } from "@baublet/coaster-utils";
 import { log } from "@baublet/coaster-log-service";
+import { getPathExecutable } from "@baublet/coaster-build-tools";
 
 import { loadRawManifest } from "../../manifest/loadRawManifest";
 import { logCoasterError } from "../utils/logCoasterError";
-import { getPathExecutable } from "../utils/getPathExecutable";
 
 // Time before we start watching files
 const WATCH_DELAY_MS = 1000;
