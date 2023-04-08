@@ -165,6 +165,20 @@ async function parseManifest(
     });
   }
 
+  const ui = getNormalizedFileDescriptorFromFileInput({
+    fileInput: rootNode.notFound,
+    exportNameIfNotSpecified: "ui",
+    referenceFileFullPath: fullPath,
+  });
+  if (isCoasterError(ui)) {
+    return createCoasterError({
+      code: `parseManifest-ui`,
+      message: `Error parsing ui`,
+      details: { fileInput: rootNode.ui, referenceFile: fullPath },
+      previousError: ui,
+    });
+  }
+
   const middlewareArray = getItemOrArrayOfItems<string | FileDescriptor>(
     rootNode.middleware
   );
@@ -194,5 +208,6 @@ async function parseManifest(
     endpoints: endpoints as NormalizedFileDescriptor[],
     notFound,
     middleware: middleware as NormalizedFileDescriptor[],
+    ui,
   };
 }

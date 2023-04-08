@@ -1,4 +1,3 @@
-import { performance } from "perf_hooks";
 import express, {
   Handler,
   NextFunction,
@@ -18,14 +17,11 @@ import {
   withWrappedHook,
   jsonStringify,
   isInvocable,
-  perform,
-  getErrorLikeStringFromUnknown,
 } from "@baublet/coaster-utils";
 import { log } from "@baublet/coaster-log-service";
 
 import { getEndpointFromFileDescriptor } from "../endpoints/getEndpointFromFileDescriptor";
 import {
-  NormalizedEndpointHandler,
   NormalizedEndpointMiddleware,
   ResolvedEndpoint,
   assertIsCoasterInternalEndpoint,
@@ -40,6 +36,9 @@ import { getMiddlewareFromFileDescriptor } from "../endpoints/getMiddlewareFromF
 import { RequestContext } from "../context/request";
 import { resolveInputPathFromFile } from "../common/resolveInputPathFromFile";
 import { COASTER_REQUEST_ID_HEADER_NAME } from "../common/coasterRequestId";
+import { handleExpressMethodWithHandler } from "./handleExpressMethodWithHandler";
+import { maybeInitializeUi } from "./maybeInitializeUi";
+import { maybeInitializeNotFound } from "./maybeInitializeNotFound";
 
 declare global {
   namespace Express {
@@ -293,45 +292,22 @@ export async function createExpressServer(
     }
   }
 
-  if (manifest.notFound) {
-    const notFoundFullPath = resolveInputPathFromFile(
-      manifest.notFound.file,
-      manifestFullPath
-    );
-    const resolvedNotFoundEndpoint = await getEndpointFromFileDescriptor({
-      fileDescriptor: {
-        file: notFoundFullPath,
-        exportName: manifest.notFound.exportName,
-      },
-      endpointFileFullPath: notFoundFullPath,
-    });
-    if (!resolvedNotFoundEndpoint) {
-      return createCoasterError({
-        code: "createServer-not-found-endpoint-not-found",
-        message: `Not found endpoint not found`,
-        details: {
-          notFound: JSON.stringify(manifest.notFound),
-        },
-      });
-    }
+  const uiResult = await maybeInitializeUi({
+    app,
+    manifest,
+    manifestFullPath,
+  });
+  if (isCoasterError(uiResult)) {
+    return uiResult;
+  }
 
-    if (isCoasterError(resolvedNotFoundEndpoint)) {
-      return createCoasterError({
-        code: "createExpressServer-unexpected-error-loading-not-found-endpoint",
-        message: `Error loading not found endpoint from ${manifestFullPath}`,
-        details: { manifestFullPath },
-        previousError: resolvedNotFoundEndpoint,
-      });
-    }
-
-    log.debug(colors.dim("Registering not found endpoint"));
-    app.use((request, response) => {
-      handleExpressMethodWithHandler({
-        request,
-        response,
-        handler: resolvedNotFoundEndpoint.handler,
-      });
-    });
+  const notFoundResult = await maybeInitializeNotFound({
+    app,
+    manifest,
+    manifestFullPath,
+  });
+  if (isCoasterError(notFoundResult)) {
+    return notFoundResult;
   }
 
   let server: http.Server;
@@ -376,55 +352,6 @@ const hashRequest = hash({
   sort: true,
   coerce: true,
 });
-async function handleExpressMethodWithHandler({
-  request,
-  response,
-  handler,
-}: {
-  request: Request;
-  response: Response;
-  handler: NormalizedEndpointHandler;
-}): Promise<void> {
-  try {
-    const context = await perform(async () => {
-      if (request.__coasterRequestContext) {
-        return request.__coasterRequestContext;
-      }
-      log.debug("Creating request context");
-      return createExpressRequestContext({
-        request,
-        response,
-      });
-    });
-
-    if (isCoasterError(context)) {
-      log.error("Unexpected error creating context", { context });
-      if (!response.headersSent) {
-        response.status(500);
-      }
-      return;
-    }
-
-    context.log("debug", "Handling request with primary handler");
-
-    const handlerStartTime = performance.now();
-    await handler(context);
-
-    const handlerEndTime = performance.now();
-    const elapsedMs = handlerEndTime - handlerStartTime;
-    const roundedElapsedTime =
-      Math.round((elapsedMs + Number.EPSILON) * 100) / 100;
-
-    context.log("debug", `Request handler complete in ${roundedElapsedTime}ms`);
-  } catch (error) {
-    log.error("Unexpected error handling request", {
-      error: getErrorLikeStringFromUnknown(error),
-    });
-    if (!response.headersSent) {
-      response.status(500);
-    }
-  }
-}
 
 export async function createRequestContext(
   request: Request,

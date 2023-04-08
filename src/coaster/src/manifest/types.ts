@@ -21,6 +21,15 @@ export interface Manifest {
    * Application-level middleware to apply to all requests
    */
   middleware?: ItemOrArrayOfItems<string | FileDescriptor>;
+  /**
+   * The UI for your application. This can be represented as a route with the
+   * path of "*", or you can add it here. Coaster will fail if you try to declare
+   * both! (Note: this doesn't preclude you from incorporating multiple UIs into
+   * your application at subroutes. This is just for the root route.) For most
+   * usecases, you want to declare this, since your UI will be properly split and
+   * served from a CDN.
+   */
+  ui?: string | FileDescriptor;
 }
 
 export interface NormalizedManifest {
@@ -31,6 +40,7 @@ export interface NormalizedManifest {
   endpoints: NormalizedFileDescriptor[];
   middleware: NormalizedFileDescriptor[];
   notFound: NormalizedFileDescriptor;
+  ui?: NormalizedFileDescriptor;
 }
 
 /**
