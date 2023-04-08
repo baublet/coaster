@@ -59,7 +59,7 @@ export async function maybeInitializeUi({
     });
   }
 
-  log.debug(colors.dim("Registering not found endpoint"));
+  log.debug(colors.dim("Registering UI endpoint"));
   app.use((request, response) => {
     handleExpressMethodWithHandler({
       request,
