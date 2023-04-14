@@ -57,11 +57,12 @@ export function build(program: Program) {
       let lastWatcherEvent = 0;
       let bufferedChanges = 0;
 
-      let childProcess = await runCommand({
+      const command = await runCommand({
         coasterBuildPath,
         additionalArguments,
         watch: watchModeEnabled,
       });
+      let childProcess = command();
 
       if (watchModeEnabled) {
         // Required for ensuring our stdin from this process is piped through to
@@ -81,11 +82,7 @@ export function build(program: Program) {
             watchingLocked = false;
           }, WATCH_DELAY_MS);
 
-          childProcess = await runCommand({
-            coasterBuildPath,
-            additionalArguments,
-            watch: watchModeEnabled,
-          });
+          childProcess = command();
         };
 
         const maybeWatcher = (() => {
@@ -189,11 +186,12 @@ async function runCommand({
 
   const executable = await getPathExecutable(coasterBuildPath);
 
-  return execa(executable, [coasterBuildPath, ...additionalArguments], {
-    all: true,
-    cwd: process.cwd(),
-    env: process.env,
-    argv0: process.argv0,
-    stdio: "inherit",
-  });
+  return () =>
+    execa(executable, [coasterBuildPath, ...additionalArguments], {
+      all: true,
+      cwd: process.cwd(),
+      env: process.env,
+      argv0: process.argv0,
+      stdio: "inherit",
+    });
 }

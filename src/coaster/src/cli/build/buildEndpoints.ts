@@ -88,7 +88,49 @@ export async function buildEndpoints(
     );
   }
 
-  log.debug(`Waiting for builds to complete`);
+  const manifestUi = manifest.ui;
+  if (manifestUi) {
+    log.debug("Loading UI");
+    let progressBar: SingleBar | Record<string, any> = {};
+    const endpointFileFullPath = path.resolve(process.cwd(), manifestUi.file);
+    const buildTools = getBuildTools();
+    try {
+      const result = await buildEndpoint({
+        fileDescriptor: {
+          file: path.resolve(process.cwd(), manifestUi.file),
+          exportName: manifestUi.exportName,
+        },
+        buildTools,
+        endpointFileFullPath,
+        onHasBuild: () => {
+          progressBar = multibar.create(100, 1, {
+            endpoint: manifestUi.file.replace(process.cwd() + path.sep, ""),
+          });
+          progressBar?.render();
+          buildTools.onProgressChange((percent) => {
+            progressBar?.update?.(percent);
+            progressBar?.render();
+          });
+        },
+      });
+      if (isCoasterError(result)) {
+        logCoasterError(result);
+        buildToolsToFlush.add(buildTools);
+      }
+    } catch (error) {
+      buildToolsToFlush.add(buildTools);
+      if (isCoasterError(error)) {
+        logCoasterError(error);
+      } else {
+        log.error(error);
+      }
+    } finally {
+      progressBar?.update?.(100);
+      progressBar?.stop?.();
+    }
+  }
+
+  log.debug("Waiting for builds to complete");
   await Promise.all(promises);
   multibar.stop();
   log.debug("Build complete, flushing any errors and cleaning up");

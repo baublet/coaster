@@ -6,18 +6,17 @@ import { isCoasterError } from "@baublet/coaster-utils";
 import { ModuleMetadata } from "../manifest/types";
 import { InternalEndpoint } from "../endpoints/types";
 import { CoasterTrack } from "../track/types";
-import { CreateReactTrackOptions } from "./types";
+import { CreateReactUiOptions } from "./types";
 
-export function createDevelopmentReactTrack(
-  trackOptions: CreateReactTrackOptions
+export function createDevelopmentReactUi(
+  uiOptions: CreateReactUiOptions = {}
 ): (args: ModuleMetadata) => Promise<
   CoasterTrack & {
     dangerouslyApplyMiddleware?: InternalEndpoint["dangerouslyApplyMiddleware"];
   }
 > {
   return async (metadata) => {
-    const normalizedEndpoint =
-      trackOptions.endpoint === "*" ? "/" : trackOptions.endpoint;
+    const normalizedEndpoint = uiOptions.endpoint || "*";
 
     const viteModule = await import("vite");
     const reactPlugin = await import("@vitejs/plugin-react");
@@ -27,7 +26,7 @@ export function createDevelopmentReactTrack(
       configFile: false,
       root: metadata.filePath,
       appType: "custom",
-      base: trackOptions.assetsPath,
+      base: uiOptions.assetsPath,
       clearScreen: false,
       plugins: [
         reactPlugin.default({
@@ -77,9 +76,9 @@ export function createDevelopmentReactTrack(
           .set({ "Content-Type": "text/html" })
           .end(rootHtmlTemplate);
       },
-      endpoint: trackOptions.endpoint,
+      endpoint: normalizedEndpoint,
       method: "ALL",
-      middleware: trackOptions.middleware,
+      middleware: uiOptions.middleware,
     };
   };
 }

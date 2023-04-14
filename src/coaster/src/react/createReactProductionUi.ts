@@ -5,34 +5,35 @@ import { getErrorLikeStringFromUnknown } from "@baublet/coaster-utils";
 
 import type { ModuleMetadata } from "../manifest/types";
 import type { CoasterTrack } from "../track/types";
-import type { CreateReactTrackOptions } from "./types";
+import type { CreateReactUiOptions } from "./types";
 
-export function createReactTrack(
-  trackOptions: CreateReactTrackOptions
+export function createReactUi(
+  uiOptions: CreateReactUiOptions = {}
 ): (args: ModuleMetadata) => Promise<CoasterTrack> {
   return async function coasterReactTrackLoader(metadata) {
-    const assetFolderPath = trackOptions.assetsPath || "assets";
-    const assetsPublicPath = `${trackOptions.endpoint.replace(
+    const assetFolderPath = uiOptions.assetsPath || "assets";
+    const normalizedEndpoint = uiOptions.endpoint || "*";
+    const assetsPublicPath = `${normalizedEndpoint.replace(
       "*",
       ""
     )}/${assetFolderPath}/`;
     const buildFolder =
-      trackOptions.buildDir ||
+      uiOptions.buildDir ||
       path.resolve(
         process.cwd(),
         "node_modules",
         ".coaster",
-        hashObject({ trackOptions, metadata })
+        hashObject({ uiOptions, metadata })
       );
     const rootHtmlFile = path.resolve(buildFolder, "index.html");
 
     return {
       __isCoasterTrack: true,
       build: async (buildTools) => {
-        const { buildReactTrack } = await import("./buildReactTract");
-        return buildReactTrack({
+        const { buildReactUi } = await import("./buildReactUi");
+        return buildReactUi({
           metadata,
-          trackOptions,
+          uiOptions,
           buildFolder,
           buildTools,
         });
@@ -92,9 +93,9 @@ export function createReactTrack(
           );
         }
       },
-      endpoint: trackOptions.endpoint,
+      endpoint: normalizedEndpoint,
       method: "ALL",
-      middleware: trackOptions.middleware,
+      middleware: uiOptions.middleware,
     };
   };
 }

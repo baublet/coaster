@@ -3,16 +3,16 @@ import mkdirp from "mkdirp";
 import { CoasterError, isCoasterError, perform } from "@baublet/coaster-utils";
 
 import { ModuleMetadata } from "../manifest/types";
-import { CreateReactTrackOptions } from "./types";
+import { CreateReactUiOptions } from "./types";
 import { BuildTools } from "../build/types";
 
-export async function buildReactTrack({
+export async function buildReactUi({
   metadata,
   buildFolder,
-  trackOptions,
+  uiOptions,
   buildTools,
 }: {
-  trackOptions: CreateReactTrackOptions;
+  uiOptions: CreateReactUiOptions;
   metadata: ModuleMetadata;
   buildFolder: string;
   buildTools: BuildTools;
@@ -30,12 +30,14 @@ export async function buildReactTrack({
     const { build } = await import("vite");
     buildTools.setProgress(15, 100);
 
+    const assetsPath = uiOptions.assetsPath || "assets";
+
     buildTools.log.info("Building application");
     const buildResult = await build({
       configFile: false,
       root: metadata.filePath,
       appType: "custom",
-      base: "/",
+      base: assetsPath,
       clearScreen: false,
       customLogger: {
         ...buildTools.log,
@@ -45,14 +47,14 @@ export async function buildReactTrack({
         warnOnce: buildTools.log.warn,
       },
       build: {
-        assetsDir: trackOptions.assetsPath,
+        assetsDir: assetsPath,
         emptyOutDir: true,
         outDir: buildFolder,
         sourcemap: true,
       },
     });
     buildTools.log.info("Application built");
-    buildTools.setProgress(95, 100);
+    buildTools.setProgress(99, 100);
     return buildResult;
   });
 

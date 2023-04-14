@@ -60,7 +60,7 @@ export async function maybeInitializeUi({
   }
 
   log.debug(colors.dim("Registering UI endpoint"));
-  app.use((request, response) => {
+  app.get("*", (request, response) => {
     handleExpressMethodWithHandler({
       request,
       response,

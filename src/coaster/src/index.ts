@@ -13,3 +13,4 @@ export type {
 } from "./endpoints/types";
 export type { LazyLoadedHandler } from "./endpoints/lazyLoadedEndpoint";
 export type { RequestContext } from "./context/request";
+export type { UserInterface } from "./ui/types";
