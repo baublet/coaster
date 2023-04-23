@@ -4,6 +4,7 @@ export const manifest: Manifest = {
   name: "todo",
   port: "8888",
   notFound: "endpoints/notFound",
+  ui: "ui",
   middleware: [
     { file: "middleware/test1" },
     { file: "middleware/test2", exportName: "default" },
@@ -16,6 +17,5 @@ export const manifest: Manifest = {
     { file: "endpoints/todos", exportName: "default" },
     "endpoints/graphql",
     "endpoints/graphqlTrack",
-    "endpoints/ui",
   ],
 };

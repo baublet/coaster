@@ -41,10 +41,10 @@ export async function buildReactUi({
       clearScreen: false,
       customLogger: {
         ...buildTools.log,
-        clearScreen: function doNothing() {},
+        clearScreen: doNothing,
         hasErrorLogged: () => false,
         hasWarned: false,
-        warnOnce: buildTools.log.warn,
+        warnOnce: doNothing,
       },
       build: {
         assetsDir: assetsPath,
@@ -62,3 +62,5 @@ export async function buildReactUi({
     return buildResult;
   }
 }
+
+function doNothing() {}

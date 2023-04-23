@@ -310,6 +310,8 @@ export async function createExpressServer(
     return notFoundResult;
   }
 
+  maybeWarnIfUiAndNotFoundPresent({ manifest, manifestFullPath });
+
   let server: http.Server;
   const port = manifest.port || 3000;
 
@@ -346,6 +348,30 @@ export async function createExpressServer(
       });
     },
   };
+}
+
+function maybeWarnIfUiAndNotFoundPresent({
+  manifest,
+  manifestFullPath,
+}: {
+  manifest: NormalizedManifest;
+  manifestFullPath: string;
+}) {
+  if (manifest.ui && manifest.notFound) {
+    log.warn(
+      colors.yellow("Warning: ") +
+        "Both a UI and a notFound handler are present in the manifest. " +
+        colors.dim(
+          "The UI will be rendered for all non-matching routes, and thus never render the notFound route."
+        )
+    );
+    log.warn(
+      colors.dim(
+        ` 🡒 Consider removing the notFound handler from the manifest and handling not found errors in your UI.`
+      )
+    );
+    log.warn(colors.dim(` 🡒 ${manifestFullPath}`));
+  }
 }
 
 const hashRequest = hash({

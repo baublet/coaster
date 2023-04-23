@@ -166,7 +166,7 @@ async function parseManifest(
   }
 
   const ui = getNormalizedFileDescriptorFromFileInput({
-    fileInput: rootNode.notFound,
+    fileInput: rootNode.ui,
     exportNameIfNotSpecified: "ui",
     referenceFileFullPath: fullPath,
   });

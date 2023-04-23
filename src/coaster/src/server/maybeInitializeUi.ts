@@ -30,7 +30,7 @@ export async function maybeInitializeUi({
   }
 
   const uiFullPath = resolveInputPathFromFile(
-    manifest.notFound.file,
+    manifestUi.file,
     manifestFullPath
   );
   const resolvedUiEndpoint = await getEndpointFromFileDescriptor({
