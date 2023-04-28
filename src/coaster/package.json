@@ -35,6 +35,7 @@
     "@graphql-codegen/typescript-resolvers": "^2.7.3",
     "@types/uuid": "^8.0.1",
     "@vitejs/plugin-react": "^3.1.0",
+    "body-parser": "^1.20.2",
     "chokidar": "^3.5.3",
     "cli-progress": "^3.11.2",
     "commander": "9.4.0",
@@ -48,6 +49,7 @@
     "mkdirp": "^1.0.4",
     "node-object-hash": "^2.3.10",
     "object-hash": "^3.0.0",
+    "safe-json-stringify": "1.2.0",
     "typescript": "^5",
     "uuid": "7",
     "vite": "^4.1.1",
@@ -58,12 +60,14 @@
   "devDependencies": {
     "@baublet/coaster-build-tools": "0.0.1",
     "@types/aws-lambda": "^8.10.100",
+    "@types/body-parser": "^1.19.2",
     "@types/cli-progress": "^3.11.0",
     "@types/cookie-parser": "1.4.3",
     "@types/express": "^4.17.13",
     "@types/mkdirp": "^1.0.2",
     "@types/node": "^18",
     "@types/object-hash": "^3.0.2",
+    "@types/safe-json-stringify": "*",
     "@types/yargs": "^15.0.11",
     "esbuild": "latest"
   }

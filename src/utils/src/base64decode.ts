@@ -1,4 +1,3 @@
-// @ts-expect-error
 const _atob: any = atob;
 
 export function base64decode(str: string, encoding: "utf-8" = "utf-8"): string {

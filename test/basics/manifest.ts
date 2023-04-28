@@ -3,7 +3,6 @@ import type { Manifest } from "@baublet/coaster";
 export const manifest: Manifest = {
   name: "todo",
   port: "8888",
-  notFound: "endpoints/notFound",
   ui: "ui",
   middleware: [
     { file: "middleware/test1" },

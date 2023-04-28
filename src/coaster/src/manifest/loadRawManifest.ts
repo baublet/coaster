@@ -151,32 +151,40 @@ async function parseManifest(
     });
   }
 
-  const notFound = getNormalizedFileDescriptorFromFileInput({
-    fileInput: rootNode.notFound,
-    exportNameIfNotSpecified: "notFound",
-    referenceFileFullPath: fullPath,
-  });
-  if (isCoasterError(notFound)) {
-    return createCoasterError({
-      code: `parseManifest-notFound`,
-      message: `Error parsing notFound`,
-      details: { fileInput: rootNode.notFound, referenceFile: fullPath },
-      previousError: notFound,
+  let notFound: NormalizedFileDescriptor | undefined = undefined;
+  if (rootNode.notFound) {
+    const notFoundResult = getNormalizedFileDescriptorFromFileInput({
+      fileInput: rootNode.notFound,
+      exportNameIfNotSpecified: "notFound",
+      referenceFileFullPath: fullPath,
     });
+    if (isCoasterError(notFoundResult)) {
+      return createCoasterError({
+        code: `parseManifest-notFound`,
+        message: `Error parsing notFound`,
+        details: { fileInput: rootNode.notFound, referenceFile: fullPath },
+        previousError: notFoundResult,
+      });
+    }
+    notFound = notFoundResult;
   }
 
-  const ui = getNormalizedFileDescriptorFromFileInput({
-    fileInput: rootNode.ui,
-    exportNameIfNotSpecified: "ui",
-    referenceFileFullPath: fullPath,
-  });
-  if (isCoasterError(ui)) {
-    return createCoasterError({
-      code: `parseManifest-ui`,
-      message: `Error parsing ui`,
-      details: { fileInput: rootNode.ui, referenceFile: fullPath },
-      previousError: ui,
+  let ui: NormalizedFileDescriptor | undefined = undefined;
+  if (rootNode.ui) {
+    const uiResult = getNormalizedFileDescriptorFromFileInput({
+      fileInput: rootNode.ui,
+      exportNameIfNotSpecified: "ui",
+      referenceFileFullPath: fullPath,
     });
+    if (isCoasterError(uiResult)) {
+      return createCoasterError({
+        code: `parseManifest-ui`,
+        message: `Error parsing ui`,
+        details: { fileInput: rootNode.ui, referenceFile: fullPath },
+        previousError: uiResult,
+      });
+    }
+    ui = uiResult;
   }
 
   const middlewareArray = getItemOrArrayOfItems<string | FileDescriptor>(

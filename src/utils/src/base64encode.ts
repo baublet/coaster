@@ -1,4 +1,3 @@
-// @ts-expect-error
 const _btoa: any = btoa;
 
 export function base64encode(str: string): string {

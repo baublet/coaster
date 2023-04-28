@@ -1,5 +1,3 @@
-import { ChildProcess } from "child_process";
-
 import { Command as Program } from "commander";
 import path from "path";
 import { execa, KillOptions } from "execa";
@@ -172,11 +170,9 @@ async function runCommand(
   coasterServePath: string,
   additionalArguments: string[],
   envVars: Record<string, string> = {}
-): Promise<
-  Omit<ChildProcess, "kill"> & {
-    kill: (signal?: string, options?: KillOptions) => void;
-  }
-> {
+): Promise<{
+  kill: (signal?: string, options?: KillOptions) => void;
+}> {
   log.info("\n⏳ " + colors.green("Starting server..."));
   log.info(
     "   r, enter  " +
@@ -189,16 +185,26 @@ async function runCommand(
 
   const executable = await getPathExecutable(coasterServePath);
 
-  return execa(executable, [coasterServePath, ...additionalArguments], {
-    all: true,
-    cwd: process.cwd(),
-    env: {
-      ...process.env,
-      ...envVars,
+  const execaInstance = execa(
+    executable,
+    [coasterServePath, ...additionalArguments],
+    {
+      all: true,
+      cwd: process.cwd(),
+      env: {
+        ...process.env,
+        ...envVars,
+      },
+      argv0: process.argv0,
+      stdio: "inherit",
+    }
+  );
+
+  return {
+    kill: (signal, options) => {
+      execaInstance.kill(signal, options);
     },
-    argv0: process.argv0,
-    stdio: "inherit",
-  });
+  };
 }
 
 function isIgnored({ path }: { path: string; event: string }) {

@@ -184,9 +184,7 @@ export function createGraphqlEndpointHandler<
       return handleError({ graphqlContext, requestContext, error: result });
     }
 
-    const status = requestContext.response.status(
-      result.http.statusCode || 200
-    );
+    const status = requestContext.response.status(result.http.status || 200);
     if (isCoasterError(status)) {
       return handleError({ graphqlContext, requestContext, error: status });
     }
@@ -196,7 +194,7 @@ export function createGraphqlEndpointHandler<
       requestContext.response.setHeader(header[0], header[1]);
     }
 
-    const json = requestContext.response.json(result.result);
+    const json = requestContext.response.json(result.body);
     if (isCoasterError(json)) {
       return handleError({ graphqlContext, requestContext, error: json });
     }

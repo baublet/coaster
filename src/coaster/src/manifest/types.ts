@@ -39,7 +39,7 @@ export interface NormalizedManifest {
   key: string;
   endpoints: NormalizedFileDescriptor[];
   middleware: NormalizedFileDescriptor[];
-  notFound: NormalizedFileDescriptor;
+  notFound?: NormalizedFileDescriptor;
   ui?: NormalizedFileDescriptor;
 }
 
