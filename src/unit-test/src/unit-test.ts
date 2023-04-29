@@ -15,7 +15,7 @@ const testRunnerPath = path.resolve(
   "vitest"
 );
 
-const additionalArguments: string[] = [];
+const additionalArguments: string[] = ["--silent", "--passWithNoTests"];
 
 if (!process.argv.includes("--watch")) {
   additionalArguments.push("run");
@@ -27,12 +27,24 @@ if (!process.argv.includes("--coverage")) {
 
 getPathExecutable(testRunnerPath)
   .then((executable) => {
-    execa(executable, [testRunnerPath, ...additionalArguments], {
-      all: true,
-      cwd: process.cwd(),
-      env: process.env,
-      argv0: process.argv0,
-      stdio: "inherit",
+    const command = execa(
+      executable,
+      [testRunnerPath, ...additionalArguments],
+      {
+        all: true,
+        cwd: process.cwd(),
+        env: process.env,
+        argv0: process.argv0,
+        stdio: "inherit",
+      }
+    );
+
+    command.on("exit", (code) => {
+      if (code === 0) {
+        process.exit(0);
+      } else {
+        process.exit(1);
+      }
     });
   })
   .catch((error) => {

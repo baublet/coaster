@@ -22,11 +22,11 @@ jobs:
         id: node_modules
         with:
           path: node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock', 'src/**/*.ts', 'src/**/*.tsx') }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-yarn-
+            ${{ runner.os }}-pnpm-
 
-      - run: yarn
+      - run: pnpm i
         if: steps.node_modules.outputs.cache-hit != 'true'
 
-      - run: yarn test
+      - run: pnpm test

@@ -7,10 +7,9 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "pnpm turbo run build --output-logs=new-only",
+    "build": "pnpm turbo run build --output-logs=errors-only",
     "rebuild": "pnpm clean; pnpm; pnpm build",
-    "test": "pnpm vitest --coverage --watch",
-    "test:all": "pnpm turbo run test --output-logs=new-only",
+    "test": "pnpm turbo run test --output-logs=errors-only",
     "test:watch": "npx nodemon --ignore */node_modules/* --ignore */dist/* --watch './src/' -e 'ts,tsx,js' --exec 'pnpm test'",
     "clean": "rm -rf **/*/dist **/*/node_modules node_modules",
     "lint:all": "eslint src/ --ext ts --fix",
