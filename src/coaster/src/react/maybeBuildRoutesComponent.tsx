@@ -53,7 +53,7 @@ function getCode({
   codeLines.push(`import React from "react";`);
   codeLines.push(`import { BrowserRouter, Route } from "react-router-dom";`);
   // prettier-ignore
-  codeLines.push(`import { AsyncComponent, route } from "@baublet/coaster/react-components";`);
+  codeLines.push(`import { AsyncComponent } from "@baublet/coaster/react-components";`);
   codeLines.push(`export function Routes() {`);
   codeLines.push(`  return (`);
   codeLines.push(`    <BrowserRouter>`);
