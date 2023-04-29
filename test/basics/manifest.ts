@@ -11,7 +11,6 @@ export const manifest: Manifest = {
     "middleware/test4",
   ],
   endpoints: [
-    "endpoints/",
     { file: "endpoints/users" },
     { file: "endpoints/todos", exportName: "default" },
     "endpoints/graphql",

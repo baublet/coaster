@@ -1,7 +1,7 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 
-import { AsyncComponent } from "./AsyncComponent";
+import { AsyncComponent } from "@baublet/coaster/react-components";
 
 export function Todo() {
   const [show, setShow] = React.useState(false);
@@ -26,4 +26,10 @@ export function Todo() {
   );
 }
 
-ReactDOM.render(<Todo />, document.getElementById("root"));
+const container = document.getElementById("root");
+if (!container) {
+  throw new Error("No container found");
+}
+
+const root = ReactDOM.createRoot(container);
+root.render(<Todo />);

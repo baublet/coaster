@@ -12,14 +12,9 @@ import {
 /**
  * Creates a single lambda-style serverless function from a Coaster manifest file.
  * Uses the manifest at `process.cwd() + manifest.ts` by default. If provided, will
- * use that manifest. Please note that your manifest file path must be the full
+ * use that manifest.
  */
-export function createLambda(
-  /**
-   * The full path to your manifest file, e.g. `createLambda(__dirname + "/manifest.ts")`
-   */
-  fullPath?: string
-): Handler {
+export function createLambda(fullPath?: string): Handler {
   const manifestPath = fullPath ?? path.resolve(process.cwd(), "manifest.ts");
 
   const lambda = new Promise<Handler>((resolve) => {

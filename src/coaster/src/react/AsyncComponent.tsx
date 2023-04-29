@@ -1,5 +1,16 @@
 import React from "react";
 
+/**
+ * Allows your frontend to load components asynchronously, so we don't have to
+ * load all components at once.
+ *
+ * @example
+ * <AsyncComponent
+ *   loadFn={() => import("./AnotherComponent")}
+ *   exportName="AnotherComponent"
+ *   componentProps={{ foo: "bar" }}
+ * />
+ */
 export function AsyncComponent<
   TImportLoadFn extends () => Promise<{ [key: string]: any }>,
   TImport extends PromiseResolutionValue<ReturnType<TImportLoadFn>>,
@@ -7,18 +18,18 @@ export function AsyncComponent<
   TProps extends TImport[TImportKey] extends (props: infer T) => any ? T : never
 >({
   loadFn,
-  loading = null,
+  loadingComponent = null,
   exportName,
   onError,
   componentProps,
 }: {
   loadFn: TImportLoadFn;
   exportName: TImportKey;
-  loading?: React.ReactElement<any, any> | null;
+  loadingComponent?: React.ReactElement<any, any> | null;
   onError?: (error: unknown) => void | React.ComponentType;
   componentProps?: TProps;
 }): React.ReactElement<any, any> | null {
-  const [, setRerenderSeed] = React.useState(0);
+  const [, setRerenderSeed] = React.useState<number>(0);
   const rerender = React.useCallback(() => {
     setRerenderSeed((seed) => seed + 1);
   }, [setRerenderSeed]);
@@ -62,7 +73,7 @@ export function AsyncComponent<
     return <AsyncComponent {...Object(componentProps || {})} />;
   }
 
-  return loading;
+  return loadingComponent;
 }
 
 type PromiseResolutionValue<V> = V extends PromiseLike<infer U> ? U : never;

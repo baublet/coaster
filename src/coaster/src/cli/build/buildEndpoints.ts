@@ -2,7 +2,6 @@ import path from "path";
 
 import { CoasterError, isCoasterError } from "@baublet/coaster-utils";
 import { log } from "@baublet/coaster-log-service";
-import type { SingleBar } from "cli-progress";
 
 import { NormalizedManifest } from "../../manifest/types";
 import { buildEndpoint } from "../../endpoints/buildEndpoint";
@@ -18,24 +17,7 @@ export async function buildEndpoints(
 
   log.debug("Loading CLI tools");
 
-  const { MultiBar, Presets } = await import("cli-progress");
-  const colors = await import("@colors/colors");
-
   log.debug("Initializing CLI tools");
-
-  const multibar = new MultiBar(
-    {
-      clearOnComplete: false,
-      hideCursor: true,
-      autopadding: true,
-      stopOnComplete: true,
-      barGlue: "",
-      format: `${colors.green(
-        "{bar}"
-      )} | {percentage}% | {duration_formatted} | ${colors.dim("{endpoint}")}`,
-    },
-    Presets.shades_classic
-  );
 
   const buildToolsToFlush = new Set<BuildTools>();
 
@@ -44,7 +26,6 @@ export async function buildEndpoints(
     log.debug(`Loading endpoint ${endpoint.file}#${endpoint.exportName}`);
     promises.push(
       (async () => {
-        let progressBar: SingleBar | Record<string, any> = {};
         const endpointFileFullPath = path.resolve(process.cwd(), endpoint.file);
         const buildTools = getBuildTools();
 
@@ -56,16 +37,6 @@ export async function buildEndpoints(
             },
             buildTools,
             endpointFileFullPath,
-            onHasBuild: () => {
-              progressBar = multibar.create(100, 1, {
-                endpoint: endpoint.file.replace(process.cwd() + path.sep, ""),
-              });
-              progressBar?.render();
-              buildTools.onProgressChange((percent) => {
-                progressBar?.update?.(percent);
-                progressBar?.render();
-              });
-            },
           });
           if (isCoasterError(result)) {
             logCoasterError(result);
@@ -78,9 +49,6 @@ export async function buildEndpoints(
           } else {
             log.error(error);
           }
-        } finally {
-          progressBar?.update?.(100);
-          progressBar?.stop?.();
         }
       })().catch((reason) => {
         log.error(reason);
@@ -91,7 +59,6 @@ export async function buildEndpoints(
   const manifestUi = manifest.ui;
   if (manifestUi) {
     log.debug("Loading UI");
-    let progressBar: SingleBar | Record<string, any> = {};
     const endpointFileFullPath = path.resolve(process.cwd(), manifestUi.file);
     const buildTools = getBuildTools();
     try {
@@ -102,16 +69,6 @@ export async function buildEndpoints(
         },
         buildTools,
         endpointFileFullPath,
-        onHasBuild: () => {
-          progressBar = multibar.create(100, 1, {
-            endpoint: manifestUi.file.replace(process.cwd() + path.sep, ""),
-          });
-          progressBar?.render();
-          buildTools.onProgressChange((percent) => {
-            progressBar?.update?.(percent);
-            progressBar?.render();
-          });
-        },
       });
       if (isCoasterError(result)) {
         logCoasterError(result);
@@ -124,15 +81,11 @@ export async function buildEndpoints(
       } else {
         log.error(error);
       }
-    } finally {
-      progressBar?.update?.(100);
-      progressBar?.stop?.();
     }
   }
 
   log.debug("Waiting for builds to complete");
   await Promise.all(promises);
-  multibar.stop();
   log.debug("Build complete, flushing any errors and cleaning up");
 
   if (buildToolsToFlush.size > 0) {

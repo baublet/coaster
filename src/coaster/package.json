@@ -49,6 +49,7 @@
     "mkdirp": "^1.0.4",
     "node-object-hash": "^2.3.10",
     "object-hash": "^3.0.0",
+    "react": "^18.2.0",
     "safe-json-stringify": "1.2.0",
     "typescript": "^5",
     "uuid": "7",
@@ -67,8 +68,12 @@
     "@types/mkdirp": "^1.0.2",
     "@types/node": "^18",
     "@types/object-hash": "^3.0.2",
+    "@types/react": "^18.2.0",
     "@types/safe-json-stringify": "*",
     "@types/yargs": "^15.0.11",
     "esbuild": "latest"
+  },
+  "peerDependencies": {
+    "react": ">=16"
   }
 }

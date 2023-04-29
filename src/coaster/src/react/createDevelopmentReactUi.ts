@@ -26,7 +26,7 @@ export function createDevelopmentReactUi(
       configFile: false,
       root: metadata.filePath,
       appType: "custom",
-      base: uiOptions.assetsPath,
+      base: uiOptions.assetsPath || "/assets",
       clearScreen: false,
       plugins: [
         reactPlugin.default({
@@ -44,13 +44,18 @@ export function createDevelopmentReactUi(
         // Vite handles this
       },
       buildWatchPatterns: [],
-      dangerouslyApplyMiddleware: (app) =>
-        app.use(normalizedEndpoint, vite.middlewares),
+      dangerouslyApplyMiddleware: (app) => {
+        if (normalizedEndpoint === "*") {
+          app.use(vite.middlewares);
+        } else {
+          app.use(normalizedEndpoint, vite.middlewares);
+        }
+      },
       handler: async (context) => {
         const request = context.request;
         const response = context.response;
 
-        if (!response.writable) {
+        if (!response.writable || response.headersSent) {
           return;
         }
 

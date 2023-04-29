@@ -59,6 +59,19 @@ export async function maybeInitializeUi({
     });
   }
 
+  if (resolvedUiEndpoint.dangerouslyApplyMiddleware) {
+    const middlewareFunctions = Array.isArray(
+      resolvedUiEndpoint.dangerouslyApplyMiddleware
+    )
+      ? resolvedUiEndpoint.dangerouslyApplyMiddleware
+      : [resolvedUiEndpoint.dangerouslyApplyMiddleware];
+
+    for (const applyMiddleware of middlewareFunctions) {
+      log.info(`Applying custom middleware for UI`);
+      await applyMiddleware(app);
+    }
+  }
+
   log.debug(colors.dim("Registering UI endpoint"));
   app.get("*", (request, response) => {
     handleExpressMethodWithHandler({

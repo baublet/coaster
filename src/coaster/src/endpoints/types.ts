@@ -46,6 +46,14 @@ export interface ResolvedEndpoint {
   middleware: NormalizedEndpointMiddleware[];
   build: undefined | EndpointBuildFunction;
   buildWatchPatterns: string[];
+  /**
+   * Generally, you don't want to be modifying the underlying express instance at all.
+   * But sometimes, we need to bolt on some middleware that we don't want to try to
+   * manually make interoperable with our context primitives. Use this to do that.
+   */
+  dangerouslyApplyMiddleware?:
+    | DangerouslyApplyMiddlewareHandler
+    | DangerouslyApplyMiddlewareHandler[];
 }
 
 export type Endpoint = Resolvable<EndpointInput, ModuleMetadata>;
