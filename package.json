@@ -12,7 +12,7 @@
     "test": "pnpm turbo run test --output-logs=errors-only",
     "test:watch": "npx nodemon --ignore */node_modules/* --ignore */dist/* --watch './src/' -e 'ts,tsx,js' --exec 'pnpm test'",
     "clean": "rm -rf **/*/dist **/*/node_modules node_modules",
-    "lint:all": "eslint src/ --ext ts --fix",
+    "lint:all": "eslint src/ --ext ts,tsx --fix",
     "lint:tsc": "tsc --noEmit",
     "postinstall": "pnpm build"
   },
@@ -28,11 +28,11 @@
   "devDependencies": {
     "@types/benchmark": "^2.1.2",
     "@types/node": "^18",
-    "@typescript-eslint/eslint-plugin": "^4",
-    "@typescript-eslint/parser": "^4",
+    "@typescript-eslint/eslint-plugin": "^5.59.1",
+    "@typescript-eslint/parser": "^5.59.1",
     "benchmark": "^2.1.4",
     "c8": "^7.11.3",
-    "eslint": "^6.3.0",
+    "eslint": "^8.39.0",
     "husky": "^3.0.5",
     "lint-staged": "^9.2.5",
     "microtime": "^3.1.1",
