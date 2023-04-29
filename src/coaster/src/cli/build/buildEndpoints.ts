@@ -14,11 +14,6 @@ export async function buildEndpoints(
 ): Promise<undefined | CoasterError[]> {
   const promises: Promise<void>[] = [];
   const errors: CoasterError[] = [];
-
-  log.debug("Loading CLI tools");
-
-  log.debug("Initializing CLI tools");
-
   const buildToolsToFlush = new Set<BuildTools>();
 
   log.debug("Loading endpoints");

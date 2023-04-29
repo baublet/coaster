@@ -3,18 +3,20 @@ import path from "path";
 import { execa, KillOptions } from "execa";
 import colors from "@colors/colors";
 
-import { isCoasterError } from "@baublet/coaster-utils";
+import { isCoasterError, perform } from "@baublet/coaster-utils";
 import { log } from "@baublet/coaster-log-service";
 import { getPathExecutable } from "@baublet/coaster-build-tools";
 
 import { loadRawManifest } from "../../manifest/loadRawManifest";
 import { logCoasterError } from "../utils/logCoasterError";
+import { shouldRebuild } from "../../build/watchFilesForEndpointDescriptor";
 
 // Time before we start watching files
 const WATCH_DELAY_MS = 1000;
 
 const GLOBALLY_IGNORED_PATH_MATCHES = [
   `${path.sep}node_modules${path.sep}.vite`,
+  `@baublet/coaster`,
 ];
 
 export function serve(program: Program) {
@@ -94,31 +96,46 @@ export function serve(program: Program) {
 
         const { watch } = await import("chokidar");
         const watcher = watch(process.cwd()).on("all", (event, path) => {
-          if (isIgnored({ path, event })) {
-            log.debug(
-              colors.dim(
-                `Ignoring file change [${event}]: ${path.replace(
-                  process.cwd(),
-                  ""
-                )}`
-              )
-            );
-            return;
-          }
-          if (lastWatcherEvent === 0 && !watchingLocked) {
-            log.info("\n📦 " + colors.blue("Change detected..."));
-          }
-          if (!watchingLocked) {
+          perform(async () => {
+            if (watchingLocked) {
+              return;
+            }
+            if (isIgnored({ path, event })) {
+              log.debug(
+                colors.dim(
+                  `Ignoring file change [${event}]: ${path.replace(
+                    process.cwd(),
+                    ""
+                  )}`
+                )
+              );
+              return;
+            }
+            const needsRebuild = await shouldRebuild(loadedManifest, path);
+            if (!needsRebuild) {
+              log.debug(
+                colors.dim(
+                  `Ignoring UI change in watch mode [${event}]: ${path.replace(
+                    process.cwd(),
+                    ""
+                  )}`
+                )
+              );
+              return;
+            }
+            if (lastWatcherEvent === 0) {
+              log.info("\n📦 " + colors.blue("Change detected..."));
+            }
             if (bufferedChanges < 5) {
               log.info(colors.dim(`[${event}] ${path}`));
             } else if (bufferedChanges === 5) {
               log.info(colors.dim("..."));
             }
-          }
-          if (!watchingLocked) {
             bufferedChanges++;
             lastWatcherEvent = Date.now();
-          }
+          })
+            .then((result) => (result ? log.error(result) : undefined))
+            .catch(log.error);
         });
 
         const optionInterval = options.watchDebounce || 500;

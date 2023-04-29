@@ -151,8 +151,12 @@ function getEndpointWatchFilePath(
 
 export async function shouldRebuild(
   loadedManifest: NormalizedManifest,
-  path: string
+  changedPath: string
 ): Promise<boolean> {
+  const uiPathToFilter = loadedManifest.ui
+    ? path.dirname(loadedManifest.ui.file)
+    : undefined;
+
   const endpointPaths = await Promise.all(
     loadedManifest.endpoints.map((endpoint) =>
       getWatchFilesForEndpointDescriptor(endpoint.file)
@@ -166,6 +170,9 @@ export async function shouldRebuild(
       continue;
     }
     for (const path of endpointPath) {
+      if (uiPathToFilter && path.startsWith(uiPathToFilter)) {
+        continue;
+      }
       allPaths.add(path);
     }
   }
@@ -173,5 +180,5 @@ export async function shouldRebuild(
   const allPathsArray = Array.from(allPaths);
   const matcher = createMatcher(allPathsArray);
 
-  return matcher(path);
+  return matcher(changedPath);
 }

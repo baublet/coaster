@@ -31,3 +31,5 @@ export { wait } from "./wait";
 
 export type { TypeOrPromiseType } from "./TypeOrPromiseType";
 export { getErrorLikeStringFromUnknown } from "./getErrorLikeStringFromUnknown";
+
+export function doNothing() {}

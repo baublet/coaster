@@ -1,19 +1,22 @@
 {
-  "name": "@baublet/conferencer",
+  "name": "@baublet/crumb-vault",
   "license": "MIT",
   "version": "0.0.1",
   "scripts": {
-    "develop": "(cd ../../; rm -rf ./node_modules/@baublet; pnpm install; pnpm build); pnpm install; pnpm coaster serve --watch",
+    "develop": "pnpm coaster serve --watch",
     "build": "pnpm coaster build",
     "serve": "pnpm coaster serve"
   },
   "dependencies": {
     "@baublet/coaster": "0.0.1",
+    "node-object-hash": "^2.3.10",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-router-dom": "5.3.4"
   },
   "devDependencies": {
     "@types/react": "^18.0.28",
-    "@types/react-dom": "^18.0.11"
+    "@types/react-dom": "^18.0.11",
+    "@types/react-router-dom": "^5.3.3"
   }
 }

@@ -5,6 +5,7 @@ import { CoasterError, isCoasterError, perform } from "@baublet/coaster-utils";
 import { ModuleMetadata } from "../manifest/types";
 import { CreateReactUiOptions } from "./types";
 import { BuildTools } from "../build/types";
+import { maybeBuildRoutesComponent } from "./maybeBuildRoutesComponent";
 
 export async function buildReactUi({
   metadata,
@@ -26,6 +27,13 @@ export async function buildReactUi({
   buildTools.setProgress(5, 100);
 
   const buildResult = await perform(async () => {
+    await maybeBuildRoutesComponent({
+      buildFolder,
+      buildTools,
+      metadata,
+      uiOptions,
+    });
+
     buildTools.log.info("Importing build tools");
     const { build } = await import("vite");
     buildTools.setProgress(15, 100);
